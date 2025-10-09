@@ -1,4 +1,4 @@
-import { NavFooter } from '@/components/nav-footer';
+//import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -13,7 +13,7 @@ import {
 import { dashboard, pricing, timeTracking, users } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, DollarSign, Timer, Users } from 'lucide-react';
+import { LayoutGrid, DollarSign, Timer, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -39,6 +39,7 @@ const mainNavItems: NavItem[] = [
     }
 ];
 
+/*
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
@@ -51,6 +52,7 @@ const footerNavItems: NavItem[] = [
         icon: BookOpen,
     },
 ];
+ */
 
 export function AppSidebar() {
     return (
@@ -72,7 +74,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
