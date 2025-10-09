@@ -10,10 +10,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, pricing } from '@/routes';
+import { dashboard, pricing, timeTracking } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, DollarSign } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, DollarSign, Timer } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -27,6 +27,11 @@ const mainNavItems: NavItem[] = [
         href: pricing(),
         icon: DollarSign
     },
+    {
+        title: 'Sledovanie času',
+        href: timeTracking(),
+        icon: Timer
+    }
 ];
 
 const footerNavItems: NavItem[] = [

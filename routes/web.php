@@ -18,7 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 /*
- * Pricing - user must be authenticated
+ * Pricing page - user must be authenticated
  */
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -27,6 +27,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('pricing');
 });
 
+/*
+ * Time tracking page - user must be authenticated
+ */
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('time-tracking', function() {
+        return Inertia::render('time-tracking');
+    })->name('time-tracking');
+});
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
