@@ -28,8 +28,6 @@ class PermissionSeeder extends Seeder
             ]
         );
 
-        if ($admin) {
-            $admin->givePermissionTo(PermissionEnum::all());
-        }
+        $admin->givePermissionTo(PermissionEnum::all());
     }
 }

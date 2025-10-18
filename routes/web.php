@@ -32,7 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
  */
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('time-tracking', function() {
+    Route::get('time-tracking', function () {
         return Inertia::render('time-tracking');
     })->name('time-tracking');
 });
@@ -42,10 +42,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
  */
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('users', function() {
+    Route::get('users', function () {
         return Inertia::render('users');
     })->name('users');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+/*
+ * Projects page - user must be authenticated
+ */
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('projects', function () {
+        return Inertia::render('projects');
+    })->name('projects');
+});
+
+/*
+ * Tasks page - user must be authenticated
+ */
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('tasks', function () {
+        return Inertia::render('tasks');
+    })->name('tasks');
+});
+
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

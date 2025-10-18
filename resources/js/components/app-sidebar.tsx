@@ -10,34 +10,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, pricing, timeTracking, users } from '@/routes';
-import { type NavItem } from '@/types';
+import { moduleNavigation } from '@/config/main-nav';
+import { dashboard } from '@/routes';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, DollarSign, Timer, Users } from 'lucide-react';
 import AppLogo from './app-logo';
-
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Naceňovanie',
-        href: pricing(),
-        icon: DollarSign
-    },
-    {
-        title: 'Sledovanie času',
-        href: timeTracking(),
-        icon: Timer
-    },
-    {
-        title: 'Používatelia',
-        href: users(),
-        icon: Users
-    }
-];
 
 /*
 const footerNavItems: NavItem[] = [
@@ -70,7 +46,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain moduleNavItems={moduleNavigation} />
             </SidebarContent>
 
             <SidebarFooter>
