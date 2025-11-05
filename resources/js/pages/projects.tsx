@@ -3,6 +3,9 @@ import { projects } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 
+import AddProjectModal from '@/features/projects/components/add-project-modal';
+import ProjectItem from '@/features/projects/components/project-item';
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Projects',
@@ -10,12 +13,19 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Users() {
+const testArr: number[] = [1, 2, 3, 4, 5, 6, 7];
+
+export default function Projects() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Projects" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <h1>Projects page</h1>
+
+            <AddProjectModal />
+
+            <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3">
+                {testArr.map((index: number) => (
+                    <ProjectItem key={index} />
+                ))}
             </div>
         </AppLayout>
     );
