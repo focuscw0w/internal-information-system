@@ -58,6 +58,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 /*
+ * Project page
+ */
+
+Route::get('projects/{id}', function ($id) {
+    return Inertia::render('project', [
+        'id' => $id,
+    ]);
+})->name('project');
+
+
+/*
  * Tasks page - user must be authenticated
  */
 

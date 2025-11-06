@@ -24,7 +24,7 @@ export default function Projects() {
 
             <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3">
                 {testArr.map((index: number) => (
-                    <ProjectItem key={index} />
+                    <ProjectItem id={index} key={index} />
                 ))}
             </div>
         </AppLayout>

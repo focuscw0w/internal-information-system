@@ -13,7 +13,12 @@ export default function EditProjectModal() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                >
                     <Pencil className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
