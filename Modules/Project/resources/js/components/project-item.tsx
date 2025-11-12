@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import EditProjectModal from '@/features/projects/components/edit-project-modal';
-import RemoveProjectModal from '@/features/projects/components/remove-project-modal';
+import EditProjectModal from '../components/edit-project-modal';
+import RemoveProjectModal from '../components/remove-project-modal';
 import { Link } from '@inertiajs/react';
 
 interface ProjectItemProps {

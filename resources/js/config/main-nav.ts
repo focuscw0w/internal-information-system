@@ -1,7 +1,6 @@
 import {
     dashboard,
     pricing,
-    projects,
     tasks,
     timeTracking,
     users,
@@ -15,6 +14,8 @@ import {
     LayoutGrid,
     Users,
 } from 'lucide-react';
+
+// TODO: Vytvoriť index pre všetky moduly a importnúť všetky urls pre moduly
 
 export const moduleNavigation: NavGroup[] = [
     {
@@ -37,7 +38,7 @@ export const moduleNavigation: NavGroup[] = [
             },
             {
                 title: 'Projekty',
-                href: projects(),
+                href: "/projects",
                 icon: FolderKanban,
             },
             {

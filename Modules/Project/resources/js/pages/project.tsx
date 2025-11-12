@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
-import { project } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 
@@ -22,7 +21,7 @@ export default function Project({ id }: ProjectProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Project',
-            href: project(id).url,
+            href: '/projects/' + id,
         },
     ];
 

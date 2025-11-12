@@ -1,5 +1,4 @@
 import AppLayout from '@/layouts/app-layout';
-import { projects } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 
@@ -9,7 +8,7 @@ import ProjectItem from '../components/project-item';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Projects',
-        href: projects().url,
+        href: "/projects",
     },
 ];
 

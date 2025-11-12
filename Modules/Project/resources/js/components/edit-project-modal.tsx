@@ -6,7 +6,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import EditProjectForm from '@/features/projects/components/edit-project-form';
+import EditProjectForm from '../components/edit-project-form';
 import { Pencil } from 'lucide-react';
 
 export default function EditProjectModal() {

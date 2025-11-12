@@ -1,15 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use Modules\Project\Http\Controllers\ProjectController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('projects', ProjectController::class)->names('project');
-});
-
-Route::middleware(['web'])->group(function () {
-    Route::get('/projects', function () {
-        return Inertia::render('projects');
-    });
+Route::middleware(['web', 'auth', 'verified'])->group(function () {
+    Route::resource('projects', ProjectController::class)
+        ->only(['index', 'show'])
+        ->names('project');
 });
