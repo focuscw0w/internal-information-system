@@ -6,3 +6,7 @@ use Modules\Project\Http\Controllers\ProjectController;
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('projects', ProjectController::class)->names('project');
 });
+
+Route::get('/project-test', function () {
+    return 'Project modul funguje!';
+});
