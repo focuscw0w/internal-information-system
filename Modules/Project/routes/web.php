@@ -9,7 +9,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['web'])->group(function () {
-    Route::get('/test', function () {
-        return Inertia::render('test');
+    Route::get('/projects', function () {
+        return Inertia::render('projects');
     });
 });

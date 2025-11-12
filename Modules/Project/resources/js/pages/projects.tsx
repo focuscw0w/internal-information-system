@@ -3,8 +3,8 @@ import { projects } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 
-import AddProjectModal from '@/features/projects/components/add-project-modal';
-import ProjectItem from '@/features/projects/components/project-item';
+import AddProjectModal from '../components/add-project-modal';
+import ProjectItem from '../components/project-item';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
