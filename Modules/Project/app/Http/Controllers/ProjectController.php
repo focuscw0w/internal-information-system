@@ -31,10 +31,10 @@ class ProjectController extends Controller
      */
     public function store(StoreProjectRequest $request)
     {
-        Project::create($request->validated());
+        $project = Project::create($request->validated());
 
         return redirect()
-            ->route('project.index')
+            ->route('project.show', $project->id)
             ->with('success', 'Projekt bol vytvorený.');
     }
 
