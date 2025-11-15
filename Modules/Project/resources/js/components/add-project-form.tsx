@@ -45,8 +45,6 @@ export function AddProjectForm() {
         });
     }
 
-    console.log(errors);
-
     return (
         <form onSubmit={handleSubmit}>
             <div className="grid gap-6 p-6">

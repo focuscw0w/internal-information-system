@@ -13,12 +13,12 @@ class StoreProjectRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'client' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
+            'client' => 'required|string|max:255',
+            'description' => 'required|string',
             'status' => 'required|in:planned,active,on_hold,completed',
             'priority' => 'required|in:low,medium,high',
-            'start_date' => 'nullable|date',
-            'due_date' => 'nullable|date|after_or_equal:start_date',
+            'start_date' => 'required|date',
+            'due_date' => 'required|date|after_or_equal:start_date',
             'tags' => 'nullable|string',
         ];
     }
