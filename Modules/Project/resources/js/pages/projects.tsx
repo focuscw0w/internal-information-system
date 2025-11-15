@@ -12,7 +12,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const testArr: number[] = [1, 2, 3, 4, 5, 6, 7];
+const testArr: number[] = [1, 2,];
 
 export default function Projects() {
     return (
