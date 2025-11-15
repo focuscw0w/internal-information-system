@@ -1,12 +1,13 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { Link } from '@inertiajs/react';
 import EditProjectModal from '../components/edit-project-modal';
 import RemoveProjectModal from '../components/remove-project-modal';
-import { Link } from '@inertiajs/react';
+import { formatDate } from '../utils/date';
 import { Project } from '../types/Project';
 
 interface ProjectItemProps {
-    project: Project
+    project: Project;
 }
 
 export default function ProjectItem({ project }: ProjectItemProps) {
@@ -18,7 +19,7 @@ export default function ProjectItem({ project }: ProjectItemProps) {
                 aria-label="Open project"
             />
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col items-center gap-1">
                 <h3 className="text-base leading-none font-medium">
                     {project.name}
                 </h3>
@@ -33,7 +34,8 @@ export default function ProjectItem({ project }: ProjectItemProps) {
                 </Badge>
 
                 <div className="text-sm text-muted-foreground">
-                    {project.start_date} → {project.due_date}
+                    {formatDate(project.start_date)} →{' '}
+                    {formatDate(project.due_date)}
                 </div>
 
                 <div className="z-20 flex items-center gap-2">

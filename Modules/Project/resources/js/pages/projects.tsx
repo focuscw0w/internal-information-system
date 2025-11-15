@@ -18,8 +18,6 @@ interface ProjectsProps {
 }
 
 export default function Projects({ projects }: ProjectsProps) {
-    console.log(projects);
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Projects" />
