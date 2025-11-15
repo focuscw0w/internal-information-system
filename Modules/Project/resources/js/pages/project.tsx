@@ -1,33 +1,29 @@
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+import type { Project } from '../types/Project';
+import { formatDate } from '../utils/date';
 
 interface ProjectProps {
-    id: number;
+    project: Project;
 }
 
-export default function Project({ id }: ProjectProps) {
+export default function Project({ project }: ProjectProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Project',
-            href: '/projects/' + id,
+            href: '/projects/' + project.id,
         },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Project" />
+            <Head title={project.name} />
 
             <div className="space-y-6 p-6">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -48,18 +44,12 @@ export default function Project({ id }: ProjectProps) {
                     {/* Overview */}
                     <Card className="lg:col-span-2">
                         <CardHeader>
-                            <CardTitle>Overview</CardTitle>
-                            <CardDescription>
-                                General information about this project
-                            </CardDescription>
+                            <CardTitle>{project.name}</CardTitle>
                         </CardHeader>
 
                         <CardContent className="space-y-6">
                             <p className="text-sm leading-relaxed text-muted-foreground">
-                                Lorem ipsum dolor sit amet, consectetur
-                                adipiscing elit. Aliquam in dui sit amet tortor
-                                gravida lobortis. Sed vel hendrerit felis, vitae
-                                pulvinar nisl.
+                                {project.description}
                             </p>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -69,7 +59,7 @@ export default function Project({ id }: ProjectProps) {
                                             Created
                                         </div>
                                         <div className="text-sm font-medium">
-                                            Jan 12, 2025
+                                            {formatDate(project.start_date)}
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -77,10 +67,10 @@ export default function Project({ id }: ProjectProps) {
                                 <Card className="border border-border shadow-none">
                                     <CardContent className="space-y-1 p-3">
                                         <div className="text-xs text-muted-foreground">
-                                            Updated
+                                            Planned completion
                                         </div>
                                         <div className="text-sm font-medium">
-                                            Jan 18, 2025
+                                            {formatDate(project.due_date)}
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -94,7 +84,7 @@ export default function Project({ id }: ProjectProps) {
                                             variant="secondary"
                                             className="w-fit capitalize"
                                         >
-                                            active
+                                            {project.status}
                                         </Badge>
                                     </CardContent>
                                 </Card>

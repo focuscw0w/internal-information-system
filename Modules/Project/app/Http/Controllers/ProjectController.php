@@ -36,17 +36,17 @@ class ProjectController extends Controller
         $project = Project::create($request->validated());
 
         return redirect()
-            ->route('project.show', $project->id)
+            ->route('project.show', $project)
             ->with('success', 'Projekt bol vytvorený.');
     }
 
     /**
      * Show the specified resource.
      */
-    public function show($id)
+    public function show(Project $project)
     {
         return Inertia::render('project', [
-            'id' => $id,
+            'project' => $project,
         ]);
     }
 
