@@ -4,6 +4,7 @@ import { Head } from '@inertiajs/react';
 
 import AddProjectModal from '../components/add-project-modal';
 import ProjectItem from '../components/project-item';
+import { Project } from '../types/Project';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -12,9 +13,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const testArr: number[] = [1, 2,];
+interface ProjectsProps {
+    projects: Project[]
+}
 
-export default function Projects() {
+export default function Projects({ projects }: ProjectsProps) {
+    console.log(projects);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Projects" />
@@ -22,8 +27,8 @@ export default function Projects() {
             <AddProjectModal />
 
             <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3">
-                {testArr.map((index: number) => (
-                    <ProjectItem id={index} key={index} />
+                {projects.map((project: Project) => (
+                    <ProjectItem project={project} key={project.id} />
                 ))}
             </div>
         </AppLayout>

@@ -15,7 +15,9 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        return Inertia::render("projects");
+        $projects = Project::query()->latest()->get();
+
+        return Inertia::render("projects", ["projects" => $projects]);
     }
 
     /**
