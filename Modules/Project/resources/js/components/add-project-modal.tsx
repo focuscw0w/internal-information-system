@@ -5,7 +5,7 @@ import {
     DialogHeader,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import AddProjectForm from '../components/add-project-form';
+import { AddProjectForm } from '../components/add-project-form';
 
 export default function AddProjectModal() {
     return (
