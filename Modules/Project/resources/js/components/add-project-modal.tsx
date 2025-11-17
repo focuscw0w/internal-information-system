@@ -4,7 +4,7 @@ import {
     DialogContent,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { AddProjectForm } from '../components/add-project-form';
+import { AddProjectForm } from './add-project-form';
 import { DialogTitle } from '../../../../../resources/js/components/ui/dialog';
 
 export default function AddProjectModal() {

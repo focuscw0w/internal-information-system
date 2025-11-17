@@ -29,7 +29,7 @@ interface FormInput {
 }
 
 export default function EditProjectForm({ project }: FormProps) {
-    const { data, errors, processing, put, reset, setData } =
+    const { data, errors, processing, patch, reset, setData } =
         useForm<FormInput>({
             name: project.name,
             description: project.description,
@@ -43,7 +43,7 @@ export default function EditProjectForm({ project }: FormProps) {
     function handleSubmit(event: FormEvent) {
         event.preventDefault();
 
-        put(`projects/${project.id}`, {
+        patch(`/projects/${project.id}`, {
             preserveScroll: true,
         });
     }

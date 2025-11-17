@@ -1,6 +1,8 @@
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Link } from '@inertiajs/react';
+import { Pencil } from 'lucide-react';
 import EditProjectModal from '../components/edit-project-modal';
 import RemoveProjectModal from '../components/remove-project-modal';
 import { Project } from '../types/Project';
@@ -39,7 +41,16 @@ export default function ProjectItem({ project }: ProjectItemProps) {
                 </div>
 
                 <div className="z-20 flex items-center gap-2">
-                    <EditProjectModal project={project}  />
+                    <EditProjectModal project={project}>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </Button>
+                    </EditProjectModal>
 
                     <RemoveProjectModal projectId={project.id} />
                 </div>

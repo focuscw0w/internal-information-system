@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+import EditProjectModal from '../components/edit-project-modal';
 import type { Project } from '../types/Project';
 import { formatDate } from '../utils/date';
 
@@ -36,7 +37,9 @@ export default function Project({ project }: ProjectProps) {
 
                     <div className="flex gap-2">
                         <Button variant="outline">Back</Button>
-                        <Button variant="outline">Edit</Button>
+                        <EditProjectModal project={project}>
+                            <Button variant="outline">Edit</Button>
+                        </EditProjectModal>
                         <Button variant="destructive">Delete</Button>
                     </div>
                 </div>
