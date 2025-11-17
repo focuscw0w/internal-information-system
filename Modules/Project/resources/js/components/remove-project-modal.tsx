@@ -10,9 +10,24 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { useForm } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
 
-export default function RemoveProjectModal() {
+interface ModalProps {
+    projectId: number
+}
+
+export default function RemoveProjectModal({
+    projectId,
+}: ModalProps) {
+    const { delete: destroy, processing } = useForm();
+
+    function handleDelete() {
+        destroy(`projects/${projectId}`, {
+            preserveScroll: true,
+        });
+    }
+
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -37,7 +52,11 @@ export default function RemoveProjectModal() {
 
                 <AlertDialogFooter>
                     <AlertDialogCancel>Zrušiť</AlertDialogCancel>
-                    <AlertDialogAction className="bg-red-600 hover:bg-red-700">
+                    <AlertDialogAction
+                        onClick={handleDelete}
+                        disabled={processing}
+                        className="bg-red-600 hover:bg-red-700"
+                    >
                         Zmazať
                     </AlertDialogAction>
                 </AlertDialogFooter>

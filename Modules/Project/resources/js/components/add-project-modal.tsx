@@ -6,6 +6,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { AddProjectForm } from '../components/add-project-form';
+import { DialogTitle } from '../../../../../resources/js/components/ui/dialog';
 
 export default function AddProjectModal() {
     return (
@@ -17,7 +18,7 @@ export default function AddProjectModal() {
             </DialogTrigger>
 
             <DialogContent className="max-w-4xl p-0">
-                <DialogHeader className="px-6 py-4"></DialogHeader>
+                <DialogTitle></DialogTitle>
                 <AddProjectForm />
             </DialogContent>
         </Dialog>

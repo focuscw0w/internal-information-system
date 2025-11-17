@@ -3,8 +3,8 @@ import { Card } from '@/components/ui/card';
 import { Link } from '@inertiajs/react';
 import EditProjectModal from '../components/edit-project-modal';
 import RemoveProjectModal from '../components/remove-project-modal';
-import { formatDate } from '../utils/date';
 import { Project } from '../types/Project';
+import { formatDate } from '../utils/date';
 
 interface ProjectItemProps {
     project: Project;
@@ -41,7 +41,7 @@ export default function ProjectItem({ project }: ProjectItemProps) {
                 <div className="z-20 flex items-center gap-2">
                     <EditProjectModal />
 
-                    <RemoveProjectModal />
+                    <RemoveProjectModal projectId={project.id} />
                 </div>
             </div>
         </Card>

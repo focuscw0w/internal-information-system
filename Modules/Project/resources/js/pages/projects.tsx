@@ -9,12 +9,12 @@ import { Project } from '../types/Project';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Projects',
-        href: "/projects",
+        href: '/projects',
     },
 ];
 
 interface ProjectsProps {
-    projects: Project[]
+    projects: Project[];
 }
 
 export default function Projects({ projects }: ProjectsProps) {

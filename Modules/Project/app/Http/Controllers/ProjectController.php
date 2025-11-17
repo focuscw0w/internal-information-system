@@ -3,8 +3,10 @@
 namespace Modules\Project\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 use Modules\Project\Http\Requests\StoreProjectRequest;
 use Modules\Project\Models\Project;
 
@@ -13,7 +15,7 @@ class ProjectController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): Response
     {
         $projects = Project::query()->latest()->get();
 
@@ -31,7 +33,7 @@ class ProjectController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreProjectRequest $request)
+    public function store(StoreProjectRequest $request): RedirectResponse
     {
         $project = Project::create($request->validated());
 
@@ -68,7 +70,8 @@ class ProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($id): void
     {
+        Project::findOrFail($id)->delete();
     }
 }

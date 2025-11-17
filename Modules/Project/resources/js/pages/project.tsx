@@ -28,7 +28,10 @@ export default function Project({ project }: ProjectProps) {
             <div className="space-y-6 p-6">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <Heading title={'Project page'} description={'test'} />
+                        <Heading
+                            title={project.name}
+                            description={project.description}
+                        />
                     </div>
 
                     <div className="flex gap-2">
