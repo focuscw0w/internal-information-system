@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Link } from '@inertiajs/react';
-import { Pencil } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import EditProjectModal from '../components/edit-project-modal';
 import RemoveProjectModal from '../components/remove-project-modal';
 import { Project } from '../types/Project';
@@ -52,7 +52,15 @@ export default function ProjectItem({ project }: ProjectItemProps) {
                         </Button>
                     </EditProjectModal>
 
-                    <RemoveProjectModal projectId={project.id} />
+                    <RemoveProjectModal projectId={project.id}>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-red-500 hover:text-red-600"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </RemoveProjectModal>
                 </div>
             </div>
         </Card>

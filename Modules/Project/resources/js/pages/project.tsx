@@ -7,6 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import EditProjectModal from '../components/edit-project-modal';
+import RemoveProjectModal from '../components/remove-project-modal';
 import type { Project } from '../types/Project';
 import { formatDate } from '../utils/date';
 
@@ -40,7 +41,9 @@ export default function Project({ project }: ProjectProps) {
                         <EditProjectModal project={project}>
                             <Button variant="outline">Edit</Button>
                         </EditProjectModal>
-                        <Button variant="destructive">Delete</Button>
+                        <RemoveProjectModal projectId={project.id}>
+                            <Button variant="destructive">Delete</Button>
+                        </RemoveProjectModal>
                     </div>
                 </div>
 
