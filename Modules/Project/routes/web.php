@@ -5,6 +5,6 @@ use Modules\Project\Http\Controllers\ProjectController;
 
 Route::middleware(['web', 'auth', 'verified'])->group(function () {
     Route::resource('projects', ProjectController::class)
-        ->only(['index', 'show', 'store', 'destroy'])
+        ->only(['index', 'show', 'store', 'destroy', 'update'])
         ->names('project');
 });

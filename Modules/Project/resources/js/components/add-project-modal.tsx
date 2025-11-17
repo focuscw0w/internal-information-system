@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { AddProjectForm } from '../components/add-project-form';

@@ -212,9 +212,6 @@ export function AddProjectForm() {
                         Resetovať
                     </Button>
                     <div className="flex gap-3">
-                        <Button type="button" variant="outline">
-                            Zrušiť
-                        </Button>
                         <Button type="submit" disabled={processing}>
                             {processing ? 'Ukladám...' : 'Vytvoriť projekt'}
                         </Button>

@@ -39,7 +39,7 @@ export default function ProjectItem({ project }: ProjectItemProps) {
                 </div>
 
                 <div className="z-20 flex items-center gap-2">
-                    <EditProjectModal />
+                    <EditProjectModal project={project}  />
 
                     <RemoveProjectModal projectId={project.id} />
                 </div>

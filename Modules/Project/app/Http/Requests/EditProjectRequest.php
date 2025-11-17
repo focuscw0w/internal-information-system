@@ -4,7 +4,7 @@ namespace Modules\Project\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreProjectRequest extends FormRequest
+class EditProjectRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -13,7 +13,6 @@ class StoreProjectRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'client' => 'required|string|max:255',
             'description' => 'required|string',
             'status' => 'required|in:planned,active,on_hold,completed',
             'priority' => 'required|in:low,medium,high',
@@ -30,4 +29,5 @@ class StoreProjectRequest extends FormRequest
     {
         return auth()->check();
     }
+
 }

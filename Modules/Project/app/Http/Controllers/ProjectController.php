@@ -4,9 +4,9 @@ namespace Modules\Project\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Project\Http\Requests\EditProjectRequest;
 use Modules\Project\Http\Requests\StoreProjectRequest;
 use Modules\Project\Models\Project;
 
@@ -63,8 +63,14 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(EditProjectRequest $request, $id)
     {
+        $project = Project::findOrFail($id);
+        $project->update($request->validated());
+
+        return redirect()
+            ->route('project.show', $project)
+            ->with('success', 'Projekt bol aktualizovaný.');
     }
 
     /**

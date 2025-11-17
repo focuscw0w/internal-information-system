@@ -8,8 +8,13 @@ import {
 } from '@/components/ui/dialog';
 import EditProjectForm from '../components/edit-project-form';
 import { Pencil } from 'lucide-react';
+import { Project } from '../types/Project';
 
-export default function EditProjectModal() {
+interface ModalProps {
+    project: Project
+}
+
+export default function EditProjectModal({project}: ModalProps) {
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -26,7 +31,7 @@ export default function EditProjectModal() {
                 <DialogHeader>
                     <DialogTitle>Upraviť projekt</DialogTitle>
                 </DialogHeader>
-                <EditProjectForm />
+                <EditProjectForm project={project} />
             </DialogContent>
         </Dialog>
     );
