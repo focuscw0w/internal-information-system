@@ -37,7 +37,12 @@ export default function Project({ project }: ProjectProps) {
                     </div>
 
                     <div className="flex gap-2">
-                        <Button variant="outline">Back</Button>
+                        <Button
+                            onClick={() => window.history.back()}
+                            variant="outline"
+                        >
+                            Back
+                        </Button>
                         <EditProjectModal project={project}>
                             <Button variant="outline">Edit</Button>
                         </EditProjectModal>

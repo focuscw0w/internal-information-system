@@ -45,7 +45,7 @@ class ProjectController extends Controller
     /**
      * Show the specified resource.
      */
-    public function show(Project $project)
+    public function show(Project $project): Response
     {
         return Inertia::render('project', [
             'project' => $project,
@@ -63,7 +63,7 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(EditProjectRequest $request, $id)
+    public function update(EditProjectRequest $request, $id): RedirectResponse
     {
         $project = Project::findOrFail($id);
         $project->update($request->validated());
@@ -76,7 +76,7 @@ class ProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
         Project::findOrFail($id)->delete();
 
