@@ -17,14 +17,17 @@ class ProjectFactory extends Factory
      */
     public function definition(): array
     {
+        $start = $this->faker->dateTimeBetween('-1 month', 'now');
+        $due   = $this->faker->dateTimeBetween($start, '+1 month');
+
         return [
             'name' => $this->faker->sentence(3),
             'client' => $this->faker->company(),
             'description' => $this->faker->paragraph(),
             'status' => $this->faker->randomElement(['planned', 'active', 'on_hold', 'completed']),
             'priority' => $this->faker->randomElement(['low', 'medium', 'high']),
-            'start_date' => $this->faker->date(),
-            'due_date' => $this->faker->date(),
+            'start_date' => $start,
+            'due_date' => $due,
             'tags' => implode(',', $this->faker->words(3)),
         ];
     }

@@ -11,8 +11,6 @@ describe('Editovanie projektu', function () {
         $user = User::factory()->create();
         $project = Project::factory()->create([
                 'name' => 'Pôvodný názov',
-                'start_date' => '2025-01-10',
-                'due_date' => '2025-01-10',
             ]
         );
 
@@ -147,8 +145,6 @@ describe('Editovanie projektu', function () {
         $project = Project::factory()->create([
             'name' => 'Old Name',
             'description' => 'Old Desc',
-            'start_date' => '2025-01-10',
-            'due_date' => '2025-01-10',
         ]);
 
         $payload = [
