@@ -61,7 +61,7 @@ describe('Vytváranie projektu', function () {
             ->assertJsonValidationErrors(['start_date', 'due_date']);
     });
 
-    it('zlyhá ak je end_date pred start_date', function () {
+    it('zlyhá ak je due_date pred start_date', function () {
         $user = User::factory()->create();
 
         $payload = [
@@ -90,7 +90,7 @@ describe('Vytváranie projektu', function () {
             ->assertJsonValidationErrors(['status']);
     });
 
-    it('nepihlásený používateľ', function () {
+    it('neprihlásený používateľ dostane 401', function () {
         $payload = [
             'name' => 'Projekt',
             'start_date' => '2025-01-10',
@@ -100,7 +100,7 @@ describe('Vytváranie projektu', function () {
             ->assertStatus(401);
     });
 
-    it('neprihlásený používateľ nemôže vytvoriť projekt', function () {
+    it('neprihlásený používateľ je presmerovaný na login', function () {
         $payload = [
             'name' => 'Nový informačný systém',
             'client' => 'Firma s.r.o.',

@@ -27,7 +27,7 @@ describe('Mazanie projektu', function () {
             ->assertStatus(404);
     });
 
-    it('neprihlásený používateľ dostane 401 pri pokuse o zmazanie', function () {
+    it('neprihlásený používateľ dostane 401', function () {
         $project = Project::factory()->create();
 
         $this->deleteJson(route('project.destroy', $project->id))
