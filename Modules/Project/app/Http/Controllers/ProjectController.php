@@ -69,7 +69,7 @@ class ProjectController extends Controller
         $project->update($request->validated());
 
         return redirect()
-            ->route('project.show', $project)
+            ->route('project.index', $project)
             ->with('success', 'Projekt bol aktualizovaný.');
     }
 
