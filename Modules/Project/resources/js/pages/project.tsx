@@ -9,7 +9,6 @@ import { Head } from '@inertiajs/react';
 import EditProjectModal from '../components/edit-project-modal';
 import RemoveProjectModal from '../components/remove-project-modal';
 import type { Project } from '../types/Project';
-import { formatDate } from '../utils/date';
 
 interface ProjectProps {
     project: Project;
@@ -73,7 +72,7 @@ export default function Project({ project }: ProjectProps) {
                                             Created
                                         </div>
                                         <div className="text-sm font-medium">
-                                            {formatDate(project.start_date)}
+                                            {project.start_date}
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -84,7 +83,7 @@ export default function Project({ project }: ProjectProps) {
                                             Planned completion
                                         </div>
                                         <div className="text-sm font-medium">
-                                            {formatDate(project.due_date)}
+                                            {project.due_date}
                                         </div>
                                     </CardContent>
                                 </Card>

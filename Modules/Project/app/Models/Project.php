@@ -41,7 +41,7 @@ class Project extends Model
      * Casts (optional, but recommended for dates)
      */
     protected $casts = [
-        'start_date' => 'date',
-        'due_date' => 'date',
+        'start_date' => 'date:d.m.Y',
+        'due_date' => 'date:d.m.Y',
     ];
 }

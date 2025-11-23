@@ -6,7 +6,6 @@ import { Pencil, Trash2 } from 'lucide-react';
 import EditProjectModal from '../components/edit-project-modal';
 import RemoveProjectModal from '../components/remove-project-modal';
 import { Project } from '../types/Project';
-import { formatDate } from '../utils/date';
 
 interface ProjectItemProps {
     project: Project;
@@ -36,8 +35,8 @@ export default function ProjectItem({ project }: ProjectItemProps) {
                 </Badge>
 
                 <div className="text-sm text-muted-foreground">
-                    {formatDate(project.start_date)} →{' '}
-                    {formatDate(project.due_date)}
+                    {project.start_date} →{' '}
+                    {project.due_date}
                 </div>
 
                 <div className="z-20 flex items-center gap-2">
