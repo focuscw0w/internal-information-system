@@ -1,3 +1,7 @@
 {
-    "Project": true
+    "Project": true,
+    "Test": true,
+    "TestModule": true,
+    "Blog": true,
+    "Product": true
 }
