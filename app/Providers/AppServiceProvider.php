@@ -20,6 +20,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-      Inertia::share('navigation', fn () => \App\Support\Navigation\ModuleNavigation::build());
+      Inertia::share('moduleNavigation', fn () => \App\Support\Navigation\ModuleNavigation::build());
     }
 }

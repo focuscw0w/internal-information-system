@@ -13,14 +13,34 @@ const modulePages = import.meta.glob('/Modules/*/resources/js/pages/**/*.{jsx,ts
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) => {
-        const modPath = Object.keys(modulePages).find(
-            (p) =>
-                p.endsWith(`/resources/js/pages/${name}.jsx`) ||
-                p.endsWith(`/resources/js/pages/${name}.tsx`),
-        );
-        if (modPath) return resolvePageComponent(modPath, modulePages);
+         console.log('🔍 Resolving page:', name);
+    
+    // Rozdeľ názov (napr. "Product/Index" → ["Product", "Index"])
+    const parts = name.split('/');
+    
+    if (parts.length >= 2) {
+        const [moduleName, ...pageParts] = parts;
+        const pageName = pageParts.join('/');
+        
+        // Hľadaj v moduloch
+        const modPath = Object.keys(modulePages).find((p) => {
+            const match = 
+                p.includes(`/Modules/${moduleName}/resources/js/pages/${pageName}.jsx`) ||
+                p.includes(`/Modules/${moduleName}/resources/js/pages/${pageName}.tsx`);
+            
+            if (match) {
+                console.log('✅ Found in module:', p);
+            }
+            return match;
+        });
+        
+        if (modPath) {
+            return resolvePageComponent(modPath, modulePages);
+        }
+    }
 
-        return resolvePageComponent(`./pages/${name}.tsx`, appPages);
+    console.log('📁 Looking in app pages');
+    return resolvePageComponent(`./pages/${name}.tsx`, appPages);
     },
     setup({ el, App, props }) {
         const root = createRoot(el);

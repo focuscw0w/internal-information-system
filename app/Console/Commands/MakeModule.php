@@ -69,16 +69,17 @@ PHP;
         $fs->put($navPath, $navContent);
 
         // 3) React page
-        $pageDir  = "{$modulePath}/resources/js/Pages";
+        $pageDir  = "{$modulePath}/resources/js/pages";
         $pagePath = "{$pageDir}/Index.tsx";
         $fs->ensureDirectoryExists($pageDir);
 
         $pageContent = <<<TSX
 import { Head } from '@inertiajs/react';
+import AppLayout from '@/layouts/app-layout';
 
 export default function Index({ title }: { title: string }) {
   return (
-    <>
+    <AppLayout>
       <Head title={title} />
       <div className="p-6">
         <h1 className="text-2xl font-semibold">{title}</h1>
@@ -86,7 +87,7 @@ export default function Index({ title }: { title: string }) {
           Toto je automaticky vytvorená stránka modulu.
         </p>
       </div>
-    </>
+    </AppLayout>
   );
 }
 TSX;
@@ -95,10 +96,9 @@ TSX;
         }
 
         // 4) Patch controller index() -> Inertia::render
-        // nwidart u vás: Modules/Blog/app/Http/Controllers/BlogController.php
         $controllerPath = "{$modulePath}/app/Http/Controllers/{$module}Controller.php";
         if (!$fs->exists($controllerPath)) {
-            $this->error("❌ Nenašiel som controller: {$controllerPath}");
+            $this->error("Nenašiel som controller: {$controllerPath}");
             $this->warn("Tip: skontroluj, či nwidart stubs generujú {$module}Controller.php.");
             return self::FAILURE;
         }
@@ -109,7 +109,7 @@ TSX;
         $controller = $this->ensureUse($controller, "use Inertia\\Inertia;");
         $controller = $this->ensureUse($controller, "use Illuminate\\Http\\Request;");
 
-        // 4b) replace index() method body (robustne: nahradíme celú metódu index)
+        // 4b) replace index() method body
         $newIndex = <<<PHP
     public function index(Request \$request)
     {
@@ -129,13 +129,12 @@ PHP;
 
         $fs->put($controllerPath, $controller2);
 
-        // 5) Patch routes/web.php aby smerovali na index (a nastavili prefix + name)
-        // nwidart často generuje resource route. My to zjednodušíme na GET /<slug>
+        // 5) Patch routes/web.php 
         $routesPath = "{$modulePath}/routes/web.php";
         if ($fs->exists($routesPath)) {
             $routes = $fs->get($routesPath);
 
-            // ak už obsahuje prefix slug, nechaj
+       
             if (!str_contains($routes, "->prefix('{$slug}')")) {
                 $routes = <<<PHP
 <?php
@@ -172,11 +171,11 @@ PHP;
             $fs->put($routesPath, $routes);
         }
 
-        $this->info("✅ Hotovo.");
-        $this->line("👉 URL: /{$slug}");
-        $this->line("👉 Route: {$routeName}");
-        $this->line("👉 Page: Modules/{$module}/resources/js/Pages/Index.tsx");
-        $this->line("👉 Controller patched: Modules/{$module}/app/Http/Controllers/{$module}Controller.php");
+        $this->info("Hotovo.");
+        $this->line("URL: /{$slug}");
+        $this->line("Route: {$routeName}");
+        $this->line("Page: Modules/{$module}/resources/js/pages/Index.tsx");
+        $this->line("Controller patched: Modules/{$module}/app/Http/Controllers/{$module}Controller.php");
 
         return self::SUCCESS;
     }
@@ -192,14 +191,12 @@ PHP;
             return $content;
         }
 
-        // vlož po namespace bloku
         $pattern = '/^namespace\s+[^\n;]+;\s*\R/m';
         if (preg_match($pattern, $content, $m, PREG_OFFSET_CAPTURE)) {
             $pos = $m[0][1] + strlen($m[0][0]);
             return substr($content, 0, $pos) . $useLine . "\n" . substr($content, $pos);
         }
 
-        // fallback: vlož na začiatok po <?php
         return preg_replace('/^<\?php\s*/', "<?php\n\n{$useLine}\n", $content) ?? $content;
     }
 
@@ -209,11 +206,9 @@ PHP;
      */
     private function replaceMethod(string $content, string $methodName, string $replacement): ?string
     {
-        // nájde: public function index(...) { ... }
         $pattern = '/\R\s*public\s+function\s+' . preg_quote($methodName, '/') . '\s*\([^)]*\)\s*\{.*?\R\s*\}\s*/s';
 
         if (!preg_match($pattern, $content)) {
-            // niekedy generuje phpdoc + method, skúsme aj s phpdoc pred metódou
             $pattern2 = '/\R\s*\/\*\*.*?\*\/\s*\R\s*public\s+function\s+' . preg_quote($methodName, '/') . '\s*\([^)]*\)\s*\{.*?\R\s*\}\s*/s';
             if (!preg_match($pattern2, $content)) {
                 return null;

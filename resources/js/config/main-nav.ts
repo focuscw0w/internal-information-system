@@ -1,71 +1,15 @@
-import {
-    dashboard,
-    pricing,
-    tasks,
-    timeTracking,
-    users,
-} from '@/routes';
-import type { NavGroup } from '@/types';
-import {
-    CheckSquare,
-    Clock,
-    DollarSign,
+import { FolderKanban } from 'lucide-react';
+
+export const iconMap = {
     FolderKanban,
-    LayoutGrid,
-    Users,
-} from 'lucide-react';
+} as const;
 
-// TODO: Vytvoriť index pre všetky moduly a importnúť všetky urls pre moduly
+export type IconName = keyof typeof iconMap;
 
-export const moduleNavigation: NavGroup[] = [
-    {
-        title: 'Prehľad',
-        items: [
-            {
-                title: 'Dashboard',
-                href: dashboard(),
-                icon: LayoutGrid,
-            },
-        ],
-    },
-    {
-        title: 'Práca & Čas',
-        items: [
-            {
-                title: 'Time Tracking',
-                href: timeTracking(),
-                icon: Clock,
-            },
-            {
-                title: 'Projekty',
-                href: "/projects",
-                icon: FolderKanban,
-            },
-            {
-                title: 'Úlohy',
-                href: tasks(),
-                icon: CheckSquare,
-            },
-        ],
-    },
-    {
-        title: 'Naceňovanie',
-        items: [
-            {
-                title: 'Naceniť projekt',
-                href: pricing(),
-                icon: DollarSign,
-            },
-        ],
-    },
-    {
-        title: 'Administrácia',
-        items: [
-            {
-                title: 'Používatelia',
-                href: users(),
-                icon: Users,
-            },
-        ],
-    },
-];
+export function resolveIcon(name?: string | null) {
+  if (name && name in iconMap) {
+    return iconMap[name as IconName];
+  }
+
+  return iconMap.FolderKanban; 
+}
