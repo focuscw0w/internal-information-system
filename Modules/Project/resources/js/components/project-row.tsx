@@ -7,16 +7,24 @@ import {
     getStatusText,
     getWorkloadColor,
 } from '../utils/project.utils';
+import { ProjectCardActions } from './project-card-actions';
 
 interface ProjectRowProps {
     project: Project;
     onClick: (projectId: number) => void;
+    onEdit: (projectId: number) => void;
+    onDelete: (projectId: number) => void;
 }
 
-export const ProjectRow: React.FC<ProjectRowProps> = ({ project, onClick }) => {
+export const ProjectRow: React.FC<ProjectRowProps> = ({
+    project,
+    onClick,
+    onEdit,
+    onDelete,
+}) => {
     return (
         <div
-            className="mb-4 cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg"
+            className="group mb-4 cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg"
             onClick={() => onClick(project.id)}
         >
             <div className="p-6">
@@ -95,6 +103,15 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({ project, onClick }) => {
                                 {project.workload}
                             </span>
                         </div>
+                    </div>
+
+                    {/* Akcie - vždy viditeľné v liste */}
+                    <div className="w-24">
+                        <ProjectCardActions
+                            projectId={project.id}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                        />
                     </div>
                 </div>
             </div>

@@ -68,9 +68,25 @@ const ProjectsCapacityOverview: React.FC = () => {
     ];
 
     const handleProjectClick = (projectId: number) => {
-        // Tu budeš v Laraveli riešiť navigáciu
-        // Napríklad: window.location.href = `/projects/${projectId}`;
         console.log(`Navigate to project: ${projectId}`);
+        // window.location.href = `/projects/${projectId}`;
+    };
+
+    const handleCreateProject = () => {
+        console.log('Navigate to create project');
+        // window.location.href = '/projects/create';
+    };
+
+    const handleEditProject = (projectId: number) => {
+        console.log(`Navigate to edit project: ${projectId}`);
+        // window.location.href = `/projects/${projectId}/edit`;
+    };
+
+    const handleDeleteProject = (projectId: number) => {
+        if (confirm('Naozaj chcete zmazať tento projekt?')) {
+            console.log(`Delete project: ${projectId}`);
+            // API call to delete project
+        }
     };
 
     return (
@@ -83,7 +99,11 @@ const ProjectsCapacityOverview: React.FC = () => {
                     </p>
 
                     <div className="flex items-center gap-6">
-                        <Button variant="default" className="py-5">
+                        <Button
+                            onClick={handleCreateProject}
+                            variant="default"
+                            size="lg"
+                        >
                             Nový projekt
                         </Button>
                         <ViewModeToggle
@@ -134,6 +154,8 @@ const ProjectsCapacityOverview: React.FC = () => {
                             key={project.id}
                             project={project}
                             onClick={handleProjectClick}
+                            onEdit={handleEditProject}
+                            onDelete={handleDeleteProject}
                         />
                     ))}
                 </div>
@@ -144,6 +166,8 @@ const ProjectsCapacityOverview: React.FC = () => {
                             key={project.id}
                             project={project}
                             onClick={handleProjectClick}
+                            onEdit={handleEditProject}
+                            onDelete={handleDeleteProject}
                         />
                     ))}
                 </div>

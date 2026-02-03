@@ -2,23 +2,37 @@ import React from 'react';
 import { Project } from '../types/project.types';
 import { ProjectHeader } from './project-header';
 import { ProjectMetrics } from './project-metrics';
+import { ProjectCardActions } from './project-card-actions';
 import { ProgressBar } from './project-progressbar';
 import { getCapacityColor } from '../utils/project.utils';
 
 interface ProjectCardProps {
   project: Project;
   onClick: (projectId: number) => void;
+  onEdit: (projectId: number) => void;
+  onDelete: (projectId: number) => void;
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ 
   project, 
-  onClick 
+  onClick,
+  onEdit,
+  onDelete
 }) => {
   return (
     <div 
-      className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer"
+      className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer relative group"
       onClick={() => onClick(project.id)}
     >
+      {/* Akčné tlačidlá - zobrazujú sa pri hover */}
+      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <ProjectCardActions 
+          projectId={project.id}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
+      </div>
+
       <div className="p-6 border-b border-gray-200">
         <ProjectHeader 
           name={project.name}

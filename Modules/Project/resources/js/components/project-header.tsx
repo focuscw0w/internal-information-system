@@ -19,25 +19,23 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
     workload,
 }) => {
     return (
-        <div className="mb-4 flex items-start justify-between">
-            <div>
-                <h3 className="mb-2 text-xl font-semibold text-gray-900">
-                    {name}
-                </h3>
-                <span
-                    className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${getStatusColor(status)}`}
+        <div className="mb-2">
+            <div className="mb-1 flex items-center gap-4">
+                <h3 className="text-xl font-semibold text-gray-900">{name}</h3>
+                <div
+                    className={`flex items-center gap-1 ${getWorkloadColor(workload)}`}
                 >
-                    {getStatusText(status)}
-                </span>
+                    <AlertCircle size={18} />
+                    <span className="text-sm font-medium capitalize">
+                        {workload}
+                    </span>
+                </div>
             </div>
-            <div
-                className={`flex items-center gap-1 ${getWorkloadColor(workload)}`}
+            <span
+                className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${getStatusColor(status)}`}
             >
-                <AlertCircle size={18} />
-                <span className="text-sm font-medium capitalize">
-                    {workload}
-                </span>
-            </div>
+                {getStatusText(status)}
+            </span>
         </div>
     );
 };
