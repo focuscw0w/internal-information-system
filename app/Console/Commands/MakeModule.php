@@ -18,6 +18,7 @@ class MakeModule extends Command
         {title : Názov v sidebare (napr. "Projekty")}
         {group : Skupina v sidebare (napr. "Práca & Čas")}';
 
+    // php artisan  make:module Project "Projekty" "Kapacitný manažment"
     /**
      * The console command description.
      *
@@ -39,14 +40,14 @@ class MakeModule extends Command
         $slug      = Str::kebab($module);                 // blog
         $routeName = Str::snake($slug) . '.index';        // blog.index
 
-        $this->info("🚀 Vytváram modul: {$module}");
+        $this->info("Vytváram modul: {$module}");
 
         // 1) nwidart module:make
         $this->call('module:make', ['name' => [$module]]);
 
         $modulePath = base_path("Modules/{$module}");
         if (!$fs->isDirectory($modulePath)) {
-            $this->error("❌ Modul sa nevytvoril: {$modulePath}");
+            $this->error("Modul sa nevytvoril: {$modulePath}");
             return self::FAILURE;
         }
 
@@ -122,7 +123,7 @@ PHP;
         $controller2 = $this->replaceMethod($controller, 'index', $newIndex);
 
         if ($controller2 === null) {
-            $this->error("❌ Nepodarilo sa nájsť/replace-núť metódu index() v controlleri.");
+            $this->error("Nepodarilo sa nájsť/replace-núť metódu index() v controlleri.");
             $this->warn("Otvor súbor a uisti sa, že obsahuje 'public function index()' alebo 'public function index(Request \$request)'.");
             return self::FAILURE;
         }

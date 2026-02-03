@@ -2,27 +2,23 @@
 
 namespace Modules\Project\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
-use Inertia\Response;
-use Modules\Project\Http\Requests\EditProjectRequest;
-use Modules\Project\Http\Requests\StoreProjectRequest;
-use Modules\Project\Models\Project;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+
+    public function index(Request $request)
     {
-        $projects = Project::query()->latest()->get();
-
-        return Inertia::render("projects", ["projects" => $projects]);
+        return Inertia::render('Project/Index', [
+            'title' => 'Projekty',
+        ]);
     }
-
-    /**
+/**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -33,23 +29,14 @@ class ProjectController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreProjectRequest $request): RedirectResponse
-    {
-        $project = Project::create($request->validated());
-
-        return redirect()
-            ->route('project.show', $project)
-            ->with('success', 'Projekt bol vytvorený.');
-    }
+    public function store(Request $request) {}
 
     /**
      * Show the specified resource.
      */
-    public function show(Project $project): Response
+    public function show($id)
     {
-        return Inertia::render('project', [
-            'project' => $project,
-        ]);
+        return view('project::show');
     }
 
     /**
@@ -63,25 +50,10 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(EditProjectRequest $request, $id): RedirectResponse
-    {
-        $project = Project::findOrFail($id);
-        $project->update($request->validated());
-
-        return redirect()
-            ->route('project.index', $project)
-            ->with('success', 'Projekt bol aktualizovaný.');
-    }
+    public function update(Request $request, $id) {}
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id): RedirectResponse
-    {
-        Project::findOrFail($id)->delete();
-
-        return redirect()
-            ->route('project.index')
-            ->with('success', 'Projekt bol vymazaný.');
-    }
+    public function destroy($id) {}
 }
