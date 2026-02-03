@@ -93,8 +93,8 @@ const ProjectsCapacityOverview: React.FC = () => {
         <div className="min-h-screen">
             {/* Header */}
             <div className="mb-8">
-                <div className="flex items-center justify-between">
-                    <p className="text-gray-600">
+                <div className="md:flex items-center justify-between gap-4 lg:gap-0">
+                    <p className="text-gray-600 mb-2 md:mb-0">
                         Prehľad projektov, zdrojov a vyťaženia tímu
                     </p>
 
