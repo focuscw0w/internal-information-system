@@ -7,7 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Modules\Projekt\App\Services\ProjectService;
+use Modules\Project\Services\ProjectService;
 
 class ProjectServiceProvider extends ServiceProvider
 {
@@ -37,9 +37,7 @@ class ProjectServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
-        $this->app->register(ProjectService::class, function ($app) {
-            return new ProjectService;
-        });
+        $this->app->singleton(ProjectService::class);
     }
 
     /**

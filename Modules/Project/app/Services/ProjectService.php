@@ -5,7 +5,7 @@ namespace Modules\Project\Services;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Modules\Project\App\Contracts\ProjectServiceInterface;
-use Modules\Projekt\Entities\Project;
+use Modules\Project\Models\Project;
 
 class ProjectService implements ProjectServiceInterface
 {

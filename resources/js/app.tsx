@@ -15,22 +15,17 @@ createInertiaApp({
     resolve: (name) => {
          console.log('🔍 Resolving page:', name);
     
-    // Rozdeľ názov (napr. "Product/Index" → ["Product", "Index"])
     const parts = name.split('/');
     
     if (parts.length >= 2) {
         const [moduleName, ...pageParts] = parts;
         const pageName = pageParts.join('/');
-        
-        // Hľadaj v moduloch
+    
         const modPath = Object.keys(modulePages).find((p) => {
             const match = 
                 p.includes(`/Modules/${moduleName}/resources/js/pages/${pageName}.jsx`) ||
                 p.includes(`/Modules/${moduleName}/resources/js/pages/${pageName}.tsx`);
-            
-            if (match) {
-                console.log('✅ Found in module:', p);
-            }
+        
             return match;
         });
         
@@ -39,7 +34,6 @@ createInertiaApp({
         }
     }
 
-    console.log('📁 Looking in app pages');
     return resolvePageComponent(`./pages/${name}.tsx`, appPages);
     },
     setup({ el, App, props }) {

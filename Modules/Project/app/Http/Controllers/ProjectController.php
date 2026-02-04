@@ -5,6 +5,7 @@ namespace Modules\Project\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Modules\Project\Services\ProjectService;
 
 class ProjectController extends Controller
 {
@@ -17,6 +18,8 @@ class ProjectController extends Controller
      */
     public function index(Request $request)
     {
+        $projects = $this->projectService->getAllProjects();
+
         return Inertia::render('Project/Index', [
             'title' => 'Projekty',
         ]);
