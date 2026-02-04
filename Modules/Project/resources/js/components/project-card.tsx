@@ -24,7 +24,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer relative group"
       onClick={() => onClick(project.id)}
     >
-      {/* Akčné tlačidlá - zobrazujú sa pri hover */}
       <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
         <ProjectCardActions 
           projectId={project.id}
