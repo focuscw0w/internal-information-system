@@ -1,6 +1,6 @@
 import React from 'react';
 import { Project } from '../types/project.types';
-import { ProjectHeader } from './project-header';
+import { ProjectCardHeader } from './project-card-header';
 import { ProjectMetrics } from './project-metrics';
 import { ProjectCardActions } from './project-card-actions';
 import { ProgressBar } from './project-progressbar';
@@ -34,7 +34,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       </div>
 
       <div className="p-6 border-b border-gray-200">
-        <ProjectHeader 
+        <ProjectCardHeader 
           name={project.name}
           status={project.status}
           workload={project.workload}

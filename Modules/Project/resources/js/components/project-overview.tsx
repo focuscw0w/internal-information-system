@@ -1,11 +1,10 @@
-import { Button } from '@/components/ui/button';
 import { CheckCircle2, Clock, TrendingUp, Users } from 'lucide-react';
 import React, { useState } from 'react';
 import { Project, ViewMode } from '../types/project.types';
 import { ProjectCard } from './project-card';
+import { ProjectHeader } from './project-header';
 import { ProjectRow } from './project-row';
 import { StatCard } from './project-statcard';
-import { ViewModeToggle } from './project-viewmode-toggle';
 
 const ProjectsCapacityOverview: React.FC = () => {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -92,27 +91,11 @@ const ProjectsCapacityOverview: React.FC = () => {
     return (
         <div className="min-h-screen">
             {/* Header */}
-            <div className="mb-8">
-                <div className="md:flex items-center justify-between gap-4 lg:gap-0">
-                    <p className="text-gray-600 mb-2 md:mb-0">
-                        Prehľad projektov, zdrojov a vyťaženia tímu
-                    </p>
-
-                    <div className="flex items-center gap-6">
-                        <Button
-                            onClick={handleCreateProject}
-                            variant="default"
-                            size="lg"
-                        >
-                            Nový projekt
-                        </Button>
-                        <ViewModeToggle
-                            viewMode={viewMode}
-                            onViewModeChange={setViewMode}
-                        />
-                    </div>
-                </div>
-            </div>
+            <ProjectHeader
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                onCreateProject={handleCreateProject}
+            />
 
             {/* Súhrnné štatistiky */}
             <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">

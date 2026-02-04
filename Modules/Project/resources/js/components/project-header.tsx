@@ -1,41 +1,68 @@
-import { AlertCircle } from 'lucide-react';
-import React from 'react';
-import { ProjectStatus, WorkloadLevel } from '../types/project.types';
+import { Button } from '@/components/ui/button';
 import {
-    getStatusColor,
-    getStatusText,
-    getWorkloadColor,
-} from '../utils/project.utils';
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { DialogClose } from '@radix-ui/react-dialog';
+import { ViewMode } from '../types/project.types';
+import { ViewModeToggle } from './project-viewmode-toggle';
 
 interface ProjectHeaderProps {
-    name: string;
-    status: ProjectStatus;
-    workload: WorkloadLevel;
+    viewMode: ViewMode;
+    onViewModeChange: (mode: ViewMode) => void;
+    onCreateProject: () => void;
 }
 
 export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
-    name,
-    status,
-    workload,
+    viewMode,
+    onViewModeChange,
+    onCreateProject,
 }) => {
     return (
-        <div className="mb-2">
-            <div className="mb-1 flex items-center gap-4">
-                <h3 className="text-xl font-semibold text-gray-900">{name}</h3>
-                <div
-                    className={`flex items-center gap-1 ${getWorkloadColor(workload)}`}
-                >
-                    <AlertCircle size={18} />
-                    <span className="text-sm font-medium capitalize">
-                        {workload}
-                    </span>
+        <div className="mb-8">
+            <div className="items-center justify-between gap-4 md:flex lg:gap-0">
+                <p className="mb-2 text-gray-600 md:mb-0">
+                    Prehľad projektov, zdrojov a vyťaženia tímu
+                </p>
+                <div className="flex items-center gap-6">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="default" size="lg">
+                                Nový projekt
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Vytvoriť nový projekt</DialogTitle>
+                                <DialogDescription>
+                                    Zadajte základné informácie o projekte.
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="grid gap-4 py-4">
+                                <p>Formulár na vytvorenie projektu...</p>
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button variant="outline">Zrušiť</Button>
+                                </DialogClose>
+                                <Button onClick={onCreateProject}>
+                                    Vytvoriť projekt
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                    <ViewModeToggle
+                        viewMode={viewMode}
+                        onViewModeChange={onViewModeChange}
+                    />
                 </div>
             </div>
-            <span
-                className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${getStatusColor(status)}`}
-            >
-                {getStatusText(status)}
-            </span>
         </div>
     );
 };
