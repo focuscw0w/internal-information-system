@@ -1,11 +1,11 @@
 <?php
 
-namespace Modules\Project\Services;
+namespace Modules\Project\App\Services;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Modules\Project\App\Contracts\ProjectServiceInterface;
-use Modules\Project\Models\Project;
+use Modules\Project\App\Models\Project;
 
 class ProjectService implements ProjectServiceInterface
 {
@@ -66,7 +66,7 @@ class ProjectService implements ProjectServiceInterface
      */
     public function createProject(array $data): Project
     {
-        $project = Project::create([
+        $projectData = [
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'status' => $data['status'] ?? 'planning',
@@ -75,15 +75,14 @@ class ProjectService implements ProjectServiceInterface
             'end_date' => $data['end_date'],
             'budget' => $data['budget'] ?? null,
             'owner_id' => $data['owner_id'] ?? auth()->id(),
-            'client_id' => $data['client_id'] ?? null,
-        ]);
+        ];
 
-        // Add team members if provided
-        if (isset($data['team_members']) && is_array($data['team_members'])) {
+        $project = Project::create($projectData);
+
+        if (! empty($data['team_members'])) {
             foreach ($data['team_members'] as $member) {
                 $project->addTeamMember(
                     $member['user_id'],
-                    $member['role'],
                     $member['allocation'] ?? 100
                 );
             }

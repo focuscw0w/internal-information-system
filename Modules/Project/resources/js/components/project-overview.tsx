@@ -71,11 +71,6 @@ const ProjectsCapacityOverview: React.FC = () => {
         // window.location.href = `/projects/${projectId}`;
     };
 
-    const handleCreateProject = () => {
-        console.log('Navigate to create project');
-        // window.location.href = '/projects/create';
-    };
-
     const handleEditProject = (projectId: number) => {
         console.log(`Navigate to edit project: ${projectId}`);
         // window.location.href = `/projects/${projectId}/edit`;
@@ -91,11 +86,7 @@ const ProjectsCapacityOverview: React.FC = () => {
     return (
         <div className="min-h-screen">
             {/* Header */}
-            <ProjectHeader
-                viewMode={viewMode}
-                onViewModeChange={setViewMode}
-                onCreateProject={handleCreateProject}
-            />
+            <ProjectHeader viewMode={viewMode} onViewModeChange={setViewMode} />
 
             {/* Súhrnné štatistiky */}
             <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">

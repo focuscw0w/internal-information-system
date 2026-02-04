@@ -39,7 +39,6 @@ return new class extends Migration
 
             // Relations
             $table->foreignId('owner_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('client_id')->nullable()->constrained('clients')->nullOnDelete();
 
             $table->timestamps();
             $table->softDeletes();

@@ -8,4 +8,6 @@ Route::middleware(['web', 'auth'])
     ->name('project.')
     ->group(function () {
         Route::get('/', [ProjectController::class, 'index'])->name('index');
+        Route::post('/', [ProjectController::class, 'store'])->name('store');
+        Route::get('/{project}', [ProjectController::class, 'show'])->name('show');
     });

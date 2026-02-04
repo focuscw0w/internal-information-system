@@ -1,11 +1,14 @@
 <?php
 
-namespace Modules\Project\Models;
+namespace Modules\Project\App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
-// use Modules\Project\Database\Factories\ProjectFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo; 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\User;
 
 class Project extends Model
 {
@@ -31,7 +34,6 @@ class Project extends Model
         'budget',
         'budget_spent',
         'owner_id',
-        'client_id',
     ];
 
     protected $casts = [
@@ -57,7 +59,7 @@ class Project extends Model
     // Relations
     public function owner(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'owner_id');
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     public function client(): BelongsTo

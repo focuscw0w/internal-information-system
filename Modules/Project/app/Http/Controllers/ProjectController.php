@@ -5,7 +5,7 @@ namespace Modules\Project\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Modules\Project\Services\ProjectService;
+use Modules\Project\App\Services\ProjectService;
 
 class ProjectController extends Controller
 {
@@ -36,14 +36,53 @@ class ProjectController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {}
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'required|in:planning,active,on_hold,completed,cancelled',
+            'workload' => 'required|in:low,medium,high',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after:start_date',
+            'budget' => 'nullable|numeric|min:0',
+        ]);
+
+        try {
+            $project = $this->projectService->createProject($validated);
+
+            return redirect()
+                ->route('project.index')
+                ->with('success', 'Projekt bol úspešne vytvorený.');
+
+        } catch (\Exception $e) {
+            \Log::error('Project creation failed:', [
+                'error' => $e->getMessage(),
+                'data' => $validated,
+            ]);
+
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Nepodarilo sa vytvoriť projekt.']);
+        }
+    }
 
     /**
      * Show the specified resource.
      */
     public function show($id)
     {
-        return view('project::show');
+        $project = $this->projectService->getProjectById($id);
+
+        if (! $project) {
+            return redirect()
+                ->route('project.index')
+                ->with('error', 'Projekt nebol nájdený.');
+        }
+
+        return Inertia::render('project/show', [
+            'project' => $project,
+        ]);
     }
 
     /**

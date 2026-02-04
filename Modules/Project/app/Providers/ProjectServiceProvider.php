@@ -7,7 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Modules\Project\Services\ProjectService;
+use Modules\Project\App\Services\ProjectService;
 
 class ProjectServiceProvider extends ServiceProvider
 {

@@ -4,7 +4,7 @@ namespace Modules\Project\App\Contracts;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Modules\Project\Models\Project;
+use Modules\Project\App\Models\Project;
 
 interface ProjectServiceInterface
 {
