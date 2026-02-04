@@ -2,23 +2,27 @@
 
 namespace Modules\Project\Http\Controllers;
 
-use Inertia\Inertia;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ProjectController extends Controller
 {
+    public function __construct(
+        protected ProjectService $projectService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
-
     public function index(Request $request)
     {
         return Inertia::render('Project/Index', [
             'title' => 'Projekty',
         ]);
     }
-/**
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
