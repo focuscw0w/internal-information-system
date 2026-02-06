@@ -25,7 +25,7 @@ class ProjectService implements ProjectServiceInterface
         }
 
         if (isset($filters['search'])) {
-            $query->where('name', 'like', '%'.$filters['search'].'%');
+            $query->where('name', 'like', '%' . $filters['search'] . '%');
         }
 
         return $query->get();
@@ -47,7 +47,7 @@ class ProjectService implements ProjectServiceInterface
         }
 
         if (isset($filters['search'])) {
-            $query->where('name', 'like', '%'.$filters['search'].'%');
+            $query->where('name', 'like', '%' . $filters['search'] . '%');
         }
 
         return $query->paginate($perPage);
@@ -79,7 +79,7 @@ class ProjectService implements ProjectServiceInterface
 
         $project = Project::create($projectData);
 
-        if (! empty($data['team_members'])) {
+        if (!empty($data['team_members'])) {
             foreach ($data['team_members'] as $member) {
                 $project->addTeamMember(
                     $member['user_id'],
@@ -98,7 +98,7 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($id);
 
-        if (! $project) {
+        if (!$project) {
             return null;
         }
 
@@ -123,7 +123,7 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = $this->getProjectById($id);
 
-        if (! $project) {
+        if (!$project) {
             return false;
         }
 
@@ -157,7 +157,7 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($projectId);
 
-        if (! $project) {
+        if (!$project) {
             return false;
         }
 
@@ -173,7 +173,7 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($projectId);
 
-        if (! $project) {
+        if (!$project) {
             return false;
         }
 
@@ -189,7 +189,7 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($projectId);
 
-        if (! $project) {
+        if (!$project) {
             return null;
         }
 
