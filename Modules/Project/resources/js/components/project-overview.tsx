@@ -71,8 +71,6 @@ const ProjectsCapacityOverview = ({ projects }: { projects: Project[] }) => {
                             key={project.id}
                             project={project}
                             onClick={handleProjectClick}
-                            onEdit={handleEditProject}
-                            onDelete={handleDeleteProject}
                         />
                     ))}
                 </div>
