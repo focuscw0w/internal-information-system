@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\Project\Http\Requests\UpdateProjectRequest;
 use Modules\Project\App\Services\ProjectService;
+use Modules\Project\Transformers\ProjectResource;
 
 class ProjectController extends Controller
 {
@@ -24,7 +25,7 @@ class ProjectController extends Controller
 
         return Inertia::render('Project/Index', [
             'title' => 'Projekty',
-            'projects' => $projects,
+            'projects' => ProjectResource::collection($projects)->resolve(),
         ]);
     }
 

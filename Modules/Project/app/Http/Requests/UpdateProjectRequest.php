@@ -20,12 +20,14 @@ class UpdateProjectRequest extends FormRequest
      */
     public function rules(): array
     {
-         return [
+        return [
             'name' => ['required', 'string', 'max:255'],
-            'status' => ['required', Rule::in(['planning', 'active', 'completed'])],
+            'description' => ['nullable', 'string'],
+            'status' => ['required', Rule::in(['planning', 'active', 'on_hold', 'completed', 'cancelled'])],
             'workload' => ['required', Rule::in(['low', 'medium', 'high'])],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'budget' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 
@@ -34,18 +36,11 @@ class UpdateProjectRequest extends FormRequest
      */
     public function messages(): array
     {
-         return [
+        return [
             'name.required' => 'Názov projektu je povinný.',
             'end_date.after_or_equal' => 'Dátum konca musí byť rovnaký alebo neskorší ako dátum začiatku.',
-        ];
-    }
-
-    /**
-     * Get custom attribute names.
-     */
-    public function attributes(): array
-    {
-        return [
+            'budget.numeric' => 'Rozpočet musí byť číslo.',
+            'budget.min' => 'Rozpočet nemôže byť záporný.',
         ];
     }
 }

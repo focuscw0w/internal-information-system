@@ -18,9 +18,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useForm } from '@inertiajs/react';
 import { Edit } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Project, ProjectStatus, WorkloadLevel } from '../types/project.types';
 
 interface ProjectEditFormProps {
@@ -30,28 +31,31 @@ interface ProjectEditFormProps {
 export const ProjectEditForm = ({ project }: ProjectEditFormProps) => {
     const [open, setOpen] = useState(false);
 
-    const formatDateForInput = (dateString: string | null): string => {
-        if (!dateString) return '';
-        return dateString.split('T')[0];
-    };
-
-    const { data, setData, put, processing, errors, reset } = useForm({
+    const { data, setData, put, processing, errors } = useForm({
         name: project.name || '',
-        status: project.status || ('planning' as ProjectStatus),
-        workload: project.workload || ('medium' as WorkloadLevel),
-        start_date: formatDateForInput((project as any).start_date),
-        end_date: formatDateForInput((project as any).end_date),
+        description: project.description || '',
+        status: project.status || 'planning',
+        workload: project.workload || 'medium',
+        start_date: project.start_date || '',
+        end_date: project.end_date || '',
+        budget: project.budget?.toString() || '',
     });
 
-    useEffect(() => {
-        setData({
-            name: project.name || '',
-            status: project.status || ('planning' as ProjectStatus),
-            workload: project.workload || ('medium' as WorkloadLevel),
-            start_date: formatDateForInput((project as any).start_date),
-            end_date: formatDateForInput((project as any).end_date),
-        });
-    }, [project]);
+    const handleOpen = (newOpen: boolean) => {
+        if (newOpen) {
+            // Refresh data pri každom otvorení
+            setData({
+                name: project.name || '',
+                description: project.description || '',
+                status: project.status || 'planning',
+                workload: project.workload || 'medium',
+                start_date: project.start_date || '',
+                end_date: project.end_date || '',
+                budget: project.budget?.toString() || '',
+            });
+        }
+        setOpen(newOpen);
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,7 +63,6 @@ export const ProjectEditForm = ({ project }: ProjectEditFormProps) => {
         put(`/project/${project.id}`, {
             onSuccess: () => {
                 setOpen(false);
-                reset();
             },
             onError: (errors) => {
                 console.error('Validation errors:', errors);
@@ -68,7 +71,7 @@ export const ProjectEditForm = ({ project }: ProjectEditFormProps) => {
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpen}>
             <DialogTrigger asChild>
                 <button
                     onClick={(e) => e.stopPropagation()}
@@ -106,6 +109,25 @@ export const ProjectEditForm = ({ project }: ProjectEditFormProps) => {
                             {errors.name && (
                                 <p className="text-sm text-red-500">
                                     {errors.name}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Popis */}
+                        <div className="grid gap-2">
+                            <Label htmlFor="description">Popis</Label>
+                            <Textarea
+                                id="description"
+                                placeholder="Stručný popis projektu..."
+                                value={data.description}
+                                onChange={(e) =>
+                                    setData('description', e.target.value)
+                                }
+                                rows={3}
+                            />
+                            {errors.description && (
+                                <p className="text-sm text-red-500">
+                                    {errors.description}
                                 </p>
                             )}
                         </div>
@@ -162,10 +184,7 @@ export const ProjectEditForm = ({ project }: ProjectEditFormProps) => {
                                 <Select
                                     value={data.status}
                                     onValueChange={(value) =>
-                                        setData(
-                                            'status',
-                                            value as ProjectStatus,
-                                        )
+                                        setData('status', value as ProjectStatus)
                                     }
                                 >
                                     <SelectTrigger>
@@ -178,8 +197,14 @@ export const ProjectEditForm = ({ project }: ProjectEditFormProps) => {
                                         <SelectItem value="active">
                                             Aktívny
                                         </SelectItem>
+                                        <SelectItem value="on_hold">
+                                            Pozastavený
+                                        </SelectItem>
                                         <SelectItem value="completed">
                                             Dokončený
+                                        </SelectItem>
+                                        <SelectItem value="cancelled">
+                                            Zrušený
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -195,10 +220,7 @@ export const ProjectEditForm = ({ project }: ProjectEditFormProps) => {
                                 <Select
                                     value={data.workload}
                                     onValueChange={(value) =>
-                                        setData(
-                                            'workload',
-                                            value as WorkloadLevel,
-                                        )
+                                        setData('workload', value as WorkloadLevel)
                                     }
                                 >
                                     <SelectTrigger>
@@ -222,6 +244,27 @@ export const ProjectEditForm = ({ project }: ProjectEditFormProps) => {
                                     </p>
                                 )}
                             </div>
+                        </div>
+
+                        {/* Budget */}
+                        <div className="grid gap-2">
+                            <Label htmlFor="budget">Rozpočet (€)</Label>
+                            <Input
+                                id="budget"
+                                type="number"
+                                placeholder="napr. 25000"
+                                value={data.budget}
+                                onChange={(e) =>
+                                    setData('budget', e.target.value)
+                                }
+                                min="0"
+                                step="0.01"
+                            />
+                            {errors.budget && (
+                                <p className="text-sm text-red-500">
+                                    {errors.budget}
+                                </p>
+                            )}
                         </div>
                     </div>
 
