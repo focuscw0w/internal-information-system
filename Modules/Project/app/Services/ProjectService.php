@@ -121,7 +121,7 @@ class ProjectService implements ProjectServiceInterface
      */
     public function deleteProject(int $id): bool
     {
-        $project = Project::find($id);
+        $project = $this->getProjectById($id);
 
         if (! $project) {
             return false;

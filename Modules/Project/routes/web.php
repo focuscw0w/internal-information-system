@@ -10,4 +10,5 @@ Route::middleware(['web', 'auth'])
         Route::get('/', [ProjectController::class, 'index'])->name('index');
         Route::put('/{id}', [ProjectController::class, 'update'])->name('update');
         Route::post('/', [ProjectController::class, 'store'])->name('store');
+        Route::delete('/{id}', [ProjectController::class, 'destroy'])->name('destroy');
     });

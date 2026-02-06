@@ -89,13 +89,6 @@ class ProjectController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(): void
-    {
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(UpdateProjectRequest $request, $id)
@@ -113,5 +106,11 @@ class ProjectController extends Controller
      */
     public function destroy($id)
     {
+        $isDeleted = $this->projectService->deleteProject($id);
+        if (!$isDeleted) {
+            return redirect()->back()->with('error', 'Projekt se nepodařilo smazat.');
+        }
+
+        return redirect()->back()->with('success', 'Projekt bol úspešne odstránený.');
     }
 }
