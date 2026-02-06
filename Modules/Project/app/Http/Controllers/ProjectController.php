@@ -3,23 +3,27 @@
 namespace Modules\Project\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Inertia\Response;
-use Modules\Project\Http\Requests\EditProjectRequest;
-use Modules\Project\Http\Requests\StoreProjectRequest;
-use Modules\Project\Models\Project;
+use Modules\Project\App\Services\ProjectService;
 
 class ProjectController extends Controller
 {
+    public function __construct(
+        protected ProjectService $projectService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request)
     {
-        $projects = Project::query()->latest()->get();
+        $projects = $this->projectService->getAllProjects();
 
-        return Inertia::render("projects", ["projects" => $projects]);
+        return Inertia::render('Project/Index', [
+            'title' => 'Projekty',
+            'projects' => $projects,
+        ]);
     }
 
     /**
@@ -33,21 +37,51 @@ class ProjectController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreProjectRequest $request): RedirectResponse
+    public function store(Request $request)
     {
-        $project = Project::create($request->validated());
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'required|in:planning,active,on_hold,completed,cancelled',
+            'workload' => 'required|in:low,medium,high',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after:start_date',
+            'budget' => 'nullable|numeric|min:0',
+        ]);
 
-        return redirect()
-            ->route('project.show', $project)
-            ->with('success', 'Projekt bol vytvorený.');
+        try {
+            $project = $this->projectService->createProject($validated);
+
+            return redirect()
+                ->route('project.index')
+                ->with('success', 'Projekt bol úspešne vytvorený.');
+
+        } catch (\Exception $e) {
+            \Log::error('Project creation failed:', [
+                'error' => $e->getMessage(),
+                'data' => $validated,
+            ]);
+
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Nepodarilo sa vytvoriť projekt.']);
+        }
     }
 
     /**
      * Show the specified resource.
      */
-    public function show(Project $project): Response
+    public function show($id)
     {
-        return Inertia::render('project', [
+        $project = $this->projectService->getProjectById($id);
+
+        if (! $project) {
+            return redirect()
+                ->route('project.index')
+                ->with('error', 'Projekt nebol nájdený.');
+        }
+
+        return Inertia::render('project/show', [
             'project' => $project,
         ]);
     }
@@ -63,25 +97,10 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(EditProjectRequest $request, $id): RedirectResponse
-    {
-        $project = Project::findOrFail($id);
-        $project->update($request->validated());
-
-        return redirect()
-            ->route('project.index', $project)
-            ->with('success', 'Projekt bol aktualizovaný.');
-    }
+    public function update(Request $request, $id) {}
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id): RedirectResponse
-    {
-        Project::findOrFail($id)->delete();
-
-        return redirect()
-            ->route('project.index')
-            ->with('success', 'Projekt bol vymazaný.');
-    }
+    public function destroy($id) {}
 }
