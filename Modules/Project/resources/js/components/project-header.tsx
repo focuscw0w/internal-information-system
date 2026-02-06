@@ -7,10 +7,10 @@ interface ProjectHeaderProps {
     onViewModeChange: (mode: ViewMode) => void;
 }
 
-export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
+export const ProjectHeader = ({
     viewMode,
     onViewModeChange,
-}) => {
+}: ProjectHeaderProps) => {
     return (
         <div className="mb-8">
             <div className="items-center justify-between gap-4 md:flex lg:gap-0">

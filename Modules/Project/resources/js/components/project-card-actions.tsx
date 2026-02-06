@@ -1,5 +1,6 @@
 import { Edit, Trash2 } from 'lucide-react';
 import React from 'react';
+import { EditProjectForm } from './project-edit-form';
 
 interface ProjectCardActionsProps {
     projectId: number;
@@ -7,11 +8,11 @@ interface ProjectCardActionsProps {
     onDelete: (projectId: number) => void;
 }
 
-export const ProjectCardActions: React.FC<ProjectCardActionsProps> = ({
+export const ProjectCardActions = ({
     projectId,
     onEdit,
     onDelete,
-}) => {
+}: ProjectCardActionsProps) => {
     const handleEdit = (e: React.MouseEvent) => {
         e.stopPropagation();
         onEdit(projectId);
@@ -23,6 +24,7 @@ export const ProjectCardActions: React.FC<ProjectCardActionsProps> = ({
     };
 
     return (
+        <>
         <div className="flex items-center gap-2">
             <button
                 onClick={handleEdit}
@@ -39,5 +41,8 @@ export const ProjectCardActions: React.FC<ProjectCardActionsProps> = ({
                 <Trash2 size={18} />
             </button>
         </div>
+
+        <EditProjectForm />
+        </>
     );
 };

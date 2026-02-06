@@ -7,7 +7,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,12 +19,31 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect } from 'react';
 
-export const CreateProjectForm = () => {
-    const [open, setOpen] = useState(false);
+interface Project {
+    id: number;
+    name: string;
+    description: string;
+    status: string;
+    workload: string;
+    start_date: string;
+    end_date: string;
+    budget: string;
+}
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+interface ProjectEditFormProps {
+    project: Project | null;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+}
+
+export const ProjectEditForm = ({
+    project,
+    open,
+    onOpenChange,
+}: ProjectEditFormProps) => {
+    const { data, setData, put, processing, errors, reset } = useForm({
         name: '',
         description: '',
         status: 'planning',
@@ -35,12 +53,29 @@ export const CreateProjectForm = () => {
         budget: '',
     });
 
+    // Naplniť form dátami projektu pri otvorení
+    useEffect(() => {
+        if (project && open) {
+            setData({
+                name: project.name || '',
+                description: project.description || '',
+                status: project.status || 'planning',
+                workload: project.workload || 'medium',
+                start_date: project.start_date || '',
+                end_date: project.end_date || '',
+                budget: project.budget || '',
+            });
+        }
+    }, [project, open]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        post('/project', {
+        if (!project) return;
+
+        put(`/project/${project.id}`, {
             onSuccess: () => {
-                setOpen(false);
+                onOpenChange(false);
                 reset();
             },
             onError: (errors) => {
@@ -49,18 +84,15 @@ export const CreateProjectForm = () => {
         });
     };
 
+    if (!project) return null;
+
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button variant="default" size="lg">
-                    Nový projekt
-                </Button>
-            </DialogTrigger>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Vytvoriť nový projekt</DialogTitle>
+                    <DialogTitle>Upraviť projekt</DialogTitle>
                     <DialogDescription>
-                        Zadajte základné informácie o projekte.
+                        Upravte informácie o projekte.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -254,7 +286,7 @@ export const CreateProjectForm = () => {
                             </Button>
                         </DialogClose>
                         <Button type="submit" disabled={processing}>
-                            {processing ? 'Vytváram...' : 'Vytvoriť projekt'}
+                            {processing ? 'Ukladám...' : 'Uložiť zmeny'}
                         </Button>
                     </DialogFooter>
                 </form>

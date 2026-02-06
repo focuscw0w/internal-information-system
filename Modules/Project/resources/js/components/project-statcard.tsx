@@ -9,13 +9,13 @@ interface StatCardProps {
     iconBgColor: string;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({
+export const StatCard = ({
     title,
     value,
     icon: Icon,
     iconColor,
     iconBgColor,
-}) => {
+}: StatCardProps) => {
     return (
         <div className="rounded-lg bg-white p-4 shadow sm:p-6">
             <div className="flex items-center justify-between gap-3">

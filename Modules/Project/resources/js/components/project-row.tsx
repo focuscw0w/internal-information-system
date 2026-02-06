@@ -16,12 +16,12 @@ interface ProjectRowProps {
     onDelete: (projectId: number) => void;
 }
 
-export const ProjectRow: React.FC<ProjectRowProps> = ({
+export const ProjectRow = ({
     project,
     onClick,
     onEdit,
     onDelete,
-}) => {
+}: ProjectRowProps) => {
     return (
         <div
             className="group mb-4 cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg"

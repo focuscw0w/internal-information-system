@@ -13,12 +13,12 @@ interface ProjectCardProps {
   onDelete: (projectId: number) => void;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ 
+export const ProjectCard = ({
   project, 
   onClick,
   onEdit,
   onDelete
-}) => {
+}: ProjectCardProps) => {
   return (
     <div 
       className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer relative group"

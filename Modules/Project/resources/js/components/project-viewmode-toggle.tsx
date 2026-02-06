@@ -8,10 +8,10 @@ interface ViewModeToggleProps {
     onViewModeChange: (mode: ViewMode) => void;
 }
 
-export const ViewModeToggle: React.FC<ViewModeToggleProps> = ({
+export const ViewModeToggle = ({
     viewMode,
     onViewModeChange,
-}) => {
+}: ViewModeToggleProps) => {
     return (
         <div className="flex items-center gap-2 rounded-lg bg-white p-1 shadow">
             <Button

@@ -8,13 +8,13 @@ interface ProgressBarProps {
     showPercentage?: boolean;
 }
 
-export const ProgressBar: React.FC<ProgressBarProps> = ({
+export const ProgressBar = ({
     label,
     value,
     maxValue = 100,
     color = 'bg-blue-600',
     showPercentage = true,
-}) => {
+}: ProgressBarProps) => {
     const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
 
     return (
