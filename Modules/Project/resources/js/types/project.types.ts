@@ -1,6 +1,6 @@
 import { User } from '@/types';
 
-export type ProjectStatus = 'active' | 'planning' | 'completed' | 'paused';
+export type ProjectStatus = 'active' | 'planning' | 'completed' | 'on_hold';
 export type WorkloadLevel = 'low' | 'medium' | 'high' | 'overloaded';
 export type TaskPriority = 'low' | 'medium' | 'high';
 export type TaskStatus = 'todo' | 'in_progress' | 'testing' | 'done';

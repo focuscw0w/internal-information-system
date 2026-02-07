@@ -25,7 +25,7 @@ export const ProjectBadge = ({
             const colors: Record<ProjectStatus, string> = {
                 planning: 'bg-blue-100 text-blue-700 border-blue-200',
                 active: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                paused: 'bg-amber-100 text-amber-700 border-amber-200',
+                on_hold: 'bg-amber-100 text-amber-700 border-amber-200',
                 completed: 'bg-purple-100 text-purple-700 border-purple-200',
             };
             return colors[value as ProjectStatus];
@@ -72,7 +72,7 @@ export const ProjectBadge = ({
             const labels: Record<ProjectStatus, string> = {
                 planning: 'Plánovanie',
                 active: 'Aktívny',
-                paused: 'Pozastavený',
+                on_hold: 'Pozastavený',
                 completed: 'Dokončený',
             };
             return labels[value as ProjectStatus];
