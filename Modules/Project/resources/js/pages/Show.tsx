@@ -20,8 +20,6 @@ import {
 import { Project } from '../types/project.types';
 
 export default function Show({ project }: { project: Project }) {
-    console.log(project);
-
     const budgetSpent = project.budget_spent ?? 0;
     const budget = project.budget ?? 0;
 
@@ -30,21 +28,20 @@ export default function Show({ project }: { project: Project }) {
         project.capacity_available > 0
             ? (project.capacity_used / project.capacity_available) * 100
             : 0;
-    const remainingBudget = budget - budgetSpent;
 
     const getStatusColor = (status: string) => {
         const colors = {
-            backlog: 'bg-gray-500',
-            active: 'bg-blue-500',
-            paused: 'bg-yellow-500',
-            completed: 'bg-green-500',
+            planning: 'bg-blue-100 text-blue-700 border-blue-200',
+            active: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+            paused: 'bg-amber-100 text-amber-700 border-amber-200',
+            completed: 'bg-purple-100 text-purple-700 border-purple-200',
         };
-        return colors[status as keyof typeof colors] || 'bg-gray-500';
+        return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-700 border-gray-200';
     };
 
     const getStatusLabel = (status: string) => {
         const labels = {
-            backlog: 'Backlog',
+            planning: 'Plánovanie',
             active: 'Aktívny',
             paused: 'Pozastavený',
             completed: 'Dokončený',
@@ -54,19 +51,19 @@ export default function Show({ project }: { project: Project }) {
 
     const getWorkloadColor = (workload: string) => {
         const colors = {
-            low: 'bg-green-100 text-green-800',
-            medium: 'bg-yellow-100 text-yellow-800',
-            high: 'bg-orange-100 text-orange-800',
-            overloaded: 'bg-red-100 text-red-800',
+            low: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+            medium: 'bg-amber-100 text-amber-700 border-amber-200',
+            high: 'bg-orange-100 text-orange-700 border-orange-200',
+            overloaded: 'bg-red-100 text-red-700 border-red-200',
         };
         return colors[workload as keyof typeof colors];
     };
 
     const getWorkloadLabel = (workload: string) => {
         const labels = {
-            low: 'Nízke zaťaženie',
-            medium: 'Stredné zaťaženie',
-            high: 'Vysoké zaťaženie',
+            low: 'Nízke',
+            medium: 'Stredné',
+            high: 'Vysoké',
             overloaded: 'Preťažené',
         };
         return labels[workload as keyof typeof labels];
@@ -74,9 +71,9 @@ export default function Show({ project }: { project: Project }) {
 
     const getPriorityColor = (priority: string) => {
         const colors = {
-            low: 'text-green-600 bg-green-50',
-            medium: 'text-yellow-600 bg-yellow-50',
-            high: 'text-red-600 bg-red-50',
+            low: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+            medium: 'bg-amber-50 text-amber-700 border-amber-200',
+            high: 'bg-red-50 text-red-700 border-red-200',
         };
         return colors[priority as keyof typeof colors];
     };
@@ -84,13 +81,13 @@ export default function Show({ project }: { project: Project }) {
     const getTaskStatusIcon = (status: string) => {
         switch (status) {
             case 'done':
-                return <CheckCircle className="h-4 w-4 text-green-500" />;
+                return <CheckCircle className="h-5 w-5 text-emerald-500" />;
             case 'in_progress':
-                return <PlayCircle className="h-4 w-4 text-blue-500" />;
+                return <PlayCircle className="h-5 w-5 text-blue-500" />;
             case 'testing':
-                return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+                return <AlertCircle className="h-5 w-5 text-amber-500" />;
             default:
-                return <CircleDashed className="h-4 w-4 text-gray-400" />;
+                return <CircleDashed className="h-5 w-5 text-gray-400" />;
         }
     };
 
@@ -98,14 +95,14 @@ export default function Show({ project }: { project: Project }) {
         <AppLayout>
             <Head title={`Detail projektu - ${project.name}`} />
 
-            <div className="mx-auto max-w-7xl space-y-6 p-6">
+            <div className="space-y-6 p-6 min-h-screen">
                 {/* Header */}
-                <div>
+                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                     <Link
                         href="/project"
-                        className="mb-4 inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+                        className="mb-4 inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
                     >
-                        <ArrowLeft className="mr-1 h-4 w-4" />
+                        <ArrowLeft className="mr-1 h-5 w-5" />
                         Späť na projekty
                     </Link>
 
@@ -114,17 +111,21 @@ export default function Show({ project }: { project: Project }) {
                             <h1 className="text-3xl font-bold text-gray-900">
                                 {project.name}
                             </h1>
-                            {project.owner && (
-                                <p className="mt-1 text-gray-600">
-                                    Owner: {project.owner.name}
+                            {project.description && (
+                                <p className="mt-2 text-gray-600 max-w-2xl">
+                                    {project.description}
                                 </p>
                             )}
                         </div>
-                        <div className="flex gap-2">
-                            <Badge className={getStatusColor(project.status)}>
+                        <div className="flex gap-2 flex-shrink-0 ml-4">
+                            <Badge 
+                                variant="outline"
+                                className={getStatusColor(project.status)}
+                            >
                                 {getStatusLabel(project.status)}
                             </Badge>
                             <Badge
+                                variant="outline"
                                 className={getWorkloadColor(project.workload)}
                             >
                                 {getWorkloadLabel(project.workload)}
@@ -132,11 +133,12 @@ export default function Show({ project }: { project: Project }) {
                             <Button
                                 variant="outline"
                                 size="sm"
+                                className="border-gray-200"
                                 onClick={() =>
                                     router.visit(`/projects/${project.id}/edit`)
                                 }
                             >
-                                <Edit className="mr-2 h-4 w-4" />
+                                <Edit className="mr-2 h-5 w-5" />
                                 Upraviť
                             </Button>
                         </div>
@@ -145,20 +147,22 @@ export default function Show({ project }: { project: Project }) {
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card>
+                    <Card className="bg-white border-gray-100 shadow-sm">
                         <CardHeader className="pb-3">
                             <CardTitle className="flex items-center text-sm font-medium text-gray-600">
-                                <Calendar className="mr-2 h-4 w-4" />
+                                <div className="p-2 bg-blue-50 rounded-lg mr-3">
+                                    <Calendar className="h-5 w-5 text-blue-600" />
+                                </div>
                                 Obdobie projektu
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-lg font-semibold">
+                            <p className="text-2xl font-bold text-gray-900">
                                 {new Date(
                                     project.start_date,
                                 ).toLocaleDateString('sk-SK')}
                             </p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-gray-500 mt-1">
                                 až{' '}
                                 {new Date(project.end_date).toLocaleDateString(
                                     'sk-SK',
@@ -167,91 +171,89 @@ export default function Show({ project }: { project: Project }) {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="bg-white border-gray-100 shadow-sm">
                         <CardHeader className="pb-3">
                             <CardTitle className="flex items-center text-sm font-medium text-gray-600">
-                                <DollarSign className="mr-2 h-4 w-4" />
+                                <div className="p-2 bg-emerald-50 rounded-lg mr-3">
+                                    <DollarSign className="h-5 w-5 text-emerald-600" />
+                                </div>
                                 Rozpočet
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">
-                                {project.budget_spent.toFixed(2)}€
+                            <p className="text-2xl font-bold text-gray-900">
+                                {budgetSpent.toFixed(2)}€
                             </p>
-                            <p className="text-sm text-gray-500">
-                                z {project.budget.toFixed(2)}€
+                            <p className="text-sm text-gray-500 mt-1">
+                                z {budget.toFixed(2)}€
                             </p>
                             <Progress
                                 value={budgetPercentage}
-                                className="mt-2 h-2"
+                                className="mt-3 h-2 bg-gray-100"
                             />
+                            <p className="text-xs text-gray-500 mt-1">
+                                {budgetPercentage.toFixed(0)}% vyčerpané
+                            </p>
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="bg-white border-gray-100 shadow-sm">
                         <CardHeader className="pb-3">
                             <CardTitle className="flex items-center text-sm font-medium text-gray-600">
-                                <Clock className="mr-2 h-4 w-4" />
+                                <div className="p-2 bg-amber-50 rounded-lg mr-3">
+                                    <Clock className="h-5 w-5 text-amber-600" />
+                                </div>
                                 Kapacita
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">
+                            <p className="text-2xl font-bold text-gray-900">
                                 {project.capacity_used}h
                             </p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-gray-500 mt-1">
                                 z {project.capacity_available}h
                             </p>
                             <Progress
                                 value={capacityPercentage}
-                                className="mt-2 h-2"
+                                className="mt-3 h-2 bg-gray-100"
                             />
+                            <p className="text-xs text-gray-500 mt-1">
+                                {capacityPercentage.toFixed(0)}% použité
+                            </p>
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="bg-white border-gray-100 shadow-sm">
                         <CardHeader className="pb-3">
                             <CardTitle className="flex items-center text-sm font-medium text-gray-600">
-                                <TrendingUp className="mr-2 h-4 w-4" />
+                                <div className="p-2 bg-purple-50 rounded-lg mr-3">
+                                    <TrendingUp className="h-5 w-5 text-purple-600" />
+                                </div>
                                 Progres
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">
+                            <p className="text-2xl font-bold text-gray-900">
                                 {project.progress}%
                             </p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-gray-500 mt-1">
                                 {project.tasks_completed} z{' '}
                                 {project.tasks_total} úloh
                             </p>
                             <Progress
                                 value={project.progress}
-                                className="mt-2 h-2"
+                                className="mt-3 h-2 bg-gray-100"
                             />
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Description */}
-                {project.description && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Popis projektu</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="whitespace-pre-wrap text-gray-700">
-                                {project.description}
-                            </p>
-                        </CardContent>
-                    </Card>
-                )}
-
                 {/* Team Allocations */}
                 {project.allocations && project.allocations.length > 0 && (
-                    <Card>
+                    <Card className="bg-white border-gray-100 shadow-sm">
                         <CardHeader>
-                            <CardTitle className="flex items-center">
-                                <Users className="mr-2 h-5 w-5" />
+                            <CardTitle className="flex items-center text-lg">
+                                <Users className="mr-2 h-5 w-5 text-gray-700" />
                                 Tím ({project.allocations.length})
                             </CardTitle>
                         </CardHeader>
@@ -268,36 +270,23 @@ export default function Show({ project }: { project: Project }) {
                                     return (
                                         <div
                                             key={allocation.id}
-                                            className="flex items-center justify-between rounded-lg border p-4"
+                                            className="flex items-center justify-between rounded-lg border border-gray-100 p-4 bg-gray-50/50"
                                         >
                                             <div className="flex-1">
-                                                <div className="mb-2 flex items-center justify-between">
+                                                <div className="mb-3 flex items-center justify-between">
                                                     <div>
-                                                        <h4 className="font-medium text-gray-900">
-                                                            {
-                                                                allocation.user
-                                                                    .name
-                                                            }
+                                                        <h4 className="font-semibold text-gray-900">
+                                                            {allocation.user.name}
                                                         </h4>
                                                         <p className="text-sm text-gray-500">
-                                                            {
-                                                                allocation.percentage
-                                                            }
-                                                            % alokácia
+                                                            {allocation.percentage}% alokácia
                                                         </p>
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className="font-semibold">
-                                                            {
-                                                                allocation.used_hours
-                                                            }
-                                                            h /{' '}
-                                                            {
-                                                                allocation.allocated_hours
-                                                            }
-                                                            h
+                                                        <p className="font-semibold text-gray-900">
+                                                            {allocation.used_hours}h / {allocation.allocated_hours}h
                                                         </p>
-                                                        <p className="text-sm text-gray-500">
+                                                        <p className="text-xs text-gray-500">
                                                             {new Date(
                                                                 allocation.start_date,
                                                             ).toLocaleDateString(
@@ -314,7 +303,7 @@ export default function Show({ project }: { project: Project }) {
                                                 </div>
                                                 <Progress
                                                     value={allocationProgress}
-                                                    className="h-2"
+                                                    className="h-2 bg-gray-200"
                                                 />
                                             </div>
                                         </div>
@@ -326,15 +315,15 @@ export default function Show({ project }: { project: Project }) {
                 )}
 
                 {/* Tasks List */}
-                <Card>
+                <Card className="bg-white border-gray-100 shadow-sm">
                     <CardHeader>
                         <div className="flex items-center justify-between">
-                            <CardTitle>
-                                Úlohy ({project.tasks_completed}/
-                                {project.tasks_total})
+                            <CardTitle className="text-lg">
+                                Úlohy ({project.tasks_completed}/{project.tasks_total})
                             </CardTitle>
                             <Button
                                 size="sm"
+                                className="bg-primary hover:bg-primary/90"
                                 onClick={() =>
                                     router.visit(
                                         `/projects/${project.id}/tasks/create`,
@@ -347,10 +336,10 @@ export default function Show({ project }: { project: Project }) {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-3">
-                            {project.tasks.map((task) => (
+                            {project.tasks && project.tasks.map((task) => (
                                 <div
                                     key={task.id}
-                                    className="flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors hover:bg-gray-50"
+                                    className="flex cursor-pointer items-center justify-between rounded-lg border border-gray-100 p-4 transition-all hover:border-gray-200 hover:shadow-sm bg-gray-50/30"
                                     onClick={() =>
                                         router.visit(`/tasks/${task.id}`)
                                     }
@@ -364,11 +353,7 @@ export default function Show({ project }: { project: Project }) {
                                             <div className="mt-1 flex items-center gap-3">
                                                 {task.assigned_user && (
                                                     <span className="text-sm text-gray-500">
-                                                        👤{' '}
-                                                        {
-                                                            task.assigned_user
-                                                                .name
-                                                        }
+                                                        👤 {task.assigned_user.name}
                                                     </span>
                                                 )}
                                                 {task.due_date && (
@@ -387,24 +372,18 @@ export default function Show({ project }: { project: Project }) {
 
                                     <div className="flex items-center gap-4">
                                         <Badge
-                                            className={getPriorityColor(
-                                                task.priority,
-                                            )}
+                                            variant="outline"
+                                            className={getPriorityColor(task.priority)}
                                         >
                                             {task.priority}
                                         </Badge>
-                                        <div className="text-right text-sm text-gray-600">
-                                            <div className="font-semibold">
-                                                {task.actual_hours}h /{' '}
-                                                {task.estimated_hours}h
+                                        <div className="text-right text-sm">
+                                            <div className="font-semibold text-gray-900">
+                                                {task.actual_hours}h / {task.estimated_hours}h
                                             </div>
-                                            {task.actual_hours >
-                                                task.estimated_hours && (
+                                            {task.actual_hours > task.estimated_hours && (
                                                 <span className="text-xs text-red-600">
-                                                    Prekročené o{' '}
-                                                    {task.actual_hours -
-                                                        task.estimated_hours}
-                                                    h
+                                                    +{task.actual_hours - task.estimated_hours}h
                                                 </span>
                                             )}
                                         </div>
@@ -412,15 +391,14 @@ export default function Show({ project }: { project: Project }) {
                                 </div>
                             ))}
 
-                            {project.tasks.length === 0 && (
+                            {(!project.tasks || project.tasks.length === 0) && (
                                 <div className="py-12 text-center">
                                     <CircleDashed className="mx-auto mb-3 h-12 w-12 text-gray-300" />
-                                    <p className="text-gray-500">
+                                    <p className="text-gray-500 mb-4">
                                         Zatiaľ nie sú vytvorené žiadne úlohy
                                     </p>
                                     <Button
                                         variant="outline"
-                                        className="mt-4"
                                         onClick={() =>
                                             router.visit(
                                                 `/projects/${project.id}/tasks/create`,
