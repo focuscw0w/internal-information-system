@@ -51,7 +51,7 @@ const ProjectsCapacityOverview = ({ projects }: { projects: Project[] }) => {
                 />
             </div>
 
-            {/* Projekty - Grid alebo List view */}
+            {/* Grid alebo List view */}
             {viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     {projects.map((project) => (

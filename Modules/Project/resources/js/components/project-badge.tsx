@@ -14,11 +14,11 @@ interface ProjectBadgeProps {
     variant?: 'default' | 'outline';
 }
 
-export default function ProjectBadge({
+export const ProjectBadge = ({
     type,
     value,
     variant = 'outline',
-}: ProjectBadgeProps) {
+}: ProjectBadgeProps) => {
     const getColor = (): string => {
         // Status farby
         if (type === 'status') {

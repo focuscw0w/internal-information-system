@@ -1,4 +1,3 @@
-// resources/js/components/StatCard.tsx
 import { Progress } from '@/components/ui/progress';
 import { LucideIcon } from 'lucide-react';
 
