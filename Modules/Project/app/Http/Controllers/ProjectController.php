@@ -74,7 +74,7 @@ class ProjectController extends Controller
     {
         $project = $this->projectService->getProjectById($id);
 
-        if (! $project) {
+        if (!$project) {
             return redirect()
                 ->route('project.index')
                 ->with('error', 'Projekt nebol nájdený.');
