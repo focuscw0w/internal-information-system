@@ -1,9 +1,15 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
-import ProjectsCapacityOverview from '../components/project-overview';
+import ProjectsCapacityOverview from '../components/index/project-overview';
 import { Project } from '../types/project.types';
 
-export default function Index({ title, projects }: { title: string, projects: Project[] }) {
+export default function Index({
+    title,
+    projects,
+}: {
+    title: string;
+    projects: Project[];
+}) {
     return (
         <AppLayout>
             <Head title={title} />

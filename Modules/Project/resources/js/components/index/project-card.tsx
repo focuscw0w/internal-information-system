@@ -1,6 +1,6 @@
-import { Project } from '../types/project.types';
-import { getCapacityColor } from '../utils/project.utils';
-import { ProjectCardActions } from './project-card-actions';
+import { Project } from '../../types/project.types';
+import { getCapacityColor } from '../../utils/project.utils';
+import { ProjectCardActions } from '../project-card-actions';
 import { ProjectCardHeader } from './project-card-header';
 import { ProjectMetrics } from './project-metrics';
 import { ProgressBar } from './project-progressbar';

@@ -1,10 +1,10 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Calendar, Clock, DollarSign, TrendingUp } from 'lucide-react';
-import { ProjectAllocations } from '../components/project-allocations';
-import { ProjectDetailHeader } from '../components/project-detail-header';
 import { StatCard } from '../components/project-statcard';
-import { ProjectTaskList } from '../components/task/project-task-list';
+import { ProjectAllocations } from '../components/show/project-allocations';
+import { ProjectDetailHeader } from '../components/show/project-detail-header';
+import { ProjectTaskList } from '../components/show/project-task-list';
 import { Project } from '../types/project.types';
 
 export default function Show({ project }: { project: Project }) {

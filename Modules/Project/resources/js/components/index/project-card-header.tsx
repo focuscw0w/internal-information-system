@@ -1,10 +1,10 @@
 import { AlertCircle } from 'lucide-react';
-import { ProjectStatus, WorkloadLevel } from '../types/project.types';
+import { ProjectStatus, WorkloadLevel } from '../../types/project.types';
 import {
     getStatusColor,
     getStatusText,
     getWorkloadColor,
-} from '../utils/project.utils';
+} from '../../utils/project.utils';
 
 interface ProjectCardHeaderProps {
     name: string;

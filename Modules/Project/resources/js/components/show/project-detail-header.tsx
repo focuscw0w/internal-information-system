@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Link, router } from '@inertiajs/react';
 import { ArrowLeft, Edit } from 'lucide-react';
-import { Project } from '../types/project.types';
-import { ProjectBadge } from './project-badge';
+import { Project } from '../../types/project.types';
+import { ProjectBadge } from '../project-badge';
 
 interface ProjectDetailHeaderProps {
     project: Project;

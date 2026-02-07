@@ -1,11 +1,11 @@
 import { Link } from '@inertiajs/react';
 import { CheckCircle2, Clock, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
-import { Project, ViewMode } from '../types/project.types';
+import { Project, ViewMode } from '../../types/project.types';
+import { StatCard } from '../project-statcard';
 import { ProjectCard } from './project-card';
 import { ProjectHeader } from './project-header';
 import { ProjectRow } from './project-row';
-import { StatCard } from './project-statcard';
 
 const ProjectsCapacityOverview = ({ projects }: { projects: Project[] }) => {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');

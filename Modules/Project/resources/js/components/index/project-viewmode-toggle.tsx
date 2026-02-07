@@ -1,7 +1,6 @@
-import { Grid3x3, List } from 'lucide-react';
-import React from 'react';
-import { ViewMode } from '../types/project.types';
 import { Button } from '@/components/ui/button';
+import { Grid3x3, List } from 'lucide-react';
+import { ViewMode } from '../../types/project.types';
 
 interface ViewModeToggleProps {
     viewMode: ViewMode;
@@ -18,8 +17,8 @@ export const ViewModeToggle = ({
                 onClick={() => onViewModeChange('grid')}
                 className={`flex items-center gap-2 rounded-md px-4 py-2 transition-colors ${
                     viewMode === 'grid'
-                        ? 'text-white bg-primary'
-                        : 'text-black bg-secondary hover:bg-gray-100'
+                        ? 'bg-primary text-white'
+                        : 'bg-secondary text-black hover:bg-gray-100'
                 }`}
             >
                 <Grid3x3 size={18} />
@@ -29,8 +28,8 @@ export const ViewModeToggle = ({
                 onClick={() => onViewModeChange('list')}
                 className={`flex items-center gap-2 rounded-md px-4 py-2 transition-colors ${
                     viewMode === 'list'
-                        ? 'text-white bg-primary'
-                        : 'text-black bg-secondary hover:bg-gray-100'
+                        ? 'bg-primary text-white'
+                        : 'bg-secondary text-black hover:bg-gray-100'
                 }`}
             >
                 <List size={18} />

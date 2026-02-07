@@ -1,12 +1,12 @@
 import { AlertCircle, Users } from 'lucide-react';
-import { Project } from '../types/project.types';
+import { Project } from '../../types/project.types';
 import {
     getCapacityColor,
     getStatusColor,
     getStatusText,
     getWorkloadColor,
-} from '../utils/project.utils';
-import { ProjectCardActions } from './project-card-actions';
+} from '../../utils/project.utils';
+import { ProjectCardActions } from '../project-card-actions';
 
 interface ProjectRowProps {
     project: Project;

@@ -12,7 +12,7 @@ import {
 import { router } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Project } from '../types/project.types';
+import { Project } from '../../types/project.types';
 
 interface ProjectDeleteDialogProps {
     project: Project;

@@ -1,4 +1,4 @@
-import { ViewMode } from '../types/project.types';
+import { ViewMode } from '../../types/project.types';
 import { CreateProjectForm } from './project-create-form';
 import { ViewModeToggle } from './project-viewmode-toggle';
 
