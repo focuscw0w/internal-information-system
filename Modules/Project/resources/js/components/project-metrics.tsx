@@ -4,13 +4,13 @@ import React from 'react';
 interface ProjectMetricsProps {
     startDate: string;
     endDate: string;
-    teamSize: number;
+   // teamSize: number;
 }
 
 export const ProjectMetrics = ({
     startDate,
     endDate,
-    teamSize,
+   // teamSize,
 }: ProjectMetricsProps) => {
     return (
         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -22,7 +22,7 @@ export const ProjectMetrics = ({
             </div>
             <div className="flex items-center gap-2 text-gray-600">
                 <Users size={16} />
-                <span>{teamSize} členov tímu</span>
+                <span>{0} členov tímu</span>
             </div>
         </div>
     );

@@ -1,13 +1,15 @@
-import { User } from "@/types";
+import { User } from '@/types';
 
-export type ProjectStatus = 'active' | 'planning' | 'completed';
-export type WorkloadLevel = 'high' | 'medium' | 'low';
+export type ProjectStatus = 'active' | 'planning' | 'completed' | 'paused';
+export type WorkloadLevel = 'low' | 'medium' | 'high' | 'overloaded';
+export type TaskPriority = 'low' | 'medium' | 'high';
+export type TaskStatus = 'todo' | 'in_progress' | 'testing' | 'done';
 export type ViewMode = 'grid' | 'list';
 
 export interface TeamMember {
-  name: string;
-  role: string;
-  allocation: number;
+    name: string;
+    role: string;
+    allocation: number;
 }
 
 export interface Project {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Project } from '../types/project.types';
 import { ProjectCardHeader } from './project-card-header';
 import { ProjectMetrics } from './project-metrics';
@@ -42,9 +41,9 @@ export const ProjectCard = ({
         </div>
 
         <ProjectMetrics 
-          startDate={project.startDate}
-          endDate={project.endDate}
-          teamSize={project.teamSize}
+          startDate={project.start_date}
+          endDate={project.end_date}
+         /*teamSize={project.team_size}*/
         />
       </div>
 
@@ -53,13 +52,13 @@ export const ProjectCard = ({
           <div>
             <p className="text-sm text-gray-600 mb-2">Využitie kapacity</p>
             <div className="flex items-end gap-2">
-              <span className="text-2xl font-bold text-gray-900">{project.capacityUsed}%</span>
+              <span className="text-2xl font-bold text-gray-900">{project.capacity_used}%</span>
               <span className="text-sm text-gray-500 mb-1">použité</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
               <div 
-                className={`h-2 rounded-full ${getCapacityColor(project.capacityUsed)}`}
-                style={{ width: `${project.capacityUsed}%` }}
+                className={`h-2 rounded-full ${getCapacityColor(project.capacity_used)}`}
+                style={{ width: `${project.capacity_used}%` }}
               />
             </div>
           </div>
@@ -67,13 +66,13 @@ export const ProjectCard = ({
           <div>
             <p className="text-sm text-gray-600 mb-2">Úlohy</p>
             <div className="flex items-end gap-2">
-              <span className="text-2xl font-bold text-gray-900">{project.tasksCompleted}</span>
-              <span className="text-sm text-gray-500 mb-1">/ {project.tasksTotal}</span>
+              <span className="text-2xl font-bold text-gray-900">{project.tasks_completed}</span>
+              <span className="text-sm text-gray-500 mb-1">/ {project.tasks_total}</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
               <div 
                 className="bg-blue-600 h-2 rounded-full"
-                style={{ width: `${(project.tasksCompleted / project.tasksTotal) * 100}%` }}
+                style={{ width: `${(project.tasks_completed / project.tasks_total) * 100}%` }}
               />
             </div>
           </div>
