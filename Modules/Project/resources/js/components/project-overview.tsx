@@ -1,3 +1,4 @@
+import { router } from '@inertiajs/react';
 import { CheckCircle2, Clock, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Project, ViewMode } from '../types/project.types';
@@ -10,20 +11,7 @@ const ProjectsCapacityOverview = ({ projects }: { projects: Project[] }) => {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
     const handleProjectClick = (projectId: number) => {
-        console.log(`Navigate to project: ${projectId}`);
-        // window.location.href = `/projects/${projectId}`;
-    };
-
-    const handleEditProject = (projectId: number) => {
-        console.log(`Navigate to edit project: ${projectId}`);
-        // window.location.href = `/projects/${projectId}/edit`;
-    };
-
-    const handleDeleteProject = (projectId: number) => {
-        if (confirm('Naozaj chcete zmazať tento projekt?')) {
-            console.log(`Delete project: ${projectId}`);
-            // API call to delete project
-        }
+        router.visit(`/project/${projectId}`);
     };
 
     return (
@@ -81,8 +69,6 @@ const ProjectsCapacityOverview = ({ projects }: { projects: Project[] }) => {
                             key={project.id}
                             project={project}
                             onClick={handleProjectClick}
-                            onEdit={handleEditProject}
-                            onDelete={handleDeleteProject}
                         />
                     ))}
                 </div>

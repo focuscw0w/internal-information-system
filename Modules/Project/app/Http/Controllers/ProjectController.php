@@ -30,14 +30,6 @@ class ProjectController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('project::create');
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -84,7 +76,7 @@ class ProjectController extends Controller
                 ->with('error', 'Projekt nebol nájdený.');
         }
 
-        return Inertia::render('project/show', [
+        return Inertia::render('Project/Show', [
             'project' => $project,
         ]);
     }

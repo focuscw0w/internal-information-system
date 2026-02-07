@@ -12,8 +12,6 @@ import { ProjectCardActions } from './project-card-actions';
 interface ProjectRowProps {
     project: Project;
     onClick: (projectId: number) => void;
-    onEdit: (projectId: number) => void;
-    onDelete: (projectId: number) => void;
 }
 
 export const ProjectRow = ({
