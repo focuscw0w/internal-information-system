@@ -34,7 +34,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
                 <ProjectMetrics
                     startDate={project.start_date}
                     endDate={project.end_date}
-                    /*teamSize={project.team_size}*/
+                    teamSize={project.team_size}
                 />
             </div>
 

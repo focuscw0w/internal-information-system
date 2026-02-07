@@ -1,4 +1,4 @@
-import { Project } from "../types/project.types";
+import { Project } from "../../types/project.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Users } from "lucide-react";

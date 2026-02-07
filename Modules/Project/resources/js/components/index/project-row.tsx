@@ -74,7 +74,7 @@ export const ProjectRow = ({ project }: ProjectRowProps) => {
                         <p className="mb-1 text-sm text-gray-600">Tím</p>
                         <div className="flex items-center justify-center gap-1 text-gray-900">
                             <Users size={18} />
-                            <span className="font-semibold">0</span>
+                            <span className="font-semibold">{project.team_size}</span>
                         </div>
                     </div>
 

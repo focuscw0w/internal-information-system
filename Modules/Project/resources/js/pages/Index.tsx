@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
-import ProjectsCapacityOverview from '../components/index/project-overview';
 import { Project } from '../types/project.types';
+import ProjectsCapacityOverview from '../components/index/project-overview';
 
 export default function Index({
     title,

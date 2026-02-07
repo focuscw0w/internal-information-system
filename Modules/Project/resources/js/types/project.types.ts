@@ -31,6 +31,9 @@ export interface Project {
     budget_spent: number;
     owner_id: number | null;
     owner?: User;
+    team_size: number;
+    is_overdue: boolean;
+    days_remaining: number;
     tasks: Task[];
     allocations: ProjectAllocation[];
     created_at: string;
