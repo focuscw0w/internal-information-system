@@ -45,7 +45,7 @@ export const ProjectDeleteDialog = ({ project }: ProjectDeleteDialogProps) => {
                     className="cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600"
                     title="Zmazať projekt"
                 >
-                    <Trash2 size={18} />
+                    <Trash2 size={20} />
                 </button>
             </AlertDialogTrigger>
             <AlertDialogContent>

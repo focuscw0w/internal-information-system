@@ -19,8 +19,6 @@ interface ProjectRowProps {
 export const ProjectRow = ({
     project,
     onClick,
-    onEdit,
-    onDelete,
 }: ProjectRowProps) => {
     return (
         <div
@@ -30,7 +28,7 @@ export const ProjectRow = ({
             <div className="p-6">
                 <div className="flex items-center justify-between gap-6">
                     {/* Názov a status */}
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 lg:flex-1">
                         <h3 className="mb-2 text-lg font-semibold text-gray-900">
                             {project.name}
                         </h3>
@@ -42,8 +40,8 @@ export const ProjectRow = ({
                     </div>
 
                     {/* Progres */}
-                    <div className="flex-1">
-                        <div className="mb-2 flex justify-between text-sm text-gray-600">
+                    <div className="flex-1 hidden lg:block">
+                        <div className="mb-2 flex lg:justify-between text-sm text-gray-600">
                             <span>Progres</span>
                             <span className="font-medium">
                                 {project.progress}%
@@ -58,8 +56,8 @@ export const ProjectRow = ({
                     </div>
 
                     {/* Kapacita */}
-                    <div className="flex-1">
-                        <div className="mb-2 flex justify-between text-sm text-gray-600">
+                    <div className="flex-1 hidden lg:block">
+                        <div className="mb-2 flex lg:justify-between text-sm text-gray-600">
                             <span>Kapacita</span>
                             <span className="font-medium">
                                 {project.capacityUsed}%
@@ -74,7 +72,7 @@ export const ProjectRow = ({
                     </div>
 
                     {/* Úlohy */}
-                    <div className="w-32 text-center">
+                    <div className="text-center hidden sm:block">
                         <p className="mb-1 text-sm text-gray-600">Úlohy</p>
                         <p className="text-xl font-bold text-gray-900">
                             {project.tasksCompleted}/{project.tasksTotal}
@@ -82,7 +80,7 @@ export const ProjectRow = ({
                     </div>
 
                     {/* Tím */}
-                    <div className="w-24 text-center">
+                    <div className="text-center hidden sm:block">
                         <p className="mb-1 text-sm text-gray-600">Tím</p>
                         <div className="flex items-center justify-center gap-1 text-gray-900">
                             <Users size={18} />
@@ -108,9 +106,7 @@ export const ProjectRow = ({
                     {/* Akcie - vždy viditeľné v liste */}
                     <div className="w-24">
                         <ProjectCardActions
-                            projectId={project.id}
-                            onEdit={onEdit}
-                            onDelete={onDelete}
+                            project={project}
                         />
                     </div>
                 </div>

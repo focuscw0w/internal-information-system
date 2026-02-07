@@ -78,7 +78,7 @@ export const ProjectEditForm = ({ project }: ProjectEditFormProps) => {
                     className="cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
                     title="Upraviť projekt"
                 >
-                    <Edit size={18} />
+                    <Edit size={20} />
                 </button>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
