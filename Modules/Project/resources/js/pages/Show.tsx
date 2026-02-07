@@ -18,6 +18,7 @@ import {
     Users,
 } from 'lucide-react';
 import ProjectBadge from '../components/project-badge';
+import { StatCard } from '../components/project-statcard';
 import { Project } from '../types/project.types';
 
 export default function Show({ project }: { project: Project }) {
@@ -103,107 +104,50 @@ export default function Show({ project }: { project: Project }) {
                     </div>
                 </div>
 
-                {/* Stats Grid - refactor and use Statcard */}
+                {/* Stats Grid */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card className="border-gray-100 bg-white shadow-sm">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="flex items-center text-sm font-medium text-gray-600">
-                                <div className="mr-3 rounded-lg bg-blue-50 p-2">
-                                    <Calendar className="h-5 w-5 text-blue-600" />
-                                </div>
-                                Obdobie projektu
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-2xl font-bold text-gray-900">
-                                {new Date(
-                                    project.start_date,
-                                ).toLocaleDateString('sk-SK')}
-                            </p>
-                            <p className="mt-1 text-sm text-gray-500">
-                                až{' '}
-                                {new Date(project.end_date).toLocaleDateString(
-                                    'sk-SK',
-                                )}
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <StatCard
+                        title="Obdobie projektu"
+                        value={new Date(project.start_date).toLocaleDateString(
+                            'sk-SK',
+                        )}
+                        subtitle={`až ${new Date(project.end_date).toLocaleDateString('sk-SK')}`}
+                        icon={Calendar}
+                        iconColor="text-blue-600"
+                        iconBgColor="bg-blue-50"
+                    />
 
-                    <Card className="border-gray-100 bg-white shadow-sm">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="flex items-center text-sm font-medium text-gray-600">
-                                <div className="mr-3 rounded-lg bg-emerald-50 p-2">
-                                    <DollarSign className="h-5 w-5 text-emerald-600" />
-                                </div>
-                                Rozpočet
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-2xl font-bold text-gray-900">
-                                {budgetSpent.toFixed(2)}€
-                            </p>
-                            <p className="mt-1 text-sm text-gray-500">
-                                z {budget.toFixed(2)}€
-                            </p>
-                            <Progress
-                                value={budgetPercentage}
-                                className="mt-3 h-2 bg-gray-100"
-                            />
-                            <p className="mt-1 text-xs text-gray-500">
-                                {budgetPercentage.toFixed(0)}% vyčerpané
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <StatCard
+                        title="Rozpočet"
+                        value={`${budgetSpent.toFixed(2)}€`}
+                        subtitle={`z ${budget.toFixed(2)}€`}
+                        icon={DollarSign}
+                        iconColor="text-emerald-600"
+                        iconBgColor="bg-emerald-50"
+                        progress={budgetPercentage}
+                        progressLabel={`${budgetPercentage.toFixed(0)}% vyčerpané`}
+                    />
 
-                    <Card className="border-gray-100 bg-white shadow-sm">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="flex items-center text-sm font-medium text-gray-600">
-                                <div className="mr-3 rounded-lg bg-amber-50 p-2">
-                                    <Clock className="h-5 w-5 text-amber-600" />
-                                </div>
-                                Kapacita
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-2xl font-bold text-gray-900">
-                                {project.capacity_used}h
-                            </p>
-                            <p className="mt-1 text-sm text-gray-500">
-                                z {project.capacity_available}h
-                            </p>
-                            <Progress
-                                value={capacityPercentage}
-                                className="mt-3 h-2 bg-gray-100"
-                            />
-                            <p className="mt-1 text-xs text-gray-500">
-                                {capacityPercentage.toFixed(0)}% použité
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <StatCard
+                        title="Kapacita"
+                        value={`${project.capacity_used}h`}
+                        subtitle={`z ${project.capacity_available}h`}
+                        icon={Clock}
+                        iconColor="text-amber-600"
+                        iconBgColor="bg-amber-50"
+                        progress={capacityPercentage}
+                        progressLabel={`${capacityPercentage.toFixed(0)}% použité`}
+                    />
 
-                    <Card className="border-gray-100 bg-white shadow-sm">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="flex items-center text-sm font-medium text-gray-600">
-                                <div className="mr-3 rounded-lg bg-purple-50 p-2">
-                                    <TrendingUp className="h-5 w-5 text-purple-600" />
-                                </div>
-                                Progres
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-2xl font-bold text-gray-900">
-                                {project.progress}%
-                            </p>
-                            <p className="mt-1 text-sm text-gray-500">
-                                {project.tasks_completed} z{' '}
-                                {project.tasks_total} úloh
-                            </p>
-                            <Progress
-                                value={project.progress}
-                                className="mt-3 h-2 bg-gray-100"
-                            />
-                        </CardContent>
-                    </Card>
+                    <StatCard
+                        title="Progres"
+                        value={`${project.progress}%`}
+                        subtitle={`${project.tasks_completed} z ${project.tasks_total} úloh`}
+                        icon={TrendingUp}
+                        iconColor="text-purple-600"
+                        iconBgColor="bg-purple-50"
+                        progress={project.progress}
+                    />
                 </div>
 
                 {/* Team Allocations */}
