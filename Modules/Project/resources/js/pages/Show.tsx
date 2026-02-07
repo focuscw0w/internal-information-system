@@ -1,6 +1,14 @@
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
-import { Calendar, Clock, DollarSign, TrendingUp } from 'lucide-react';
+import {
+    Calendar,
+    Clock,
+    DollarSign,
+    Kanban,
+    LayoutGrid,
+    TrendingUp,
+} from 'lucide-react';
 import { StatCard } from '../components/project-statcard';
 import { ProjectAllocations } from '../components/show/project-allocations';
 import { ProjectDetailHeader } from '../components/show/project-detail-header';
@@ -24,6 +32,33 @@ export default function Show({ project }: { project: Project }) {
             <div className="min-h-screen space-y-6 p-6">
                 {/* Header */}
                 <ProjectDetailHeader project={project} />
+
+                {/* Tabs */}
+                <Tabs defaultValue="overview" className="mb-12 w-full">
+                    <TabsList className="grid w-full max-w-md grid-cols-3 gap-3 bg-white">
+                        <TabsTrigger
+                            value="overview"
+                            className="flex cursor-pointer items-center gap-2 py-2.5"
+                        >
+                            <LayoutGrid className="h-4 w-4" />
+                            Prehľad
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="kanban"
+                            className="flex cursor-pointer items-center gap-2 py-2.5"
+                        >
+                            <Kanban className="h-4 w-4" />
+                            Kanban
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="timeline"
+                            className="flex cursor-pointer items-center gap-2 py-2.5"
+                        >
+                            <Calendar className="h-4 w-4" />
+                            Časová os
+                        </TabsTrigger>
+                    </TabsList>
+                </Tabs>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

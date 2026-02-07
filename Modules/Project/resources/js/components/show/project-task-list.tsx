@@ -14,6 +14,7 @@ interface ProjectTaskListProps {
     project: Project;
 }
 
+// TODO - dialog na vytváranie Taskov, editáciu atď.
 export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
     const getPriorityColor = (priority: string) => {
         const colors = {
@@ -45,7 +46,7 @@ export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
                         Úlohy ({project.tasks_completed}/{project.tasks_total})
                     </CardTitle>
                     <Button
-                        size="sm"
+                        size="lg"
                         className="bg-primary hover:bg-primary/90"
                         onClick={() =>
                             router.visit(`/projects/${project.id}/tasks/create`)
