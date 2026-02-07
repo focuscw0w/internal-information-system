@@ -5,16 +5,15 @@ namespace Modules\Project\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Modules\Project\Http\Requests\UpdateProjectRequest;
 use Modules\Project\App\Services\ProjectService;
+use Modules\Project\Http\Requests\UpdateProjectRequest;
 use Modules\Project\Transformers\ProjectResource;
 
 class ProjectController extends Controller
 {
     public function __construct(
         protected ProjectService $projectService
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of the resource.
@@ -70,14 +69,20 @@ class ProjectController extends Controller
     {
         $project = $this->projectService->getProjectById($id);
 
-        if (!$project) {
+        if (! $project) {
             return redirect()
                 ->route('project.index')
                 ->with('error', 'Projekt nebol nájdený.');
         }
 
+        $project->load([
+            'tasks.assignedUser',
+            'allocations.user',
+            'owner',
+        ]);
+
         return Inertia::render('Project/Show', [
-            'project' => $project,
+            'project' => new ProjectResource($project)->resolve(),
         ]);
     }
 
@@ -87,7 +92,7 @@ class ProjectController extends Controller
     public function update(UpdateProjectRequest $request, $id)
     {
         $project = $this->projectService->updateProject($id, $request->validated());
-        if (!$project) {
+        if (! $project) {
             return redirect()->back()->with('error', 'Projekt nebol nájdený.');
         }
 
@@ -100,7 +105,7 @@ class ProjectController extends Controller
     public function destroy($id)
     {
         $isDeleted = $this->projectService->deleteProject($id);
-        if (!$isDeleted) {
+        if (! $isDeleted) {
             return redirect()->back()->with('error', 'Projekt se nepodařilo smazat.');
         }
 

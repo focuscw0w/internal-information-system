@@ -1,3 +1,5 @@
+import { User } from "@/types";
+
 export type ProjectStatus = 'active' | 'planning' | 'completed';
 export type WorkloadLevel = 'high' | 'medium' | 'low';
 export type ViewMode = 'grid' | 'list';
@@ -11,25 +13,26 @@ export interface TeamMember {
 export interface Project {
     id: number;
     name: string;
-    description?: string | null; 
+    description: string | null;
     status: ProjectStatus;
-    progress: number;
-    start_date: string; 
-    end_date: string;   
-    actual_start_date?: string | null;
-    actual_end_date?: string | null;
-    teamSize: number;
-    tasksTotal: number;
-    tasksCompleted: number;
-    capacityUsed: number;
-    capacityAvailable: number;
     workload: WorkloadLevel;
-    budget?: number | null; 
-    budget_spent?: number;
-    owner_id?: number | null;
-    team: TeamMember[];
-    created_at?: string;
-    updated_at?: string;
+    start_date: string;
+    end_date: string;
+    actual_start_date: string | null;
+    actual_end_date: string | null;
+    progress: number;
+    capacity_used: number;
+    capacity_available: number;
+    tasks_total: number;
+    tasks_completed: number;
+    budget: number;
+    budget_spent: number;
+    owner_id: number | null;
+    owner?: User;
+    tasks: Task[];
+    allocations: ProjectAllocation[];
+    created_at: string;
+    updated_at: string;
 }
 
 interface ProjectAllocation {
