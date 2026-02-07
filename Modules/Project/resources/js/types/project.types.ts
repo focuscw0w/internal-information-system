@@ -11,11 +11,11 @@ export interface TeamMember {
 export interface Project {
     id: number;
     name: string;
-    description?: string | null; // 👈 Pridané
+    description?: string | null; 
     status: ProjectStatus;
     progress: number;
-    start_date: string; // 👈 snake_case ako z backendu
-    end_date: string;   // 👈 snake_case ako z backendu
+    start_date: string; 
+    end_date: string;   
     actual_start_date?: string | null;
     actual_end_date?: string | null;
     teamSize: number;
@@ -30,4 +30,35 @@ export interface Project {
     team: TeamMember[];
     created_at?: string;
     updated_at?: string;
+}
+
+interface ProjectAllocation {
+    id: number;
+    user_id: number;
+    allocated_hours: number;
+    used_hours: number;
+    percentage: number;
+    start_date: string;
+    end_date: string;
+    user: {
+        id: number;
+        name: string;
+        email: string;
+    };
+}
+
+interface Task {
+    id: number;
+    title: string;
+    description: string | null;
+    status: 'todo' | 'in_progress' | 'testing' | 'done';
+    priority: 'low' | 'medium' | 'high';
+    estimated_hours: number;
+    actual_hours: number;
+    due_date: string | null;
+    assigned_to: number | null;
+    assigned_user?: {
+        id: number;
+        name: string;
+    };
 }
