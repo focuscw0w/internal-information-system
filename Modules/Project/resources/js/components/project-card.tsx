@@ -1,83 +1,86 @@
 import { Project } from '../types/project.types';
+import { getCapacityColor } from '../utils/project.utils';
+import { ProjectCardActions } from './project-card-actions';
 import { ProjectCardHeader } from './project-card-header';
 import { ProjectMetrics } from './project-metrics';
-import { ProjectCardActions } from './project-card-actions';
 import { ProgressBar } from './project-progressbar';
-import { getCapacityColor } from '../utils/project.utils';
 
 interface ProjectCardProps {
-  project: Project;
-  onClick: (projectId: number) => void;
+    project: Project;
 }
 
-export const ProjectCard = ({
-  project, 
-  onClick,
-}: ProjectCardProps) => {
-  return (
-    <div 
-      className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer relative group"
-      onClick={() => onClick(project.id)}
-    >
-      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-        <ProjectCardActions 
-          project={project}
-        />
-      </div>
+export const ProjectCard = ({ project }: ProjectCardProps) => {
+    return (
+        <div className="group relative cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg">
+            <div className="absolute top-4 right-4 z-10 opacity-0 transition-opacity group-hover:opacity-100">
+                <ProjectCardActions project={project} />
+            </div>
 
-      <div className="p-6 border-b border-gray-200">
-        <ProjectCardHeader 
-          name={project.name}
-          status={project.status}
-          workload={project.workload}
-        />
+            <div className="border-b border-gray-200 p-6">
+                <ProjectCardHeader
+                    name={project.name}
+                    status={project.status}
+                    workload={project.workload}
+                />
 
-        <div className="mb-4">
-          <ProgressBar 
-            label="Progres"
-            value={project.progress}
-            color="bg-blue-600"
-          />
+                <div className="mb-4">
+                    <ProgressBar
+                        label="Progres"
+                        value={project.progress}
+                        color="bg-blue-600"
+                    />
+                </div>
+
+                <ProjectMetrics
+                    startDate={project.start_date}
+                    endDate={project.end_date}
+                    /*teamSize={project.team_size}*/
+                />
+            </div>
+
+            <div className="p-6">
+                <div className="grid grid-cols-2 gap-6">
+                    <div>
+                        <p className="mb-2 text-sm text-gray-600">
+                            Využitie kapacity
+                        </p>
+                        <div className="flex items-end gap-2">
+                            <span className="text-2xl font-bold text-gray-900">
+                                {project.capacity_used}%
+                            </span>
+                            <span className="mb-1 text-sm text-gray-500">
+                                použité
+                            </span>
+                        </div>
+                        <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                            <div
+                                className={`h-2 rounded-full ${getCapacityColor(project.capacity_used)}`}
+                                style={{ width: `${project.capacity_used}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <p className="mb-2 text-sm text-gray-600">Úlohy</p>
+                        <div className="flex items-end gap-2">
+                            <span className="text-2xl font-bold text-gray-900">
+                                {project.tasks_completed}
+                            </span>
+                            <span className="mb-1 text-sm text-gray-500">
+                                / {project.tasks_total}
+                            </span>
+                        </div>
+                        <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                            <div
+                                className="h-2 rounded-full bg-blue-600"
+                                style={{
+                                    width: `${(project.tasks_completed / project.tasks_total) * 100}%`,
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <ProjectMetrics 
-          startDate={project.start_date}
-          endDate={project.end_date}
-         /*teamSize={project.team_size}*/
-        />
-      </div>
-
-      <div className="p-6">
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <p className="text-sm text-gray-600 mb-2">Využitie kapacity</p>
-            <div className="flex items-end gap-2">
-              <span className="text-2xl font-bold text-gray-900">{project.capacity_used}%</span>
-              <span className="text-sm text-gray-500 mb-1">použité</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-              <div 
-                className={`h-2 rounded-full ${getCapacityColor(project.capacity_used)}`}
-                style={{ width: `${project.capacity_used}%` }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-600 mb-2">Úlohy</p>
-            <div className="flex items-end gap-2">
-              <span className="text-2xl font-bold text-gray-900">{project.tasks_completed}</span>
-              <span className="text-sm text-gray-500 mb-1">/ {project.tasks_total}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-              <div 
-                className="bg-blue-600 h-2 rounded-full"
-                style={{ width: `${(project.tasks_completed / project.tasks_total) * 100}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };

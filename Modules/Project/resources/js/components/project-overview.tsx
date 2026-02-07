@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { CheckCircle2, Clock, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Project, ViewMode } from '../types/project.types';
@@ -9,10 +9,6 @@ import { StatCard } from './project-statcard';
 
 const ProjectsCapacityOverview = ({ projects }: { projects: Project[] }) => {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
-
-    const handleProjectClick = (projectId: number) => {
-        router.visit(`/project/${projectId}`);
-    };
 
     return (
         <div className="min-h-screen">
@@ -55,21 +51,17 @@ const ProjectsCapacityOverview = ({ projects }: { projects: Project[] }) => {
             {viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     {projects.map((project) => (
-                        <ProjectCard
-                            key={project.id}
-                            project={project}
-                            onClick={handleProjectClick}
-                        />
+                        <Link href={'/project/' + project.id} key={project.id}>
+                            <ProjectCard project={project} />
+                        </Link>
                     ))}
                 </div>
             ) : (
                 <div>
                     {projects.map((project) => (
-                        <ProjectRow
-                            key={project.id}
-                            project={project}
-                            onClick={handleProjectClick}
-                        />
+                        <Link href={'/project/' + project.id} key={project.id}>
+                            <ProjectRow key={project.id} project={project} />
+                        </Link>
                     ))}
                 </div>
             )}

@@ -1,5 +1,4 @@
 import { AlertCircle, Users } from 'lucide-react';
-import React from 'react';
 import { Project } from '../types/project.types';
 import {
     getCapacityColor,
@@ -11,18 +10,11 @@ import { ProjectCardActions } from './project-card-actions';
 
 interface ProjectRowProps {
     project: Project;
-    onClick: (projectId: number) => void;
 }
 
-export const ProjectRow = ({
-    project,
-    onClick,
-}: ProjectRowProps) => {
+export const ProjectRow = ({ project }: ProjectRowProps) => {
     return (
-        <div
-            className="group mb-4 cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg"
-            onClick={() => onClick(project.id)}
-        >
+        <div className="group mb-4 cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg">
             <div className="p-6">
                 <div className="flex items-center justify-between gap-6">
                     {/* Názov a status */}
@@ -38,8 +30,8 @@ export const ProjectRow = ({
                     </div>
 
                     {/* Progres */}
-                    <div className="flex-1 hidden lg:block">
-                        <div className="mb-2 flex lg:justify-between text-sm text-gray-600">
+                    <div className="hidden flex-1 lg:block">
+                        <div className="mb-2 flex text-sm text-gray-600 lg:justify-between">
                             <span>Progres</span>
                             <span className="font-medium">
                                 {project.progress}%
@@ -54,37 +46,35 @@ export const ProjectRow = ({
                     </div>
 
                     {/* Kapacita */}
-                    <div className="flex-1 hidden lg:block">
-                        <div className="mb-2 flex lg:justify-between text-sm text-gray-600">
+                    <div className="hidden flex-1 lg:block">
+                        <div className="mb-2 flex text-sm text-gray-600 lg:justify-between">
                             <span>Kapacita</span>
                             <span className="font-medium">
-                                {project.capacityUsed}%
+                                {project.capacity_used}%
                             </span>
                         </div>
                         <div className="h-2 w-full rounded-full bg-gray-200">
                             <div
-                                className={`h-2 rounded-full ${getCapacityColor(project.capacityUsed)}`}
-                                style={{ width: `${project.capacityUsed}%` }}
+                                className={`h-2 rounded-full ${getCapacityColor(project.capacity_used)}`}
+                                style={{ width: `${project.capacity_used}%` }}
                             />
                         </div>
                     </div>
 
                     {/* Úlohy */}
-                    <div className="text-center hidden sm:block">
+                    <div className="hidden text-center sm:block">
                         <p className="mb-1 text-sm text-gray-600">Úlohy</p>
                         <p className="text-xl font-bold text-gray-900">
-                            {project.tasksCompleted}/{project.tasksTotal}
+                            {project.tasks_completed}/{project.tasks_total}
                         </p>
                     </div>
 
                     {/* Tím */}
-                    <div className="text-center hidden sm:block">
+                    <div className="hidden text-center sm:block">
                         <p className="mb-1 text-sm text-gray-600">Tím</p>
                         <div className="flex items-center justify-center gap-1 text-gray-900">
                             <Users size={18} />
-                            <span className="font-semibold">
-                                {project.teamSize}
-                            </span>
+                            <span className="font-semibold">0</span>
                         </div>
                     </div>
 
@@ -103,9 +93,7 @@ export const ProjectRow = ({
 
                     {/* Akcie - vždy viditeľné v liste */}
                     <div className="w-24">
-                        <ProjectCardActions
-                            project={project}
-                        />
+                        <ProjectCardActions project={project} />
                     </div>
                 </div>
             </div>
