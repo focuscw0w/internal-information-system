@@ -1,70 +1,13 @@
 import { CheckCircle2, Clock, TrendingUp, Users } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Project, ViewMode } from '../types/project.types';
 import { ProjectCard } from './project-card';
 import { ProjectHeader } from './project-header';
 import { ProjectRow } from './project-row';
 import { StatCard } from './project-statcard';
 
-const ProjectsCapacityOverview: React.FC = () => {
+const ProjectsCapacityOverview = ({ projects }: { projects: Project[] }) => {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
-
-    const projects: Project[] = [
-        {
-            id: 1,
-            name: 'Redizajn e-shopu',
-            status: 'active',
-            progress: 65,
-            startDate: '2024-01-15',
-            endDate: '2024-04-30',
-            teamSize: 5,
-            tasksTotal: 24,
-            tasksCompleted: 16,
-            capacityUsed: 78,
-            capacityAvailable: 22,
-            workload: 'high',
-            team: [
-                { name: 'Ján Novák', role: 'Frontend Dev', allocation: 100 },
-                { name: 'Petra Kovács', role: 'UX Designer', allocation: 80 },
-                { name: 'Martin Szabó', role: 'Backend Dev', allocation: 60 },
-            ],
-        },
-        {
-            id: 2,
-            name: 'Mobilná aplikácia',
-            status: 'active',
-            progress: 35,
-            startDate: '2024-02-01',
-            endDate: '2024-06-15',
-            teamSize: 4,
-            tasksTotal: 32,
-            tasksCompleted: 11,
-            capacityUsed: 45,
-            capacityAvailable: 55,
-            workload: 'medium',
-            team: [
-                { name: 'Lucia Horváth', role: 'Mobile Dev', allocation: 100 },
-                { name: 'Tomáš Varga', role: 'QA Engineer', allocation: 50 },
-            ],
-        },
-        {
-            id: 3,
-            name: 'API Integrácia',
-            status: 'planning',
-            progress: 10,
-            startDate: '2024-03-01',
-            endDate: '2024-05-30',
-            teamSize: 3,
-            tasksTotal: 18,
-            tasksCompleted: 2,
-            capacityUsed: 25,
-            capacityAvailable: 75,
-            workload: 'low',
-            team: [
-                { name: 'Peter Molnár', role: 'Backend Dev', allocation: 40 },
-            ],
-        },
-    ];
 
     const handleProjectClick = (projectId: number) => {
         console.log(`Navigate to project: ${projectId}`);
@@ -128,8 +71,6 @@ const ProjectsCapacityOverview: React.FC = () => {
                             key={project.id}
                             project={project}
                             onClick={handleProjectClick}
-                            onEdit={handleEditProject}
-                            onDelete={handleDeleteProject}
                         />
                     ))}
                 </div>

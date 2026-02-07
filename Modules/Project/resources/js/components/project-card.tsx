@@ -9,16 +9,12 @@ import { getCapacityColor } from '../utils/project.utils';
 interface ProjectCardProps {
   project: Project;
   onClick: (projectId: number) => void;
-  onEdit: (projectId: number) => void;
-  onDelete: (projectId: number) => void;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ 
+export const ProjectCard = ({
   project, 
   onClick,
-  onEdit,
-  onDelete
-}) => {
+}: ProjectCardProps) => {
   return (
     <div 
       className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer relative group"
@@ -26,9 +22,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
     >
       <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
         <ProjectCardActions 
-          projectId={project.id}
-          onEdit={onEdit}
-          onDelete={onDelete}
+          project={project}
         />
       </div>
 

@@ -74,7 +74,7 @@ class Project extends Model
 
     public function team(): BelongsToMany
     {
-        return $this->belongsToMany(\App\Models\User::class, 'project_team')
+        return $this->belongsToMany(User::class, 'project_team')
             ->withPivot(['role', 'allocation', 'hourly_rate'])
             ->withTimestamps();
     }

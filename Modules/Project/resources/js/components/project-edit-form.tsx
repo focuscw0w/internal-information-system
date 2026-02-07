@@ -20,28 +20,49 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from '@inertiajs/react';
+import { Edit } from 'lucide-react';
 import { useState } from 'react';
+import { Project, ProjectStatus, WorkloadLevel } from '../types/project.types';
 
-export const CreateProjectForm = () => {
+interface ProjectEditFormProps {
+    project: Project;
+}
+
+export const ProjectEditForm = ({ project }: ProjectEditFormProps) => {
     const [open, setOpen] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        description: '',
-        status: 'planning',
-        workload: 'medium',
-        start_date: '',
-        end_date: '',
-        budget: '',
+    const { data, setData, put, processing, errors } = useForm({
+        name: project.name || '',
+        description: project.description || '',
+        status: project.status || 'planning',
+        workload: project.workload || 'medium',
+        start_date: project.start_date || '',
+        end_date: project.end_date || '',
+        budget: project.budget?.toString() || '',
     });
+
+    const handleOpen = (newOpen: boolean) => {
+        if (newOpen) {
+            // Refresh data pri každom otvorení
+            setData({
+                name: project.name || '',
+                description: project.description || '',
+                status: project.status || 'planning',
+                workload: project.workload || 'medium',
+                start_date: project.start_date || '',
+                end_date: project.end_date || '',
+                budget: project.budget?.toString() || '',
+            });
+        }
+        setOpen(newOpen);
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        post('/project', {
+        put(`/project/${project.id}`, {
             onSuccess: () => {
                 setOpen(false);
-                reset();
             },
             onError: (errors) => {
                 console.error('Validation errors:', errors);
@@ -50,17 +71,21 @@ export const CreateProjectForm = () => {
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpen}>
             <DialogTrigger asChild>
-                <Button variant="default" size="lg">
-                    Nový projekt
-                </Button>
+                <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    title="Upraviť projekt"
+                >
+                    <Edit size={18} />
+                </button>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Vytvoriť nový projekt</DialogTitle>
+                    <DialogTitle>Upraviť projekt</DialogTitle>
                     <DialogDescription>
-                        Zadajte základné informácie o projekte.
+                        Upravte informácie o projekte.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -159,7 +184,7 @@ export const CreateProjectForm = () => {
                                 <Select
                                     value={data.status}
                                     onValueChange={(value) =>
-                                        setData('status', value)
+                                        setData('status', value as ProjectStatus)
                                     }
                                 >
                                     <SelectTrigger>
@@ -195,7 +220,7 @@ export const CreateProjectForm = () => {
                                 <Select
                                     value={data.workload}
                                     onValueChange={(value) =>
-                                        setData('workload', value)
+                                        setData('workload', value as WorkloadLevel)
                                     }
                                 >
                                     <SelectTrigger>
@@ -254,7 +279,7 @@ export const CreateProjectForm = () => {
                             </Button>
                         </DialogClose>
                         <Button type="submit" disabled={processing}>
-                            {processing ? 'Vytváram...' : 'Vytvoriť projekt'}
+                            {processing ? 'Ukladám...' : 'Uložiť zmeny'}
                         </Button>
                     </DialogFooter>
                 </form>

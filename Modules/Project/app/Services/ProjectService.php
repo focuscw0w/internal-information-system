@@ -25,7 +25,7 @@ class ProjectService implements ProjectServiceInterface
         }
 
         if (isset($filters['search'])) {
-            $query->where('name', 'like', '%'.$filters['search'].'%');
+            $query->where('name', 'like', '%' . $filters['search'] . '%');
         }
 
         return $query->get();
@@ -47,7 +47,7 @@ class ProjectService implements ProjectServiceInterface
         }
 
         if (isset($filters['search'])) {
-            $query->where('name', 'like', '%'.$filters['search'].'%');
+            $query->where('name', 'like', '%' . $filters['search'] . '%');
         }
 
         return $query->paginate($perPage);
@@ -121,7 +121,7 @@ class ProjectService implements ProjectServiceInterface
      */
     public function deleteProject(int $id): bool
     {
-        $project = Project::find($id);
+        $project = $this->getProjectById($id);
 
         if (!$project) {
             return false;

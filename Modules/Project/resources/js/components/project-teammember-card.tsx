@@ -5,7 +5,7 @@ interface TeamMemberCardProps {
   member: TeamMember;
 }
 
-export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ member }) => {
+export const TeamMemberCard = ({ member }: TeamMemberCardProps) => {
   return (
     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
       <div>

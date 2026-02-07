@@ -5,13 +5,16 @@ namespace Modules\Project\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Modules\Project\Http\Requests\UpdateProjectRequest;
 use Modules\Project\App\Services\ProjectService;
+use Modules\Project\Transformers\ProjectResource;
 
 class ProjectController extends Controller
 {
     public function __construct(
         protected ProjectService $projectService
-    ) {}
+    ) {
+    }
 
     /**
      * Display a listing of the resource.
@@ -22,6 +25,7 @@ class ProjectController extends Controller
 
         return Inertia::render('Project/Index', [
             'title' => 'Projekty',
+            'projects' => ProjectResource::collection($projects)->resolve(),
         ]);
     }
 
@@ -86,20 +90,28 @@ class ProjectController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('project::edit');
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id) {}
+    public function update(UpdateProjectRequest $request, $id)
+    {
+        $project = $this->projectService->updateProject($id, $request->validated());
+        if (!$project) {
+            return redirect()->back()->with('error', 'Projekt nebol nájdený.');
+        }
+
+        return redirect()->back()->with('success', 'Projekt bol úspešne aktualizovaný.');
+    }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id) {}
+    public function destroy($id)
+    {
+        $isDeleted = $this->projectService->deleteProject($id);
+        if (!$isDeleted) {
+            return redirect()->back()->with('error', 'Projekt se nepodařilo smazat.');
+        }
+
+        return redirect()->back()->with('success', 'Projekt bol úspešne odstránený.');
+    }
 }

@@ -1,5 +1,4 @@
 import { AlertCircle } from 'lucide-react';
-import React from 'react';
 import { ProjectStatus, WorkloadLevel } from '../types/project.types';
 import {
     getStatusColor,
@@ -13,11 +12,11 @@ interface ProjectCardHeaderProps {
     workload: WorkloadLevel;
 }
 
-export const ProjectCardHeader: React.FC<ProjectCardHeaderProps> = ({
+export const ProjectCardHeader = ({
     name,
     status,
     workload,
-}) => {
+}: ProjectCardHeaderProps) => {
     return (
         <div className="mb-2">
             <div className="mb-1 flex items-center gap-4">
