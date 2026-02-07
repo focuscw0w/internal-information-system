@@ -114,7 +114,7 @@ export default function ProjectBadge({
     };
 
     return (
-        <Badge variant={variant} className={getColor()}>
+        <Badge variant={variant} className={getColor() + ' py-2 px-3'}>
             {getText()}
         </Badge>
     );

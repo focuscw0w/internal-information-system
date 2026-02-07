@@ -91,7 +91,7 @@ export default function Show({ project }: { project: Project }) {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="border-gray-200"
+                                className="border-gray-200 p-4"
                                 onClick={() =>
                                     router.visit(`/projects/${project.id}/edit`)
                                 }
