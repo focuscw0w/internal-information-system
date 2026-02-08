@@ -11,12 +11,14 @@ type BadgeType = 'status' | 'workload' | 'priority' | 'task-status';
 interface ProjectBadgeProps {
     type: BadgeType;
     value: ProjectStatus | WorkloadLevel | TaskPriority | TaskStatus;
+    className?: string;
     variant?: 'default' | 'outline';
 }
 
 export const ProjectBadge = ({
     type,
     value,
+    className,
     variant = 'outline',
 }: ProjectBadgeProps) => {
     const getColor = (): string => {
@@ -114,7 +116,7 @@ export const ProjectBadge = ({
     };
 
     return (
-        <Badge variant={variant} className={getColor() + ' py-2 px-3'}>
+        <Badge variant={variant} className={getColor() + ' py-2 px-3 ' + (className ?? '')}>
             {getText()}
         </Badge>
     );

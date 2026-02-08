@@ -22,7 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
-export const CreateProjectForm = () => {
+export const CreateProjectDialog = () => {
     const [open, setOpen] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({

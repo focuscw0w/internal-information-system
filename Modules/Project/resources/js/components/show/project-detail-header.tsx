@@ -32,8 +32,8 @@ export const ProjectDetailHeader = ({ project }: ProjectDetailHeaderProps) => {
                     )}
                 </div>
                 <div className="ml-4 flex flex-shrink-0 gap-2">
-                    <ProjectBadge type="status" value={project.status} />
-                    <ProjectBadge type="workload" value={project.workload} />
+                    <ProjectBadge type="status" value={project.status} className='hidden sm:block' />
+                    <ProjectBadge type="workload" value={project.workload} className='hidden sm:block' />
 
                     <Button
                         variant="outline"

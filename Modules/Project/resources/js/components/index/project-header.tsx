@@ -1,5 +1,5 @@
 import { ViewMode } from '../../types/project.types';
-import { CreateProjectForm } from './project-create-form';
+import { CreateProjectDialog } from './project-create-dialog';
 import { ViewModeToggle } from './project-viewmode-toggle';
 
 interface ProjectHeaderProps {
@@ -18,7 +18,7 @@ export const ProjectHeader = ({
                     Prehľad projektov, zdrojov a vyťaženia tímu
                 </p>
                 <div className="flex items-center gap-6">
-                    <CreateProjectForm />
+                    <CreateProjectDialog />
                     <ViewModeToggle
                         viewMode={viewMode}
                         onViewModeChange={onViewModeChange}
