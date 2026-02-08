@@ -1,16 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
-import {
-    Calendar,
-    Kanban,
-    LayoutGrid,
-} from 'lucide-react';
+import { Calendar, Kanban, LayoutGrid } from 'lucide-react';
 import { ProjectDetailHeader } from '../components/show/project-detail-header';
-import { Project } from '../types/project.types';
-import { ProjectOverview } from '../components/show/project-overview';
 import { ProjectKanban } from '../components/show/project-kanban';
+import { ProjectOverview } from '../components/show/project-overview';
 import { ProjectTimeline } from '../components/show/project-timeline';
+import { Project } from '../types/project.types';
 
 export default function Show({ project }: { project: Project }) {
     return (
@@ -47,13 +43,13 @@ export default function Show({ project }: { project: Project }) {
                         </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value='overview' className='mt-6'>
+                    <TabsContent value="overview" className="mt-6">
                         <ProjectOverview project={project} />
                     </TabsContent>
-                    <TabsContent value='kanban' className='mt-6'>
+                    <TabsContent value="kanban" className="mt-6">
                         <ProjectKanban project={project} />
                     </TabsContent>
-                    <TabsContent value='timeline' className='mt-6'>
+                    <TabsContent value="timeline" className="mt-6">
                         <ProjectTimeline project={project} />
                     </TabsContent>
                 </Tabs>

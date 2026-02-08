@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Project\Http\Controllers\ProjectController;
 
+// TODO: pridať middleware na permissions
 Route::middleware(['web', 'auth'])
     ->prefix('project')
     ->name('project.')

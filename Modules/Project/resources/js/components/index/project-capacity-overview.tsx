@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { CheckCircle2, Clock, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Project, ViewMode } from '../../types/project.types';
@@ -7,8 +7,16 @@ import { ProjectCard } from './project-card';
 import { ProjectHeader } from './project-header';
 import { ProjectRow } from './project-row';
 
-export const ProjectCapacityOverview = ({ projects }: { projects: Project[] }) => {
+export const ProjectCapacityOverview = ({
+    projects,
+}: {
+    projects: Project[];
+}) => {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
+    const handleProjectClick = (projectId: number) => {
+        router.visit(`/project/${projectId}`);
+    };
 
     return (
         <div className="min-h-screen">
@@ -51,17 +59,21 @@ export const ProjectCapacityOverview = ({ projects }: { projects: Project[] }) =
             {viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     {projects.map((project) => (
-                        <Link href={'/project/' + project.id} key={project.id}>
-                            <ProjectCard project={project} />
-                        </Link>
+                        <ProjectCard
+                            key={project.id}
+                            project={project}
+                            onClick={() => handleProjectClick(project.id)}
+                        />
                     ))}
                 </div>
             ) : (
                 <div>
                     {projects.map((project) => (
-                        <Link href={'/project/' + project.id} key={project.id}>
-                            <ProjectRow key={project.id} project={project} />
-                        </Link>
+                        <ProjectRow
+                            key={project.id}
+                            project={project}
+                            onClick={() => handleProjectClick(project.id)}
+                        />
                     ))}
                 </div>
             )}

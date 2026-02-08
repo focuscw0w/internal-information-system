@@ -1,5 +1,6 @@
 <?php
 
+// TODO: použiť policy v Service/Controlleri
 class ProjectPolicy
 {
     public function update(User $user, Project $project): bool

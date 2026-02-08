@@ -1,8 +1,8 @@
 import { Calendar, Clock, DollarSign, TrendingUp } from 'lucide-react';
+import { Project } from '../../types/project.types';
 import { StatCard } from '../project-statcard';
 import { ProjectAllocations } from './project-allocations';
 import { ProjectTaskList } from './project-task-list';
-import { Project } from '../../types/project.types';
 
 export function ProjectOverview({ project }: { project: Project }) {
     const budgetSpent = project.budget_spent ?? 0;
@@ -19,7 +19,9 @@ export function ProjectOverview({ project }: { project: Project }) {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <StatCard
                     title="Obdobie projektu"
-                    value={new Date(project.start_date).toLocaleDateString('sk-SK')}
+                    value={new Date(project.start_date).toLocaleDateString(
+                        'sk-SK',
+                    )}
                     subtitle={`až ${new Date(project.end_date).toLocaleDateString('sk-SK')}`}
                     icon={Calendar}
                     iconColor="text-blue-600"

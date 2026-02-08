@@ -7,12 +7,13 @@ import { ProgressBar } from './project-progressbar';
 
 interface ProjectCardProps {
     project: Project;
+    onClick: () => void;
 }
 
-export const ProjectCard = ({ project }: ProjectCardProps) => {
+export const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
     return (
-        <div className="group relative cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg">
-            <div className="absolute top-4 right-4 z-10 opacity-0 transition-opacity group-hover:opacity-100">
+        <div onClick={onClick} className="group relative cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg">
+            <div onClick={(e) => e.stopPropagation()} className="absolute top-4 right-4 z-10 opacity-0 transition-opacity group-hover:opacity-100">
                 <ProjectCardActions project={project} />
             </div>
 

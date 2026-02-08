@@ -10,11 +10,12 @@ import { ProjectCardActions } from '../project-card-actions';
 
 interface ProjectRowProps {
     project: Project;
+    onClick: () => void;
 }
 
-export const ProjectRow = ({ project }: ProjectRowProps) => {
+export const ProjectRow = ({ project, onClick }: ProjectRowProps) => {
     return (
-        <div className="group mb-4 cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg">
+        <div onClick={onClick} className="group mb-4 cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg">
             <div className="p-6">
                 <div className="flex items-center justify-between gap-6">
                     {/* Názov a status */}
@@ -91,8 +92,8 @@ export const ProjectRow = ({ project }: ProjectRowProps) => {
                         </div>
                     </div>
 
-                    {/* Akcie - vždy viditeľné v liste */}
-                    <div className="w-24">
+                    {/* Akcie */}
+                    <div onClick={(e) => e.stopPropagation()} className="w-24">
                         <ProjectCardActions project={project} />
                     </div>
                 </div>

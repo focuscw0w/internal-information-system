@@ -8,6 +8,7 @@ use Modules\Project\App\Services\ProjectService;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Illuminate\Routing\Router;
 
 class ProjectServiceProvider extends ServiceProvider
 {
@@ -27,6 +28,7 @@ class ProjectServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
+        $this->registerMiddleware();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
     }
 
@@ -47,6 +49,18 @@ class ProjectServiceProvider extends ServiceProvider
     {
         // $this->commands([]);
     }
+
+     /**
+     * Register permissions middleware for the module.
+     */
+    protected function registerMiddleware(): void
+{
+    $router = $this->app->make(Router::class);
+    $router->aliasMiddleware(
+        'check.project.permission', 
+        \Modules\Project\Http\Middleware\CheckProjectPermission::class
+    );
+}
 
     /**
      * Register command Schedules.
