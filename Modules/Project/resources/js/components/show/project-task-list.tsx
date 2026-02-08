@@ -16,7 +16,6 @@ interface ProjectTaskListProps {
 
 // TODO - dialog na vytváranie Taskov, editáciu atď.
 export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
-
     const getPriorityColor = (priority: string) => {
         const colors = {
             low: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -46,7 +45,7 @@ export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
                     <CardTitle className="text-lg">
                         Úlohy ({project.tasks_completed}/{project.tasks_total})
                     </CardTitle>
-                    <ProjectCreateTaskDialog projectId={project.id} />
+                    <ProjectCreateTaskDialog projectId={project.id} team={project.team} />
                 </div>
             </CardHeader>
             <CardContent>
@@ -120,7 +119,7 @@ export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
                             <p className="mb-4 text-gray-500">
                                 Zatiaľ nie sú vytvorené žiadne úlohy
                             </p>
-                            <ProjectCreateTaskDialog projectId={project.id} />
+                            <ProjectCreateTaskDialog projectId={project.id} team={project.team} />
                         </div>
                     )}
                 </div>

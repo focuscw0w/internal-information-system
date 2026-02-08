@@ -22,14 +22,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { useForm } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import { TeamMember } from '../../types/project.types';
 
 interface ProjectCreateTaskDialogProps {
     projectId: number;
-    //  users: User[];
+    team: TeamMember[];
 }
 
 export function ProjectCreateTaskDialog({
     projectId,
+    team,
 }: ProjectCreateTaskDialogProps) {
     const [open, setOpen] = useState(false);
 
@@ -246,34 +248,21 @@ export function ProjectCreateTaskDialog({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {/* Prázdna možnosť */}
-                                    <SelectItem value="t">
+                                    <SelectItem value=" ">
                                         Nepriradené
                                     </SelectItem>
 
                                     {/* Mapovanie používateľov */}
-                                    {/*
-                                    {users.map((user) => (
-                                        <SelectItem 
-                                            key={user.id} 
-                                            value={user.id.toString()}
+                                    {team.map((member) => (
+                                        <SelectItem
+                                            key={member.id}
+                                            value={member.id.toString()}
                                         >
                                             <div className="flex items-center gap-2">
-                                                <span>{user.name}</span>
-                                                <span className="text-xs text-gray-500">
-                                                    ({user.email})
-                                                </span>
+                                                <span>{member.name}</span>
                                             </div>
                                         </SelectItem>
                                     ))}
-                                      */}
-                                    <SelectItem key={1} value="Filip">
-                                        <div className="flex items-center gap-2">
-                                            <span>Filip</span>
-                                            <span className="text-xs text-gray-500">
-                                                test@gmail.com
-                                            </span>
-                                        </div>
-                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                             {errors.assigned_to && (

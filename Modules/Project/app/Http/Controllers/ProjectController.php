@@ -79,6 +79,7 @@ class ProjectController extends Controller
             'tasks.assignedUser',
             'allocations.user',
             'owner',
+            'team',
         ]);
 
         return Inertia::render('Project/Show', [

@@ -7,6 +7,7 @@ export type TaskStatus = 'todo' | 'in_progress' | 'testing' | 'done';
 export type ViewMode = 'grid' | 'list';
 
 export interface TeamMember {
+    id: number;
     name: string;
     role: string;
     allocation: number;
@@ -31,6 +32,7 @@ export interface Project {
     budget_spent: number;
     owner_id: number | null;
     owner?: User;
+    team: TeamMember[];
     team_size: number;
     is_overdue: boolean;
     days_remaining: number;
