@@ -48,7 +48,7 @@ export function ProjectCreateTaskDialog({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        post(`/projects/${projectId}/tasks`, {
+        post(`/project/${projectId}/tasks`, {
             onSuccess: () => {
                 setOpen(false);
                 reset();
@@ -122,7 +122,7 @@ export function ProjectCreateTaskDialog({
                             )}
                         </div>
 
-                        {/* Status a Priorita - Side by side */}
+                        {/* Status a Priorita*/}
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="status">Status</Label>

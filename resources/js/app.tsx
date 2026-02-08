@@ -13,7 +13,7 @@ const modulePages = import.meta.glob('/Modules/*/resources/js/pages/**/*.{jsx,ts
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) => {
-         console.log('🔍 Resolving page:', name);
+         console.log('Resolving page:', name);
     
     const parts = name.split('/');
     

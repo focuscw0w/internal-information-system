@@ -2,13 +2,12 @@
 
 namespace Modules\Project\App\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo; 
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
@@ -75,7 +74,7 @@ class Project extends Model
     public function team(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'project_team')
-            ->withPivot(['role', 'allocation', 'hourly_rate'])
+            ->withPivot(['permissions', 'allocation', 'hourly_rate'])
             ->withTimestamps();
     }
 
@@ -130,17 +129,60 @@ class Project extends Model
         }
     }
 
-    public function addTeamMember(int $userId, string $role, int $allocation = 100): void
+    public function addTeamMember(int $userId, array $permissions, int $allocation = 100, ?float $hourlyRate = null): void
     {
         $this->team()->attach($userId, [
-            'role' => $role,
+            'permissions' => $permissions,
             'allocation' => $allocation,
+            'hourly_rate' => $hourlyRate,
         ]);
     }
 
     public function removeTeamMember(int $userId): void
     {
         $this->team()->detach($userId);
+    }
+
+    public function updateTeamMemberPermissions(int $userId, array $permissions): void
+    {
+        $this->team()->updateExistingPivot($userId, [
+            'permissions' => $permissions,
+        ]);
+    }
+
+    public function userHasPermission(User $user, string $permission): bool
+    {
+        $teamMember = $this->team()->where('user_id', $user->id)->first();
+
+        if (! $teamMember) {
+            return false;
+        }
+
+        $permissions = $teamMember->pivot->permissions;
+
+        return in_array($permission, $permissions);
+    }
+
+    public function userHasAnyPermission(User $user, array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if ($this->userHasPermission($user, $permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function userHasAllPermissions(User $user, array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if (! $this->userHasPermission($user, $permission)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // Factory

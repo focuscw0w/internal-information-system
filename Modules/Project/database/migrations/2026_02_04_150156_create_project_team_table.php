@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('project_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('role'); // Frontend Dev, Backend Dev, Designer, etc.
+            $table->json('permissions');
             $table->integer('allocation')->default(100); // percentage 0-100
             $table->decimal('hourly_rate', 8, 2)->nullable();
             $table->timestamps();

@@ -89,10 +89,33 @@ class ProjectResource extends JsonResource
                     return [
                         'id' => $member->id,
                         'name' => $member->name,
-                        'role' => $member->pivot->role ?? null,
+                        'email' => $member->email ?? null,
+                        'permissions' => $member->pivot->permissions ?? [],
                         'allocation' => $member->pivot->allocation ?? null,
+                        'hourly_rate' => $member->pivot->hourly_rate ?? null,
                     ];
                 });
+            }),
+
+            'current_user_permissions' => $this->when(auth()->check(), function () {
+                $user = auth()->user();
+                $teamMember = $this->team()->where('user_id', $user->id)->first();
+
+                if ($teamMember) {
+                    return $teamMember->pivot->permissions ?? [];
+                }
+
+                if ($this->owner_id === $user->id) {
+                    return [
+                        'view_project', 'edit_project', 'delete_project',
+                        'view_team', 'manage_team',
+                        'view_tasks', 'create_tasks', 'edit_tasks', 'delete_tasks', 'assign_tasks',
+                        'view_budget', 'edit_budget',
+                        'export_data',
+                    ];
+                }
+
+                return [];
             }),
 
             'created_at' => $this->created_at?->toISOString(),

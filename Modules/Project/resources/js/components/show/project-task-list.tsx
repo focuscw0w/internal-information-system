@@ -14,7 +14,6 @@ interface ProjectTaskListProps {
     project: Project;
 }
 
-// TODO - dialog na vytváranie Taskov, editáciu atď.
 export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
     const getPriorityColor = (priority: string) => {
         const colors = {

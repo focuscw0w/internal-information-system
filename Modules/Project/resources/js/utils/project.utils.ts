@@ -1,4 +1,8 @@
-import { ProjectStatus, WorkloadLevel } from '../types/project.types';
+import {
+    ProjectStatus,
+    TeamMember,
+    WorkloadLevel,
+} from '../types/project.types';
 
 export const getStatusColor = (status: ProjectStatus): string => {
     switch (status) {
@@ -43,4 +47,25 @@ export const getCapacityColor = (capacityUsed: number): string => {
     if (capacityUsed > 80) return 'bg-red-500';
     if (capacityUsed > 60) return 'bg-yellow-500';
     return 'bg-green-500';
+};
+
+export const hasPermission = (
+    teamMember: TeamMember,
+    permission: string,
+): boolean => {
+    return teamMember.permissions.includes(permission);
+};
+
+export const hasAnyPermission = (
+    teamMember: TeamMember,
+    permissions: string[],
+): boolean => {
+    return permissions.some((p) => teamMember.permissions.includes(p));
+};
+
+export const hasAllPermissions = (
+    teamMember: TeamMember,
+    permissions: string[],
+): boolean => {
+    return permissions.every((p) => teamMember.permissions.includes(p));
 };

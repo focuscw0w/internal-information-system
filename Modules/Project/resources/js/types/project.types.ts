@@ -9,7 +9,7 @@ export type ViewMode = 'grid' | 'list';
 export interface TeamMember {
     id: number;
     name: string;
-    role: string;
+    permissions: string[];
     allocation: number;
 }
 

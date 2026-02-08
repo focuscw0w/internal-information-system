@@ -10,7 +10,7 @@ export const TeamMemberCard = ({ member }: TeamMemberCardProps) => {
     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
       <div>
         <p className="font-medium text-gray-900">{member.name}</p>
-        <p className="text-sm text-gray-500">{member.role}</p>
+        <p className="text-sm text-gray-500">{member.permissions.join(', ')}</p>
       </div>
       <div className="text-right">
         <p className="font-semibold text-gray-900">{member.allocation}%</p>

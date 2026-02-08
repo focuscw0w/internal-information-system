@@ -1,4 +1,3 @@
-import React from 'react';
 import { TeamMember } from '../types/project.types';
 import { TeamMemberCard } from './project-teammember-card';
 
