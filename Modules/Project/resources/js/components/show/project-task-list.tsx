@@ -1,5 +1,4 @@
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { router } from '@inertiajs/react';
 import {
@@ -9,6 +8,7 @@ import {
     PlayCircle,
 } from 'lucide-react';
 import { Project } from '../../types/project.types';
+import { ProjectCreateTaskDialog } from './project-create-task-dialog';
 
 interface ProjectTaskListProps {
     project: Project;
@@ -16,6 +16,7 @@ interface ProjectTaskListProps {
 
 // TODO - dialog na vytváranie Taskov, editáciu atď.
 export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
+
     const getPriorityColor = (priority: string) => {
         const colors = {
             low: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -45,15 +46,7 @@ export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
                     <CardTitle className="text-lg">
                         Úlohy ({project.tasks_completed}/{project.tasks_total})
                     </CardTitle>
-                    <Button
-                        size="lg"
-                        className="bg-primary hover:bg-primary/90"
-                        onClick={() =>
-                            router.visit(`/projects/${project.id}/tasks/create`)
-                        }
-                    >
-                        Pridať úlohu
-                    </Button>
+                    <ProjectCreateTaskDialog projectId={project.id} />
                 </div>
             </CardHeader>
             <CardContent>
@@ -127,16 +120,7 @@ export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
                             <p className="mb-4 text-gray-500">
                                 Zatiaľ nie sú vytvorené žiadne úlohy
                             </p>
-                            <Button
-                                variant="outline"
-                                onClick={() =>
-                                    router.visit(
-                                        `/projects/${project.id}/tasks/create`,
-                                    )
-                                }
-                            >
-                                Vytvoriť prvú úlohu
-                            </Button>
+                            <ProjectCreateTaskDialog projectId={project.id} />
                         </div>
                     )}
                 </div>
