@@ -7,7 +7,7 @@ import { ProjectCard } from './project-card';
 import { ProjectHeader } from './project-header';
 import { ProjectRow } from './project-row';
 
-const ProjectsCapacityOverview = ({ projects }: { projects: Project[] }) => {
+export const ProjectCapacityOverview = ({ projects }: { projects: Project[] }) => {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
     return (
@@ -68,5 +68,3 @@ const ProjectsCapacityOverview = ({ projects }: { projects: Project[] }) => {
         </div>
     );
 };
-
-export default ProjectsCapacityOverview;

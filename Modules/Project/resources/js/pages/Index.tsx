@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Project } from '../types/project.types';
-import ProjectsCapacityOverview from '../components/index/project-overview';
+import ProjectCapacityOverview from '../components/index/project-capacity-overview';
 
 export default function Index({
     title,
@@ -15,7 +15,7 @@ export default function Index({
             <Head title={title} />
             <div className="p-6">
                 <h1 className="text-2xl font-semibold">{title}</h1>
-                <ProjectsCapacityOverview projects={projects} />
+                <ProjectCapacityOverview projects={projects} />
             </div>
         </AppLayout>
     );
