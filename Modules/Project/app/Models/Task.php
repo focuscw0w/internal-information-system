@@ -32,6 +32,38 @@ class Task extends Model
         'actual_hours' => 'integer',
     ];
 
+    protected static function boot() {
+         parent::boot();
+
+        // After creating a task
+        static::created(function ($task) {
+            $task->project->increment('tasks_total');
+        });
+
+        // After deleting a task
+        static::deleted(function ($task) {
+            $task->project->decrement('tasks_total');
+        });
+        
+        // After updating a task's status
+        static::updated(function ($task) {
+            if ($task->isDirty('status')) {
+                $oldStatus = $task->getOriginal('status');
+                $newStatus = $task->status;
+                
+                // If the task changed from a status other than done to done
+                if ($oldStatus !== 'done' && $newStatus === 'done') {
+                    $task->project->increment('tasks_completed');
+                }
+                
+                // If the task changed from done to another status
+                if ($oldStatus === 'done' && $newStatus !== 'done') {
+                    $task->project->decrement('tasks_completed');
+                }
+            }
+        });
+    }
+
     // Relations
     public function project(): BelongsTo
     {
