@@ -29,4 +29,18 @@ class CreateTaskRequest extends FormRequest
     {
         return true;
     }
+
+    /**
+     * Get custom error messages for validator errors.
+     */
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'Názov úlohy je povinný.',
+            'title.max' => 'Názov úlohy môže mať maximálne 255 znakov.',
+            'priority.required' => 'Priorita je povinná.',
+            'priority.in' => 'Priorita musí byť low, medium alebo high.',
+            'assigned_to.exists' => 'Vybraný používateľ neexistuje.',
+        ];
+    }
 }
