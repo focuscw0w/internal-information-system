@@ -71,7 +71,7 @@ class ProjectController extends Controller
 
         if (! $project) {
             return redirect()
-                ->route('project.index')
+                ->route('Project/Index')
                 ->with('error', 'Projekt nebol nájdený.');
         }
 
