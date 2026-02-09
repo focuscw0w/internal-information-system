@@ -38,7 +38,7 @@ export const CreateProjectDialog = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        post('/project', {
+        post('/projects', {
             onSuccess: () => {
                 setOpen(false);
                 reset();

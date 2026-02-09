@@ -7,7 +7,7 @@ use Modules\Projects\Http\Controllers\TaskController;
 // TODO: pridať middleware na permissions
 Route::middleware(['web', 'auth'])
     ->prefix('projects')
-    ->name('project.')
+    ->name('projects.')
     ->group(function () {
         // Projects
         Route::get('/', [ProjectController::class, 'index'])->name('index');

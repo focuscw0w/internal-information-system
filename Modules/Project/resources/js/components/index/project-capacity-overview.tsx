@@ -15,7 +15,7 @@ export const ProjectCapacityOverview = ({
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
     const handleProjectClick = (projectId: number) => {
-        router.visit(`/project/${projectId}`);
+        router.visit(`/projects/${projectId}`);
     };
 
     return (

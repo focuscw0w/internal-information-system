@@ -5,7 +5,7 @@ return [
     'items' => [
         [
             'title' => 'Projekty',
-            'route' => 'project.index',
+            'route' => 'projects.index',
             'order' => 50,
         ],
     ],

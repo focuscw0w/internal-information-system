@@ -12,7 +12,7 @@ export const ProjectDetailHeader = ({ project }: ProjectDetailHeaderProps) => {
     return (
         <div className="rounded-lg border border-gray-100 bg-white p-6 shadow-sm">
             <Link
-                href="/project"
+                href="/projects"
                 className="mb-4 inline-flex items-center text-sm text-gray-600 transition-colors hover:text-gray-900"
             >
                 <ArrowLeft className="mr-1 h-5 w-5" />

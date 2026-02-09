@@ -60,7 +60,7 @@ export const ProjectEditForm = ({ project }: ProjectEditFormProps) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        put(`/project/${project.id}`, {
+        put(`/projects/${project.id}`, {
             onSuccess: () => {
                 setOpen(false);
             },

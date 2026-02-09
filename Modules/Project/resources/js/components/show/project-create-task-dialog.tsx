@@ -48,7 +48,7 @@ export function ProjectCreateTaskDialog({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        post(`/project/${projectId}/tasks`, {
+        post(`/projects/${projectId}/tasks`, {
             onSuccess: () => {
                 setOpen(false);
                 reset();

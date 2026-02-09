@@ -25,7 +25,7 @@ export const ProjectDeleteDialog = ({ project }: ProjectDeleteDialogProps) => {
     const handleDelete = () => {
         setIsDeleting(true);
 
-        router.delete(`/project/${project.id}`, {
+        router.delete(`/projects/${project.id}`, {
             onSuccess: () => {
                 setOpen(false);
                 setIsDeleting(false);
