@@ -6,7 +6,7 @@ import {
     getStatusText,
     getWorkloadColor,
 } from '../../utils/project.utils';
-import { ProjectCardActions } from '../project-card-actions';
+import { ProjectCardActions } from './project-actions';
 
 interface ProjectRowProps {
     project: Project;

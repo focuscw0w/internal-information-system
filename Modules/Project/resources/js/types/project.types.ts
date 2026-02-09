@@ -42,7 +42,7 @@ export interface Project {
     updated_at: string;
 }
 
-interface ProjectAllocation {
+export interface ProjectAllocation {
     id: number;
     user_id: number;
     allocated_hours: number;
@@ -57,7 +57,7 @@ interface ProjectAllocation {
     };
 }
 
-interface Task {
+export interface Task {
     id: number;
     title: string;
     description: string | null;

@@ -1,6 +1,6 @@
 import { Project } from '../../types/project.types';
 import { getCapacityColor } from '../../utils/project.utils';
-import { ProjectCardActions } from '../project-card-actions';
+import { ProjectCardActions } from './project-actions';
 import { ProjectCardHeader } from './project-card-header';
 import { ProjectMetrics } from './project-metrics';
 import { ProgressBar } from './project-progressbar';
@@ -11,6 +11,7 @@ interface ProjectCardProps {
 }
 
 export const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
+    console.log(project)
     return (
         <div onClick={onClick} className="group relative cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg">
             <div onClick={(e) => e.stopPropagation()} className="absolute top-4 right-4 z-10 opacity-0 transition-opacity group-hover:opacity-100">

@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { router } from '@inertiajs/react';
+//import { router } from '@inertiajs/react';
 import {
     AlertCircle,
     CheckCircle,
@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Project } from '../../types/project.types';
 import { ProjectCreateTaskDialog } from './project-create-task-dialog';
+import { ProjectTaskListActions } from './project-task-actions';
 
 interface ProjectTaskListProps {
     project: Project;
@@ -56,9 +57,6 @@ export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
                             <div
                                 key={task.id}
                                 className="flex cursor-pointer items-center justify-between rounded-lg border border-gray-100 bg-gray-50/30 p-4 transition-all hover:border-gray-200 hover:shadow-sm"
-                                onClick={() =>
-                                    router.visit(`/tasks/${task.id}`)
-                                }
                             >
                                 <div className="flex flex-1 items-center gap-3">
                                     {getTaskStatusIcon(task.status)}
@@ -110,6 +108,13 @@ export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
                                             </span>
                                         )}
                                     </div>
+
+                                    {/* Actions */}
+                                    <ProjectTaskListActions
+                                        task={task}
+                                        projectId={project.id}
+                                        team={project.team}
+                                    />
                                 </div>
                             </div>
                         ))}

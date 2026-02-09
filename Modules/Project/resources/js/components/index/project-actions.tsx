@@ -1,6 +1,6 @@
-import { Project } from '../types/project.types';
-import { ProjectDeleteDialog } from './index/project-delete-dialog';
-import { ProjectEditForm } from './project-edit-form';
+import { Project } from '../../types/project.types';
+import { ProjectDeleteDialog } from './project-delete-dialog';
+import { ProjectEditForm } from '../project-edit-form';
 
 interface ProjectCardActionsProps {
     project: Project;
