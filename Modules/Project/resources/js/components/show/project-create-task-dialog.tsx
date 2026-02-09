@@ -188,7 +188,7 @@ export function ProjectCreateTaskDialog({
                             </div>
                         </div>
 
-                        {/* Odhadované hodiny a Deadline - Side by side */}
+                        {/* Odhadované hodiny a Deadline*/}
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="estimated_hours">
@@ -232,7 +232,7 @@ export function ProjectCreateTaskDialog({
                             </div>
                         </div>
 
-                        {/* ✅ Select pre používateľov */}
+                        {/* Select pre používateľov */}
                         <div className="grid gap-2">
                             <Label htmlFor="assigned_to">
                                 Priradiť používateľovi

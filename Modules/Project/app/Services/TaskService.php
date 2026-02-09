@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Projects\Services;
+namespace Modules\Project\Services;
 
 use Illuminate\Database\Eloquent\Collection;
-use Modules\Projects\Contracts\TaskServiceInterface;
-use Modules\Projects\Entities\Task;
-use Modules\Projects\Entities\Project;
 use Illuminate\Support\Facades\DB;
+use Modules\Project\App\Models\Project;
+use Modules\Project\App\Models\Task;
+use Modules\Project\Contracts\TaskServiceInterface;
 
 class TaskService implements TaskServiceInterface
 {
@@ -21,7 +21,7 @@ class TaskService implements TaskServiceInterface
             ->orderBy('created_at', 'desc')
             ->get();
     }
-    
+
     /**
      * Get task by ID
      */
@@ -30,14 +30,14 @@ class TaskService implements TaskServiceInterface
         return Task::with(['project', 'assignedUser', 'timeEntries'])
             ->findOrFail($taskId);
     }
-    
+
     /**
      * Create new task
      */
     public function createTask(int $projectId, array $data): Task
     {
         $project = Project::findOrFail($projectId);
-        
+
         return DB::transaction(function () use ($projectId, $data) {
             $task = Task::create([
                 'project_id' => $projectId,
@@ -48,18 +48,18 @@ class TaskService implements TaskServiceInterface
                 'estimated_hours' => $data['estimated_hours'] ?? 0,
                 'assigned_to' => $data['assigned_to'] ?? null,
             ]);
-            
+
             return $task->load(['project', 'assignedUser']);
         });
     }
-    
+
     /**
      * Update existing task
      */
     public function updateTask(int $taskId, array $data): Task
     {
         $task = Task::findOrFail($taskId);
-        
+
         $task->update([
             'title' => $data['title'] ?? $task->title,
             'description' => $data['description'] ?? $task->description,
@@ -68,19 +68,20 @@ class TaskService implements TaskServiceInterface
             'estimated_hours' => $data['estimated_hours'] ?? $task->estimated_hours,
             'assigned_to' => $data['assigned_to'] ?? $task->assigned_to,
         ]);
-        
+
         return $task->fresh(['project', 'assignedUser']);
     }
-    
+
     /**
      * Delete task
      */
     public function deleteTask(int $taskId): bool
     {
         $task = Task::findOrFail($taskId);
+
         return $task->delete();
     }
-    
+
     /**
      * Assign task to user
      */
@@ -88,10 +89,10 @@ class TaskService implements TaskServiceInterface
     {
         $task = Task::findOrFail($taskId);
         $task->update(['assigned_to' => $userId]);
-        
+
         return $task->fresh(['assignedUser']);
     }
-    
+
     /**
      * Update task status
      */
@@ -99,10 +100,10 @@ class TaskService implements TaskServiceInterface
     {
         $task = Task::findOrFail($taskId);
         $task->update(['status' => $status]);
-        
+
         return $task->fresh();
     }
-    
+
     /**
      * Get all tasks assigned to user
      */
@@ -113,7 +114,7 @@ class TaskService implements TaskServiceInterface
             ->orderBy('priority', 'desc')
             ->get();
     }
-    
+
     /**
      * Estimate task hours using AI
      */

@@ -1,21 +1,18 @@
 <?php
 
-namespace Modules\Projects\Http\Controllers;
+namespace Modules\Project\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
-use Modules\Projects\Contracts\TaskServiceInterface;
-use Modules\Projects\Http\Requests\CreateTaskRequest;
-use Modules\Projects\Http\Requests\UpdateTaskRequest;
+use Modules\Project\Services\TaskService;
+use Modules\Project\Http\Requests\CreateTaskRequest;
+use Modules\Project\Http\Requests\UpdateTaskRequest;
 
 class TaskController extends Controller
 {
-    protected TaskServiceInterface $taskService;
-    
-    public function __construct(TaskServiceInterface $taskService)
+    public function __construct(protected TaskService $taskService)
     {
-        $this->taskService = $taskService;
     }
     
     /**
@@ -49,7 +46,7 @@ class TaskController extends Controller
         $task = $this->taskService->createTask($projectId, $request->validated());
         
         return redirect()
-            ->route('Project::Tasks/Show', [$projectId, $task->id])
+            ->route('projects.show', [$projectId, $task->id])
             ->with('success', 'Úloha bola úspešne vytvorená.');
     }
     

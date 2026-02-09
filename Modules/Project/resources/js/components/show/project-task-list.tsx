@@ -15,6 +15,8 @@ interface ProjectTaskListProps {
 }
 
 export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
+    console.log(project)
+
     const getPriorityColor = (priority: string) => {
         const colors = {
             low: 'bg-emerald-50 text-emerald-700 border-emerald-200',

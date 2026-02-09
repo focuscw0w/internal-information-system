@@ -1,9 +1,9 @@
 <?php
 
-namespace Modules\Projects\Contracts;
+namespace Modules\Project\Contracts;
 
 use Illuminate\Database\Eloquent\Collection;
-use Modules\Projects\Entities\Task;
+use Modules\Project\App\Models\Task;
 
 interface TaskServiceInterface
 {
