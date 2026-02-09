@@ -58,7 +58,7 @@ class TaskController extends Controller
         $task = $this->taskService->updateTask($taskId, $request->validated());
 
         return redirect()
-            ->route('projects.tasks.show', [$projectId, $task->id])
+            ->route('projects.show', [$projectId, $task->id])
             ->with('success', 'Úloha bola úspešne aktualizovaná.');
     }
 

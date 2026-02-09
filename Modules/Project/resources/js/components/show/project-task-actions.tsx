@@ -1,6 +1,6 @@
 import { Task } from '../../types/project.types';
 import { ProjectTaskDeleteDialog } from './project-delete-task-dialog';
-//import { TaskEditDialog } from './task-edit-dialog';
+import { ProjectTaskEditDialog } from './project-edit-task-dialog';
 
 interface ProjectTaskListActionsProps {
     task: Task;
@@ -15,7 +15,7 @@ export const ProjectTaskListActions = ({
 }: ProjectTaskListActionsProps) => {
     return (
         <div className="flex items-center gap-1">
-            {/*<TaskEditDialog task={task} projectId={projectId} team={team} />*/}
+            <ProjectTaskEditDialog task={task} projectId={projectId} team={team} />
             <ProjectTaskDeleteDialog task={task} projectId={projectId} />
         </div>
     );

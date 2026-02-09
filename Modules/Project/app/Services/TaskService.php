@@ -16,7 +16,7 @@ class TaskService implements TaskServiceInterface
     public function getAllTasks(int $projectId): Collection
     {
         return Task::where('project_id', $projectId)
-            ->with(['assignedUser', 'timeEntries'])
+            ->with(['assignedUser',])
             ->orderBy('priority', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -27,7 +27,7 @@ class TaskService implements TaskServiceInterface
      */
     public function getTaskById(int $taskId): ?Task
     {
-        return Task::with(['project', 'assignedUser', 'timeEntries'])
+        return Task::with(['project', 'assignedUser',])
             ->findOrFail($taskId);
     }
 
