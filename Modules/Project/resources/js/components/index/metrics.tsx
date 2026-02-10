@@ -7,7 +7,6 @@ interface MetricsProps {
 }
 
 export const Metrics = ({ startDate, endDate, teamSize }: MetricsProps) => {
-    console.log(teamSize);
     return (
         <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2 text-gray-600">
