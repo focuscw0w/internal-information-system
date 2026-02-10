@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
-import { Link, router } from '@inertiajs/react';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 import { Project } from '../../types/project.types';
+import { EditProjectDialog } from '../index/dialogs/edit-project';
 import { BadgeLabel } from '../ui/badge';
 
 interface ShowHeaderProps {
@@ -43,17 +43,7 @@ export const ShowHeader = ({ project }: ShowHeaderProps) => {
                     />
 
                     {/* TODO: vytvoriť dialog na edit */}
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-gray-200 p-4"
-                        onClick={() =>
-                            router.visit(`/projects/${project.id}/edit`)
-                        }
-                    >
-                        <Edit className="mr-2 h-5 w-5" />
-                        Upraviť
-                    </Button>
+                    <EditProjectDialog project={project} text='Upraviť' />
                 </div>
             </div>
         </div>

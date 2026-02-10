@@ -11,9 +11,13 @@ import {
 
 interface EditProjectDialogProps {
     project: Project;
+    text?: string;
 }
 
-export const EditProjectDialog = ({ project }: EditProjectDialogProps) => {
+export const EditProjectDialog = ({
+    project,
+    text,
+}: EditProjectDialogProps) => {
     const [open, setOpen] = useState(false);
 
     const { data, setData, put, processing, errors } = useForm({
@@ -71,10 +75,11 @@ export const EditProjectDialog = ({ project }: EditProjectDialogProps) => {
             trigger={
                 <button
                     onClick={(e) => e.stopPropagation()}
-                    className="cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    className="cursor-pointer flex items-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
                     title="Upraviť projekt"
                 >
                     <Edit size={20} />
+                    <span className='text-sm'>{text} </span>
                 </button>
             }
             title="Upraviť projekt"

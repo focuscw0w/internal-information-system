@@ -16,6 +16,8 @@ export const EditTaskDialog = ({
     projectId,
     team,
 }: EditTaskDialogProps) => {
+    console.log(task)
+
     const [open, setOpen] = useState(false);
 
     const { data, setData, put, processing, errors } = useForm({
