@@ -4,23 +4,23 @@ import {
     TaskPriority,
     TaskStatus,
     WorkloadLevel,
-} from '../types/project.types';
+} from '../../types/project.types';
 
 type BadgeType = 'status' | 'workload' | 'priority' | 'task-status';
 
-interface ProjectBadgeProps {
+interface BadgeProps {
     type: BadgeType;
     value: ProjectStatus | WorkloadLevel | TaskPriority | TaskStatus;
     className?: string;
     variant?: 'default' | 'outline';
 }
 
-export const ProjectBadge = ({
+export const BadgeLabel = ({
     type,
     value,
     className,
     variant = 'outline',
-}: ProjectBadgeProps) => {
+}: BadgeProps) => {
     const getColor = (): string => {
         // Status farby
         if (type === 'status') {
@@ -116,8 +116,11 @@ export const ProjectBadge = ({
     };
 
     return (
-        <Badge variant={variant} className={getColor() + ' py-2 px-3 ' + (className ?? '')}>
+        <Badge
+            variant={variant}
+            className={getColor() + ' px-3 py-2 flex justify-center items-center' + (className ?? '')}
+        >
             {getText()}
         </Badge>
     );
-}
+};

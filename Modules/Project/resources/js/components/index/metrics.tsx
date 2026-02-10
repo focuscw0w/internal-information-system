@@ -1,17 +1,13 @@
 import { Calendar, Users } from 'lucide-react';
 
-interface ProjectMetricsProps {
+interface MetricsProps {
     startDate: string;
     endDate: string;
     teamSize: number;
 }
 
-export const ProjectMetrics = ({
-    startDate,
-    endDate,
-    teamSize,
-}: ProjectMetricsProps) => {
-    console.log(teamSize)
+export const Metrics = ({ startDate, endDate, teamSize }: MetricsProps) => {
+    console.log(teamSize);
     return (
         <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2 text-gray-600">

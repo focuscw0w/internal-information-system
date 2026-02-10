@@ -1,6 +1,6 @@
 import { Calendar, Clock, DollarSign, TrendingUp } from 'lucide-react';
 import { Project } from '../../types/project.types';
-import { StatCard } from '../project-statcard';
+import { StatCard } from '../ui/statcard';
 import { ProjectAllocations } from './project-allocations';
 import { ProjectTaskList } from './project-task-list';
 

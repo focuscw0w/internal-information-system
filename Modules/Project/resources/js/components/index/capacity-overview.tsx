@@ -2,16 +2,12 @@ import { router } from '@inertiajs/react';
 import { CheckCircle2, Clock, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Project, ViewMode } from '../../types/project.types';
-import { StatCard } from '../project-statcard';
-import { ProjectCard } from './project-card';
-import { ProjectHeader } from './project-header';
-import { ProjectRow } from './project-row';
+import { StatCard } from '../ui/statcard';
+import { Header } from './header';
+import { Card } from './views/card';
+import { Row } from './views/row';
 
-export const ProjectCapacityOverview = ({
-    projects,
-}: {
-    projects: Project[];
-}) => {
+export const CapacityOverview = ({ projects }: { projects: Project[] }) => {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
     const handleProjectClick = (projectId: number) => {
@@ -21,7 +17,7 @@ export const ProjectCapacityOverview = ({
     return (
         <div className="min-h-screen">
             {/* Header */}
-            <ProjectHeader viewMode={viewMode} onViewModeChange={setViewMode} />
+            <Header viewMode={viewMode} onViewModeChange={setViewMode} />
 
             {/* Súhrnné štatistiky */}
             <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -59,7 +55,7 @@ export const ProjectCapacityOverview = ({
             {viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     {projects.map((project) => (
-                        <ProjectCard
+                        <Card
                             key={project.id}
                             project={project}
                             onClick={() => handleProjectClick(project.id)}
@@ -69,7 +65,7 @@ export const ProjectCapacityOverview = ({
             ) : (
                 <div>
                     {projects.map((project) => (
-                        <ProjectRow
+                        <Row
                             key={project.id}
                             project={project}
                             onClick={() => handleProjectClick(project.id)}

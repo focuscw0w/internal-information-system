@@ -1,21 +1,24 @@
 import { AlertCircle, Users } from 'lucide-react';
-import { Project } from '../../types/project.types';
+import { Project } from '../../../types/project.types';
 import {
     getCapacityColor,
     getStatusColor,
     getStatusText,
     getWorkloadColor,
-} from '../../utils/project.utils';
-import { ProjectCardActions } from './project-actions';
+} from '../../../utils/project.utils';
+import { Actions } from '../actions';
 
-interface ProjectRowProps {
+interface RowProps {
     project: Project;
     onClick: () => void;
 }
 
-export const ProjectRow = ({ project, onClick }: ProjectRowProps) => {
+export const Row = ({ project, onClick }: RowProps) => {
     return (
-        <div onClick={onClick} className="group mb-4 cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg">
+        <div
+            onClick={onClick}
+            className="group mb-4 cursor-pointer rounded-lg bg-white shadow transition-shadow hover:shadow-lg"
+        >
             <div className="p-6">
                 <div className="flex items-center justify-between gap-6">
                     {/* Názov a status */}
@@ -75,7 +78,9 @@ export const ProjectRow = ({ project, onClick }: ProjectRowProps) => {
                         <p className="mb-1 text-sm text-gray-600">Tím</p>
                         <div className="flex items-center justify-center gap-1 text-gray-900">
                             <Users size={18} />
-                            <span className="font-semibold">{project.team_size}</span>
+                            <span className="font-semibold">
+                                {project.team_size}
+                            </span>
                         </div>
                     </div>
 
@@ -94,7 +99,7 @@ export const ProjectRow = ({ project, onClick }: ProjectRowProps) => {
 
                     {/* Akcie */}
                     <div onClick={(e) => e.stopPropagation()} className="w-24">
-                        <ProjectCardActions project={project} />
+                        <Actions project={project} />
                     </div>
                 </div>
             </div>

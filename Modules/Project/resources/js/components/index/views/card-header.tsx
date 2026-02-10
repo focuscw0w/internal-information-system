@@ -1,21 +1,15 @@
 import { AlertCircle } from 'lucide-react';
-import { ProjectStatus, WorkloadLevel } from '../../types/project.types';
-import {
-    getWorkloadColor,
-} from '../../utils/project.utils';
-import { ProjectBadge } from '../project-badge';
+import { ProjectStatus, WorkloadLevel } from '../../../types/project.types';
+import { getWorkloadColor } from '../../../utils/project.utils';
+import { BadgeLabel } from '../../ui/badge';
 
-interface ProjectCardHeaderProps {
+interface CardHeaderProps {
     name: string;
     status: ProjectStatus;
     workload: WorkloadLevel;
 }
 
-export const ProjectCardHeader = ({
-    name,
-    status,
-    workload,
-}: ProjectCardHeaderProps) => {
+export const CardHeader = ({ name, status, workload }: CardHeaderProps) => {
     return (
         <div className="mb-3">
             <div className="mb-2 flex items-center gap-4">
@@ -29,7 +23,7 @@ export const ProjectCardHeader = ({
                     </span>
                 </div>
             </div>
-          <ProjectBadge type='status' value={status} />
+            <BadgeLabel type="status" value={status} />
         </div>
     );
 };
