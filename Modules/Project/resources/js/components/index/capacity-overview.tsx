@@ -3,7 +3,7 @@ import { CheckCircle2, Clock, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Project, ViewMode } from '../../types/project.types';
 import { StatCard } from '../ui/statcard';
-import { Header } from './header';
+import { IndexHeader } from './index-header';
 import { Card } from './views/card';
 import { Row } from './views/row';
 
@@ -17,7 +17,7 @@ export const CapacityOverview = ({ projects }: { projects: Project[] }) => {
     return (
         <div className="min-h-screen">
             {/* Header */}
-            <Header viewMode={viewMode} onViewModeChange={setViewMode} />
+            <IndexHeader viewMode={viewMode} onViewModeChange={setViewMode} />
 
             {/* Súhrnné štatistiky */}
             <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">

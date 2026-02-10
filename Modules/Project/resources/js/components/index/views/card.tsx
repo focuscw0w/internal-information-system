@@ -1,6 +1,6 @@
 import { Project } from '../../../types/project.types';
 import { getCapacityColor } from '../../../utils/project.utils';
-import { Actions } from '../actions';
+import { ProjectActions } from '../project-actions';
 import { Metrics } from '../metrics';
 import { ProgressBar } from '../progressbar';
 import { CardHeader } from './card-header';
@@ -20,7 +20,7 @@ export const Card = ({ project, onClick }: CardProps) => {
                 onClick={(e) => e.stopPropagation()}
                 className="absolute top-4 right-4 z-10 opacity-0 transition-opacity group-hover:opacity-100"
             >
-                <Actions project={project} />
+                <ProjectActions project={project} />
             </div>
 
             <div className="border-b border-gray-200 p-6">

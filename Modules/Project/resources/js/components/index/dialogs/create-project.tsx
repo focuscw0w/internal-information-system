@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
 
-export const CreateProject = () => {
+export const CreateProjectDialog = () => {
     const [open, setOpen] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({

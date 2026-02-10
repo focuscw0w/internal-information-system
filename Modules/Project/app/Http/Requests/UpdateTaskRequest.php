@@ -7,6 +7,17 @@ use Illuminate\Foundation\Http\FormRequest;
 class UpdateTaskRequest extends FormRequest
 {
     /**
+     * Prepare data for validation
+     */
+    protected function prepareForValidation()
+    {
+        // Preveď '0' na null PRED validáciou
+        if ($this->assigned_to === '0') {
+            $this->merge(['assigned_to' => null]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      */
     public function rules(): array

@@ -6,7 +6,7 @@ import {
     getStatusText,
     getWorkloadColor,
 } from '../../../utils/project.utils';
-import { Actions } from '../actions';
+import { ProjectActions } from '../project-actions';
 
 interface RowProps {
     project: Project;
@@ -99,7 +99,7 @@ export const Row = ({ project, onClick }: RowProps) => {
 
                     {/* Akcie */}
                     <div onClick={(e) => e.stopPropagation()} className="w-24">
-                        <Actions project={project} />
+                        <ProjectActions project={project} />
                     </div>
                 </div>
             </div>

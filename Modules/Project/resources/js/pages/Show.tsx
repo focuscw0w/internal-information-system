@@ -1,11 +1,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
-import { Calendar, Kanban, LayoutGrid } from 'lucide-react';
-import { ProjectDetailHeader } from '../components/show/project-detail-header';
-import { ProjectKanban } from '../components/show/project-kanban';
-import { ProjectOverview } from '../components/show/project-overview';
-import { ProjectTimeline } from '../components/show/project-timeline';
+import { Calendar, KanbanIcon, LayoutGrid } from 'lucide-react';
+import { ShowHeader } from '../components/show/show-header';
+import { Kanban } from '../components/show/kanban';
+import { Overview } from '../components/show/overview';
+import { Timeline } from '../components/show/timeline';
 import { Project } from '../types/project.types';
 
 export default function Show({ project }: { project: Project }) {
@@ -15,7 +15,7 @@ export default function Show({ project }: { project: Project }) {
 
             <div className="min-h-screen space-y-6 p-6">
                 {/* Header */}
-                <ProjectDetailHeader project={project} />
+                <ShowHeader project={project} />
 
                 {/* Tabs */}
                 <Tabs defaultValue="overview" className="mb-12 w-full">
@@ -31,7 +31,7 @@ export default function Show({ project }: { project: Project }) {
                             value="kanban"
                             className="flex cursor-pointer items-center gap-2 py-2.5"
                         >
-                            <Kanban className="h-4 w-4" />
+                            <KanbanIcon className="h-4 w-4" />
                             Kanban
                         </TabsTrigger>
                         <TabsTrigger
@@ -44,13 +44,13 @@ export default function Show({ project }: { project: Project }) {
                     </TabsList>
 
                     <TabsContent value="overview" className="mt-6">
-                        <ProjectOverview project={project} />
+                        <Overview project={project} />
                     </TabsContent>
                     <TabsContent value="kanban" className="mt-6">
-                        <ProjectKanban project={project} />
+                        <Kanban project={project} />
                     </TabsContent>
                     <TabsContent value="timeline" className="mt-6">
-                        <ProjectTimeline project={project} />
+                        <Timeline project={project} />
                     </TabsContent>
                 </Tabs>
             </div>

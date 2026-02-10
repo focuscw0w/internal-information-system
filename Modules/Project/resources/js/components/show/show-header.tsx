@@ -4,11 +4,11 @@ import { ArrowLeft, Edit } from 'lucide-react';
 import { Project } from '../../types/project.types';
 import { BadgeLabel } from '../ui/badge';
 
-interface ProjectDetailHeaderProps {
+interface ShowHeaderProps {
     project: Project;
 }
 
-export const ProjectDetailHeader = ({ project }: ProjectDetailHeaderProps) => {
+export const ShowHeader = ({ project }: ShowHeaderProps) => {
     return (
         <div className="rounded-lg border border-gray-100 bg-white p-6 shadow-sm">
             <Link

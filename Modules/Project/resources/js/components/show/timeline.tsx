@@ -2,7 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
 import { Project } from '../../types/project.types';
 
-export function ProjectTimeline({ project }: { project: Project }) {
+interface TimelineProps {
+    project: Project;
+}
+
+export function Timeline({ project }: TimelineProps) {
     return (
         <Card>
             <CardHeader>

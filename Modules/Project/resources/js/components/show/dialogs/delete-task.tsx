@@ -1,20 +1,24 @@
+import { DeleteDialog } from '@/components/dialogs/delete-dialog';
 import { router } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Project } from '../../../types/project.types';
-import { DeleteDialog } from '@/components/dialogs/delete-dialog';
+import { Task } from '../../../types/project.types';
 
-interface DeleteProjectDialogProps {
-    project: Project;
+interface DeleteTaskDialogProps {
+    task: Task;
+    projectId: number;
 }
 
-export const DeleteProjectDialog = ({ project }: DeleteProjectDialogProps) => {
+export const DeleteTaskDialog = ({
+    task,
+    projectId,
+}: DeleteTaskDialogProps) => {
     const [open, setOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDelete = () => {
         setIsDeleting(true);
-        router.delete(`/projects/${project.id}`, {
+        router.delete(`/projects/${projectId}/tasks/${task.id}`, {
             onSuccess: () => {
                 setOpen(false);
                 setIsDeleting(false);
@@ -31,22 +35,22 @@ export const DeleteProjectDialog = ({ project }: DeleteProjectDialogProps) => {
                 <button
                     onClick={(e) => e.stopPropagation()}
                     className="cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600"
-                    title="Zmazať projekt"
+                    title="Zmazať úlohu"
                 >
-                    <Trash2 size={20} />
+                    <Trash2 size={18} />
                 </button>
             }
-            title="Zmazať projekt?"
+            title="Zmazať úlohu?"
             description={
                 <>
-                    Naozaj chcete zmazať projekt <strong>{project.name}</strong>
-                    ? Táto akcia je nenávratná a všetky dáta budú natrvalo
+                    Naozaj chcete zmazať úlohu <strong>{task.title}</strong>?
+                    Táto akcia je nenávratná a všetky dáta budú natrvalo
                     odstránené.
                 </>
             }
             onConfirm={handleDelete}
             isDeleting={isDeleting}
-            confirmLabel="Zmazať projekt"
+            confirmLabel="Zmazať úlohu"
         />
     );
 };

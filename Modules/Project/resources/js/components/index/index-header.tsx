@@ -1,13 +1,13 @@
 import { ViewMode } from '../../types/project.types';
-import { CreateProject } from './dialogs/create-project';
+import { CreateProjectDialog } from './dialogs/create-project';
 import { ViewModeToggle } from './viewmode-toggle';
 
-interface HeaderProps {
+interface IndexHeaderProps {
     viewMode: ViewMode;
     onViewModeChange: (mode: ViewMode) => void;
 }
 
-export const Header = ({ viewMode, onViewModeChange }: HeaderProps) => {
+export const IndexHeader = ({ viewMode, onViewModeChange }: IndexHeaderProps) => {
     return (
         <div className="mb-8">
             <div className="items-center justify-between gap-4 md:flex lg:gap-0">
@@ -15,7 +15,7 @@ export const Header = ({ viewMode, onViewModeChange }: HeaderProps) => {
                     Prehľad projektov, zdrojov a vyťaženia tímu
                 </p>
                 <div className="flex items-center gap-6">
-                    <CreateProject />
+                    <CreateProjectDialog />
                     <ViewModeToggle
                         viewMode={viewMode}
                         onViewModeChange={onViewModeChange}

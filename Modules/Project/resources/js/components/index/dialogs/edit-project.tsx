@@ -9,11 +9,11 @@ import {
     WorkloadLevel,
 } from '../../../types/project.types';
 
-interface EditProjectProps {
+interface EditProjectDialogProps {
     project: Project;
 }
 
-export const EditProject = ({ project }: EditProjectProps) => {
+export const EditProjectDialog = ({ project }: EditProjectDialogProps) => {
     const [open, setOpen] = useState(false);
 
     const { data, setData, put, processing, errors } = useForm({

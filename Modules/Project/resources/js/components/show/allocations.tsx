@@ -3,11 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Users } from "lucide-react";
 
-interface ProjectAllocationsProps {
+interface AllocationsProps {
     project: Project;
 }
 
-export const ProjectAllocations = ({project}: ProjectAllocationsProps) => {
+export const Allocations = ({project}: AllocationsProps) => {
     return (
         <>
             {project.allocations && project.allocations.length > 0 && (

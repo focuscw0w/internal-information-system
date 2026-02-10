@@ -1,10 +1,14 @@
 import { Calendar, Clock, DollarSign, TrendingUp } from 'lucide-react';
 import { Project } from '../../types/project.types';
 import { StatCard } from '../ui/statcard';
-import { ProjectAllocations } from './project-allocations';
-import { ProjectTaskList } from './project-task-list';
+import { Allocations } from './allocations';
+import { TaskList } from './task-list';
 
-export function ProjectOverview({ project }: { project: Project }) {
+interface OverviewProps {
+    project: Project;
+}
+
+export function Overview({ project }: OverviewProps) {
     const budgetSpent = project.budget_spent ?? 0;
     const budget = project.budget ?? 0;
     const budgetPercentage = budget > 0 ? (budgetSpent / budget) * 100 : 0;
@@ -59,10 +63,10 @@ export function ProjectOverview({ project }: { project: Project }) {
             </div>
 
             {/* Team Allocations */}
-            <ProjectAllocations project={project} />
+            <Allocations project={project} />
 
             {/* Tasks List */}
-            <ProjectTaskList project={project} />
+            <TaskList project={project} />
         </div>
     );
 }

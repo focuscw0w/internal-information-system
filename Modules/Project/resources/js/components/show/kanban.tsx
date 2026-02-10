@@ -1,7 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Project } from '../../types/project.types';
 
-export function ProjectKanban({ project }: { project: Project }) {
+interface KanbanProps {
+    project: Project;
+}
+
+export function Kanban({ project }: KanbanProps) {
     const columns = [
         { id: 'todo', title: 'Na vykonanie', status: 'todo' },
         { id: 'in_progress', title: 'Prebieha', status: 'in_progress' },

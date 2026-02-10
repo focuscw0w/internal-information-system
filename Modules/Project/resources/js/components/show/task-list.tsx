@@ -8,14 +8,14 @@ import {
     PlayCircle,
 } from 'lucide-react';
 import { Project } from '../../types/project.types';
-import { ProjectCreateTaskDialog } from './project-create-task-dialog';
-import { ProjectTaskListActions } from './project-task-actions';
+import { TaskActions } from './task-actions';
+import { CreateTaskDialog } from './dialogs/create-task';
 
-interface ProjectTaskListProps {
+interface TaskListProps {
     project: Project;
 }
 
-export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
+export const TaskList = ({ project }: TaskListProps) => {
     console.log(project)
 
     const getPriorityColor = (priority: string) => {
@@ -47,7 +47,7 @@ export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
                     <CardTitle className="text-lg">
                         Úlohy ({project.tasks_completed}/{project.tasks_total})
                     </CardTitle>
-                    <ProjectCreateTaskDialog projectId={project.id} team={project.team} />
+                    <CreateTaskDialog projectId={project.id} team={project.team} />
                 </div>
             </CardHeader>
             <CardContent>
@@ -110,7 +110,7 @@ export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
                                     </div>
 
                                     {/* Actions */}
-                                    <ProjectTaskListActions
+                                    <TaskActions
                                         task={task}
                                         projectId={project.id}
                                         team={project.team}
@@ -125,7 +125,7 @@ export const ProjectTaskList = ({ project }: ProjectTaskListProps) => {
                             <p className="mb-4 text-gray-500">
                                 Zatiaľ nie sú vytvorené žiadne úlohy
                             </p>
-                            <ProjectCreateTaskDialog projectId={project.id} team={project.team} />
+                            <CreateTaskDialog projectId={project.id} team={project.team} />
                         </div>
                     )}
                 </div>
