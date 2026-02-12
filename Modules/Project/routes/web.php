@@ -29,6 +29,9 @@ Route::middleware(['web', 'auth'])
             Route::patch('/{task}/status', [TaskController::class, 'updateStatus'])->name('update-status');
         });
 
+        // Team management
+        Route::put('/{id}/team', [ProjectController::class, 'updateTeam'])->name('team.update');
+
         // AI estimate endpoint
         Route::post('/tasks/estimate-ai', [TaskController::class, 'estimateWithAI'])
             ->name('tasks.estimate-ai');

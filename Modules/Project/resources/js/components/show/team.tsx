@@ -4,6 +4,7 @@ import { CheckCircle2, Crown, Users } from 'lucide-react';
 import { PERMISSION_GROUPS, PERMISSION_LABELS } from '../../config';
 import { Project } from '../../types/types';
 import { EditProjectDialog } from '../index/dialogs/edit-project';
+import { ManageTeamDialog } from './dialogs/manage-team';
 
 interface TeamProps {
     project: Project;
@@ -33,7 +34,7 @@ export const Team = ({ project }: TeamProps) => {
                         </p>
                     </div>
                 </div>
-                <EditProjectDialog project={project} text="Upraviť tím" />
+                <ManageTeamDialog project={project} />
             </div>
 
             {/* Owner Card */}
@@ -208,10 +209,7 @@ export const Team = ({ project }: TeamProps) => {
                         Zatiaľ nie sú pridaní žiadni členovia do tímu projektu.
                     </p>
                     <div className="flex items-center justify-center">
-                        <EditProjectDialog
-                            project={project}
-                            text="Pridať členov"
-                        />
+                      <ManageTeamDialog project={project} />
                     </div>
                 </Card>
             )}

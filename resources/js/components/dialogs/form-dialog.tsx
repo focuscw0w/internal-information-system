@@ -20,6 +20,7 @@ interface FormDialogProps {
     onSubmit: (e: React.FormEvent) => void;
     processing: boolean;
     submitLabel?: string;
+    size?: 'sm' | 'md' | 'lg' | 'xl';
     children: ReactNode;
 }
 
