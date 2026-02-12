@@ -1,15 +1,15 @@
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
-import { TeamMemberSelect } from '../../team-member-select';
-import { useUsers } from '@/hooks/use-users'; 
+import { useUsers } from '@/hooks/use-users';
 import { useForm } from '@inertiajs/react';
-import { Edit, Loader2, AlertCircle } from 'lucide-react';
+import { AlertCircle, Edit, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import {
     Project,
     ProjectStatus,
     WorkloadLevel,
 } from '../../../types/project.types';
+import { TeamMemberSelect } from '../../team-member-select';
 import { statusOptions, workloadOptions } from './config';
 
 interface EditProjectDialogProps {
@@ -22,19 +22,20 @@ export const EditProjectDialog = ({
     text,
 }: EditProjectDialogProps) => {
     const [open, setOpen] = useState(false);
-    
+
     const { data: users = [], isLoading, isError, error } = useUsers();
-    console.log(users);
 
     const initialTeamMembers = project.team.map((member) => member.id);
-    const initialTeamSettings = project.team.reduce((acc, member) => {
-        acc[member.id] = {
-            allocation: member.allocation || 100,
-            permissions: member.permissions || ['view'],
-            hourly_rate: member.hourly_rate,
-        };
-        return acc;
-    }, {} as Record<number, any>);
+    const initialTeamSettings = project.team.reduce(
+        (acc, member) => {
+            acc[member.id] = {
+                allocation: member.allocation || 100,
+                permissions: member.permissions || ['view'],
+            };
+            return acc;
+        },
+        {} as Record<number, any>,
+    );
 
     const { data, setData, put, processing, errors } = useForm({
         name: project.name || '',
@@ -67,6 +68,7 @@ export const EditProjectDialog = ({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         put(`/projects/${project.id}`, {
             onSuccess: () => setOpen(false),
             onError: (errors) => console.error('Validation errors:', errors),
@@ -199,11 +201,8 @@ export const EditProjectDialog = ({
                     selectedMembers={data.team_members}
                     teamSettings={data.team_settings}
                     onChange={(members, settings) => {
-                        setData({
-                            ...data,
-                            team_members: members,
-                            team_settings: settings,
-                        });
+                        setData('team_members', members);
+                        setData('team_settings', settings);
                     }}
                     error={errors.team_members}
                 />

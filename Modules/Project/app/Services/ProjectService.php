@@ -4,8 +4,10 @@ namespace Modules\Project\App\Services;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Modules\Project\App\Contracts\ProjectServiceInterface;
 use Modules\Project\App\Models\Project;
+use Illuminate\Support\Facades\Log;
 
 class ProjectService implements ProjectServiceInterface
 {
@@ -25,7 +27,7 @@ class ProjectService implements ProjectServiceInterface
         }
 
         if (isset($filters['search'])) {
-            $query->where('name', 'like', '%' . $filters['search'] . '%');
+            $query->where('name', 'like', '%'.$filters['search'].'%');
         }
 
         return $query->get();
@@ -47,7 +49,7 @@ class ProjectService implements ProjectServiceInterface
         }
 
         if (isset($filters['search'])) {
-            $query->where('name', 'like', '%' . $filters['search'] . '%');
+            $query->where('name', 'like', '%'.$filters['search'].'%');
         }
 
         return $query->paginate($perPage);
@@ -79,7 +81,7 @@ class ProjectService implements ProjectServiceInterface
 
         $project = Project::create($projectData);
 
-        if (!empty($data['team_members'])) {
+        if (! empty($data['team_members'])) {
             foreach ($data['team_members'] as $member) {
                 $project->addTeamMember(
                     $member['user_id'],
@@ -98,22 +100,62 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($id);
 
-        if (!$project) {
+        if (! $project) {
             return null;
         }
 
-        $project->update([
-            'name' => $data['name'] ?? $project->name,
-            'description' => $data['description'] ?? $project->description,
-            'status' => $data['status'] ?? $project->status,
-            'workload' => $data['workload'] ?? $project->workload,
-            'start_date' => $data['start_date'] ?? $project->start_date,
-            'end_date' => $data['end_date'] ?? $project->end_date,
-            'budget' => $data['budget'] ?? $project->budget,
-            'progress' => $data['progress'] ?? $project->progress,
-        ]);
+        Log::info('UpdateProject data:', $data);
 
-        return $project->fresh(['owner', 'team']);
+        try {
+            DB::beginTransaction();
+
+            // Update basic project fields
+            $project->update([
+                'name' => $data['name'] ?? $project->name,
+                'description' => $data['description'] ?? $project->description,
+                'status' => $data['status'] ?? $project->status,
+                'workload' => $data['workload'] ?? $project->workload,
+                'start_date' => $data['start_date'] ?? $project->start_date,
+                'end_date' => $data['end_date'] ?? $project->end_date,
+                'budget' => $data['budget'] ?? $project->budget,
+                'progress' => $data['progress'] ?? $project->progress,
+            ]);
+
+            Log::info('Team members:', [
+                'exists' => array_key_exists('team_members', $data),
+                'value' => $data['team_members'] ?? 'not set',
+                'team_settings' => $data['team_settings'] ?? 'not set',
+            ]);
+
+            // Sync team members
+            if (array_key_exists('team_members', $data)) {
+                if (is_array($data['team_members']) && ! empty($data['team_members'])) {
+                    $syncData = [];
+
+                    foreach ($data['team_members'] as $userId) {
+                        $settings = $data['team_settings'][$userId] ?? [];
+
+                        $syncData[$userId] = [
+                            'permissions' => json_encode($settings['permissions'] ?? ['view_project']),
+                            'allocation' => $settings['allocation'] ?? 100,
+                        ];
+                    }
+
+                    $project->team()->sync($syncData);
+                } else {
+                    $project->team()->sync([]);
+                }
+            }
+
+            DB::commit();
+
+            return $project->fresh(['owner', 'team', 'tasks']);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Project update failed: '.$e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -123,7 +165,7 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = $this->getProjectById($id);
 
-        if (!$project) {
+        if (! $project) {
             return false;
         }
 
@@ -157,7 +199,7 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($projectId);
 
-        if (!$project) {
+        if (! $project) {
             return false;
         }
 
@@ -173,7 +215,7 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($projectId);
 
-        if (!$project) {
+        if (! $project) {
             return false;
         }
 
@@ -189,7 +231,7 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($projectId);
 
-        if (!$project) {
+        if (! $project) {
             return null;
         }
 

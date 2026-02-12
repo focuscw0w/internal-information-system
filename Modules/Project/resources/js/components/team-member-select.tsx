@@ -50,7 +50,7 @@ export const TeamMemberSelect = ({
             ...teamSettings,
             [userId]: {
                 allocation: 100,
-                permissions: ['view_project', 'view_tasks'], // ✅ Default permissions
+                permissions: ['view_project', 'view_tasks'], 
                 hourly_rate: undefined,
             },
         };
@@ -160,7 +160,7 @@ export const TeamMemberSelect = ({
                         return (
                             <div
                                 key={userId}
-                                className="space-y-3 rounded-md border bg-white p-4 shadow-sm"
+                                className="space-y-3 rounded-md"
                             >
                                 {/* Header */}
                                 <div className="flex items-start justify-between">

@@ -12,7 +12,6 @@ export interface TeamMember {
     email?: string; 
     permissions: string[];
     allocation: number;
-    hourly_rate?: number; 
 }
 
 export interface Project {
