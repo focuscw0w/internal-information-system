@@ -50,3 +50,12 @@ export const PERMISSION_GROUPS = [
         permissions: [{ value: 'export_data', label: 'Export dát' }],
     },
 ];
+
+export const PERMISSION_LABELS: Record<string, string> =
+    PERMISSION_GROUPS.flatMap((group) => group.permissions).reduce(
+        (acc, perm) => {
+            acc[perm.value] = perm.label;
+            return acc;
+        },
+        {} as Record<string, string>,
+    );

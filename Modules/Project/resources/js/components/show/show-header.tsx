@@ -42,8 +42,7 @@ export const ShowHeader = ({ project }: ShowHeaderProps) => {
                         className="hidden sm:block"
                     />
 
-                    {/* TODO: vytvoriť dialog na edit */}
-                    <EditProjectDialog project={project} text='Upraviť' />
+                    <EditProjectDialog project={project} text='Upraviť projekt' />
                 </div>
             </div>
         </div>
