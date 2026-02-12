@@ -21,9 +21,9 @@ class UpdateProjectTeamRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'team_members' => ['required', 'array'],
+            'team_members' => ['nullable', 'array'],
             'team_members.*' => ['integer', 'exists:users,id'],
-            'team_settings' => ['required', 'array'],
+            'team_settings' => ['nullable', 'array'],
             'team_settings.*.allocation' => ['nullable', 'integer', 'min:0', 'max:200'],
             'team_settings.*.permissions' => ['nullable', 'array'],
             'team_settings.*.permissions.*' => [

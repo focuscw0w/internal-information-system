@@ -51,7 +51,7 @@ export const TeamMemberList = ({
         const newMembers = selectedMembers.filter((id) => id !== userId);
         const newSettings = { ...teamSettings };
         delete newSettings[userId];
-
+        
         onChange(newMembers, newSettings);
     };
 

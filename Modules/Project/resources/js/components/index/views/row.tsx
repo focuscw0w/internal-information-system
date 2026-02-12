@@ -5,7 +5,7 @@ import {
     getStatusColor,
     getStatusText,
     getWorkloadColor,
-} from '../../../utils/project.utils';
+} from '../../../config';
 import { ProjectActions } from '../project-actions';
 
 interface RowProps {

@@ -21,8 +21,8 @@ interface CreateProjectFormData {
     start_date: string;
     end_date: string;
     budget: string;
-    team_members: number[]; // ✅ Explicitný typ
-    team_settings: Record<number, TeamMemberSettings>; // ✅ Explicitný typ
+    team_members: number[]; 
+    team_settings: Record<number, TeamMemberSettings>; 
 }
 
 export const CreateProjectDialog = () => {
@@ -30,7 +30,6 @@ export const CreateProjectDialog = () => {
 
     const { data: users = [], isLoading, isError } = useUsers();
 
-    // ✅ Použiť generický typ
     const { data, setData, post, processing, errors, reset } =
         useForm<CreateProjectFormData>({
             name: '',

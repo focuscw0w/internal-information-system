@@ -10,6 +10,7 @@ import { Timeline } from '../components/show/timeline';
 import { Project } from '../types/types';
 
 export default function Show({ project }: { project: Project }) {
+    console.log(project)
     return (
         <AppLayout>
             <Head title={`Detail projektu - ${project.name}`} />
