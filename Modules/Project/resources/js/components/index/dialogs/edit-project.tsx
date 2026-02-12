@@ -10,6 +10,7 @@ import {
     ProjectStatus,
     WorkloadLevel,
 } from '../../../types/project.types';
+import { statusOptions, workloadOptions } from './config';
 
 interface EditProjectDialogProps {
     project: Project;
@@ -71,20 +72,6 @@ export const EditProjectDialog = ({
             onError: (errors) => console.error('Validation errors:', errors),
         });
     };
-
-    const statusOptions = [
-        { value: 'planning', label: 'Plánovanie' },
-        { value: 'active', label: 'Aktívny' },
-        { value: 'on_hold', label: 'Pozastavený' },
-        { value: 'completed', label: 'Dokončený' },
-        { value: 'cancelled', label: 'Zrušený' },
-    ];
-
-    const workloadOptions = [
-        { value: 'low', label: 'Nízke' },
-        { value: 'medium', label: 'Stredné' },
-        { value: 'high', label: 'Vysoké' },
-    ];
 
     return (
         <FormDialog
@@ -186,7 +173,7 @@ export const EditProjectDialog = ({
                 step="0.01"
             />
 
-            {/* ✅ Loading state */}
+            {/* Loading state */}
             {isLoading && (
                 <div className="flex items-center justify-center py-8">
                     <Loader2 className="animate-spin" size={24} />

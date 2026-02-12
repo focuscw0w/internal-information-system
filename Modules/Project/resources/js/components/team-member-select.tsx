@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { PERMISSION_GROUPS } from './index/dialogs/config';
 
 interface TeamMemberSelectProps {
     allUsers: User[];
@@ -26,47 +27,6 @@ export interface TeamMemberSettings {
     permissions: string[];
     hourly_rate?: number;
 }
-
-const PERMISSION_GROUPS = [
-    {
-        label: 'Projekt',
-        permissions: [
-            { value: 'view_project', label: 'Zobrazenie projektu' },
-            { value: 'edit_project', label: 'Úprava projektu' },
-            { value: 'delete_project', label: 'Zmazanie projektu' },
-        ],
-    },
-    {
-        label: 'Úlohy',
-        permissions: [
-            { value: 'view_tasks', label: 'Zobrazenie úloh' },
-            { value: 'create_tasks', label: 'Vytváranie úloh' },
-            { value: 'edit_tasks', label: 'Úprava úloh' },
-            { value: 'delete_tasks', label: 'Mazanie úloh' },
-            { value: 'assign_tasks', label: 'Priradenie úloh' },
-        ],
-    },
-    {
-        label: 'Tím',
-        permissions: [
-            { value: 'view_team', label: 'Zobrazenie tímu' },
-            { value: 'manage_team', label: 'Správa tímu' },
-        ],
-    },
-    {
-        label: 'Rozpočet',
-        permissions: [
-            { value: 'view_budget', label: 'Zobrazenie rozpočtu' },
-            { value: 'edit_budget', label: 'Úprava rozpočtu' },
-        ],
-    },
-    {
-        label: 'Ostatné',
-        permissions: [
-            { value: 'export_data', label: 'Export dát' },
-        ],
-    },
-];
 
 export const TeamMemberSelect = ({
     allUsers,
@@ -133,9 +93,8 @@ export const TeamMemberSelect = ({
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-2">
             <Label className="flex items-center gap-2">
-                <Users size={16} />
                 Tím projektu
                 {selectedMembers.length > 0 && (
                     <span className="text-sm font-normal text-gray-500">
@@ -328,9 +287,6 @@ export const TeamMemberSelect = ({
                     <Users className="mx-auto mb-2 text-gray-400" size={32} />
                     <p className="text-sm text-gray-500">
                         Žiadni členovia tímu nie sú priradení
-                    </p>
-                    <p className="text-xs text-gray-400">
-                        Použite dropdown vyššie pre pridanie členov
                     </p>
                 </div>
             )}

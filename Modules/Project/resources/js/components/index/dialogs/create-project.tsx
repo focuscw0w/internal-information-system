@@ -3,6 +3,7 @@ import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
+import { statusOptions, workloadOptions } from './config';
 
 export const CreateProjectDialog = () => {
     const [open, setOpen] = useState(false);
@@ -26,20 +27,6 @@ export const CreateProjectDialog = () => {
             },
         });
     };
-
-    const statusOptions = [
-        { value: 'planning', label: 'Plánovanie' },
-        { value: 'active', label: 'Aktívny' },
-        { value: 'on_hold', label: 'Pozastavený' },
-        { value: 'completed', label: 'Dokončený' },
-        { value: 'cancelled', label: 'Zrušený' },
-    ];
-
-    const workloadOptions = [
-        { value: 'low', label: 'Nízke' },
-        { value: 'medium', label: 'Stredné' },
-        { value: 'high', label: 'Vysoké' },
-    ];
 
     return (
         <FormDialog
