@@ -1,4 +1,4 @@
-import { ProjectStatus, WorkloadLevel } from '../types/project.types';
+import { ProjectStatus, WorkloadLevel } from '../types/types';
 
 export const getStatusColor = (status: ProjectStatus): string => {
     switch (status) {

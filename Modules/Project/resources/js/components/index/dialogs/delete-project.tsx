@@ -1,8 +1,8 @@
+import { DeleteDialog } from '@/components/dialogs/delete-dialog';
 import { router } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Project } from '../../../types/project.types';
-import { DeleteDialog } from '@/components/dialogs/delete-dialog';
+import { Project } from '../../../types/types';
 
 interface DeleteProjectDialogProps {
     project: Project;

@@ -7,9 +7,9 @@ import {
     CircleDashed,
     PlayCircle,
 } from 'lucide-react';
-import { Project } from '../../types/project.types';
-import { TaskActions } from './task-actions';
+import { Project } from '../../types/types';
 import { CreateTaskDialog } from './dialogs/create-task';
+import { TaskActions } from './task-actions';
 
 interface TaskListProps {
     project: Project;
@@ -45,7 +45,10 @@ export const TaskList = ({ project }: TaskListProps) => {
                     <CardTitle className="text-lg">
                         Úlohy ({project.tasks_completed}/{project.tasks_total})
                     </CardTitle>
-                    <CreateTaskDialog projectId={project.id} team={project.team} />
+                    <CreateTaskDialog
+                        projectId={project.id}
+                        team={project.team}
+                    />
                 </div>
             </CardHeader>
             <CardContent>
@@ -123,7 +126,10 @@ export const TaskList = ({ project }: TaskListProps) => {
                             <p className="mb-4 text-gray-500">
                                 Zatiaľ nie sú vytvorené žiadne úlohy
                             </p>
-                            <CreateTaskDialog projectId={project.id} team={project.team} />
+                            <CreateTaskDialog
+                                projectId={project.id}
+                                team={project.team}
+                            />
                         </div>
                     )}
                 </div>

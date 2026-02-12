@@ -1,11 +1,10 @@
-import { Button } from '@/components/ui/button';
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
+import { Button } from '@/components/ui/button';
 import { useForm } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
-import { TeamMember } from '../../../types/project.types';;
-
+import { TeamMember } from '../../../types/types';
 interface CreateTaskDialogProps {
     projectId: number;
     team: TeamMember[];
@@ -60,7 +59,10 @@ export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
             open={open}
             onOpenChange={setOpen}
             trigger={
-                <Button size="default" className="bg-primary hover:bg-primary/90">
+                <Button
+                    size="default"
+                    className="bg-primary hover:bg-primary/90"
+                >
                     <Plus className="mr-2 h-4 w-4" />
                     Pridať úlohu
                 </Button>
@@ -98,7 +100,7 @@ export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
                     id="status"
                     type="select"
                     value={data.status}
-                    onChange={(value) => setData('status', value) }
+                    onChange={(value) => setData('status', value)}
                     error={errors.status}
                     options={statusOptions}
                 />

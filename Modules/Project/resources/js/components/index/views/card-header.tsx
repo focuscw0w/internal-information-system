@@ -1,6 +1,6 @@
 import { AlertCircle } from 'lucide-react';
-import { ProjectStatus, WorkloadLevel } from '../../../types/project.types';
-import { getWorkloadColor } from '../../../utils/project.utils';
+import { ProjectStatus, WorkloadLevel } from '../../../types/types';
+import { getWorkloadColor } from '../../../config';
 import { BadgeLabel } from '../../ui/badge';
 
 interface CardHeaderProps {

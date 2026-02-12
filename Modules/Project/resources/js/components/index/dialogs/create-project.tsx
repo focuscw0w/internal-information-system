@@ -1,13 +1,17 @@
-import { Button } from '@/components/ui/button';
-import { useForm } from '@inertiajs/react';
-import { useState } from 'react';
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
-import { TeamMemberSelect } from '../../team-member-select';
+import { Button } from '@/components/ui/button';
 import { useUsers } from '@/hooks/use-users';
+import { useForm } from '@inertiajs/react';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 import { statusOptions, workloadOptions } from '../../../config';
-import { ProjectStatus, WorkloadLevel, TeamMemberSettings } from '../../../types/project.types';
+import {
+    ProjectStatus,
+    TeamMemberSettings,
+    WorkloadLevel,
+} from '../../../types/types';
+import { TeamMemberSelect } from '../../team-member-select';
 
 interface CreateProjectFormData {
     name: string;
@@ -23,25 +27,26 @@ interface CreateProjectFormData {
 
 export const CreateProjectDialog = () => {
     const [open, setOpen] = useState(false);
-    
+
     const { data: users = [], isLoading, isError } = useUsers();
 
     // ✅ Použiť generický typ
-    const { data, setData, post, processing, errors, reset } = useForm<CreateProjectFormData>({
-        name: '',
-        description: '',
-        status: 'planning',
-        workload: 'medium',
-        start_date: '',
-        end_date: '',
-        budget: '',
-        team_members: [],
-        team_settings: {},
-    });
+    const { data, setData, post, processing, errors, reset } =
+        useForm<CreateProjectFormData>({
+            name: '',
+            description: '',
+            status: 'planning',
+            workload: 'medium',
+            start_date: '',
+            end_date: '',
+            budget: '',
+            team_members: [],
+            team_settings: {},
+        });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         post('/projects', {
             onSuccess: () => {
                 setOpen(false);
@@ -116,7 +121,9 @@ export const CreateProjectDialog = () => {
                     id="status"
                     type="select"
                     value={data.status}
-                    onChange={(value) => setData('status', value as ProjectStatus)}
+                    onChange={(value) =>
+                        setData('status', value as ProjectStatus)
+                    }
                     error={errors.status}
                     options={statusOptions}
                 />
@@ -126,7 +133,9 @@ export const CreateProjectDialog = () => {
                     id="workload"
                     type="select"
                     value={data.workload}
-                    onChange={(value) => setData('workload', value as WorkloadLevel)}
+                    onChange={(value) =>
+                        setData('workload', value as WorkloadLevel)
+                    }
                     error={errors.workload}
                     options={workloadOptions}
                 />

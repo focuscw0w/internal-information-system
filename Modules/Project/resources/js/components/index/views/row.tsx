@@ -1,5 +1,5 @@
 import { AlertCircle, Users } from 'lucide-react';
-import { Project } from '../../../types/project.types';
+import { Project } from '../../../types/types';
 import {
     getCapacityColor,
     getStatusColor,

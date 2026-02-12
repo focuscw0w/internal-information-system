@@ -4,14 +4,14 @@ import { useUsers } from '@/hooks/use-users';
 import { useForm } from '@inertiajs/react';
 import { AlertCircle, Edit, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { statusOptions, workloadOptions } from '../../../config';
 import {
     Project,
     ProjectStatus,
+    TeamMemberSettings,
     WorkloadLevel,
-} from '../../../types/project.types';
+} from '../../../types/types';
 import { TeamMemberSelect } from '../../team-member-select';
-import { TeamMemberSettings } from '../../../types/project.types';
-import { statusOptions, workloadOptions } from '../../../config';
 
 interface EditProjectDialogProps {
     project: Project;
@@ -52,17 +52,18 @@ export const EditProjectDialog = ({
     );
 
     // ✅ Použiť generický typ
-    const { data, setData, put, processing, errors } = useForm<EditProjectFormData>({
-        name: project.name || '',
-        description: project.description || '',
-        status: project.status || 'planning',
-        workload: project.workload || 'medium',
-        start_date: project.start_date || '',
-        end_date: project.end_date || '',
-        budget: project.budget?.toString() || '',
-        team_members: initialTeamMembers,
-        team_settings: initialTeamSettings,
-    });
+    const { data, setData, put, processing, errors } =
+        useForm<EditProjectFormData>({
+            name: project.name || '',
+            description: project.description || '',
+            status: project.status || 'planning',
+            workload: project.workload || 'medium',
+            start_date: project.start_date || '',
+            end_date: project.end_date || '',
+            budget: project.budget?.toString() || '',
+            team_members: initialTeamMembers,
+            team_settings: initialTeamSettings,
+        });
 
     const handleOpen = (newOpen: boolean) => {
         if (newOpen) {

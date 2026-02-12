@@ -1,5 +1,5 @@
 import { Calendar, Clock, DollarSign, TrendingUp } from 'lucide-react';
-import { Project } from '../../types/project.types';
+import { Project } from '../../types/types';
 import { StatCard } from '../ui/statcard';
 import { Allocations } from './allocations';
 import { TaskList } from './task-list';

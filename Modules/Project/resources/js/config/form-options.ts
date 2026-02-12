@@ -1,4 +1,4 @@
-import { ProjectStatus, WorkloadLevel } from '../types/project.types';
+import { ProjectStatus, WorkloadLevel } from '../types/types';
 
 export const statusOptions: { value: ProjectStatus; label: string }[] = [
     { value: 'planning', label: 'Plánovanie' },

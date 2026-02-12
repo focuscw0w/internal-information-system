@@ -1,4 +1,4 @@
-import { TeamMember } from '../types/project.types';
+import { TeamMember } from '../types/types';
 
 export const PERMISSION_GROUPS = [
     {

@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react';
 import { CheckCircle2, Clock, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
-import { Project, ViewMode } from '../../types/project.types';
+import { Project, ViewMode } from '../../types/types';
 import { StatCard } from '../ui/statcard';
 import { IndexHeader } from './index-header';
 import { Card } from './views/card';

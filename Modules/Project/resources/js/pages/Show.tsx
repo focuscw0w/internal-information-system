@@ -5,9 +5,9 @@ import { Calendar, KanbanIcon, LayoutGrid, Users } from 'lucide-react';
 import { Kanban } from '../components/show/kanban';
 import { Overview } from '../components/show/overview';
 import { ShowHeader } from '../components/show/show-header';
-import { Timeline } from '../components/show/timeline';
-import { Project } from '../types/project.types';
 import { Team } from '../components/show/team';
+import { Timeline } from '../components/show/timeline';
+import { Project } from '../types/types';
 
 export default function Show({ project }: { project: Project }) {
     return (

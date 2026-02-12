@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Project } from '../../types/project.types';
+import { Project } from '../../types/types';
 
 interface KanbanProps {
     project: Project;

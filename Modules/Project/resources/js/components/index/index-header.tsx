@@ -1,4 +1,4 @@
-import { ViewMode } from '../../types/project.types';
+import { ViewMode } from '../../types/types';
 import { CreateProjectDialog } from './dialogs/create-project';
 import { ViewModeToggle } from './viewmode-toggle';
 
@@ -7,7 +7,10 @@ interface IndexHeaderProps {
     onViewModeChange: (mode: ViewMode) => void;
 }
 
-export const IndexHeader = ({ viewMode, onViewModeChange }: IndexHeaderProps) => {
+export const IndexHeader = ({
+    viewMode,
+    onViewModeChange,
+}: IndexHeaderProps) => {
     return (
         <div className="mb-8">
             <div className="items-center justify-between gap-4 md:flex lg:gap-0">

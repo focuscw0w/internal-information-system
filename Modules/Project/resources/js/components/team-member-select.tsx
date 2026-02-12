@@ -12,8 +12,8 @@ import {
 import { User } from '@/types';
 import { Plus, Users, X } from 'lucide-react';
 import { useState } from 'react';
-import { TeamMemberSettings } from '../types/project.types';
 import { PERMISSION_GROUPS } from '../config';
+import { TeamMemberSettings } from '../types/types';
 
 interface TeamMemberSelectProps {
     allUsers: User[];

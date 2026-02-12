@@ -3,7 +3,7 @@ import { FormField } from '@/components/dialogs/form-field';
 import { useForm } from '@inertiajs/react';
 import { Edit } from 'lucide-react';
 import { useState } from 'react';
-import { Task, TeamMember } from '../../../types/project.types';
+import { Task, TeamMember } from '../../../types/types';
 
 interface EditTaskDialogProps {
     task: Task;

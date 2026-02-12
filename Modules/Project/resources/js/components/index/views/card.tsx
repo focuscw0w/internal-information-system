@@ -1,8 +1,8 @@
-import { Project } from '../../../types/project.types';
-import { getCapacityColor } from '../../../utils/project.utils';
-import { ProjectActions } from '../project-actions';
+import { Project } from '../../../types/types';
+import { getCapacityColor } from '../../../config';
 import { Metrics } from '../metrics';
 import { ProgressBar } from '../progressbar';
+import { ProjectActions } from '../project-actions';
 import { CardHeader } from './card-header';
 
 interface CardProps {

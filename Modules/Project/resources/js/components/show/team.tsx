@@ -1,8 +1,8 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { CheckCircle2, Crown, Users } from 'lucide-react';
-import { Project } from '../../types/project.types';
 import { PERMISSION_GROUPS, PERMISSION_LABELS } from '../../config';
+import { Project } from '../../types/types';
 import { EditProjectDialog } from '../index/dialogs/edit-project';
 
 interface TeamProps {
@@ -158,7 +158,7 @@ export const Team = ({ project }: TeamProps) => {
                                                                                         perm
                                                                                     }
                                                                                     variant="outline"
-                                                                                    className="text-xs"
+                                                                                    className="text-xs text-white bg-blue-600 py-1 px-2"
                                                                                 >
                                                                                     {PERMISSION_LABELS[
                                                                                         perm

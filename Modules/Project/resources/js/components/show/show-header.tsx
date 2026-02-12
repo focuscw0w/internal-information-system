@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
-import { Project } from '../../types/project.types';
+import { Project } from '../../types/types';
 import { EditProjectDialog } from '../index/dialogs/edit-project';
 import { BadgeLabel } from '../ui/badge';
 
@@ -34,15 +34,18 @@ export const ShowHeader = ({ project }: ShowHeaderProps) => {
                     <BadgeLabel
                         type="status"
                         value={project.status}
-                        className="hidden sm:block"
+                        className="hidden sm:flex items-center justify-center"
                     />
                     <BadgeLabel
                         type="workload"
                         value={project.workload}
-                        className="hidden sm:block"
+                        className="hidden sm:flex items-center justify-center"
                     />
 
-                    <EditProjectDialog project={project} text='Upraviť projekt' />
+                    <EditProjectDialog
+                        project={project}
+                        text="Upraviť projekt"
+                    />
                 </div>
             </div>
         </div>

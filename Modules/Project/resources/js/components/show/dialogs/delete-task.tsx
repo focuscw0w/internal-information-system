@@ -2,7 +2,7 @@ import { DeleteDialog } from '@/components/dialogs/delete-dialog';
 import { router } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Task } from '../../../types/project.types';
+import { Task } from '../../../types/types';
 
 interface DeleteTaskDialogProps {
     task: Task;

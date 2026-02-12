@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
-import { Project } from '../../types/project.types';
+import { Project } from '../../types/types';
 
 interface TimelineProps {
     project: Project;

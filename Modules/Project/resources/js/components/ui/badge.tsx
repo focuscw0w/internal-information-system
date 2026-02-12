@@ -4,7 +4,7 @@ import {
     TaskPriority,
     TaskStatus,
     WorkloadLevel,
-} from '../../types/project.types';
+} from '../../types/types';
 
 type BadgeType = 'status' | 'workload' | 'priority' | 'task-status';
 
@@ -118,7 +118,11 @@ export const BadgeLabel = ({
     return (
         <Badge
             variant={variant}
-            className={getColor() + ' px-3 py-2 flex justify-center items-center' + (className ?? '')}
+            className={
+                getColor() +
+                ' flex items-center justify-center px-3 py-2' +
+                (className ?? '')
+            }
         >
             {getText()}
         </Badge>

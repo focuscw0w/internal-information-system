@@ -1,4 +1,4 @@
-import { Project } from '../../types/project.types';
+import { Project } from '../../types/types';
 import { DeleteProjectDialog } from './dialogs/delete-project';
 import { EditProjectDialog } from './dialogs/edit-project';
 
