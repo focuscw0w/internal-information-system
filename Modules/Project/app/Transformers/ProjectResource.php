@@ -86,13 +86,20 @@ class ProjectResource extends JsonResource
 
             'team' => $this->whenLoaded('team', function () {
                 return $this->team->map(function ($member) {
+                    $permissions = $member->pivot->permissions;
+                    if (is_string($permissions)) {
+                        $decoded = json_decode($permissions, true);
+                        $permissions = is_array($decoded) ? $decoded : [];
+                    } elseif (!is_array($permissions)) {
+                        $permissions = [];
+                    }
+
                     return [
                         'id' => $member->id,
                         'name' => $member->name,
                         'email' => $member->email ?? null,
-                        'permissions' => $member->pivot->permissions ?? [],
-                        'allocation' => $member->pivot->allocation ?? null,
-                        'hourly_rate' => $member->pivot->hourly_rate ?? null,
+                        'permissions' => $permissions,
+                        'allocation' => $member->pivot->allocation ?? 100,
                     ];
                 });
             }),
@@ -102,15 +109,28 @@ class ProjectResource extends JsonResource
                 $teamMember = $this->team()->where('user_id', $user->id)->first();
 
                 if ($teamMember) {
-                    return $teamMember->pivot->permissions ?? [];
+                    $permissions = $teamMember->pivot->permissions;
+                    if (is_string($permissions)) {
+                        $decoded = json_decode($permissions, true);
+                        return is_array($decoded) ? $decoded : [];
+                    }
+                    return is_array($permissions) ? $permissions : [];
                 }
 
                 if ($this->owner_id === $user->id) {
                     return [
-                        'view_project', 'edit_project', 'delete_project',
-                        'view_team', 'manage_team',
-                        'view_tasks', 'create_tasks', 'edit_tasks', 'delete_tasks', 'assign_tasks',
-                        'view_budget', 'edit_budget',
+                        'view_project',
+                        'edit_project',
+                        'delete_project',
+                        'view_team',
+                        'manage_team',
+                        'view_tasks',
+                        'create_tasks',
+                        'edit_tasks',
+                        'delete_tasks',
+                        'assign_tasks',
+                        'view_budget',
+                        'edit_budget',
                         'export_data',
                     ];
                 }

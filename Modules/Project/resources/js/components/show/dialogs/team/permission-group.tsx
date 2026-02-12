@@ -20,12 +20,6 @@ export const PermissionGroup = ({
     selectedPermissions,
     onToggle,
 }: PermissionGroupProps) => {
-    const hasAnyPermission = permissions.some((p) =>
-        selectedPermissions.includes(p.value),
-    );
-
-    if (!hasAnyPermission) return null;
-
     return (
         <div className="rounded-md bg-gray-50 p-2">
             <p className="mb-1 text-xs font-semibold text-gray-700">

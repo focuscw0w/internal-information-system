@@ -51,7 +51,7 @@ export const TeamMemberList = ({
         const newMembers = selectedMembers.filter((id) => id !== userId);
         const newSettings = { ...teamSettings };
         delete newSettings[userId];
-        
+
         onChange(newMembers, newSettings);
     };
 
@@ -72,7 +72,11 @@ export const TeamMemberList = ({
     };
 
     const handleTogglePermission = (userId: number, permission: string) => {
-        const currentPermissions = teamSettings[userId]?.permissions || [];
+        const userPermissions = teamSettings[userId]?.permissions;
+        const currentPermissions = Array.isArray(userPermissions)
+            ? userPermissions
+            : [];
+
         const newPermissions = currentPermissions.includes(permission)
             ? currentPermissions.filter((p) => p !== permission)
             : [...currentPermissions, permission];

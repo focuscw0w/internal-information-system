@@ -27,9 +27,14 @@ export const ManageTeamDialog = ({
     const initialTeamMembers = project.team.map((member) => member.id);
     const initialTeamSettings = project.team.reduce(
         (acc, member) => {
+            const permissions = Array.isArray(member.permissions)
+                ? member.permissions
+                : [];
+
             acc[member.id] = {
                 allocation: member.allocation || 100,
-                permissions: member.permissions || ['view_project'],
+                permissions:
+                    permissions.length > 0 ? permissions : ['view_project'],
             };
             return acc;
         },
