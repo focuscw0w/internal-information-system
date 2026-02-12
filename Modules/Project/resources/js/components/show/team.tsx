@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { CheckCircle2, Crown, Users } from 'lucide-react';
 import { Project } from '../../types/project.types';
-import { PERMISSION_GROUPS, PERMISSION_LABELS } from '../index/dialogs/config';
+import { PERMISSION_GROUPS, PERMISSION_LABELS } from '../../config';
 import { EditProjectDialog } from '../index/dialogs/edit-project';
 
 interface TeamProps {

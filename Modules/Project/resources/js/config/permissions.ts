@@ -1,16 +1,4 @@
-export const statusOptions = [
-    { value: 'planning', label: 'Plánovanie' },
-    { value: 'active', label: 'Aktívny' },
-    { value: 'on_hold', label: 'Pozastavený' },
-    { value: 'completed', label: 'Dokončený' },
-    { value: 'cancelled', label: 'Zrušený' },
-];
-
-export const workloadOptions = [
-    { value: 'low', label: 'Nízke' },
-    { value: 'medium', label: 'Stredné' },
-    { value: 'high', label: 'Vysoké' },
-];
+import { TeamMember } from '../types/project.types';
 
 export const PERMISSION_GROUPS = [
     {
@@ -52,10 +40,30 @@ export const PERMISSION_GROUPS = [
 ];
 
 export const PERMISSION_LABELS: Record<string, string> =
-    PERMISSION_GROUPS.flatMap((group) => group.permissions).reduce(
-        (acc, perm) => {
-            acc[perm.value] = perm.label;
-            return acc;
-        },
-        {} as Record<string, string>,
-    );
+    PERMISSION_GROUPS.flatMap((group) => group.permissions).reduce<
+        Record<string, string>
+    >((acc, perm) => {
+        acc[perm.value] = perm.label;
+        return acc;
+    }, {});
+
+export const hasPermission = (
+    teamMember: TeamMember,
+    permission: string,
+): boolean => {
+    return teamMember.permissions.includes(permission);
+};
+
+export const hasAnyPermission = (
+    teamMember: TeamMember,
+    permissions: string[],
+): boolean => {
+    return permissions.some((p) => teamMember.permissions.includes(p));
+};
+
+export const hasAllPermissions = (
+    teamMember: TeamMember,
+    permissions: string[],
+): boolean => {
+    return permissions.every((p) => teamMember.permissions.includes(p));
+};

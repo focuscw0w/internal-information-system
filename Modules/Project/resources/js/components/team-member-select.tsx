@@ -13,7 +13,7 @@ import { User } from '@/types';
 import { Plus, Users, X } from 'lucide-react';
 import { useState } from 'react';
 import { TeamMemberSettings } from '../types/project.types';
-import { PERMISSION_GROUPS } from './index/dialogs/config';
+import { PERMISSION_GROUPS } from '../config';
 
 interface TeamMemberSelectProps {
     allUsers: User[];

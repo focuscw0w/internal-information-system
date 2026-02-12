@@ -6,7 +6,7 @@ import { FormField } from '@/components/dialogs/form-field';
 import { TeamMemberSelect } from '../../team-member-select';
 import { useUsers } from '@/hooks/use-users';
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { statusOptions, workloadOptions } from './config';
+import { statusOptions, workloadOptions } from '../../../config';
 import { ProjectStatus, WorkloadLevel, TeamMemberSettings } from '../../../types/project.types';
 
 interface CreateProjectFormData {

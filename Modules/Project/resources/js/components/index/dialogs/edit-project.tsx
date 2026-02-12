@@ -11,7 +11,7 @@ import {
 } from '../../../types/project.types';
 import { TeamMemberSelect } from '../../team-member-select';
 import { TeamMemberSettings } from '../../../types/project.types';
-import { statusOptions, workloadOptions } from './config';
+import { statusOptions, workloadOptions } from '../../../config';
 
 interface EditProjectDialogProps {
     project: Project;
