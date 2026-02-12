@@ -9,8 +9,10 @@ export type ViewMode = 'grid' | 'list';
 export interface TeamMember {
     id: number;
     name: string;
+    email?: string; 
     permissions: string[];
     allocation: number;
+    hourly_rate?: number; 
 }
 
 export interface Project {

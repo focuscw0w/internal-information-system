@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use Modules\Project\App\Services\ProjectService;
 use Modules\Project\Http\Requests\UpdateProjectRequest;
 use Modules\Project\Transformers\ProjectResource;
+use App\Models\User;
 
 class ProjectController extends Controller
 {
@@ -81,6 +82,8 @@ class ProjectController extends Controller
             'owner',
             'team',
         ]);
+
+       // $allUsers = User::select("id", "name", "email")->get();
 
         return Inertia::render('Project/Show', [
             'project' => new ProjectResource($project)->resolve(),

@@ -3,13 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Http\Controllers\UserController; 
+
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
-
-/*
- * Dashboard - user must be authenticated
- */
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -17,45 +15,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
-/*
- * Pricing page - user must be authenticated
- */
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('pricing', function () {
-        return Inertia::render('pricing');
-    })->name('pricing');
-});
-
-/*
- * Time tracking page - user must be authenticated
- */
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('time-tracking', function () {
-        return Inertia::render('time-tracking');
-    })->name('time-tracking');
-});
-
-/*
- * Users page - user must be authenticated
- */
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('users', function () {
-        return Inertia::render('users');
-    })->name('users');
-});
-
-/*
- * Tasks page - user must be authenticated
- */
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('tasks', function () {
-        return Inertia::render('tasks');
-    })->name('tasks');
-});
+// TODO: presunúť do user-modulu
+Route::get('/users', [UserController::class, 'index']);
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

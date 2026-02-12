@@ -1,7 +1,9 @@
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
+import { TeamMemberSelect } from '../../team-member-select';
+import { useUsers } from '@/hooks/use-users'; 
 import { useForm } from '@inertiajs/react';
-import { Edit } from 'lucide-react';
+import { Edit, Loader2, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import {
     Project,
@@ -19,6 +21,19 @@ export const EditProjectDialog = ({
     text,
 }: EditProjectDialogProps) => {
     const [open, setOpen] = useState(false);
+    
+    const { data: users = [], isLoading, isError, error } = useUsers();
+    console.log(users);
+
+    const initialTeamMembers = project.team.map((member) => member.id);
+    const initialTeamSettings = project.team.reduce((acc, member) => {
+        acc[member.id] = {
+            allocation: member.allocation || 100,
+            permissions: member.permissions || ['view'],
+            hourly_rate: member.hourly_rate,
+        };
+        return acc;
+    }, {} as Record<number, any>);
 
     const { data, setData, put, processing, errors } = useForm({
         name: project.name || '',
@@ -28,11 +43,12 @@ export const EditProjectDialog = ({
         start_date: project.start_date || '',
         end_date: project.end_date || '',
         budget: project.budget?.toString() || '',
+        team_members: initialTeamMembers,
+        team_settings: initialTeamSettings,
     });
 
     const handleOpen = (newOpen: boolean) => {
         if (newOpen) {
-            // Refresh data pri každom otvorení
             setData({
                 name: project.name || '',
                 description: project.description || '',
@@ -41,6 +57,8 @@ export const EditProjectDialog = ({
                 start_date: project.start_date || '',
                 end_date: project.end_date || '',
                 budget: project.budget?.toString() || '',
+                team_members: initialTeamMembers,
+                team_settings: initialTeamSettings,
             });
         }
         setOpen(newOpen);
@@ -75,11 +93,11 @@ export const EditProjectDialog = ({
             trigger={
                 <button
                     onClick={(e) => e.stopPropagation()}
-                    className="cursor-pointer flex items-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    className="flex cursor-pointer items-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
                     title="Upraviť projekt"
                 >
                     <Edit size={20} />
-                    <span className='text-sm'>{text} </span>
+                    <span className="text-sm">{text}</span>
                 </button>
             }
             title="Upraviť projekt"
@@ -167,6 +185,42 @@ export const EditProjectDialog = ({
                 min="0"
                 step="0.01"
             />
+
+            {/* ✅ Loading state */}
+            {isLoading && (
+                <div className="flex items-center justify-center py-8">
+                    <Loader2 className="animate-spin" size={24} />
+                    <span className="ml-2 text-gray-600">
+                        Načítavam používateľov...
+                    </span>
+                </div>
+            )}
+
+            {isError && (
+                <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-red-600">
+                    <AlertCircle size={20} />
+                    <span>
+                        Nepodarilo sa načítať používateľov. Skúste to znova.
+                    </span>
+                </div>
+            )}
+
+            {/* TeamMemberSelect */}
+            {!isLoading && !isError && (
+                <TeamMemberSelect
+                    allUsers={users}
+                    selectedMembers={data.team_members}
+                    teamSettings={data.team_settings}
+                    onChange={(members, settings) => {
+                        setData({
+                            ...data,
+                            team_members: members,
+                            team_settings: settings,
+                        });
+                    }}
+                    error={errors.team_members}
+                />
+            )}
         </FormDialog>
     );
 };
