@@ -2,8 +2,8 @@
 
 namespace Modules\Project\App\Services;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Project\App\Contracts\ProjectServiceInterface;
@@ -26,8 +26,15 @@ class ProjectService implements ProjectServiceInterface
             $query->where('workload', $filters['workload']);
         }
 
+        if (isset($filters['owner_id'])) {
+            $query->where('owner_id', $filters['owner_id']);
+        }
+
         if (isset($filters['search'])) {
-            $query->where('name', 'like', '%'.$filters['search'].'%');
+            $query->where(function ($q) use ($filters) {
+                $q->where('name', 'like', '%'.$filters['search'].'%')
+                  ->orWhere('description', 'like', '%'.$filters['search'].'%');
+            });
         }
 
         return $query->get();
@@ -48,8 +55,15 @@ class ProjectService implements ProjectServiceInterface
             $query->where('workload', $filters['workload']);
         }
 
+        if (isset($filters['owner_id'])) {
+            $query->where('owner_id', $filters['owner_id']);
+        }
+
         if (isset($filters['search'])) {
-            $query->where('name', 'like', '%'.$filters['search'].'%');
+            $query->where(function ($q) use ($filters) {
+                $q->where('name', 'like', '%'.$filters['search'].'%')
+                  ->orWhere('description', 'like', '%'.$filters['search'].'%');
+            });
         }
 
         return $query->paginate($perPage);
@@ -68,41 +82,44 @@ class ProjectService implements ProjectServiceInterface
      */
     public function createProject(array $data): Project
     {
-        $project = Project::create([
-            'name' => $data['name'],
-            'description' => $data['description'] ?? null,
-            'status' => $data['status'] ?? 'planning',
-            'workload' => $data['workload'] ?? 'medium',
-            'start_date' => $data['start_date'],
-            'end_date' => $data['end_date'],
-            'budget' => $data['budget'] ?? null,
-            'owner_id' => auth()->id(),
-            'progress' => 0,
-            'tasks_total' => 0,
-            'tasks_completed' => 0,
-            'capacity_used' => 0,
-            'capacity_available' => 100,
-            'budget_spent' => 0,
-        ]);
+        Log::info('Creating project with data:', $data);
 
-        // Attach team members if provided
-        if (isset($data['team_members']) && is_array($data['team_members']) && ! empty($data['team_members'])) {
-            $syncData = [];
+        try {
+            DB::beginTransaction();
 
-            foreach ($data['team_members'] as $userId) {
-                $settings = $data['team_settings'][$userId] ?? [];
+            $project = Project::create([
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'status' => $data['status'] ?? 'planning',
+                'workload' => $data['workload'] ?? 'medium',
+                'start_date' => $data['start_date'],
+                'end_date' => $data['end_date'],
+                'budget' => $data['budget'] ?? null,
+                'owner_id' => auth()->id(),
+                'progress' => 0,
+                'tasks_total' => 0,
+                'tasks_completed' => 0,
+                'capacity_used' => 0,
+                'capacity_available' => 100,
+                'budget_spent' => 0,
+            ]);
 
-                $syncData[$userId] = [
-                    'permissions' => json_encode($settings['permissions'] ?? ['view_project']),
-                    'allocation' => $settings['allocation'] ?? 100,
-                ];
+            // Attach team members if provided
+            if (isset($data['team_members']) && is_array($data['team_members']) && !empty($data['team_members'])) {
+                $this->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
             }
 
-            Log::info('Attaching team members:', $syncData);
-            $project->team()->attach($syncData);
-        }
+            DB::commit();
 
-        return $project->fresh(['owner', 'team', 'tasks']);
+            return $project->fresh(['owner', 'team', 'tasks']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Project creation failed: '.$e->getMessage(), [
+                'data' => $data,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
     }
 
     /**
@@ -112,11 +129,11 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($id);
 
-        if (! $project) {
+        if (!$project) {
             return null;
         }
 
-        Log::info('UpdateProject data:', $data);
+        Log::info('Updating project:', ['id' => $id, 'data' => $data]);
 
         try {
             DB::beginTransaction();
@@ -133,28 +150,12 @@ class ProjectService implements ProjectServiceInterface
                 'progress' => $data['progress'] ?? $project->progress,
             ]);
 
-            Log::info('Team members:', [
-                'exists' => array_key_exists('team_members', $data),
-                'value' => $data['team_members'] ?? 'not set',
-                'team_settings' => $data['team_settings'] ?? 'not set',
-            ]);
-
-            // Sync team members
+            // Sync team members if provided
             if (array_key_exists('team_members', $data)) {
-                if (is_array($data['team_members']) && ! empty($data['team_members'])) {
-                    $syncData = [];
-
-                    foreach ($data['team_members'] as $userId) {
-                        $settings = $data['team_settings'][$userId] ?? [];
-
-                        $syncData[$userId] = [
-                            'permissions' => json_encode($settings['permissions'] ?? ['view_project']),
-                            'allocation' => $settings['allocation'] ?? 100,
-                        ];
-                    }
-
-                    $project->team()->sync($syncData);
+                if (is_array($data['team_members']) && !empty($data['team_members'])) {
+                    $this->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
                 } else {
+                    Log::info('Removing all team members from project', ['project_id' => $id]);
                     $project->team()->sync([]);
                 }
             }
@@ -162,10 +163,13 @@ class ProjectService implements ProjectServiceInterface
             DB::commit();
 
             return $project->fresh(['owner', 'team', 'tasks']);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Project update failed: '.$e->getMessage());
+            Log::error('Project update failed: '.$e->getMessage(), [
+                'project_id' => $id,
+                'data' => $data,
+                'trace' => $e->getTraceAsString(),
+            ]);
             throw $e;
         }
     }
@@ -177,9 +181,11 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = $this->getProjectById($id);
 
-        if (! $project) {
+        if (!$project) {
             return false;
         }
+
+        Log::info('Deleting project', ['project_id' => $id]);
 
         return $project->delete();
     }
@@ -190,7 +196,13 @@ class ProjectService implements ProjectServiceInterface
     public function getProjectStatistics(): array
     {
         return [
-            'active_projects' => Project::active()->count(),
+            'total' => Project::count(),
+            'active' => Project::where('status', 'active')->count(),
+            'planning' => Project::where('status', 'planning')->count(),
+            'completed' => Project::where('status', 'completed')->count(),
+            'on_hold' => Project::where('status', 'on_hold')->count(),
+            'cancelled' => Project::where('status', 'cancelled')->count(),
+            'overdue' => $this->getOverdueProjects()->count(),
             'total_team_members' => Project::active()
                 ->with('team')
                 ->get()
@@ -198,42 +210,10 @@ class ProjectService implements ProjectServiceInterface
                 ->flatten()
                 ->unique('id')
                 ->count(),
-            'average_capacity' => Project::active()->avg('capacity_used'),
+            'average_capacity' => round(Project::active()->avg('capacity_used') ?? 0, 2),
             'completed_tasks' => Project::active()->sum('tasks_completed'),
             'total_tasks' => Project::active()->sum('tasks_total'),
         ];
-    }
-
-    /**
-     * Add team member to project
-     */
-    public function addTeamMember(int $projectId, int $userId, string $role, int $allocation = 100): bool
-    {
-        $project = Project::find($projectId);
-
-        if (! $project) {
-            return false;
-        }
-
-        $project->addTeamMember($userId, $role, $allocation);
-
-        return true;
-    }
-
-    /**
-     * Remove team member from project
-     */
-    public function removeTeamMember(int $projectId, int $userId): bool
-    {
-        $project = Project::find($projectId);
-
-        if (! $project) {
-            return false;
-        }
-
-        $project->removeTeamMember($userId);
-
-        return true;
     }
 
     /**
@@ -243,13 +223,13 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($projectId);
 
-        if (! $project) {
+        if (!$project) {
             return null;
         }
 
         $project->updateProgress();
 
-        return $project;
+        return $project->fresh(['owner', 'team', 'tasks']);
     }
 
     /**
@@ -271,5 +251,211 @@ class ProjectService implements ProjectServiceInterface
             ->whereNotIn('status', ['completed', 'cancelled'])
             ->with(['owner', 'team'])
             ->get();
+    }
+
+    // ===== Team Management Methods =====
+
+    /**
+     * Update project team (bulk update)
+     */
+    public function updateProjectTeam(int $id, array $data): ?Project
+    {
+        $project = Project::find($id);
+
+        if (!$project) {
+            return null;
+        }
+
+        Log::info('Updating project team:', ['project_id' => $id, 'data' => $data]);
+
+        try {
+            DB::beginTransaction();
+
+            if (is_array($data['team_members']) && !empty($data['team_members'])) {
+                $this->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
+            } else {
+                Log::info('Removing all team members from project', ['project_id' => $id]);
+                $project->team()->sync([]);
+            }
+
+            DB::commit();
+
+            return $project->fresh(['owner', 'team', 'tasks']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Project team update failed: '.$e->getMessage(), [
+                'project_id' => $id,
+                'data' => $data,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Add single team member to project
+     */
+    public function addTeamMember(
+        int $projectId,
+        int $userId,
+        array $permissions = ['view_project'],
+        int $allocation = 100
+    ): ?Project {
+        $project = Project::find($projectId);
+
+        if (!$project) {
+            return null;
+        }
+
+        // Check if user is already in team
+        if ($project->team()->where('user_id', $userId)->exists()) {
+            Log::warning('User already in project team', [
+                'project_id' => $projectId,
+                'user_id' => $userId,
+            ]);
+            return $project->fresh(['owner', 'team']);
+        }
+
+        try {
+            $project->team()->attach($userId, [
+                'permissions' => json_encode($permissions),
+                'allocation' => $allocation,
+            ]);
+
+            Log::info('Added team member to project', [
+                'project_id' => $projectId,
+                'user_id' => $userId,
+                'permissions' => $permissions,
+                'allocation' => $allocation,
+            ]);
+
+            return $project->fresh(['owner', 'team']);
+        } catch (\Exception $e) {
+            Log::error('Failed to add team member: '.$e->getMessage(), [
+                'project_id' => $projectId,
+                'user_id' => $userId,
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Remove team member from project
+     */
+    public function removeTeamMember(int $projectId, int $userId): ?Project
+    {
+        $project = Project::find($projectId);
+
+        if (!$project) {
+            return null;
+        }
+
+        try {
+            $project->team()->detach($userId);
+
+            Log::info('Removed team member from project', [
+                'project_id' => $projectId,
+                'user_id' => $userId,
+            ]);
+
+            return $project->fresh(['owner', 'team']);
+        } catch (\Exception $e) {
+            Log::error('Failed to remove team member: '.$e->getMessage(), [
+                'project_id' => $projectId,
+                'user_id' => $userId,
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Update team member settings
+     */
+    public function updateTeamMemberSettings(
+        int $projectId,
+        int $userId,
+        ?array $permissions = null,
+        ?int $allocation = null
+    ): ?Project {
+        $project = Project::find($projectId);
+
+        if (!$project) {
+            return null;
+        }
+
+        // Check if user is in team
+        if (!$project->team()->where('user_id', $userId)->exists()) {
+            Log::warning('User not in project team', [
+                'project_id' => $projectId,
+                'user_id' => $userId,
+            ]);
+            return null;
+        }
+
+        $updateData = [];
+
+        if ($permissions !== null) {
+            $updateData['permissions'] = json_encode($permissions);
+        }
+
+        if ($allocation !== null) {
+            $updateData['allocation'] = $allocation;
+        }
+
+        if (empty($updateData)) {
+            Log::warning('No update data provided for team member', [
+                'project_id' => $projectId,
+                'user_id' => $userId,
+            ]);
+            return $project->fresh(['owner', 'team']);
+        }
+
+        try {
+            $project->team()->updateExistingPivot($userId, $updateData);
+
+            Log::info('Updated team member settings', [
+                'project_id' => $projectId,
+                'user_id' => $userId,
+                'updates' => $updateData,
+            ]);
+
+            return $project->fresh(['owner', 'team']);
+        } catch (\Exception $e) {
+            Log::error('Failed to update team member settings: '.$e->getMessage(), [
+                'project_id' => $projectId,
+                'user_id' => $userId,
+                'updates' => $updateData,
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Sync team members with their settings (protected helper)
+     *
+     * @param Project $project
+     * @param array $userIds
+     * @param array $settings
+     * @return void
+     */
+    protected function syncTeamMembers(Project $project, array $userIds, array $settings): void
+    {
+        $syncData = [];
+
+        foreach ($userIds as $userId) {
+            $userSettings = $settings[$userId] ?? [];
+
+            $syncData[$userId] = [
+                'permissions' => json_encode($userSettings['permissions'] ?? ['view_project']),
+                'allocation' => $userSettings['allocation'] ?? 100,
+            ];
+        }
+
+        Log::info('Syncing team members', [
+            'project_id' => $project->id,
+            'team_members_count' => count($syncData),
+        ]);
+
+        $project->team()->sync($syncData);
     }
 }

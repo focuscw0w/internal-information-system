@@ -3,12 +3,12 @@
 namespace Modules\Project\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\Project\App\Services\ProjectService;
 use Modules\Project\Http\Requests\UpdateProjectRequest;
 use Modules\Project\Http\Requests\CreateProjectRequest;
+use Modules\Project\Http\Requests\UpdateProjectTeamRequest;
 use Modules\Project\Transformers\ProjectResource;
 
 class ProjectController extends Controller
@@ -106,4 +106,18 @@ class ProjectController extends Controller
 
         return redirect()->back()->with('success', 'Projekt bol úspešne odstránený.');
     }
+
+    /**
+ * Update project team
+ */
+public function updateTeam(UpdateProjectTeamRequest $request, $id)
+{
+    $project = $this->projectService->updateProjectTeam($id, $request->validated());
+    
+    if (!$project) {
+        return redirect()->back()->with('error', 'Projekt nebol nájdený.');
+    }
+    
+    return redirect()->back()->with('success', 'Tím bol úspešne aktualizovaný.');
+}
 }
