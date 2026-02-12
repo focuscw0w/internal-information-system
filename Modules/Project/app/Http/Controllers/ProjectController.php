@@ -15,7 +15,8 @@ class ProjectController extends Controller
 {
     public function __construct(
         protected ProjectService $projectService
-    ) {}
+    ) {
+    }
 
     /**
      * Display a listing of the resource.
@@ -61,7 +62,7 @@ class ProjectController extends Controller
     {
         $project = $this->projectService->getProjectById($id);
 
-        if (! $project) {
+        if (!$project) {
             return redirect()
                 ->route('project.index')
                 ->with('error', 'Projekt nebol nájdený.');
@@ -77,7 +78,7 @@ class ProjectController extends Controller
         // $allUsers = User::select("id", "name", "email")->get();
 
         return Inertia::render('Project/Show', [
-            'project' => new ProjectResource($project)->resolve(),
+            'project' => (new ProjectResource($project))->resolve(),
         ]);
     }
 
@@ -87,7 +88,7 @@ class ProjectController extends Controller
     public function update(UpdateProjectRequest $request, $id)
     {
         $project = $this->projectService->updateProject($id, $request->validated());
-        if (! $project) {
+        if (!$project) {
             return redirect()->back()->with('error', 'Projekt nebol nájdený.');
         }
 
@@ -100,7 +101,7 @@ class ProjectController extends Controller
     public function destroy($id)
     {
         $isDeleted = $this->projectService->deleteProject($id);
-        if (! $isDeleted) {
+        if (!$isDeleted) {
             return redirect()->back()->with('error', 'Projekt se nepodařilo smazat.');
         }
 
@@ -108,16 +109,16 @@ class ProjectController extends Controller
     }
 
     /**
- * Update project team
- */
-public function updateTeam(UpdateProjectTeamRequest $request, $id)
-{
-    $project = $this->projectService->updateProjectTeam($id, $request->validated());
-    
-    if (!$project) {
-        return redirect()->back()->with('error', 'Projekt nebol nájdený.');
+     * Update project team
+     */
+    public function updateTeam(UpdateProjectTeamRequest $request, $id)
+    {
+        $project = $this->projectService->updateProjectTeam($id, $request->validated());
+
+        if (!$project) {
+            return redirect()->back()->with('error', 'Projekt nebol nájdený.');
+        }
+
+        return redirect()->back()->with('success', 'Tím bol úspešne aktualizovaný.');
     }
-    
-    return redirect()->back()->with('success', 'Tím bol úspešne aktualizovaný.');
-}
 }

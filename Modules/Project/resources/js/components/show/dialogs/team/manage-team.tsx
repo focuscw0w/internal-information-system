@@ -3,9 +3,8 @@ import { useUsers } from '@/hooks/use-users';
 import { useForm } from '@inertiajs/react';
 import { AlertCircle, Loader2, Users } from 'lucide-react';
 import { useState } from 'react';
-import { Project } from '../../../types/types';
-import { TeamMemberSettings } from '../../../types/types';
-import { TeamMemberList } from '../dialogs/team-member-list';
+import { Project, TeamMemberSettings } from '../../../../types/types';
+import { TeamMemberList } from './team-member-list';
 
 interface ManageTeamDialogProps {
     project: Project;
@@ -17,7 +16,10 @@ interface TeamFormData {
     team_settings: Record<number, TeamMemberSettings>;
 }
 
-export const ManageTeamDialog = ({ project, trigger }: ManageTeamDialogProps) => {
+export const ManageTeamDialog = ({
+    project,
+    trigger,
+}: ManageTeamDialogProps) => {
     const [open, setOpen] = useState(false);
 
     const { data: users = [], isLoading, isError } = useUsers();
@@ -31,7 +33,7 @@ export const ManageTeamDialog = ({ project, trigger }: ManageTeamDialogProps) =>
             };
             return acc;
         },
-        {} as Record<number, TeamMemberSettings>
+        {} as Record<number, TeamMemberSettings>,
     );
 
     const { data, setData, put, processing, errors } = useForm<TeamFormData>({
@@ -84,7 +86,9 @@ export const ManageTeamDialog = ({ project, trigger }: ManageTeamDialogProps) =>
             {isLoading && (
                 <div className="flex items-center justify-center py-12">
                     <Loader2 className="animate-spin" size={32} />
-                    <span className="ml-3 text-gray-600">Načítavam používateľov...</span>
+                    <span className="ml-3 text-gray-600">
+                        Načítavam používateľov...
+                    </span>
                 </div>
             )}
 

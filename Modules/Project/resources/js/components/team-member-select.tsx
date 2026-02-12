@@ -68,7 +68,7 @@ export const TeamMemberSelect = ({
     const handleSettingChange = (
         userId: number,
         field: keyof TeamMemberSettings,
-        value: any,
+        value: unknown,
     ) => {
         const newSettings = {
             ...teamSettings,

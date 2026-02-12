@@ -3,8 +3,7 @@ import { Card } from '@/components/ui/card';
 import { CheckCircle2, Crown, Users } from 'lucide-react';
 import { PERMISSION_GROUPS, PERMISSION_LABELS } from '../../config';
 import { Project } from '../../types/types';
-import { EditProjectDialog } from '../index/dialogs/edit-project';
-import { ManageTeamDialog } from './dialogs/manage-team';
+import { ManageTeamDialog } from './dialogs/team/manage-team';
 
 interface TeamProps {
     project: Project;
@@ -159,7 +158,7 @@ export const Team = ({ project }: TeamProps) => {
                                                                                         perm
                                                                                     }
                                                                                     variant="outline"
-                                                                                    className="text-xs text-white bg-blue-600 py-1 px-2"
+                                                                                    className="bg-blue-600 px-3 py-2 text-xs text-white"
                                                                                 >
                                                                                     {PERMISSION_LABELS[
                                                                                         perm
@@ -209,7 +208,7 @@ export const Team = ({ project }: TeamProps) => {
                         Zatiaľ nie sú pridaní žiadni členovia do tímu projektu.
                     </p>
                     <div className="flex items-center justify-center">
-                      <ManageTeamDialog project={project} />
+                        <ManageTeamDialog project={project} />
                     </div>
                 </Card>
             )}
