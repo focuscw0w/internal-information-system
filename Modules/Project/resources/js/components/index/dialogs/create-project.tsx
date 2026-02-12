@@ -3,12 +3,31 @@ import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
+import { TeamMemberSelect } from '../../team-member-select';
+import { useUsers } from '@/hooks/use-users';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { statusOptions, workloadOptions } from './config';
+import { ProjectStatus, WorkloadLevel, TeamMemberSettings } from '../../../types/project.types';
+
+interface CreateProjectFormData {
+    name: string;
+    description: string;
+    status: ProjectStatus;
+    workload: WorkloadLevel;
+    start_date: string;
+    end_date: string;
+    budget: string;
+    team_members: number[]; // ✅ Explicitný typ
+    team_settings: Record<number, TeamMemberSettings>; // ✅ Explicitný typ
+}
 
 export const CreateProjectDialog = () => {
     const [open, setOpen] = useState(false);
+    
+    const { data: users = [], isLoading, isError } = useUsers();
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    // ✅ Použiť generický typ
+    const { data, setData, post, processing, errors, reset } = useForm<CreateProjectFormData>({
         name: '',
         description: '',
         status: 'planning',
@@ -16,14 +35,20 @@ export const CreateProjectDialog = () => {
         start_date: '',
         end_date: '',
         budget: '',
+        team_members: [],
+        team_settings: {},
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
         post('/projects', {
             onSuccess: () => {
                 setOpen(false);
                 reset();
+            },
+            onError: (errors) => {
+                console.error('Validation errors:', errors);
             },
         });
     };
@@ -91,7 +116,7 @@ export const CreateProjectDialog = () => {
                     id="status"
                     type="select"
                     value={data.status}
-                    onChange={(value) => setData('status', value)}
+                    onChange={(value) => setData('status', value as ProjectStatus)}
                     error={errors.status}
                     options={statusOptions}
                 />
@@ -101,7 +126,7 @@ export const CreateProjectDialog = () => {
                     id="workload"
                     type="select"
                     value={data.workload}
-                    onChange={(value) => setData('workload', value)}
+                    onChange={(value) => setData('workload', value as WorkloadLevel)}
                     error={errors.workload}
                     options={workloadOptions}
                 />
@@ -118,6 +143,37 @@ export const CreateProjectDialog = () => {
                 min="0"
                 step="0.01"
             />
+
+            {isLoading && (
+                <div className="flex items-center justify-center py-8">
+                    <Loader2 className="animate-spin" size={24} />
+                    <span className="ml-2 text-gray-600">
+                        Načítavam používateľov...
+                    </span>
+                </div>
+            )}
+
+            {isError && (
+                <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-red-600">
+                    <AlertCircle size={20} />
+                    <span>
+                        Nepodarilo sa načítať používateľov. Skúste to znova.
+                    </span>
+                </div>
+            )}
+
+            {!isLoading && !isError && (
+                <TeamMemberSelect
+                    allUsers={users}
+                    selectedMembers={data.team_members}
+                    teamSettings={data.team_settings}
+                    onChange={(members, settings) => {
+                        setData('team_members', members);
+                        setData('team_settings', settings);
+                    }}
+                    error={errors.team_members}
+                />
+            )}
         </FormDialog>
     );
 };

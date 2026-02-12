@@ -3,12 +3,13 @@
 namespace Modules\Project\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\Project\App\Services\ProjectService;
 use Modules\Project\Http\Requests\UpdateProjectRequest;
+use Modules\Project\Http\Requests\CreateProjectRequest;
 use Modules\Project\Transformers\ProjectResource;
-use App\Models\User;
 
 class ProjectController extends Controller
 {
@@ -32,29 +33,19 @@ class ProjectController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateProjectRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'status' => 'required|in:planning,active,on_hold,completed,cancelled',
-            'workload' => 'required|in:low,medium,high',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'budget' => 'nullable|numeric|min:0',
-        ]);
-
         try {
-            $project = $this->projectService->createProject($validated);
+            $project = $this->projectService->createProject($request->validated());
 
             return redirect()
                 ->route('projects.index')
                 ->with('success', 'Projekt bol úspešne vytvorený.');
-
         } catch (\Exception $e) {
             \Log::error('Project creation failed:', [
                 'error' => $e->getMessage(),
-                'data' => $validated,
+                'data' => $request->validated(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return back()
@@ -83,7 +74,7 @@ class ProjectController extends Controller
             'team',
         ]);
 
-       // $allUsers = User::select("id", "name", "email")->get();
+        // $allUsers = User::select("id", "name", "email")->get();
 
         return Inertia::render('Project/Show', [
             'project' => new ProjectResource($project)->resolve(),

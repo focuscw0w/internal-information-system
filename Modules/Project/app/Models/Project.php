@@ -132,9 +132,8 @@ class Project extends Model
     public function addTeamMember(int $userId, array $permissions, int $allocation = 100, ?float $hourlyRate = null): void
     {
         $this->team()->attach($userId, [
-            'permissions' => $permissions,
+            'permissions' => json_encode($permissions),
             'allocation' => $allocation,
-            'hourly_rate' => $hourlyRate,
         ]);
     }
 

@@ -10,11 +10,25 @@ import {
     WorkloadLevel,
 } from '../../../types/project.types';
 import { TeamMemberSelect } from '../../team-member-select';
+import { TeamMemberSettings } from '../../../types/project.types';
 import { statusOptions, workloadOptions } from './config';
 
 interface EditProjectDialogProps {
     project: Project;
     text?: string;
+}
+
+// ✅ Definuj interface pre form data
+interface EditProjectFormData {
+    name: string;
+    description: string;
+    status: ProjectStatus;
+    workload: WorkloadLevel;
+    start_date: string;
+    end_date: string;
+    budget: string;
+    team_members: number[];
+    team_settings: Record<number, TeamMemberSettings>;
 }
 
 export const EditProjectDialog = ({
@@ -23,21 +37,22 @@ export const EditProjectDialog = ({
 }: EditProjectDialogProps) => {
     const [open, setOpen] = useState(false);
 
-    const { data: users = [], isLoading, isError, error } = useUsers();
+    const { data: users = [], isLoading, isError } = useUsers();
 
     const initialTeamMembers = project.team.map((member) => member.id);
     const initialTeamSettings = project.team.reduce(
         (acc, member) => {
             acc[member.id] = {
                 allocation: member.allocation || 100,
-                permissions: member.permissions || ['view'],
+                permissions: member.permissions || ['view_project'],
             };
             return acc;
         },
-        {} as Record<number, any>,
+        {} as Record<number, TeamMemberSettings>,
     );
 
-    const { data, setData, put, processing, errors } = useForm({
+    // ✅ Použiť generický typ
+    const { data, setData, put, processing, errors } = useForm<EditProjectFormData>({
         name: project.name || '',
         description: project.description || '',
         status: project.status || 'planning',
@@ -175,7 +190,6 @@ export const EditProjectDialog = ({
                 step="0.01"
             />
 
-            {/* Loading state */}
             {isLoading && (
                 <div className="flex items-center justify-center py-8">
                     <Loader2 className="animate-spin" size={24} />
@@ -194,7 +208,6 @@ export const EditProjectDialog = ({
                 </div>
             )}
 
-            {/* TeamMemberSelect */}
             {!isLoading && !isError && (
                 <TeamMemberSelect
                     allUsers={users}

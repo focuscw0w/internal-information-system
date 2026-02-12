@@ -1,6 +1,6 @@
-import { User } from '@/types';
-import { useState } from 'react';
-import { X, Plus, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -9,23 +9,21 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { User } from '@/types';
+import { Plus, Users, X } from 'lucide-react';
+import { useState } from 'react';
+import { TeamMemberSettings } from '../types/project.types';
 import { PERMISSION_GROUPS } from './index/dialogs/config';
 
 interface TeamMemberSelectProps {
     allUsers: User[];
     selectedMembers: number[];
     teamSettings: Record<number, TeamMemberSettings>;
-    onChange: (members: number[], settings: Record<number, TeamMemberSettings>) => void;
+    onChange: (
+        members: number[],
+        settings: Record<number, TeamMemberSettings>,
+    ) => void;
     error?: string;
-}
-
-export interface TeamMemberSettings {
-    allocation: number;
-    permissions: string[];
-    hourly_rate?: number;
 }
 
 export const TeamMemberSelect = ({
@@ -38,7 +36,7 @@ export const TeamMemberSelect = ({
     const [selectedUserId, setSelectedUserId] = useState<string>('');
 
     const availableUsers = allUsers.filter(
-        (user) => !selectedMembers.includes(user.id)
+        (user) => !selectedMembers.includes(user.id),
     );
 
     const handleAddMember = () => {
@@ -50,7 +48,7 @@ export const TeamMemberSelect = ({
             ...teamSettings,
             [userId]: {
                 allocation: 100,
-                permissions: ['view_project', 'view_tasks'], 
+                permissions: ['view_project', 'view_tasks'],
                 hourly_rate: undefined,
             },
         };
@@ -70,7 +68,7 @@ export const TeamMemberSelect = ({
     const handleSettingChange = (
         userId: number,
         field: keyof TeamMemberSettings,
-        value: any
+        value: any,
     ) => {
         const newSettings = {
             ...teamSettings,
@@ -102,8 +100,8 @@ export const TeamMemberSelect = ({
                         {selectedMembers.length === 1
                             ? 'člen'
                             : selectedMembers.length < 5
-                            ? 'členovia'
-                            : 'členov'}
+                              ? 'členovia'
+                              : 'členov'}
                         )
                     </span>
                 )}
@@ -111,7 +109,10 @@ export const TeamMemberSelect = ({
 
             {/* Add Member Section */}
             <div className="flex gap-2">
-                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                <Select
+                    value={selectedUserId}
+                    onValueChange={setSelectedUserId}
+                >
                     <SelectTrigger className="flex-1">
                         <SelectValue placeholder="Vybrať člena tímu..." />
                     </SelectTrigger>
@@ -122,9 +123,14 @@ export const TeamMemberSelect = ({
                             </div>
                         ) : (
                             availableUsers.map((user) => (
-                                <SelectItem key={user.id} value={user.id.toString()}>
+                                <SelectItem
+                                    key={user.id}
+                                    value={user.id.toString()}
+                                >
                                     <div>
-                                        <div className="font-medium">{user.name}</div>
+                                        <div className="font-medium">
+                                            {user.name}
+                                        </div>
                                         <div className="text-xs text-gray-500">
                                             {user.email}
                                         </div>
@@ -158,10 +164,7 @@ export const TeamMemberSelect = ({
                         };
 
                         return (
-                            <div
-                                key={userId}
-                                className="space-y-3 rounded-md"
-                            >
+                            <div key={userId} className="space-y-3 rounded-md">
                                 {/* Header */}
                                 <div className="flex items-start justify-between">
                                     <div>
@@ -174,7 +177,9 @@ export const TeamMemberSelect = ({
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={() => handleRemoveMember(userId)}
+                                        onClick={() =>
+                                            handleRemoveMember(userId)
+                                        }
                                         className="rounded p-1 text-red-500 transition-colors hover:bg-red-50"
                                         title="Odstrániť člena"
                                     >
@@ -197,7 +202,8 @@ export const TeamMemberSelect = ({
                                                 handleSettingChange(
                                                     userId,
                                                     'allocation',
-                                                    parseInt(e.target.value) || 0
+                                                    parseInt(e.target.value) ||
+                                                        0,
                                                 )
                                             }
                                             className="mt-1"
@@ -206,34 +212,13 @@ export const TeamMemberSelect = ({
                                             {settings.allocation}% kapacity
                                         </p>
                                     </div>
-                                    <div>
-                                        <Label className="text-xs text-gray-600">
-                                            Hodinová sadzba (€)
-                                        </Label>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            value={settings.hourly_rate || ''}
-                                            onChange={(e) =>
-                                                handleSettingChange(
-                                                    userId,
-                                                    'hourly_rate',
-                                                    e.target.value
-                                                        ? parseFloat(e.target.value)
-                                                        : undefined
-                                                )
-                                            }
-                                            placeholder="Nepovinné"
-                                            className="mt-1"
-                                        />
-                                    </div>
                                 </div>
 
                                 {/* Permissions by Groups */}
                                 <div>
                                     <Label className="text-xs text-gray-600">
-                                        Oprávnenia ({settings.permissions.length} vybraných)
+                                        Oprávnenia (
+                                        {settings.permissions.length} vybraných)
                                     </Label>
                                     <div className="mt-2 space-y-3">
                                         {PERMISSION_GROUPS.map((group) => (
@@ -245,31 +230,33 @@ export const TeamMemberSelect = ({
                                                     {group.label}
                                                 </p>
                                                 <div className="space-y-2">
-                                                    {group.permissions.map((perm) => (
-                                                        <div
-                                                            key={perm.value}
-                                                            className="flex items-center space-x-2"
-                                                        >
-                                                            <Checkbox
-                                                                id={`${userId}-${perm.value}`}
-                                                                checked={settings.permissions.includes(
-                                                                    perm.value
-                                                                )}
-                                                                onCheckedChange={() =>
-                                                                    togglePermission(
-                                                                        userId,
-                                                                        perm.value
-                                                                    )
-                                                                }
-                                                            />
-                                                            <label
-                                                                htmlFor={`${userId}-${perm.value}`}
-                                                                className="text-sm text-gray-700 cursor-pointer"
+                                                    {group.permissions.map(
+                                                        (perm) => (
+                                                            <div
+                                                                key={perm.value}
+                                                                className="flex items-center space-x-2"
                                                             >
-                                                                {perm.label}
-                                                            </label>
-                                                        </div>
-                                                    ))}
+                                                                <Checkbox
+                                                                    id={`${userId}-${perm.value}`}
+                                                                    checked={settings.permissions.includes(
+                                                                        perm.value,
+                                                                    )}
+                                                                    onCheckedChange={() =>
+                                                                        togglePermission(
+                                                                            userId,
+                                                                            perm.value,
+                                                                        )
+                                                                    }
+                                                                />
+                                                                <label
+                                                                    htmlFor={`${userId}-${perm.value}`}
+                                                                    className="cursor-pointer text-sm text-gray-700"
+                                                                >
+                                                                    {perm.label}
+                                                                </label>
+                                                            </div>
+                                                        ),
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}

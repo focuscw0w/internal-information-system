@@ -5,9 +5,9 @@ namespace Modules\Project\App\Services;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\Project\App\Contracts\ProjectServiceInterface;
 use Modules\Project\App\Models\Project;
-use Illuminate\Support\Facades\Log;
 
 class ProjectService implements ProjectServiceInterface
 {
@@ -68,7 +68,7 @@ class ProjectService implements ProjectServiceInterface
      */
     public function createProject(array $data): Project
     {
-        $projectData = [
+        $project = Project::create([
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'status' => $data['status'] ?? 'planning',
@@ -76,21 +76,33 @@ class ProjectService implements ProjectServiceInterface
             'start_date' => $data['start_date'],
             'end_date' => $data['end_date'],
             'budget' => $data['budget'] ?? null,
-            'owner_id' => $data['owner_id'] ?? auth()->id(),
-        ];
+            'owner_id' => auth()->id(),
+            'progress' => 0,
+            'tasks_total' => 0,
+            'tasks_completed' => 0,
+            'capacity_used' => 0,
+            'capacity_available' => 100,
+            'budget_spent' => 0,
+        ]);
 
-        $project = Project::create($projectData);
+        // Attach team members if provided
+        if (isset($data['team_members']) && is_array($data['team_members']) && ! empty($data['team_members'])) {
+            $syncData = [];
 
-        if (! empty($data['team_members'])) {
-            foreach ($data['team_members'] as $member) {
-                $project->addTeamMember(
-                    $member['user_id'],
-                    $member['allocation'] ?? 100
-                );
+            foreach ($data['team_members'] as $userId) {
+                $settings = $data['team_settings'][$userId] ?? [];
+
+                $syncData[$userId] = [
+                    'permissions' => json_encode($settings['permissions'] ?? ['view_project']),
+                    'allocation' => $settings['allocation'] ?? 100,
+                ];
             }
+
+            Log::info('Attaching team members:', $syncData);
+            $project->team()->attach($syncData);
         }
 
-        return $project->fresh(['owner', 'team']);
+        return $project->fresh(['owner', 'team', 'tasks']);
     }
 
     /**

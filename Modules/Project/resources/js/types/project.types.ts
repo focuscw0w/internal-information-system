@@ -14,6 +14,11 @@ export interface TeamMember {
     allocation: number;
 }
 
+export interface TeamMemberSettings {
+    allocation: number;
+    permissions: string[];
+}
+
 export interface Project {
     id: number;
     name: string;
