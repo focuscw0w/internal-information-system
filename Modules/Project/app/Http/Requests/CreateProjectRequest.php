@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Project\Enums\ProjectStatus;
 use Modules\Project\Enums\ProjectWorkload;
+use Modules\Project\Enums\ProjectPermission;
 
 class CreateProjectRequest extends FormRequest
 {
@@ -41,21 +42,7 @@ class CreateProjectRequest extends FormRequest
             'team_settings.*.permissions' => ['nullable', 'array'],
             'team_settings.*.permissions.*' => [
                 'string',
-                Rule::in([
-                    'view_project',
-                    'edit_project',
-                    'delete_project',
-                    'view_tasks',
-                    'create_tasks',
-                    'edit_tasks',
-                    'delete_tasks',
-                    'assign_tasks',
-                    'view_team',
-                    'manage_team',
-                    'view_budget',
-                    'edit_budget',
-                    'export_data',
-                ]),
+                Rule::in(ProjectPermission::values()),
             ],
         ];
     }
