@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use Modules\Project\Http\Requests\CreateTaskRequest;
 use Modules\Project\Http\Requests\UpdateTaskRequest;
 use Modules\Project\Http\Requests\UpdateTaskStatusRequest;
+use Modules\Project\Http\Requests\AssignTaskRequest;
 use Modules\Project\Services\TaskService;
 
 class TaskController extends Controller

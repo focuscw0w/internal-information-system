@@ -29,6 +29,7 @@ export const BadgeLabel = ({
                 active: 'bg-emerald-100 text-emerald-700 border-emerald-200',
                 on_hold: 'bg-amber-100 text-amber-700 border-amber-200',
                 completed: 'bg-purple-100 text-purple-700 border-purple-200',
+                cancelled: 'bg-red-100 text-red-700 border-red-200',
             };
             return colors[value as ProjectStatus];
         }
@@ -76,6 +77,7 @@ export const BadgeLabel = ({
                 active: 'Aktívny',
                 on_hold: 'Pozastavený',
                 completed: 'Dokončený',
+                cancelled: 'Zrušený',
             };
             return labels[value as ProjectStatus];
         }

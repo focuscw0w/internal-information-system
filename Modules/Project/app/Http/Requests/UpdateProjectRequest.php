@@ -4,6 +4,8 @@ namespace Modules\Project\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Project\Enums\ProjectStatus;
+use Modules\Project\Enums\ProjectWorkload;
 
 class UpdateProjectRequest extends FormRequest
 {
@@ -23,8 +25,8 @@ class UpdateProjectRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'status' => ['required', Rule::in(['planning', 'active', 'on_hold', 'completed', 'cancelled'])],
-            'workload' => ['required', Rule::in(['low', 'medium', 'high'])],
+            'status' => ['required', Rule::in(ProjectStatus::values())],
+            'workload' => ['required', Rule::in(ProjectWorkload::values())],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'budget' => ['nullable', 'numeric', 'min:0'],
@@ -40,10 +42,18 @@ class UpdateProjectRequest extends FormRequest
             'team_settings.*.permissions.*' => [
                 'string',
                 Rule::in([
-                    'view_project', 'edit_project', 'delete_project',
-                    'view_tasks', 'create_tasks', 'edit_tasks', 'delete_tasks', 'assign_tasks',
-                    'view_team', 'manage_team',
-                    'view_budget', 'edit_budget',
+                    'view_project',
+                    'edit_project',
+                    'delete_project',
+                    'view_tasks',
+                    'create_tasks',
+                    'edit_tasks',
+                    'delete_tasks',
+                    'assign_tasks',
+                    'view_team',
+                    'manage_team',
+                    'view_budget',
+                    'edit_budget',
                     'export_data',
                 ]),
             ],
@@ -67,5 +77,23 @@ class UpdateProjectRequest extends FormRequest
             'team_settings.*.allocation.max' => 'Alokácia nesmie presiahnuť 200%.',
             'team_settings.*.permissions.*.in' => 'Neplatné oprávnenie.',
         ];
+    }
+
+    /**
+     * Get status as enum
+     */
+    public function getStatusEnum(): ?ProjectStatus
+    {
+        $status = $this->validated()['status'] ?? null;
+        return $status ? ProjectStatus::from($status) : null;
+    }
+
+    /**
+     * Get workload as enum
+     */
+    public function getWorkloadEnum(): ?ProjectWorkload
+    {
+        $workload = $this->validated()['workload'] ?? null;
+        return $workload ? ProjectWorkload::from($workload) : null;
     }
 }
