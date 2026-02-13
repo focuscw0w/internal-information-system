@@ -3,6 +3,9 @@
 namespace Modules\Project\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Modules\Project\Enums\TaskStatus;
+use Modules\Project\Enums\TaskPriority;
 
 class CreateTaskRequest extends FormRequest
 {
@@ -25,8 +28,8 @@ class CreateTaskRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:todo,in_progress,testing,done',
-            'priority' => 'required|in:low,medium,high',
+            'status' => ['required', Rule::in(TaskStatus::values())],
+            'priority' => ['required', Rule::in(TaskPriority::values())],
             'estimated_hours' => 'nullable|numeric|min:0',
             'due_date' => 'nullable|date',
             'assigned_to' => 'nullable|exists:users,id',
@@ -53,5 +56,23 @@ class CreateTaskRequest extends FormRequest
             'priority.in' => 'Priorita musí byť low, medium alebo high.',
             'assigned_to.exists' => 'Vybraný používateľ neexistuje.',
         ];
+    }
+
+    /**
+     * Get status as enum (with default)
+     */
+    public function getStatusEnum(): TaskStatus
+    {
+        $status = $this->validated()['status'] ?? null;
+        return $status ? TaskStatus::from($status) : TaskStatus::TODO;
+    }
+
+    /**
+     * Get priority as enum (with default)
+     */
+    public function getPriorityEnum(): TaskPriority
+    {
+        $priority = $this->validated()['priority'] ?? null;
+        return $priority ? TaskPriority::from($priority) : TaskPriority::MEDIUM;
     }
 }

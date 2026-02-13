@@ -1,11 +1,11 @@
 import { AlertCircle, Users } from 'lucide-react';
-import { Project } from '../../../types/types';
 import {
     getCapacityColor,
     getStatusColor,
     getStatusText,
     getWorkloadColor,
 } from '../../../config';
+import { Project } from '../../../types/types';
 import { ProjectActions } from '../project-actions';
 
 interface RowProps {

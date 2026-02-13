@@ -3,6 +3,8 @@
 namespace Modules\Project\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Modules\Project\Enums\TaskStatus;
 
 class UpdateTaskStatusRequest extends FormRequest
 {
@@ -12,7 +14,7 @@ class UpdateTaskStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|in:todo,in_progress,testing,done',
+            'status' => ['required', Rule::in(TaskStatus::values())],
         ];
     }
 
@@ -33,5 +35,13 @@ class UpdateTaskStatusRequest extends FormRequest
             'status.required' => 'Stav je povinný.',
             'status.in' => 'Neplatný stav úlohy.',
         ];
+    }
+
+    /**
+     * Get validated status as enum
+     */
+    public function getStatusEnum(): TaskStatus
+    {
+        return TaskStatus::from($this->validated()['status']);
     }
 }

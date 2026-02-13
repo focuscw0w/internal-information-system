@@ -31,7 +31,6 @@ class TaskController extends Controller
      */
     public function store(CreateTaskRequest $request, int $projectId)
     {
-         \Log::info('Task data:', $request->validated());
         $task = $this->taskService->createTask($projectId, $request->validated());
 
         return redirect()

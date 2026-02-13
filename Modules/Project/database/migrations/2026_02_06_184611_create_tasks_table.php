@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Modules\Project\Enums\TaskStatus;
+use Modules\Project\Enums\TaskPriority;
 
 return new class extends Migration {
     public function up(): void
@@ -12,8 +14,9 @@ return new class extends Migration {
             $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->enum('status', ['todo', 'in_progress', 'testing', 'done'])->default('todo');
-            $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
+
+            $table->enum('status', TaskStatus::values())->default(TaskStatus::TODO->value);
+            $table->enum('priority', TaskPriority::values())->default(TaskPriority::MEDIUM->value);
 
             $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             $table->integer('estimated_hours')->nullable();
