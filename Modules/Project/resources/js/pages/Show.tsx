@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Calendar, KanbanIcon, LayoutGrid, Users } from 'lucide-react';
-import { Kanban } from '../components/show/kanban';
+import { Kanban } from '../components/show/kanban/kanban';
 import { Overview } from '../components/show/overview';
 import { ShowHeader } from '../components/show/show-header';
 import { Team } from '../components/show/team';

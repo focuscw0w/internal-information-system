@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->enum('status', ['todo', 'in_progress', 'review', 'done'])->default('todo');
+            $table->enum('status', ['todo', 'in_progress', 'testing', 'done'])->default('todo');
             $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
 
             $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
