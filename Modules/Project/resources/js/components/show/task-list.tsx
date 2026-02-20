@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Link } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import {
     AlertCircle,
     CheckCircle,
@@ -55,10 +55,14 @@ export const TaskList = ({ project }: TaskListProps) => {
                 <div className="space-y-3">
                     {project.tasks &&
                         project.tasks.map((task) => (
-                            <Link
+                            <div
                                 key={task.id}
-                                href={`/projects/${project.id}/tasks/${task.id}`}
-                                className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/30 p-4 transition-all hover:border-gray-200 hover:shadow-sm"
+                                onClick={() =>
+                                    router.visit(
+                                        `/projects/${project.id}/tasks/${task.id}`,
+                                    )
+                                }
+                                className="flex cursor-pointer items-center justify-between rounded-lg border border-gray-100 bg-gray-50/30 p-4 transition-all hover:border-gray-200 hover:shadow-sm"
                             >
                                 <div className="flex flex-1 items-center gap-3">
                                     {getTaskStatusIcon(task.status)}
@@ -111,8 +115,8 @@ export const TaskList = ({ project }: TaskListProps) => {
                                             )}
                                     </div>
 
-                                    {/* Actions - stopPropagation prevents navigation */}
-                                    <div onClick={(e) => e.preventDefault()}>
+                                    {/* Actions */}
+                                    <div onClick={(e) => e.stopPropagation()}>
                                         <TaskActions
                                             task={task}
                                             projectId={project.id}
@@ -120,7 +124,7 @@ export const TaskList = ({ project }: TaskListProps) => {
                                         />
                                     </div>
                                 </div>
-                            </Link>
+                            </div>
                         ))}
 
                     {(!project.tasks || project.tasks.length === 0) && (
