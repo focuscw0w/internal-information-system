@@ -6,11 +6,7 @@ import { useForm } from '@inertiajs/react';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { statusOptions, workloadOptions } from '../../../config';
-import {
-    ProjectStatus,
-    TeamMemberSettings,
-    WorkloadLevel,
-} from '../../../types/types';
+import { ProjectStatus, WorkloadLevel } from '../../../types/types';
 import { TeamMemberSelect } from '../../team-member-select';
 
 interface CreateProjectFormData {
@@ -21,8 +17,7 @@ interface CreateProjectFormData {
     start_date: string;
     end_date: string;
     budget: string;
-    team_members: number[]; 
-    team_settings: Record<number, TeamMemberSettings>; 
+    team_members: number[];
 }
 
 export const CreateProjectDialog = () => {
@@ -40,7 +35,6 @@ export const CreateProjectDialog = () => {
             end_date: '',
             budget: '',
             team_members: [],
-            team_settings: {},
         });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -174,10 +168,8 @@ export const CreateProjectDialog = () => {
                 <TeamMemberSelect
                     allUsers={users}
                     selectedMembers={data.team_members}
-                    teamSettings={data.team_settings}
-                    onChange={(members, settings) => {
+                    onChange={(members) => {
                         setData('team_members', members);
-                        setData('team_settings', settings);
                     }}
                     error={errors.team_members}
                 />

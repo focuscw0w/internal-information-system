@@ -8,7 +8,6 @@ import { statusOptions, workloadOptions } from '../../../config';
 import {
     Project,
     ProjectStatus,
-    TeamMemberSettings,
     WorkloadLevel,
 } from '../../../types/types';
 import { TeamMemberSelect } from '../../team-member-select';
@@ -18,7 +17,6 @@ interface EditProjectDialogProps {
     text?: string;
 }
 
-// ✅ Definuj interface pre form data
 interface EditProjectFormData {
     name: string;
     description: string;
@@ -28,7 +26,6 @@ interface EditProjectFormData {
     end_date: string;
     budget: string;
     team_members: number[];
-    team_settings: Record<number, TeamMemberSettings>;
 }
 
 export const EditProjectDialog = ({
@@ -40,18 +37,7 @@ export const EditProjectDialog = ({
     const { data: users = [], isLoading, isError } = useUsers();
 
     const initialTeamMembers = project.team.map((member) => member.id);
-    const initialTeamSettings = project.team.reduce(
-        (acc, member) => {
-            acc[member.id] = {
-                allocation: member.allocation || 100,
-                permissions: member.permissions || ['view_project'],
-            };
-            return acc;
-        },
-        {} as Record<number, TeamMemberSettings>,
-    );
 
-    // ✅ Použiť generický typ
     const { data, setData, put, processing, errors } =
         useForm<EditProjectFormData>({
             name: project.name || '',
@@ -62,7 +48,6 @@ export const EditProjectDialog = ({
             end_date: project.end_date || '',
             budget: project.budget?.toString() || '',
             team_members: initialTeamMembers,
-            team_settings: initialTeamSettings,
         });
 
     const handleOpen = (newOpen: boolean) => {
@@ -76,7 +61,6 @@ export const EditProjectDialog = ({
                 end_date: project.end_date || '',
                 budget: project.budget?.toString() || '',
                 team_members: initialTeamMembers,
-                team_settings: initialTeamSettings,
             });
         }
         setOpen(newOpen);
@@ -213,10 +197,8 @@ export const EditProjectDialog = ({
                 <TeamMemberSelect
                     allUsers={users}
                     selectedMembers={data.team_members}
-                    teamSettings={data.team_settings}
-                    onChange={(members, settings) => {
+                    onChange={(members) => {
                         setData('team_members', members);
-                        setData('team_settings', settings);
                     }}
                     error={errors.team_members}
                 />

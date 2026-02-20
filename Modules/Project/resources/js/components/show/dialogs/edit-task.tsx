@@ -157,6 +157,7 @@ export const EditTaskDialog = ({
                 />
             </div>
 
+            {/* TODO: Viacerí môžu byť priradení */}
             <FormField
                 label="Priradený"
                 id="assigned_to"

@@ -139,6 +139,7 @@ export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
                 />
             </div>
 
+            {/* TODO: Viacerí môžu byť priradení */}
             <FormField
                 label="Priradiť používateľovi"
                 id="assigned_to"
