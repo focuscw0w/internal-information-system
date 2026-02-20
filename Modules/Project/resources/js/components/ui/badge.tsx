@@ -106,7 +106,7 @@ export const BadgeLabel = ({
         // Task status texty
         if (type === 'task-status') {
             const labels: Record<TaskStatus, string> = {
-                todo: 'Nová',
+                todo: 'Nový',
                 in_progress: 'Prebieha',
                 testing: 'Testovanie',
                 done: 'Hotovo',
@@ -122,7 +122,7 @@ export const BadgeLabel = ({
             variant={variant}
             className={
                 getColor() +
-                ' flex items-center justify-center px-3 py-2' +
+                ' flex items-center justify-center px-3.5 py-2.5 ' +
                 (className ?? '')
             }
         >

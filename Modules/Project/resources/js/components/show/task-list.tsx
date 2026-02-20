@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-//import { router } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import {
     AlertCircle,
     CheckCircle,
@@ -55,9 +55,10 @@ export const TaskList = ({ project }: TaskListProps) => {
                 <div className="space-y-3">
                     {project.tasks &&
                         project.tasks.map((task) => (
-                            <div
+                            <Link
                                 key={task.id}
-                                className="flex cursor-pointer items-center justify-between rounded-lg border border-gray-100 bg-gray-50/30 p-4 transition-all hover:border-gray-200 hover:shadow-sm"
+                                href={`/projects/${project.id}/tasks/${task.id}`}
+                                className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/30 p-4 transition-all hover:border-gray-200 hover:shadow-sm"
                             >
                                 <div className="flex flex-1 items-center gap-3">
                                     {getTaskStatusIcon(task.status)}
@@ -101,23 +102,25 @@ export const TaskList = ({ project }: TaskListProps) => {
                                         </div>
                                         {task.actual_hours >
                                             task.estimated_hours && (
-                                            <span className="text-xs text-red-600">
+                                                <span className="text-xs text-red-600">
                                                 +
-                                                {task.actual_hours -
-                                                    task.estimated_hours}
-                                                h
+                                                    {task.actual_hours -
+                                                        task.estimated_hours}
+                                                    h
                                             </span>
-                                        )}
+                                            )}
                                     </div>
 
-                                    {/* Actions */}
-                                    <TaskActions
-                                        task={task}
-                                        projectId={project.id}
-                                        team={project.team}
-                                    />
+                                    {/* Actions - stopPropagation prevents navigation */}
+                                    <div onClick={(e) => e.preventDefault()}>
+                                        <TaskActions
+                                            task={task}
+                                            projectId={project.id}
+                                            team={project.team}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
 
                     {(!project.tasks || project.tasks.length === 0) && (

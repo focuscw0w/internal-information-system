@@ -4,15 +4,18 @@ namespace Modules\Project\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
+use Modules\Project\App\Services\ProjectService;
+use Modules\Project\Services\TaskService;
 use Modules\Project\Http\Requests\CreateTaskRequest;
 use Modules\Project\Http\Requests\UpdateTaskRequest;
 use Modules\Project\Http\Requests\UpdateTaskStatusRequest;
 use Modules\Project\Http\Requests\AssignTaskRequest;
-use Modules\Project\Services\TaskService;
 
 class TaskController extends Controller
 {
-    public function __construct(protected TaskService $taskService) {}
+    public function __construct(protected TaskService $taskService, protected ProjectService $projectService)
+    {
+    }
 
     /**
      * Display a listing of tasks for a project
@@ -45,9 +48,18 @@ class TaskController extends Controller
     public function show(int $projectId, int $taskId)
     {
         $task = $this->taskService->getTaskById($taskId);
+        if (!$task) {
+            return redirect("projects.show");
+        }
 
-        return Inertia::render('Project::Tasks/Show', [
+        $project = $this->projectService->getProjectById($projectId);
+        if (!$project) {
+            return redirect("projects.show");
+        }
+
+        return Inertia::render('Project/Task', [
             'task' => $task,
+            'project' => $project,
         ]);
     }
 
