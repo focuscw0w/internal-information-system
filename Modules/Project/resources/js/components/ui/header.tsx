@@ -7,17 +7,15 @@ interface HeaderProps {
     description?: string | null;
     backHref: string;
     backLabel: string;
-    badges?: ReactNode;
-    actions?: ReactNode;
+    children?: ReactNode;
 }
 
-export const Header = ({
+const HeaderRoot = ({
     title,
     description,
     backHref,
     backLabel,
-    badges,
-    actions,
+    children,
 }: HeaderProps) => {
     return (
         <div className="rounded-lg border border-gray-100 bg-white p-6 shadow-sm">
@@ -40,11 +38,25 @@ export const Header = ({
                         </p>
                     )}
                 </div>
-                <div className="ml-4 flex flex-shrink-0 items-center gap-2">
-                    {badges}
-                    {actions}
-                </div>
+                {children && (
+                    <div className="ml-4 flex flex-shrink-0 items-center gap-2">
+                        {children}
+                    </div>
+                )}
             </div>
         </div>
     );
 };
+
+const HeaderBadges = ({ children }: { children: ReactNode }) => {
+    return <div className="flex items-center gap-2">{children}</div>;
+};
+
+const HeaderActions = ({ children }: { children: ReactNode }) => {
+    return <div className="flex items-center gap-2">{children}</div>;
+};
+
+export const Header = Object.assign(HeaderRoot, {
+    Badges: HeaderBadges,
+    Actions: HeaderActions,
+});

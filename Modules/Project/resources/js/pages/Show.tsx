@@ -4,7 +4,9 @@ import { Head } from '@inertiajs/react';
 import { Calendar, KanbanIcon, LayoutGrid, Users } from 'lucide-react';
 import { Kanban } from '../components/project-detail/kanban/kanban';
 import { Overview } from '../components/project-detail/tab-views/overview';
-import { ShowHeader } from '../components/project-detail/show-header';
+import { Header } from '../components/ui/header';
+import { BadgeLabel } from '../components/ui/badge';
+import { EditProjectDialog } from '../components/projects/dialogs/edit-project';
 import { Team } from '../components/project-detail/tab-views/team';
 import { Timeline } from '../components/project-detail/tab-views/timeline';
 import { Project } from '../types/types';
@@ -16,7 +18,31 @@ export default function Show({ project }: { project: Project }) {
 
             <div className="min-h-screen space-y-6 p-6">
                 {/* Header */}
-                <ShowHeader project={project} />
+                <Header
+                    title={project.name}
+                    description={project.description}
+                    backHref="/projects"
+                    backLabel="Späť na projekty"
+                >
+                    <Header.Badges>
+                        <BadgeLabel
+                            type="status"
+                            value={project.status}
+                            label="Stav"
+                        />
+                        <BadgeLabel
+                            type="workload"
+                            value={project.workload}
+                            label="Vyťaženie"
+                        />
+                    </Header.Badges>
+                    <Header.Actions>
+                        <EditProjectDialog
+                            project={project}
+                            text="Upraviť projekt"
+                        />
+                    </Header.Actions>
+                </Header>
 
                 {/* Tabs */}
                 <Tabs defaultValue="overview" className="mb-12 w-full">

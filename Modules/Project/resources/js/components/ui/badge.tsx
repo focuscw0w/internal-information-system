@@ -11,18 +11,19 @@ type BadgeType = 'status' | 'workload' | 'priority' | 'task-status';
 interface BadgeProps {
     type: BadgeType;
     value: ProjectStatus | WorkloadLevel | TaskPriority | TaskStatus;
+    label?: string;
     className?: string;
     variant?: 'default' | 'outline';
 }
 
 export const BadgeLabel = ({
-    type,
-    value,
-    className,
-    variant = 'outline',
-}: BadgeProps) => {
+                               type,
+                               value,
+                               label,
+                               className,
+                               variant = 'outline',
+                           }: BadgeProps) => {
     const getColor = (): string => {
-        // Status farby
         if (type === 'status') {
             const colors: Record<ProjectStatus, string> = {
                 planning: 'bg-blue-100 text-blue-700 border-blue-200',
@@ -34,7 +35,6 @@ export const BadgeLabel = ({
             return colors[value as ProjectStatus];
         }
 
-        // Workload farby
         if (type === 'workload') {
             const colors: Record<WorkloadLevel, string> = {
                 low: 'bg-emerald-100 text-emerald-700 border-emerald-200',
@@ -45,7 +45,6 @@ export const BadgeLabel = ({
             return colors[value as WorkloadLevel];
         }
 
-        // Priority farby
         if (type === 'priority') {
             const colors: Record<TaskPriority, string> = {
                 low: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -55,7 +54,6 @@ export const BadgeLabel = ({
             return colors[value as TaskPriority];
         }
 
-        // Task status farby
         if (type === 'task-status') {
             const colors: Record<TaskStatus, string> = {
                 todo: 'bg-gray-100 text-gray-700 border-gray-200',
@@ -70,7 +68,6 @@ export const BadgeLabel = ({
     };
 
     const getText = (): string => {
-        // Status texty
         if (type === 'status') {
             const labels: Record<ProjectStatus, string> = {
                 planning: 'Plánovanie',
@@ -82,7 +79,6 @@ export const BadgeLabel = ({
             return labels[value as ProjectStatus];
         }
 
-        // Workload texty
         if (type === 'workload') {
             const labels: Record<WorkloadLevel, string> = {
                 low: 'Nízke',
@@ -93,7 +89,6 @@ export const BadgeLabel = ({
             return labels[value as WorkloadLevel];
         }
 
-        // Priority texty
         if (type === 'priority') {
             const labels: Record<TaskPriority, string> = {
                 low: 'Nízka',
@@ -103,7 +98,6 @@ export const BadgeLabel = ({
             return labels[value as TaskPriority];
         }
 
-        // Task status texty
         if (type === 'task-status') {
             const labels: Record<TaskStatus, string> = {
                 todo: 'Nový',
@@ -122,10 +116,13 @@ export const BadgeLabel = ({
             variant={variant}
             className={
                 getColor() +
-                ' flex items-center justify-center px-3.5 py-2.5 ' +
+                ' flex items-center justify-center gap-1.5 px-3.5 py-2.5 ' +
                 (className ?? '')
             }
         >
+            {label && (
+                <span className="font-normal">{label}:</span>
+            )}
             {getText()}
         </Badge>
     );
