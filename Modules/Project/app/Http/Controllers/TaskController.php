@@ -31,30 +31,30 @@ class TaskController extends Controller
     }
 
     /**
-     * Store a newly created task
+     * Store a newly created task-detail
      */
     public function store(CreateTaskRequest $request, int $projectId)
     {
         $task = $this->taskService->createTask($projectId, $request->validated());
 
         return redirect()
-            ->route('projects.show', [$projectId, $task->id])
+            ->route('projects.project-detail', [$projectId, $task->id])
             ->with('success', 'Úloha bola úspešne vytvorená.');
     }
 
     /**
-     * Display the specified task
+     * Display the specified task-detail
      */
     public function show(int $projectId, int $taskId)
     {
         $task = $this->taskService->getTaskById($taskId);
         if (!$task) {
-            return redirect("projects.show");
+            return redirect()->route('projects.show', $projectId);
         }
 
         $project = $this->projectService->getProjectById($projectId);
         if (!$project) {
-            return redirect("projects.show");
+            return redirect()->route('projects.show', $projectId);
         }
 
         return Inertia::render('Project/Task', [
@@ -64,31 +64,31 @@ class TaskController extends Controller
     }
 
     /**
-     * Update the specified task
+     * Update the specified task-detail
      */
     public function update(UpdateTaskRequest $request, int $projectId, int $taskId)
     {
         $task = $this->taskService->updateTask($taskId, $request->validated());
 
         return redirect()
-            ->route('projects.show', [$projectId, $task->id])
+            ->route('projects.project-detail', [$projectId, $task->id])
             ->with('success', 'Úloha bola úspešne aktualizovaná.');
     }
 
     /**
-     * Remove the specified task
+     * Remove the specified task-detail
      */
     public function destroy(int $projectId, int $taskId)
     {
         $this->taskService->deleteTask($taskId);
 
         return redirect()
-            ->route('projects.show', $projectId)
+            ->route('projects.project-detail', $projectId)
             ->with('success', 'Úloha bola úspešne zmazaná.');
     }
 
     /**
-     * Assign task to a user
+     * Assign task-detail to a user
      */
     public function assign(AssignTaskRequest $request, int $taskId)
     {
@@ -98,7 +98,7 @@ class TaskController extends Controller
     }
 
     /**
-     * Update task status
+     * Update task-detail status
      */
     public function updateStatus(UpdateTaskStatusRequest $request, int $taskId)
     {
@@ -108,7 +108,7 @@ class TaskController extends Controller
     }
 
     /**
-     * AI estimate task hours
+     * AI estimate task-detail hours
      */
     public function estimateWithAI(CreateTaskRequest $request)
     {

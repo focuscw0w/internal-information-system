@@ -38,7 +38,7 @@ class MakeModule extends Command
         $group  = $this->argument('group');               // Práca & Čas
 
         $slug      = Str::kebab($module);                 // blog
-        $routeName = Str::snake($slug) . '.index';        // blog.index
+        $routeName = Str::snake($slug) . '.projects';        // blog.projects
 
         $this->info("Vytváram modul: {$module}");
 
@@ -96,7 +96,7 @@ TSX;
             $fs->put($pagePath, $pageContent);
         }
 
-        // 4) Patch controller index() -> Inertia::render
+        // 4) Patch controller projects() -> Inertia::render
         $controllerPath = "{$modulePath}/app/Http/Controllers/{$module}Controller.php";
         if (!$fs->exists($controllerPath)) {
             $this->error("Nenašiel som controller: {$controllerPath}");
@@ -110,9 +110,9 @@ TSX;
         $controller = $this->ensureUse($controller, "use Inertia\\Inertia;");
         $controller = $this->ensureUse($controller, "use Illuminate\\Http\\Request;");
 
-        // 4b) replace index() method body
+        // 4b) replace projects() method body
         $newIndex = <<<PHP
-    public function index(Request \$request)
+    public function projects(Request \$request)
     {
         return Inertia::render('{$module}/Index', [
             'title' => '{$this->escape($title)}',
@@ -120,22 +120,22 @@ TSX;
     }
 PHP;
 
-        $controller2 = $this->replaceMethod($controller, 'index', $newIndex);
+        $controller2 = $this->replaceMethod($controller, 'projects', $newIndex);
 
         if ($controller2 === null) {
-            $this->error("Nepodarilo sa nájsť/replace-núť metódu index() v controlleri.");
-            $this->warn("Otvor súbor a uisti sa, že obsahuje 'public function index()' alebo 'public function index(Request \$request)'.");
+            $this->error("Nepodarilo sa nájsť/replace-núť metódu projects() v controlleri.");
+            $this->warn("Otvor súbor a uisti sa, že obsahuje 'public function projects()' alebo 'public function projects(Request \$request)'.");
             return self::FAILURE;
         }
 
         $fs->put($controllerPath, $controller2);
 
-        // 5) Patch routes/web.php 
+        // 5) Patch routes/web.php
         $routesPath = "{$modulePath}/routes/web.php";
         if ($fs->exists($routesPath)) {
             $routes = $fs->get($routesPath);
 
-       
+
             if (!str_contains($routes, "->prefix('{$slug}')")) {
                 $routes = <<<PHP
 <?php
@@ -147,7 +147,7 @@ Route::middleware(['web', 'auth'])
     ->prefix('{$slug}')
     ->name('{$slug}.')
     ->group(function () {
-        Route::get('/', [{$module}Controller::class, 'index'])->name('index');
+        Route::get('/', [{$module}Controller::class, 'projects'])->name('projects');
     });
 
 PHP;
@@ -164,7 +164,7 @@ Route::middleware(['web', 'auth'])
     ->prefix('{$slug}')
     ->name('{$slug}.')
     ->group(function () {
-        Route::get('/', [{$module}Controller::class, 'index'])->name('index');
+        Route::get('/', [{$module}Controller::class, 'projects'])->name('projects');
     });
 
 PHP;

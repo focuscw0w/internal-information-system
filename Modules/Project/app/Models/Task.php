@@ -35,28 +35,28 @@ class Task extends Model
     protected static function boot() {
          parent::boot();
 
-        // After creating a task
+        // After creating a task-detail
         static::created(function ($task) {
             $task->project->increment('tasks_total');
         });
 
-        // After deleting a task
+        // After deleting a task-detail
         static::deleted(function ($task) {
             $task->project->decrement('tasks_total');
         });
-        
-        // After updating a task's status
+
+        // After updating a task-detail's status
         static::updated(function ($task) {
             if ($task->isDirty('status')) {
                 $oldStatus = $task->getOriginal('status');
                 $newStatus = $task->status;
-                
-                // If the task changed from a status other than done to done
+
+                // If the task-detail changed from a status other than done to done
                 if ($oldStatus !== 'done' && $newStatus === 'done') {
                     $task->project->increment('tasks_completed');
                 }
-                
-                // If the task changed from done to another status
+
+                // If the task-detail changed from done to another status
                 if ($oldStatus === 'done' && $newStatus !== 'done') {
                     $task->project->decrement('tasks_completed');
                 }
@@ -115,8 +115,8 @@ class Task extends Model
 
     public function isOverdue(): bool
     {
-        return $this->due_date && 
-               $this->due_date < now() && 
+        return $this->due_date &&
+               $this->due_date < now() &&
                $this->status !== 'done';
     }
 }

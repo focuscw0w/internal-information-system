@@ -4,9 +4,9 @@ import { Head } from '@inertiajs/react';
 import { FileText, ListChecks } from 'lucide-react';
 import { BadgeLabel } from '../components/ui/badge';
 import { Header } from '../components/ui/header';
-import { TaskComments } from '../components/task/task-comments';
-import { TaskOverview } from '../components/task/task-overview';
-import { TaskSubtasks } from '../components/task/task-subtasks';
+import { TaskComments } from '../components/task-detail/task-comments';
+import { TaskOverview } from '../components/task-detail/task-overview';
+import { TaskSubtasks } from '../components/task-detail/task-subtasks';
 import { Project, Task } from '../types/types';
 
 interface TaskProps {

@@ -23,7 +23,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Get task by ID
+     * Get task-detail by ID
      */
     public function getTaskById(int $taskId): ?Task
     {
@@ -32,7 +32,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Create new task
+     * Create new task-detail
      */
     public function createTask(int $projectId, array $data): Task
     {
@@ -55,7 +55,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Update existing task
+     * Update existing task-detail
      */
     public function updateTask(int $taskId, array $data): Task
     {
@@ -74,7 +74,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Delete task
+     * Delete task-detail
      */
     public function deleteTask(int $taskId): bool
     {
@@ -84,7 +84,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Assign task to user
+     * Assign task-detail to user
      */
     public function assignTask(int $taskId, int $userId): Task
     {
@@ -95,7 +95,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Update task status
+     * Update task-detail status
      */
     public function updateTaskStatus(int $taskId, string $status): Task
     {
@@ -117,7 +117,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Estimate task hours using AI
+     * Estimate task-detail hours using AI
      */
     public function estimateTaskWithAI(string $title, string $description): float
     {

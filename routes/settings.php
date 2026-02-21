@@ -24,5 +24,5 @@ Route::middleware('auth')->group(function () {
     })->name('appearance.edit');
 
     Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
-        ->name('two-factor.show');
+        ->name('two-factor.project-detail');
 });

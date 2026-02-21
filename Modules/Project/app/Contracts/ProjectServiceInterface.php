@@ -69,9 +69,9 @@ interface ProjectServiceInterface
      * Add single team member to project
      */
     public function addTeamMember(
-        int $projectId, 
-        int $userId, 
-        array $permissions = ['view_project'], 
+        int $projectId,
+        int $userId,
+        array $permissions = ['view_project'],
         int $allocation = 100
     ): ?Project;
 
@@ -84,9 +84,9 @@ interface ProjectServiceInterface
      * Update team member settings (permissions and/or allocation)
      */
     public function updateTeamMemberSettings(
-        int $projectId, 
-        int $userId, 
-        ?array $permissions = null, 
+        int $projectId,
+        int $userId,
+        ?array $permissions = null,
         ?int $allocation = null
     ): ?Project;
 }

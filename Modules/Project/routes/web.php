@@ -10,8 +10,8 @@ Route::middleware(['web', 'auth'])
     ->name('projects.')
     ->group(function () {
         // Projects
-        Route::get('/', [ProjectController::class, 'index'])->name('index');
-        Route::get('/{id}', [ProjectController::class, 'show'])->name('show');
+        Route::get('/', [ProjectController::class, 'index'])->name('projects');
+        Route::get('/{id}', [ProjectController::class, 'show'])->name('project-detail');
         Route::put('/{id}', [ProjectController::class, 'update'])->name('update');
         Route::post('/', [ProjectController::class, 'store'])->name('store');
         Route::delete('/{id}', [ProjectController::class, 'destroy'])->name('destroy');

@@ -40,7 +40,7 @@ class ProjectController extends Controller
             $project = $this->projectService->createProject($request->validated());
 
             return redirect()
-                ->route('projects.index')
+                ->route('projects.projects')
                 ->with('success', 'Projekt bol úspešne vytvorený.');
         } catch (\Exception $e) {
             \Log::error('Project creation failed:', [
@@ -64,7 +64,7 @@ class ProjectController extends Controller
 
         if (!$project) {
             return redirect()
-                ->route('project.index')
+                ->route('project.projects')
                 ->with('error', 'Projekt nebol nájdený.');
         }
 

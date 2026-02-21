@@ -2,11 +2,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Calendar, KanbanIcon, LayoutGrid, Users } from 'lucide-react';
-import { Kanban } from '../components/show/kanban/kanban';
-import { Overview } from '../components/show/overview';
-import { ShowHeader } from '../components/show/show-header';
-import { Team } from '../components/show/team';
-import { Timeline } from '../components/show/timeline';
+import { Kanban } from '../components/project-detail/kanban/kanban';
+import { Overview } from '../components/project-detail/tab-views/overview';
+import { ShowHeader } from '../components/project-detail/show-header';
+import { Team } from '../components/project-detail/tab-views/team';
+import { Timeline } from '../components/project-detail/tab-views/timeline';
 import { Project } from '../types/types';
 
 export default function Show({ project }: { project: Project }) {
