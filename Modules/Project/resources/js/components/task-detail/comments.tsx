@@ -8,7 +8,7 @@ interface TaskCommentsProps {
     task: Task;
 }
 
-export const TaskComments = ({ task }: TaskCommentsProps) => {
+export const Comments = ({ task }: TaskCommentsProps) => {
     const comments = task.comments ?? [];
 
     const { data, setData, post, processing, reset } = useForm({

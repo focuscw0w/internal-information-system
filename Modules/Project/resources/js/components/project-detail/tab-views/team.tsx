@@ -16,23 +16,7 @@ export const Team = ({ project }: TeamProps) => {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Users className="h-6 w-6 text-blue-600" />
-                    <div>
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            Tím projektu
-                        </h2>
-                        <p className="text-sm text-gray-500">
-                            {teamMembers.length + 1}{' '}
-                            {teamMembers.length === 0
-                                ? 'člen'
-                                : teamMembers.length < 4
-                                  ? 'členovia'
-                                  : 'členov'}
-                        </p>
-                    </div>
-                </div>
+            <div className="flex justify-end">
                 <ManageTeamDialog project={project} />
             </div>
 

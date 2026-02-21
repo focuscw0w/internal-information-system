@@ -1,13 +1,14 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
-import { FileText, ListChecks } from 'lucide-react';
-import { TaskComments } from '../components/task-detail/task-comments';
-import { TaskOverview } from '../components/task-detail/task-overview';
-import { TaskSubtasks } from '../components/task-detail/task-subtasks';
+import { FileText, ListChecks, Users } from 'lucide-react';
+import { Comments } from '../components/task-detail/comments';
+import { TaskOverview } from '../components/task-detail/tab-views/task-overview';
+import { Subtasks } from '../components/task-detail/tab-views/subtasks';
 import { BadgeLabel } from '../components/ui/badge';
 import { Header } from '../components/ui/header';
 import { Project, Task } from '../types/types';
+import { Assignees } from '../components/task-detail/tab-views/assignees';
 
 interface TaskProps {
     task: Task;
@@ -35,7 +36,7 @@ export default function TaskPage({ task, project }: TaskProps) {
                 {/* Tabs */}
                 <Tabs defaultValue="overview" className="w-full">
                     <div className="flex items-center justify-between">
-                        <TabsList className="grid w-full max-w-sm grid-cols-2 gap-3 bg-white">
+                        <TabsList className="grid w-full max-w-sm grid-cols-3 gap-3 bg-white">
                             <TabsTrigger
                                 value="overview"
                                 className="flex cursor-pointer items-center gap-2 py-2.5"
@@ -50,6 +51,13 @@ export default function TaskPage({ task, project }: TaskProps) {
                                 <ListChecks className="h-4 w-4" />
                                 Podúlohy
                             </TabsTrigger>
+                            <TabsTrigger
+                                value="assignees"
+                                className="flex cursor-pointer items-center gap-2 py-2.5"
+                            >
+                                <Users className="h-4 w-4" />
+                                Priradení
+                            </TabsTrigger>
                         </TabsList>
                     </div>
 
@@ -57,12 +65,15 @@ export default function TaskPage({ task, project }: TaskProps) {
                         <TaskOverview task={task} project={project} />
                     </TabsContent>
                     <TabsContent value="subtasks" className="mt-6">
-                        <TaskSubtasks task={task} project={project} />
+                        <Subtasks task={task} project={project} />
+                    </TabsContent>
+                    <TabsContent value="assignees" className="mt-6">
+                        <Assignees task={task} projectId={project.id} />
                     </TabsContent>
                 </Tabs>
 
                 {/* Comments - always visible below tabs */}
-                <TaskComments task={task} />
+                <Comments task={task} />
             </div>
         </AppLayout>
     );

@@ -1,9 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
-import { Calendar, KanbanIcon, LayoutGrid, Users } from 'lucide-react';
+import { Calendar, FileText, KanbanIcon, Users } from 'lucide-react';
 import { Kanban } from '../components/project-detail/kanban/kanban';
-import { Overview } from '../components/project-detail/tab-views/overview';
+import { ProjectOverview } from '../components/project-detail/tab-views/project-overview';
 import { Header } from '../components/ui/header';
 import { BadgeLabel } from '../components/ui/badge';
 import { EditProjectDialog } from '../components/projects/dialogs/edit-project';
@@ -52,7 +52,7 @@ export default function Show({ project }: { project: Project }) {
                                 value="overview"
                                 className="flex cursor-pointer items-center gap-2 py-2.5"
                             >
-                                <LayoutGrid className="h-4 w-4" />
+                                <FileText className="h-4 w-4" />
                                 Prehľad
                             </TabsTrigger>
                             <TabsTrigger
@@ -80,7 +80,7 @@ export default function Show({ project }: { project: Project }) {
                     </div>
 
                     <TabsContent value="overview" className="mt-6">
-                        <Overview project={project} />
+                        <ProjectOverview project={project} />
                     </TabsContent>
                     <TabsContent value="kanban" className="mt-6">
                         <Kanban project={project} />

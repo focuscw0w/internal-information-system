@@ -4,6 +4,7 @@ namespace Modules\Project\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User;
@@ -70,9 +71,9 @@ class Task extends Model
         return $this->belongsTo(Project::class);
     }
 
-    public function assignedUser(): BelongsTo
+    public function assignedUser(): BelongsToMany
     {
-        return $this->belongsTo(User::class, 'assigned_to');
+        return $this->belongsToMany(User::class, 'task_user');
     }
 
     /*

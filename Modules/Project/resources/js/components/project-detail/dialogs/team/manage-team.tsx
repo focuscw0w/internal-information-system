@@ -5,6 +5,7 @@ import { AlertCircle, Loader2, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Project, TeamMemberSettings } from '../../../../types/types';
 import { TeamMemberList } from './team-member-list';
+import { Button } from '@/components/ui/button';
 
 interface ManageTeamDialogProps {
     project: Project;
@@ -70,10 +71,10 @@ export const ManageTeamDialog = ({
     };
 
     const defaultTrigger = (
-        <button className="flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700">
+        <Button size="lg" className="flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90">
             <Users size={18} />
             Spravovať tím
-        </button>
+        </Button>
     );
 
     return (

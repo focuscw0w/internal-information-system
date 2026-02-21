@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Clock, Target, User } from 'lucide-react';
-import { Project, Task } from '../../types/types';
+import { Project, Task } from '../../../types/types';
 
 interface TaskOverviewProps {
     task: Task;

@@ -4,11 +4,11 @@ import { StatCard } from '../../ui/statcard';
 import { Allocations } from '../allocations';
 import { TaskList } from '../task-list/task-list';
 
-interface OverviewProps {
+interface ProjectOverviewProps {
     project: Project;
 }
 
-export function Overview({ project }: OverviewProps) {
+export function ProjectOverview({ project }: ProjectOverviewProps) {
     const budgetSpent = project.budget_spent ?? 0;
     const budget = project.budget ?? 0;
     const budgetPercentage = budget > 0 ? (budgetSpent / budget) * 100 : 0;

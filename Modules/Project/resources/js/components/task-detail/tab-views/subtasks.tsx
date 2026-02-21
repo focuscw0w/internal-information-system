@@ -1,13 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ListChecks } from 'lucide-react';
-import { Project, Task } from '../../types/types';
+import { Project, Task } from '../../../types/types';
 
-interface TaskSubtasksProps {
+interface SubtasksProps {
     task: Task;
     project: Project;
 }
 
-export const TaskSubtasks = ({ task, project }: TaskSubtasksProps) => {
+export const Subtasks = ({ task, project }: SubtasksProps) => {
     const subtasks = task.subtasks ?? [];
     const completed = subtasks.filter((s) => s.status === 'done').length;
 
