@@ -33,7 +33,7 @@ export const CreateSubtaskDialog = ({ projectId, taskId }: CreateSubtaskDialogPr
             open={open}
             onOpenChange={setOpen}
             trigger={
-                <Button variant="outline" size="sm">
+                <Button variant="default" size="lg">
                     <Plus className="mr-1 h-4 w-4" />
                     Pridať podúlohu
                 </Button>

@@ -1,6 +1,8 @@
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
+import { Button } from '@/components/ui/button';
 import { useForm } from '@inertiajs/react';
+import { Edit } from 'lucide-react';
 import { useState } from 'react';
 import { Subtask } from '../../../../types/types';
 
@@ -8,10 +10,13 @@ interface EditSubtaskDialogProps {
     subtask: Subtask;
     projectId: number;
     taskId: number;
-    trigger: React.ReactNode;
 }
 
-export const EditSubtaskDialog = ({ subtask, projectId, taskId, trigger }: EditSubtaskDialogProps) => {
+export const EditSubtaskDialog = ({
+    subtask,
+    projectId,
+    taskId,
+}: EditSubtaskDialogProps) => {
     const [open, setOpen] = useState(false);
 
     const { data, setData, put, processing, errors } = useForm({
@@ -37,7 +42,11 @@ export const EditSubtaskDialog = ({ subtask, projectId, taskId, trigger }: EditS
         <FormDialog
             open={open}
             onOpenChange={handleOpen}
-            trigger={trigger}
+            trigger={
+                <Button variant="ghost" size="sm">
+                    <Edit size={20} className="h-3.5 w-3.5 text-gray-400" />
+                </Button>
+            }
             title="Upraviť podúlohu"
             onSubmit={handleSubmit}
             processing={processing}
