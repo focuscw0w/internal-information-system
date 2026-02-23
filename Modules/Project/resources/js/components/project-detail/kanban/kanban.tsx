@@ -57,14 +57,11 @@ export function Kanban({ project }: KanbanProps) {
         const taskId = active.id;
         const newStatus = over.id as string;
 
-        // Find the task-detail being dragged
         const task = project.tasks?.find((t) => t.id === taskId);
 
         if (!task) return;
-
         if (task.status === newStatus) return;
 
-        // Optimistically update the UI
         router.patch(
             `/projects/${project.id}/tasks/${taskId}/status`,
             { status: newStatus },
@@ -78,6 +75,20 @@ export function Kanban({ project }: KanbanProps) {
 
     const handleDragCancel = () => {
         setActiveTask(null);
+    };
+
+    const handleTaskClick = (taskId: number) => {
+        router.visit(`/projects/${project.id}/tasks/${taskId}`);
+    };
+
+    const renderAssignedUsers = (task: Task) => {
+        if (!task.assigned_users || task.assigned_users.length === 0) return null;
+
+        return (
+            <p className="text-xs text-gray-500">
+                👤 {task.assigned_users.map((u) => u.name).join(', ')}
+            </p>
+        );
     };
 
     return (
@@ -105,36 +116,28 @@ export function Kanban({ project }: KanbanProps) {
                                 <CardContent className="space-y-2">
                                     {tasks.map((task) => (
                                         <Draggable key={task.id} id={task.id}>
-                                            <Card className="cursor-grab transition-shadow hover:shadow-md active:cursor-grabbing">
+                                            <Card
+                                                className="cursor-grab transition-shadow hover:shadow-md active:cursor-grabbing"
+                                                onClick={() => handleTaskClick(task.id)}
+                                            >
                                                 <CardContent className="p-3">
                                                     <h4 className="mb-2 text-sm font-medium text-gray-900">
                                                         {task.title}
                                                     </h4>
-                                                    {task.assigned_user && (
-                                                        <p className="text-xs text-gray-500">
-                                                            👤{' '}
-                                                            {
-                                                                task
-                                                                    .assigned_user
-                                                                    .name
-                                                            }
-                                                        </p>
-                                                    )}
+                                                    {renderAssignedUsers(task)}
                                                     <div className="mt-2 flex items-center justify-between">
                                                         <span className="text-xs text-gray-500">
                                                             {task.actual_hours}h
                                                             /{' '}
-                                                            {
-                                                                task.estimated_hours
-                                                            }
+                                                            {task.estimated_hours}
                                                             h
                                                         </span>
                                                         {task.priority ===
                                                             'high' && (
-                                                            <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">
+                                                                <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">
                                                                 Vysoká
                                                             </span>
-                                                        )}
+                                                            )}
                                                     </div>
                                                 </CardContent>
                                             </Card>
@@ -152,7 +155,6 @@ export function Kanban({ project }: KanbanProps) {
                 })}
             </div>
 
-            {/* Drag overlay - shows the task-detail being dragged */}
             <DragOverlay>
                 {activeTask ? (
                     <Card className="cursor-grabbing shadow-lg">
@@ -160,11 +162,7 @@ export function Kanban({ project }: KanbanProps) {
                             <h4 className="mb-2 text-sm font-medium text-gray-900">
                                 {activeTask.title}
                             </h4>
-                            {activeTask.assigned_user && (
-                                <p className="text-xs text-gray-500">
-                                    👤 {activeTask.assigned_user.name}
-                                </p>
-                            )}
+                            {renderAssignedUsers(activeTask)}
                             <div className="mt-2 flex items-center justify-between">
                                 <span className="text-xs text-gray-500">
                                     {activeTask.actual_hours}h /{' '}
