@@ -65,6 +65,7 @@ export interface ProjectAllocation {
 
 export interface Task {
     id: number;
+    project_id: number;
     title: string;
     description: string | null;
     status: 'todo' | 'in_progress' | 'testing' | 'done';
@@ -72,8 +73,11 @@ export interface Task {
     estimated_hours: number;
     actual_hours: number;
     due_date: string | null;
+    completed_at: string | null;
     assigned_users?: {
         id: number;
         name: string;
     }[];
+    created_at: string;
+    updated_at: string;
 }
