@@ -44,6 +44,7 @@ export interface Project {
     days_remaining: number;
     tasks: Task[];
     allocations: ProjectAllocation[];
+    activities?: Activity[];
     created_at: string;
     updated_at: string;
 }
@@ -90,4 +91,17 @@ export interface Subtask {
     is_completed: boolean;
     created_at: string;
     updated_at: string;
+}
+
+export interface Activity {
+    id: number;
+    project_id: number;
+    type: string;
+    description: string;
+    metadata?: Record<string, any>;
+    user: {
+        id: number;
+        name: string;
+    };
+    created_at: string;
 }

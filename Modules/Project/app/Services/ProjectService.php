@@ -3,7 +3,6 @@
 namespace Modules\Project\App\Services;
 
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Project\App\Contracts\ProjectServiceInterface;
@@ -38,35 +37,6 @@ class ProjectService implements ProjectServiceInterface
         }
 
         return $query->get();
-    }
-
-    /**
-     * Get paginated projects
-     */
-    public function getPaginatedProjects(int $perPage = 15, array $filters = []): LengthAwarePaginator
-    {
-        $query = Project::with(['owner', 'team']);
-
-        if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
-
-        if (isset($filters['workload'])) {
-            $query->where('workload', $filters['workload']);
-        }
-
-        if (isset($filters['owner_id'])) {
-            $query->where('owner_id', $filters['owner_id']);
-        }
-
-        if (isset($filters['search'])) {
-            $query->where(function ($q) use ($filters) {
-                $q->where('name', 'like', '%'.$filters['search'].'%')
-                  ->orWhere('description', 'like', '%'.$filters['search'].'%');
-            });
-        }
-
-        return $query->paginate($perPage);
     }
 
     /**

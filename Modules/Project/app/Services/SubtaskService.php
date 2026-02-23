@@ -3,10 +3,11 @@
 namespace Modules\Project\Services;
 
 use Illuminate\Support\Facades\Log;
+use Modules\Project\Contracts\SubtaskServiceInterface;
 use Modules\Project\Models\Subtask;
 use Modules\Project\Models\Task;
 
-class SubtaskService
+class SubtaskService implements SubtaskServiceInterface
 {
     /**
      * Create a new subtask

@@ -87,6 +87,22 @@ class ProjectResource extends JsonResource
                 });
             }),
 
+            'activities' => $this->whenLoaded('activities', function () {
+                return $this->activities->map(function ($activity) {
+                    return [
+                        'id' => $activity->id,
+                        'type' => $activity->type,
+                        'description' => $activity->description,
+                        'metadata' => $activity->metadata,
+                        'user' => [
+                            'id' => $activity->user->id,
+                            'name' => $activity->user->name,
+                        ],
+                        'created_at' => $activity->created_at->toISOString(),
+                    ];
+                });
+            }),
+
             'team' => $this->whenLoaded('team', function () {
                 return $this->team->map(function ($member) {
                     $permissions = $member->pivot->permissions;

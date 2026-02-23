@@ -14,11 +14,6 @@ interface ProjectServiceInterface
     public function getAllProjects(array $filters = []): Collection;
 
     /**
-     * Get paginated projects with optional filters
-     */
-    public function getPaginatedProjects(int $perPage = 15, array $filters = []): LengthAwarePaginator;
-
-    /**
      * Get project by ID
      */
     public function getProjectById(int $id): ?Project;

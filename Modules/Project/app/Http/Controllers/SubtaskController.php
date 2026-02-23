@@ -20,7 +20,7 @@ class SubtaskController extends Controller
     {
         $this->subtaskService->createSubtask($taskId, $request->validated());
 
-        return back()->with('success', 'Podúloha bola vytvorená.');
+        return back()->with('success', 'Subtask was successfully created.');
     }
 
     /**
@@ -30,7 +30,7 @@ class SubtaskController extends Controller
     {
         $this->subtaskService->updateSubtask($subtaskId, $request->validated());
 
-        return back()->with('success', 'Podúloha bola aktualizovaná.');
+        return back()->with('success', 'Subtask was successfully updated.');
     }
 
     /**
@@ -40,7 +40,7 @@ class SubtaskController extends Controller
     {
         $this->subtaskService->toggleSubtask($subtaskId);
 
-        return back()->with('success', 'Stav podúlohy bol zmenený.');
+        return back()->with('success', 'Subtask was successfully changed.');
     }
 
     /**
@@ -50,6 +50,6 @@ class SubtaskController extends Controller
     {
         $this->subtaskService->deleteSubtask($subtaskId);
 
-        return back()->with('success', 'Podúloha bola odstránená.');
+        return back()->with('success', 'Subtask was successfully deleted.');
     }
 }

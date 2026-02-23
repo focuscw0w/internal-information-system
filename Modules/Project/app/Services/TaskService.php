@@ -11,6 +11,31 @@ use Modules\Project\Contracts\TaskServiceInterface;
 
 class TaskService implements TaskServiceInterface
 {
+    public function __construct(
+        protected ActivityLogService $activityLog
+    )
+    {
+    }
+
+    /**
+     * Detect changes between model and new data
+     */
+    private function detectChanges(Task $task, array $data, array $fields): array
+    {
+        $changes = [];
+
+        foreach ($fields as $field) {
+            if (array_key_exists($field, $data) && $data[$field] !== $task->{$field}) {
+                $changes[$field] = [
+                    'old' => $task->{$field},
+                    'new' => $data[$field],
+                ];
+            }
+        }
+
+        return $changes;
+    }
+
     /**
      * Get all tasks for a project
      */
@@ -39,8 +64,6 @@ class TaskService implements TaskServiceInterface
     {
         Log::info('Creating task', ['project_id' => $projectId, 'title' => $data['title']]);
 
-        Project::findOrFail($projectId);
-
         return DB::transaction(function () use ($projectId, $data) {
             $task = Task::create([
                 'project_id' => $projectId,
@@ -51,6 +74,17 @@ class TaskService implements TaskServiceInterface
                 'estimated_hours' => $data['estimated_hours'] ?? 0,
                 'due_date' => $data['due_date'] ?? null,
             ]);
+
+            if (!empty($data['assigned_users'])) {
+                $task->assignedUsers()->sync($data['assigned_users']);
+            }
+
+            $this->activityLog->log(
+                $projectId,
+                'task_created',
+                "Vytvoril úlohu: {$task->title}",
+                $task
+            );
 
             return $task->load(['project', 'assignedUsers']);
         });
@@ -65,6 +99,10 @@ class TaskService implements TaskServiceInterface
 
         Log::info('Updating task', ['task_id' => $taskId, 'data' => $data]);
 
+        $changes = $this->detectChanges($task, $data, [
+            'title', 'status', 'priority', 'description', 'estimated_hours',
+        ]);
+
         $task->update([
             'title' => $data['title'] ?? $task->title,
             'description' => $data['description'] ?? $task->description,
@@ -75,6 +113,16 @@ class TaskService implements TaskServiceInterface
 
         if (array_key_exists('assigned_users', $data)) {
             $task->assignedUsers()->sync($data['assigned_users']);
+        }
+
+        if (!empty($changes)) {
+            $this->activityLog->log(
+                $task->project_id,
+                'task_updated',
+                "Aktualizoval úlohu: {$task->title}",
+                $task,
+                ['changes' => $changes]
+            );
         }
 
         return $task->fresh(['project', 'assignedUsers']);
@@ -89,6 +137,14 @@ class TaskService implements TaskServiceInterface
 
         Log::info('Deleting task', ['task_id' => $taskId, 'title' => $task->title]);
 
+        $this->activityLog->log(
+            $task->project_id,
+            'task_deleted',
+            "Odstránil úlohu: {$task->title}",
+            null,
+            ['task_title' => $task->title]
+        );
+
         return $task->delete();
     }
 
@@ -100,7 +156,16 @@ class TaskService implements TaskServiceInterface
         Log::info('Assigning users to task', ['task_id' => $taskId, 'user_ids' => $userIds]);
 
         $task = Task::findOrFail($taskId);
+        $oldUsers = $task->assignedUsers->pluck('id')->toArray();
         $task->assignedUsers()->sync($userIds);
+
+        $this->activityLog->log(
+            $task->project_id,
+            'task_assigned',
+            "Zmenil priradenie úlohy: {$task->title}",
+            $task,
+            ['old_users' => $oldUsers, 'new_users' => $userIds]
+        );
 
         return $task->fresh(['assignedUsers']);
     }
@@ -111,10 +176,19 @@ class TaskService implements TaskServiceInterface
     public function updateTaskStatus(int $taskId, string $status): Task
     {
         $task = Task::findOrFail($taskId);
+        $oldStatus = $task->status;
 
-        Log::info('Updating task status', ['task_id' => $taskId, 'old_status' => $task->status, 'new_status' => $status]);
+        Log::info('Updating task status', ['task_id' => $taskId, 'old_status' => $oldStatus, 'new_status' => $status]);
 
         $task->update(['status' => $status]);
+
+        $this->activityLog->log(
+            $task->project_id,
+            'task_status_changed',
+            "Zmenil stav úlohy: {$task->title}",
+            $task,
+            ['old_status' => $oldStatus, 'new_status' => $status]
+        );
 
         return $task->fresh();
     }

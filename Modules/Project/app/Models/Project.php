@@ -106,6 +106,11 @@ class Project extends Model
             ->withTimestamps();
     }
 
+    public function activities(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class)->oldest();
+    }
+
     public function allocations(): HasMany
     {
         return $this->hasMany(ProjectAllocation::class);
