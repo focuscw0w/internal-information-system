@@ -69,7 +69,7 @@ class ProjectController extends Controller
         }
 
         $project->load([
-            'tasks.assignedUser',
+            'tasks.assignedUsers',
             'allocations.user',
             'owner',
             'team',

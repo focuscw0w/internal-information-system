@@ -9,7 +9,7 @@ interface AssigneesProps {
 }
 
 export const Assignees = ({ task, projectId }: AssigneesProps) => {
-    const assignees = task.assigned_user ?? [];
+    const assignees = task.assigned_users ?? [];
 
     return (
         <div className="space-y-6">

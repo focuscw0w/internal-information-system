@@ -72,7 +72,6 @@ export interface Task {
     estimated_hours: number;
     actual_hours: number;
     due_date: string | null;
-    assigned_to: number | null;
     assigned_users?: {
         id: number;
         name: string;
