@@ -61,6 +61,8 @@ class Task extends Model
                 if ($oldStatus === 'done' && $newStatus !== 'done') {
                     $task->project->decrement('tasks_completed');
                 }
+
+                $task->project->updateProgress();
             }
         });
     }
