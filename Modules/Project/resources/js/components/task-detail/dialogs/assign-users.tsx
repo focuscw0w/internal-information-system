@@ -17,7 +17,7 @@ export const AssignTaskDialog = ({ task, projectId }: AssignTaskDialogProps) => 
 
     const { data: users = [], isLoading, isError } = useUsers();
 
-    const initialMembers = task.assigned_user ? [task.assigned_user.id] : [];
+    const initialMembers = task.assigned_user?.map((u) => u.id) ?? [];
 
     const { data, setData, post, processing } = useForm({
         assigned_users: initialMembers,
@@ -43,7 +43,7 @@ export const AssignTaskDialog = ({ task, projectId }: AssignTaskDialogProps) => 
             open={open}
             onOpenChange={handleOpen}
             trigger={
-                <Button variant="default">
+                <Button size="lg" variant="default">
                     <Users size={18} />
                     Priradiť ľudí
                 </Button>

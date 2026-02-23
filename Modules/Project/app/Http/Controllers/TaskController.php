@@ -92,9 +92,9 @@ class TaskController extends Controller
      */
     public function assign(AssignTaskRequest $request, int $taskId)
     {
-        $task = $this->taskService->assignTask($taskId, $request->validated('user_id'));
+        $this->taskService->assignTask($taskId, $request->validated('assigned_users'));
 
-        return back()->with('success', 'Úloha bola priradená.');
+        return back()->with('success', 'Členovia boli priradení.');
     }
 
     /**

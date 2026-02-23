@@ -17,7 +17,7 @@ interface TaskServiceInterface
 
     public function deleteTask(int $taskId): bool;
 
-    public function assignTask(int $taskId, int $userId): Task;
+    public function assignTask(int $taskId, array $userIds): Task;
 
     public function updateTaskStatus(int $taskId, string $status): Task;
 

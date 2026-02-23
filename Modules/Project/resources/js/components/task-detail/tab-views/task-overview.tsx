@@ -125,15 +125,13 @@ export const TaskOverview = ({ task, project }: TaskOverviewProps) => {
                             </div>
                         </div>
 
-                        {task.assigned_user && (
+                        {task.assigned_users && task.assigned_users.length > 0 && (
                             <div className="flex items-center gap-3">
                                 <User className="h-4 w-4 text-gray-400" />
                                 <div>
-                                    <p className="text-xs text-gray-500">
-                                        Priradený
-                                    </p>
+                                    <p className="text-xs text-gray-500">Priradení</p>
                                     <p className="text-sm font-medium text-gray-900">
-                                        {task.assigned_user.name}
+                                        {task.assigned_users.map((u) => u.name).join(', ')}
                                     </p>
                                 </div>
                             </div>

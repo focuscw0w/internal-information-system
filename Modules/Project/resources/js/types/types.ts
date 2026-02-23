@@ -9,7 +9,7 @@ export type ViewMode = 'grid' | 'list';
 export interface TeamMember {
     id: number;
     name: string;
-    email?: string; 
+    email?: string;
     permissions: string[];
     allocation: number;
 }
@@ -73,8 +73,8 @@ export interface Task {
     actual_hours: number;
     due_date: string | null;
     assigned_to: number | null;
-    assigned_user?: {
+    assigned_users?: {
         id: number;
         name: string;
-    };
+    }[];
 }

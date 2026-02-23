@@ -12,7 +12,8 @@ class AssignTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|exists:users,id',
+            'assigned_users' => 'present|array',
+            'assigned_users.*' => 'exists:users,id',
         ];
     }
 
@@ -30,8 +31,9 @@ class AssignTaskRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'user_id.required' => 'Používateľ je povinný.',
-            'user_id.exists' => 'Vybraný používateľ neexistuje.',
+            'assigned_users.required' => 'Vyberte aspoň jedného používateľa.',
+            'assigned_users.array' => 'Neplatný formát dát.',
+            'assigned_users.*.exists' => 'Vybraný používateľ neexistuje.',
         ];
     }
 }

@@ -45,6 +45,7 @@ class ProjectResource extends JsonResource
                 ];
             }),
 
+
             'tasks' => $this->whenLoaded('tasks', function () {
                 return $this->tasks->map(function ($task) {
                     return [
@@ -57,10 +58,12 @@ class ProjectResource extends JsonResource
                         'actual_hours' => (int) $task->actual_hours,
                         'due_date' => $task->due_date?->format('Y-m-d'),
                         'assigned_to' => $task->assigned_to,
-                        'assigned_user' => $task->assignedUser ? [
-                            'id' => $task->assignedUser->id,
-                            'name' => $task->assignedUser->name,
-                        ] : null,
+                        'assigned_users' => $task->assignedUser->map(function ($user) {
+                            return [
+                                'id' => $user->id,
+                                'name' => $user->name,
+                            ];
+                        }),
                     ];
                 });
             }),

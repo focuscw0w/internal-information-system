@@ -86,10 +86,10 @@ class TaskService implements TaskServiceInterface
     /**
      * Assign task-detail to user
      */
-    public function assignTask(int $taskId, int $userId): Task
+    public function assignTask(int $taskId, array $userIds): Task
     {
         $task = Task::findOrFail($taskId);
-        $task->update(['assigned_to' => $userId]);
+        $task->assignedUser()->sync($userIds);
 
         return $task->fresh(['assignedUser']);
     }
