@@ -28,7 +28,7 @@ class TaskService implements TaskServiceInterface
      */
     public function getTaskById(int $taskId): ?Task
     {
-        return Task::with(['project', 'assignedUsers'])
+        return Task::with(['project', 'assignedUsers', 'subtasks'])
             ->findOrFail($taskId);
     }
 

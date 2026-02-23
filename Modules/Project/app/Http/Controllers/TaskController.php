@@ -77,7 +77,7 @@ class TaskController extends Controller
     /**
      * Assign task-detail to a user
      */
-    public function assign(AssignTaskRequest $request, int $taskId)
+    public function assign(AssignTaskRequest $request, int $projectId, int $taskId)
     {
         $this->taskService->assignTask($taskId, $request->validated('assigned_users'));
 
@@ -87,7 +87,7 @@ class TaskController extends Controller
     /**
      * Update task-detail status
      */
-    public function updateStatus(UpdateTaskStatusRequest $request, int $taskId)
+    public function updateStatus(UpdateTaskStatusRequest $request, int $projectId, int $taskId)
     {
         $this->taskService->updateTaskStatus($taskId, $request->validated('status'));
 

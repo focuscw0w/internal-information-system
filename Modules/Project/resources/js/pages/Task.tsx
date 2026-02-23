@@ -65,7 +65,7 @@ export default function TaskPage({ task, project }: TaskProps) {
                         <TaskOverview task={task} project={project} />
                     </TabsContent>
                     <TabsContent value="subtasks" className="mt-6">
-                        <Subtasks task={task} project={project} />
+                        <Subtasks task={task} projectId={project.id} />
                     </TabsContent>
                     <TabsContent value="assignees" className="mt-6">
                         <Assignees task={task} projectId={project.id} />

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Project\Http\Controllers\ProjectController;
 use Modules\Project\Http\Controllers\TaskController;
+use Modules\Project\Http\Controllers\SubtaskController;
 
 // TODO: pridať middleware na permissions
 Route::middleware(['web', 'auth'])
@@ -27,6 +28,14 @@ Route::middleware(['web', 'auth'])
             Route::delete('/{task}', [TaskController::class, 'destroy'])->name('destroy');
             Route::post('/{task}/assign', [TaskController::class, 'assign'])->name('assign');
             Route::patch('/{task}/status', [TaskController::class, 'updateStatus'])->name('update-status');
+
+            // Subtasks
+            Route::prefix('{task}/subtasks')->name('subtasks.')->group(function () {
+                Route::post('/', [SubtaskController::class, 'store'])->name('store');
+                Route::put('/{subtask}', [SubtaskController::class, 'update'])->name('update');
+                Route::patch('/{subtask}/toggle', [SubtaskController::class, 'toggle'])->name('toggle');
+                Route::delete('/{subtask}', [SubtaskController::class, 'destroy'])->name('destroy');
+            });
         });
 
         // Team management
