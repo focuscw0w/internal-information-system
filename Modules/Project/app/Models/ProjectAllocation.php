@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Project\App\Models;
+namespace Modules\Project\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -57,7 +57,7 @@ class ProjectAllocation extends Model
         if ($this->allocated_hours === 0) {
             return 0;
         }
-        
+
         return round(($this->used_hours / $this->allocated_hours) * 100, 2);
     }
 

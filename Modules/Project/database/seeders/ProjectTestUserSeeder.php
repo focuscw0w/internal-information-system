@@ -4,7 +4,7 @@ namespace Modules\Project\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use Modules\Project\App\Models\Project;
+use Modules\Project\Models\Project;
 
 class ProjectTestUserSeeder extends Seeder
 {
@@ -17,7 +17,7 @@ class ProjectTestUserSeeder extends Seeder
             ['email' => 'test@test.com'],
             [
                 'name' => 'Test User',
-                'password' => bcrypt('password'), 
+                'password' => bcrypt('password'),
             ]
         );
 
@@ -50,19 +50,19 @@ class ProjectTestUserSeeder extends Seeder
             'view_project',
             'edit_project',
             'delete_project',
-            
+
             'view_team',
             'manage_team',
-            
+
             'view_tasks',
             'create_tasks',
             'edit_tasks',
             'delete_tasks',
             'assign_tasks',
-            
+
             'view_budget',
             'edit_budget',
-            
+
             'export_data',
         ];
 
@@ -73,7 +73,7 @@ class ProjectTestUserSeeder extends Seeder
                 allocation: 100,
                 hourlyRate: 75.00
             );
-            
+
             echo "✅ Test user pridaný do tímu s ADMIN permissions\n";
         } else {
             $project->updateTeamMemberPermissions($testUser->id, $allPermissions);
@@ -132,7 +132,7 @@ class ProjectTestUserSeeder extends Seeder
                     'tasks_completed' => rand(0, 20),
                     'budget' => rand(10000, 100000),
                     'budget_spent' => rand(5000, 50000),
-                    'owner_id' => 1, 
+                    'owner_id' => 1,
                 ]
             );
 

@@ -7,7 +7,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Project\App\Contracts\ProjectServiceInterface;
-use Modules\Project\App\Models\Project;
+use Modules\Project\Models\Project;
 
 class ProjectService implements ProjectServiceInterface
 {
@@ -74,7 +74,13 @@ class ProjectService implements ProjectServiceInterface
      */
     public function getProjectById(int $id): ?Project
     {
-        return Project::with(['owner', 'team', 'tasks'])->find($id);
+        $project = Project::with(['owner', 'team', 'tasks'])->find($id);
+
+        if (!$project) {
+            Log::warning('Project not found', ['project_id' => $id]);
+        }
+
+        return $project;
     }
 
     /**
@@ -130,6 +136,7 @@ class ProjectService implements ProjectServiceInterface
         $project = Project::find($id);
 
         if (!$project) {
+            Log::warning('Project not found for update', ['project_id' => $id]);
             return null;
         }
 
@@ -182,6 +189,7 @@ class ProjectService implements ProjectServiceInterface
         $project = $this->getProjectById($id);
 
         if (!$project) {
+            Log::warning('Project not found for deletion', ['project_id' => $id]);
             return false;
         }
 
@@ -210,7 +218,7 @@ class ProjectService implements ProjectServiceInterface
                 ->flatten()
                 ->unique('id')
                 ->count(),
-            'average_capacity' => round(Project::active()->avg('capacity_used') ?? 0, 2),
+            'average_capacity' => round((float) Project::active()->avg('capacity_used'), 2),
             'completed_tasks' => Project::active()->sum('tasks_completed'),
             'total_tasks' => Project::active()->sum('tasks_total'),
         ];
@@ -224,6 +232,7 @@ class ProjectService implements ProjectServiceInterface
         $project = Project::find($projectId);
 
         if (!$project) {
+            Log::warning('Project not found for progress update', ['project_id' => $projectId]);
             return null;
         }
 
@@ -263,6 +272,7 @@ class ProjectService implements ProjectServiceInterface
         $project = Project::find($id);
 
         if (!$project) {
+            Log::warning('Project not found for team update', ['project_id' => $id]);
             return null;
         }
 
@@ -304,6 +314,7 @@ class ProjectService implements ProjectServiceInterface
         $project = Project::find($projectId);
 
         if (!$project) {
+            Log::warning('Project not found for adding team member', ['project_id' => $projectId]);
             return null;
         }
 
@@ -347,6 +358,7 @@ class ProjectService implements ProjectServiceInterface
         $project = Project::find($projectId);
 
         if (!$project) {
+            Log::warning('Project not found for removing team member', ['project_id' => $projectId]);
             return null;
         }
 
@@ -380,6 +392,7 @@ class ProjectService implements ProjectServiceInterface
         $project = Project::find($projectId);
 
         if (!$project) {
+            Log::warning('Project not found for updating team member settings', ['project_id' => $projectId]);
             return null;
         }
 

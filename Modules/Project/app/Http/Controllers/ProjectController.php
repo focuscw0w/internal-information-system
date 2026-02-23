@@ -41,7 +41,7 @@ class ProjectController extends Controller
 
             return redirect()
                 ->route('projects.projects')
-                ->with('success', 'Projekt bol úspešne vytvorený.');
+                ->with('success', 'Project was successfully created.');
         } catch (\Exception $e) {
             \Log::error('Project creation failed:', [
                 'error' => $e->getMessage(),
@@ -51,7 +51,7 @@ class ProjectController extends Controller
 
             return back()
                 ->withInput()
-                ->withErrors(['error' => 'Nepodarilo sa vytvoriť projekt.']);
+                ->withErrors(['error' => 'Failed to create project.']);
         }
     }
 
@@ -64,8 +64,8 @@ class ProjectController extends Controller
 
         if (!$project) {
             return redirect()
-                ->route('project.projects')
-                ->with('error', 'Projekt nebol nájdený.');
+                ->route('projects.projects')
+                ->with('error', 'Project not found.');
         }
 
         $project->load([
@@ -89,10 +89,10 @@ class ProjectController extends Controller
     {
         $project = $this->projectService->updateProject($id, $request->validated());
         if (!$project) {
-            return redirect()->back()->with('error', 'Projekt nebol nájdený.');
+            return redirect()->back()->with('error', 'Project not found.');
         }
 
-        return redirect()->back()->with('success', 'Projekt bol úspešne aktualizovaný.');
+        return redirect()->back()->with('success', 'Project was successfully updated.');
     }
 
     /**
@@ -102,10 +102,10 @@ class ProjectController extends Controller
     {
         $isDeleted = $this->projectService->deleteProject($id);
         if (!$isDeleted) {
-            return redirect()->back()->with('error', 'Projekt se nepodařilo smazat.');
+            return redirect()->back()->with('error', 'Project was not deleted.');
         }
 
-        return redirect()->back()->with('success', 'Projekt bol úspešne odstránený.');
+        return redirect()->back()->with('success', 'Project was successfully deleted.');
     }
 
     /**
@@ -116,9 +116,9 @@ class ProjectController extends Controller
         $project = $this->projectService->updateProjectTeam($id, $request->validated());
 
         if (!$project) {
-            return redirect()->back()->with('error', 'Projekt nebol nájdený.');
+            return redirect()->back()->with('error', 'Project team was not updated.');
         }
 
-        return redirect()->back()->with('success', 'Tím bol úspešne aktualizovaný.');
+        return redirect()->back()->with('success', 'Team was successfully updated.');
     }
 }

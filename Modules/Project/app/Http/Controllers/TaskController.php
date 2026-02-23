@@ -18,19 +18,6 @@ class TaskController extends Controller
     }
 
     /**
-     * Display a listing of tasks for a project
-     */
-    public function index(int $projectId)
-    {
-        $tasks = $this->taskService->getAllTasks($projectId);
-
-        return Inertia::render('Projects::Tasks/Index', [
-            'tasks' => $tasks,
-            'projectId' => $projectId,
-        ]);
-    }
-
-    /**
      * Store a newly created task-detail
      */
     public function store(CreateTaskRequest $request, int $projectId)
@@ -39,7 +26,7 @@ class TaskController extends Controller
 
         return redirect()
             ->route('projects.project-detail', [$projectId, $task->id])
-            ->with('success', 'Úloha bola úspešne vytvorená.');
+            ->with('success', 'Task was successfully created.');
     }
 
     /**
@@ -72,7 +59,7 @@ class TaskController extends Controller
 
         return redirect()
             ->route('projects.project-detail', [$projectId, $task->id])
-            ->with('success', 'Úloha bola úspešne aktualizovaná.');
+            ->with('success', 'Task was successfully updated.');
     }
 
     /**
@@ -84,7 +71,7 @@ class TaskController extends Controller
 
         return redirect()
             ->route('projects.project-detail', $projectId)
-            ->with('success', 'Úloha bola úspešne zmazaná.');
+            ->with('success', 'Task was successfully deleted.');
     }
 
     /**
@@ -94,7 +81,7 @@ class TaskController extends Controller
     {
         $this->taskService->assignTask($taskId, $request->validated('assigned_users'));
 
-        return back()->with('success', 'Členovia boli priradení.');
+        return back()->with('success', 'Members were successfully assigned.');
     }
 
     /**
@@ -102,9 +89,9 @@ class TaskController extends Controller
      */
     public function updateStatus(UpdateTaskStatusRequest $request, int $taskId)
     {
-        $task = $this->taskService->updateTaskStatus($taskId, $request->validated('status'));
+        $this->taskService->updateTaskStatus($taskId, $request->validated('status'));
 
-        return back()->with('success', 'Stav úlohy bol aktualizovaný.');
+        return back()->with('success', 'Status was successfully updated.');
     }
 
     /**

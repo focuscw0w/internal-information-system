@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Project\App\Models;
+namespace Modules\Project\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -55,16 +55,44 @@ class Project extends Model
         'days_remaining',
     ];
 
+    // Accessors
+    public function getTeamSizeAttribute(): int
+    {
+        return $this->team()->count();
+    }
+
+    public function getIsOverdueAttribute(): bool
+    {
+        return $this->end_date < now() && $this->status !== 'completed';
+    }
+
+    public function getDaysRemainingAttribute(): int
+    {
+        return max(0, now()->diffInDays($this->end_date, false));
+    }
+
+
+    // Scopes
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    // Methods
+    public function updateProgress(): void
+    {
+        if ($this->tasks_total > 0) {
+            $this->progress = round(($this->tasks_completed / $this->tasks_total) * 100);
+            $this->save();
+        }
+    }
+
     // Relations
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(\App\Models\Client::class);
-    }
 
     public function tasks(): HasMany
     {
@@ -83,65 +111,7 @@ class Project extends Model
         return $this->hasMany(ProjectAllocation::class);
     }
 
-    // Accessors
-    public function getTeamSizeAttribute(): int
-    {
-        return $this->team()->count();
-    }
-
-    public function getIsOverdueAttribute(): bool
-    {
-        return $this->end_date < now() && $this->status !== 'completed';
-    }
-
-    public function getDaysRemainingAttribute(): int
-    {
-        return max(0, now()->diffInDays($this->end_date, false));
-    }
-
-    // Scopes
-    public function scopeActive($query)
-    {
-        return $query->where('status', 'active');
-    }
-
-    public function scopePlanning($query)
-    {
-        return $query->where('status', 'planning');
-    }
-
-    public function scopeCompleted($query)
-    {
-        return $query->where('status', 'completed');
-    }
-
-    public function scopeHighWorkload($query)
-    {
-        return $query->where('workload', 'high');
-    }
-
     // Methods
-    public function updateProgress(): void
-    {
-        if ($this->tasks_total > 0) {
-            $this->progress = round(($this->tasks_completed / $this->tasks_total) * 100);
-            $this->save();
-        }
-    }
-
-    public function addTeamMember(int $userId, array $permissions, int $allocation = 100, ?float $hourlyRate = null): void
-    {
-        $this->team()->attach($userId, [
-            'permissions' => json_encode($permissions),
-            'allocation' => $allocation,
-        ]);
-    }
-
-    public function removeTeamMember(int $userId): void
-    {
-        $this->team()->detach($userId);
-    }
-
     public function updateTeamMemberPermissions(int $userId, array $permissions): void
     {
         $this->team()->updateExistingPivot($userId, [
@@ -153,7 +123,7 @@ class Project extends Model
     {
         $teamMember = $this->team()->where('user_id', $user->id)->first();
 
-        if (! $teamMember) {
+        if (!$teamMember) {
             return false;
         }
 
@@ -176,7 +146,7 @@ class Project extends Model
     public function userHasAllPermissions(User $user, array $permissions): bool
     {
         foreach ($permissions as $permission) {
-            if (! $this->userHasPermission($user, $permission)) {
+            if (!$this->userHasPermission($user, $permission)) {
                 return false;
             }
         }

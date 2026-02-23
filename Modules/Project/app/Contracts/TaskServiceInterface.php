@@ -3,7 +3,7 @@
 namespace Modules\Project\Contracts;
 
 use Illuminate\Database\Eloquent\Collection;
-use Modules\Project\App\Models\Task;
+use Modules\Project\Models\Task;
 
 interface TaskServiceInterface
 {

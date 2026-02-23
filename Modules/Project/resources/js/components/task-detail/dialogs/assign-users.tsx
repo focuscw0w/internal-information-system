@@ -16,10 +16,8 @@ export const AssignTaskDialog = ({ task, projectId }: AssignTaskDialogProps) => 
     const [open, setOpen] = useState(false);
 
     const { data: users = [], isLoading, isError } = useUsers();
-    console.log(task)
-    const initialMembers = task.assigned_users?.map((u) => u.id) ?? [];
 
-    console.log(initialMembers)
+    const initialMembers = task.assigned_users?.map((u) => u.id) ?? [];
 
     const { data, setData, post, processing } = useForm({
         assigned_users: initialMembers,
