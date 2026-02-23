@@ -177,7 +177,7 @@ export const TaskOverview = ({ task, project }: TaskOverviewProps) => {
                     <CardContent className="space-y-2 text-sm">
                         {task.created_at && (
                             <div className="flex justify-between">
-                                <span className="text-gray-500">Vytvorená</span>
+                                <span className="text-gray-500">Vytvorené</span>
                                 <span className="text-gray-900">
                                     {new Date(
                                         task.created_at,
@@ -187,7 +187,7 @@ export const TaskOverview = ({ task, project }: TaskOverviewProps) => {
                         )}
                         {task && (
                             <div className="flex justify-between">
-                                <span className="text-gray-500">Upravená</span>
+                                <span className="text-gray-500">Upravené</span>
                                 <span className="text-gray-900">
                                     {new Date(
                                         task.updated_at,

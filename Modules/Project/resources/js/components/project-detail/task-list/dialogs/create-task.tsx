@@ -5,6 +5,7 @@ import { useForm } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { TeamMember } from '../../../../types/types';
+import { TeamMemberSelect } from '../../../ui/team-member-select';
 interface CreateTaskDialogProps {
     projectId: number;
     team: TeamMember[];
@@ -20,7 +21,7 @@ export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
         priority: 'medium',
         estimated_hours: '',
         due_date: '',
-        assigned_to: '0',
+        assigned_users: [] as number[],
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -44,14 +45,6 @@ export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
         { value: 'low', label: 'Nízka' },
         { value: 'medium', label: 'Stredná' },
         { value: 'high', label: 'Vysoká' },
-    ];
-
-    const teamOptions = [
-        { value: '0', label: 'Nepriradené' },
-        ...team.map((member) => ({
-            value: member.id.toString(),
-            label: member.name,
-        })),
     ];
 
     return (
@@ -139,16 +132,10 @@ export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
                 />
             </div>
 
-            {/* TODO: Viacerí môžu byť priradení */}
-            <FormField
-                label="Priradiť používateľovi"
-                id="assigned_to"
-                type="select"
-                value={data.assigned_to}
-                onChange={(value) => setData('assigned_to', value)}
-                error={errors.assigned_to}
-                options={teamOptions}
-                placeholder="Vybrať používateľa"
+            <TeamMemberSelect
+                allUsers={team}
+                selectedMembers={data.assigned_users}
+                onChange={(members) => setData('assigned_users', members)}
             />
         </FormDialog>
     );

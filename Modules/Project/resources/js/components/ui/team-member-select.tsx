@@ -1,8 +1,9 @@
 import { Label } from '@/components/ui/label';
 import { User } from '@/types';
+import { TeamMember } from '../../types/types';
 
 interface TeamMemberSelectProps {
-    allUsers: User[];
+    allUsers: User[] | TeamMember[];
     selectedMembers: number[];
     onChange: (members: number[]) => void;
     error?: string;

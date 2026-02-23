@@ -73,6 +73,10 @@ class TaskService implements TaskServiceInterface
             'estimated_hours' => $data['estimated_hours'] ?? $task->estimated_hours,
         ]);
 
+        if (array_key_exists('assigned_users', $data)) {
+            $task->assignedUsers()->sync($data['assigned_users']);
+        }
+
         return $task->fresh(['project', 'assignedUsers']);
     }
 

@@ -10,16 +10,6 @@ use Modules\Project\Enums\TaskPriority;
 class UpdateTaskRequest extends FormRequest
 {
     /**
-     * Prepare data for validation
-     */
-    protected function prepareForValidation()
-    {
-        if ($this->assigned_to === '0') {
-            $this->merge(['assigned_to' => null]);
-        }
-    }
-
-    /**
      * Get the validation rules that apply to the request.
      */
     public function rules(): array
@@ -31,7 +21,8 @@ class UpdateTaskRequest extends FormRequest
             'priority' => ['sometimes', Rule::in(TaskPriority::values())],
             'estimated_hours' => 'nullable|numeric|min:0',
             'due_date' => 'nullable|date',
-            'assigned_to' => 'nullable|exists:users,id',
+            'assigned_users' => 'sometimes|array',
+            'assigned_users.*' => 'exists:users,id',
         ];
     }
 

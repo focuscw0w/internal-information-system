@@ -4,19 +4,24 @@ import { useForm } from '@inertiajs/react';
 import { Edit } from 'lucide-react';
 import { useState } from 'react';
 import { Task, TeamMember } from '../../../../types/types';
+import { TeamMemberSelect } from '../../../ui/team-member-select';
 
 interface EditTaskDialogProps {
     task: Task;
     projectId: number;
     team: TeamMember[];
+    text?: string;
 }
 
 export const EditTaskDialog = ({
     task,
     projectId,
     team,
+    text
 }: EditTaskDialogProps) => {
     const [open, setOpen] = useState(false);
+
+    const initialMembers = task.assigned_users?.map((u) => u.id) ?? [];
 
     const { data, setData, put, processing, errors } = useForm({
         title: task.title,
@@ -25,7 +30,7 @@ export const EditTaskDialog = ({
         priority: task.priority,
         estimated_hours: task.estimated_hours?.toString() || '',
         due_date: task.due_date || '',
-        assigned_to: task.assigned_to?.toString() || '',
+        assigned_users: initialMembers,
     });
 
     const handleOpen = (newOpen: boolean) => {
@@ -37,7 +42,7 @@ export const EditTaskDialog = ({
                 priority: task.priority,
                 estimated_hours: task.estimated_hours?.toString() || '',
                 due_date: task.due_date || '',
-                assigned_to: task.assigned_to?.toString() || '',
+                assigned_users: initialMembers
             });
         }
         setOpen(newOpen);
@@ -63,14 +68,6 @@ export const EditTaskDialog = ({
         { value: 'high', label: 'Vysoká' },
     ];
 
-    const teamOptions = [
-        { value: '0', label: 'Nepriradené' },
-        ...team.map((member) => ({
-            value: member.id.toString(),
-            label: member.name,
-        })),
-    ];
-
     return (
         <FormDialog
             open={open}
@@ -78,10 +75,11 @@ export const EditTaskDialog = ({
             trigger={
                 <button
                     onClick={(e) => e.stopPropagation()}
-                    className="cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    className="cursor-pointer flex items-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
                     title="Upraviť úlohu"
                 >
                     <Edit size={18} />
+                    <span className="text-sm">{text}</span>
                 </button>
             }
             title="Upraviť úlohu"
@@ -157,15 +155,10 @@ export const EditTaskDialog = ({
                 />
             </div>
 
-            {/* TODO: Viacerí môžu byť priradení */}
-            <FormField
-                label="Priradený"
-                id="assigned_to"
-                type="select"
-                value={data.assigned_to}
-                onChange={(value) => setData('assigned_to', value)}
-                options={teamOptions}
-                placeholder="Vyber používateľa"
+            <TeamMemberSelect
+                allUsers={team}
+                selectedMembers={data.assigned_users}
+                onChange={(members) => setData('assigned_users', members)}
             />
         </FormDialog>
     );

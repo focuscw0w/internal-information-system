@@ -71,11 +71,16 @@ export const TaskList = ({ project }: TaskListProps) => {
                                             {task.title}
                                         </h4>
                                         <div className="mt-1 flex items-center gap-3">
-                                            {task.assigned_user && (
-                                                <span className="text-sm text-gray-500">
-                                                    👤 {task.assigned_user.name}
-                                                </span>
-                                            )}
+                                            {task.assigned_users &&
+                                                task.assigned_users.length >
+                                                    0 && (
+                                                    <span className="text-sm text-gray-500">
+                                                        👤{' '}
+                                                        {task.assigned_users
+                                                            .map((u) => u.name)
+                                                            .join(', ')}
+                                                    </span>
+                                                )}
                                             {task.due_date && (
                                                 <span className="text-sm text-gray-500">
                                                     📅{' '}
@@ -106,13 +111,13 @@ export const TaskList = ({ project }: TaskListProps) => {
                                         </div>
                                         {task.actual_hours >
                                             task.estimated_hours && (
-                                                <span className="text-xs text-red-600">
+                                            <span className="text-xs text-red-600">
                                                 +
-                                                    {task.actual_hours -
-                                                        task.estimated_hours}
-                                                    h
+                                                {task.actual_hours -
+                                                    task.estimated_hours}
+                                                h
                                             </span>
-                                            )}
+                                        )}
                                     </div>
 
                                     {/* Actions */}
@@ -144,4 +149,3 @@ export const TaskList = ({ project }: TaskListProps) => {
         </Card>
     );
 };
-

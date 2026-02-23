@@ -142,7 +142,7 @@ export const Team = ({ project }: TeamProps) => {
                                                                                         perm
                                                                                     }
                                                                                     variant="outline"
-                                                                                    className="bg-blue-600 px-3 py-2 text-xs text-white"
+                                                                                    className="bg-primary px-3 py-2 text-xs text-white"
                                                                                 >
                                                                                     {PERMISSION_LABELS[
                                                                                         perm

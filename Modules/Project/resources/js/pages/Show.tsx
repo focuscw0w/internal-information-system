@@ -28,12 +28,12 @@ export default function Show({ project }: { project: Project }) {
                         <BadgeLabel
                             type="status"
                             value={project.status}
-                            label="Stav"
+                            showLabel
                         />
                         <BadgeLabel
                             type="workload"
                             value={project.workload}
-                            label="Vyťaženie"
+                            showLabel
                         />
                     </Header.Badges>
                     <Header.Actions>
