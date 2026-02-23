@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { CheckCircle2, Crown, Users } from 'lucide-react';
-import { PERMISSION_GROUPS, PERMISSION_LABELS } from '../lib/permissions';
+import { PERMISSION_GROUPS, PERMISSION_LABELS } from '../utils/permissions';
 import { Project } from '../../../types/types';
 import { ManageTeamDialog } from '../dialogs/team/manage-team';
 

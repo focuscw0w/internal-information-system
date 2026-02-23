@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { router } from '@inertiajs/react';
-import { Check, ListChecks, X } from 'lucide-react';
+import { Check, ListChecks,  Trash2, X } from 'lucide-react';
 import { Task } from '../../../types/types';
 import { CreateSubtaskDialog } from '../dialogs/subtask/create-subtask';
 import { EditSubtaskDialog } from '../dialogs/subtask/edit-subtask';
@@ -110,6 +111,11 @@ export const Subtasks = ({ task, projectId }: SubtasksProps) => {
                                                 subtask={subtask}
                                                 projectId={projectId}
                                                 taskId={task.id}
+                                                trigger={
+                                                    <Button variant="ghost" size="sm">
+                                                        <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                                                    </Button>
+                                                }
                                             />
                                         </div>
                                     </td>

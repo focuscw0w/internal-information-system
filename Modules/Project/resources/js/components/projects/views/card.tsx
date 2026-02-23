@@ -1,5 +1,5 @@
 import { Project } from '../../../types/types';
-import { getCapacityColor } from '../lib';
+import { getCapacityColor } from '../utils';
 import { Metrics } from '../metrics';
 import { ProgressBar } from '../progressbar';
 import { ProjectActions } from './project-actions';

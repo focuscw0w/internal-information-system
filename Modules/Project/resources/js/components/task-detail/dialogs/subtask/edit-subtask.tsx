@@ -44,7 +44,7 @@ export const EditSubtaskDialog = ({
             onOpenChange={handleOpen}
             trigger={
                 <Button variant="ghost" size="sm">
-                    <Edit size={20} className="h-3.5 w-3.5 text-gray-400" />
+                    <Edit size={20} className="h-3.5 w-3.5" />
                 </Button>
             }
             title="Upraviť podúlohu"

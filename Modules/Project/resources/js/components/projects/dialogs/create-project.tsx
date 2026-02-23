@@ -5,7 +5,7 @@ import { useUsers } from '@/hooks/use-users';
 import { useForm } from '@inertiajs/react';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { statusOptions, workloadOptions } from '../lib';
+import { statusOptions, workloadOptions } from '../utils';
 import { ProjectStatus, WorkloadLevel } from '../../../types/types';
 import { TeamMemberSelect } from '../../ui/team-member-select';
 

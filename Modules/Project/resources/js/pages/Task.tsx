@@ -3,12 +3,12 @@ import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { FileText, ListChecks, Users } from 'lucide-react';
 import { Comments } from '../components/task-detail/comments';
-import { TaskOverview } from '../components/task-detail/tab-views/task-overview';
+import { Assignees } from '../components/task-detail/tab-views/assignees';
 import { Subtasks } from '../components/task-detail/tab-views/subtasks';
+import { TaskOverview } from '../components/task-detail/tab-views/task-overview';
 import { BadgeLabel } from '../components/ui/badge';
 import { Header } from '../components/ui/header';
 import { Project, Task } from '../types/types';
-import { Assignees } from '../components/task-detail/tab-views/assignees';
 
 interface TaskProps {
     task: Task;
@@ -28,8 +28,16 @@ export default function TaskPage({ task, project }: TaskProps) {
                     backLabel={`Späť na ${project.name}`}
                 >
                     <Header.Badges>
-                        <BadgeLabel type="task-status" value={task.status} label="Stav" />
-                        <BadgeLabel type="priority" value={task.priority} label="Priorita" />
+                        <BadgeLabel
+                            type="task-status"
+                            value={task.status}
+                            showLabel
+                        />
+                        <BadgeLabel
+                            type="priority"
+                            value={task.priority}
+                            showLabel
+                        />
                     </Header.Badges>
                 </Header>
 
@@ -72,7 +80,7 @@ export default function TaskPage({ task, project }: TaskProps) {
                     </TabsContent>
                 </Tabs>
 
-                {/* Comments - always visible below tabs */}
+                {/* Comments */}
                 <Comments task={task} />
             </div>
         </AppLayout>

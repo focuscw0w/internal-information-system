@@ -1,11 +1,12 @@
-import { AlertCircle, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
+import { Project } from '../../../types/types';
+import { BadgeLabel } from '../../ui/badge';
 import {
     getCapacityColor,
     getStatusColor,
     getStatusText,
     getWorkloadColor,
-} from '../lib';
-import { Project } from '../../../types/types';
+} from '../utils';
 import { ProjectActions } from './project-actions';
 
 interface RowProps {
@@ -90,10 +91,11 @@ export const Row = ({ project, onClick }: RowProps) => {
                         <div
                             className={`flex items-center justify-center gap-1 ${getWorkloadColor(project.workload)}`}
                         >
-                            <AlertCircle size={18} />
-                            <span className="text-sm font-medium capitalize">
-                                {project.workload}
-                            </span>
+                            <BadgeLabel
+                                type="workload"
+                                value={project.workload}
+                                textOnly
+                            />
                         </div>
                     </div>
 

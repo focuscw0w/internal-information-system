@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { User } from '@/types';
 import { ChevronDown, ChevronRight, Shield, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { PERMISSION_GROUPS } from '../../lib/permissions';
+import { PERMISSION_GROUPS } from '../../utils/permissions';
 import { TeamMemberSettings } from '../../../../types/types';
 import { PermissionGroup } from './permission-group';
 

@@ -9,47 +9,33 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
 import { useForm } from '@inertiajs/react';
-import { Trash2 } from 'lucide-react';
 import { Subtask } from '../../../../types/types';
 
 interface DeleteSubtaskDialogProps {
     subtask: Subtask;
     projectId: number;
     taskId: number;
+    trigger: React.ReactNode;
 }
 
-export const DeleteSubtaskDialog = ({
-    subtask,
-    projectId,
-    taskId,
-}: DeleteSubtaskDialogProps) => {
+export const DeleteSubtaskDialog = ({ subtask, projectId, taskId, trigger }: DeleteSubtaskDialogProps) => {
     const { delete: destroy, processing } = useForm();
 
     const handleDelete = () => {
-        destroy(
-            `/projects/${projectId}/tasks/${taskId}/subtasks/${subtask.id}`,
-            {
-                preserveScroll: true,
-            },
-        );
+        destroy(`/projects/${projectId}/tasks/${taskId}/subtasks/${subtask.id}`, {
+            preserveScroll: true,
+        });
     };
 
     return (
         <AlertDialog>
-            <AlertDialogTrigger asChild>
-                {' '}
-                <Button variant="ghost" size="sm">
-                    <Trash2 className="h-3.5 w-3.5 text-red-400" />
-                </Button>
-            </AlertDialogTrigger>
+            <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Odstrániť podúlohu</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Naozaj chcete odstrániť podúlohu „{subtask.title}"? Táto
-                        akcia sa nedá vrátiť.
+                        Naozaj chcete odstrániť podúlohu „{subtask.title}"? Táto akcia sa nedá vrátiť.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
