@@ -14,37 +14,58 @@ export const CapacityOverview = ({ projects }: { projects: Project[] }) => {
         router.visit(`/projects/${projectId}`);
     };
 
+    const activeProjects = projects.filter((p) => p.status === 'active').length;
+
+    const totalTeam = projects.reduce((sum, p) => sum + p.team_size, 0);
+
+    const avgCapacity =
+        projects.length > 0
+            ? Math.round(
+                  projects.reduce((sum, p) => sum + p.capacity_used, 0) /
+                      projects.length,
+              )
+            : 0;
+
+    const tasksCompleted = projects.reduce(
+        (sum, p) => sum + p.tasks_completed,
+        0,
+    );
+    const tasksTotal = projects.reduce((sum, p) => sum + p.tasks_total, 0);
+
     return (
         <div className="min-h-screen">
             {/* Header */}
-            <ProjectsHeader viewMode={viewMode} onViewModeChange={setViewMode} />
+            <ProjectsHeader
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+            />
 
             {/* Súhrnné štatistiky */}
             <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
                 <StatCard
                     title="Aktívne projekty"
-                    value={2}
+                    value={activeProjects}
                     icon={TrendingUp}
                     iconColor="text-blue-600"
                     iconBgColor="bg-blue-100"
                 />
                 <StatCard
                     title="Celkový tím"
-                    value={12}
+                    value={totalTeam}
                     icon={Users}
                     iconColor="text-green-600"
                     iconBgColor="bg-green-100"
                 />
                 <StatCard
                     title="Priemerné vyťaženie"
-                    value="58%"
+                    value={`${avgCapacity}%`}
                     icon={Clock}
                     iconColor="text-yellow-600"
                     iconBgColor="bg-yellow-100"
                 />
                 <StatCard
                     title="Dokončené úlohy"
-                    value="29/74"
+                    value={`${tasksCompleted}/${tasksTotal}`}
                     icon={CheckCircle2}
                     iconColor="text-purple-600"
                     iconBgColor="bg-purple-100"

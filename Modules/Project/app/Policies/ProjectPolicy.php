@@ -1,6 +1,10 @@
 <?php
 
-// TODO: použiť policy v Service/Controlleri
+namespace Modules\Project\Policies;
+
+use App\Models\User;
+use Modules\Project\Models\Project;
+
 class ProjectPolicy
 {
     public function update(User $user, Project $project): bool

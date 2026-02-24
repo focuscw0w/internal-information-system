@@ -45,7 +45,6 @@ class ProjectResource extends JsonResource
                 ];
             }),
 
-
             'tasks' => $this->whenLoaded('tasks', function () {
                 return $this->tasks->map(function ($task) {
                     return [
@@ -105,56 +104,18 @@ class ProjectResource extends JsonResource
 
             'team' => $this->whenLoaded('team', function () {
                 return $this->team->map(function ($member) {
-                    $permissions = $member->pivot->permissions;
-                    if (is_string($permissions)) {
-                        $decoded = json_decode($permissions, true);
-                        $permissions = is_array($decoded) ? $decoded : [];
-                    } elseif (!is_array($permissions)) {
-                        $permissions = [];
-                    }
-
                     return [
                         'id' => $member->id,
                         'name' => $member->name,
                         'email' => $member->email ?? null,
-                        'permissions' => $permissions,
+                        'permissions' => $this->resource->userPermissions($member),
                         'allocation' => $member->pivot->allocation ?? 100,
                     ];
                 });
             }),
 
             'current_user_permissions' => $this->when(auth()->check(), function () {
-                $user = auth()->user();
-                $teamMember = $this->team()->where('user_id', $user->id)->first();
-
-                if ($teamMember) {
-                    $permissions = $teamMember->pivot->permissions;
-                    if (is_string($permissions)) {
-                        $decoded = json_decode($permissions, true);
-                        return is_array($decoded) ? $decoded : [];
-                    }
-                    return is_array($permissions) ? $permissions : [];
-                }
-
-                if ($this->owner_id === $user->id) {
-                    return [
-                        'view_project',
-                        'edit_project',
-                        'delete_project',
-                        'view_team',
-                        'manage_team',
-                        'view_tasks',
-                        'create_tasks',
-                        'edit_tasks',
-                        'delete_tasks',
-                        'assign_tasks',
-                        'view_budget',
-                        'edit_budget',
-                        'export_data',
-                    ];
-                }
-
-                return [];
+                return $this->resource->userPermissions(auth()->user());
             }),
 
             'created_at' => $this->created_at?->toISOString(),

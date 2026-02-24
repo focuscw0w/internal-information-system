@@ -1,40 +1,32 @@
 <?php
 
+
+namespace Modules\Project\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Modules\Project\Models\Project;
+use Symfony\Component\HttpFoundation\Response;
+
 class CheckProjectPermission
 {
-     /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next, string $permission): Response
+    public function handle(Request $request, Closure $next, string ...$permissions): Response
     {
-        $user = auth()->user();
-        
+        $user = $request->user();
+
         if (!$user) {
-            return response()->json([
-                'error' => 'Unauthenticated',
-                'message' => 'Musíte byť prihlásený'
-            ], 401);
+            abort(401, 'You must be logged in to access this source.');
         }
-        
-        $project = $request->route('project');
-        
-        if (!$project || !($project instanceof Project)) {
-            return response()->json([
-                'error' => 'Project not found',
-                'message' => 'Projekt neexistuje'
-            ], 404);
+
+        $projectId = $request->route('id');
+        $project = Project::findOrFail($projectId);
+
+        foreach ($permissions as $permission) {
+            if (!$project->userHasPermission($user, $permission)) {
+                abort(403, "You don't have this permission: {$permission}");
+            }
         }
-        
-        if (!$project->userHasPermission($user, $permission)) {
-            return response()->json([
-                'error' => 'Forbidden',
-                'message' => "Nemáte oprávnenie: {$permission}",
-                'required_permission' => $permission
-            ], 403);
-        }
-        
+
         return $next($request);
     }
 }

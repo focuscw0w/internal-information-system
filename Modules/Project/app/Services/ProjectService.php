@@ -15,7 +15,15 @@ class ProjectService implements ProjectServiceInterface
      */
     public function getAllProjects(array $filters = []): Collection
     {
-        $query = Project::with(['owner', 'team']);
+        $userId = auth()->id();
+
+        $query = Project::with(['owner', 'team'])
+            ->where(function ($q) use ($userId) {
+                $q->where('owner_id', $userId)
+                    ->orWhereHas('team', function ($q) use ($userId) {
+                        $q->where('user_id', $userId);
+                    });
+            });
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -32,7 +40,7 @@ class ProjectService implements ProjectServiceInterface
         if (isset($filters['search'])) {
             $query->where(function ($q) use ($filters) {
                 $q->where('name', 'like', '%'.$filters['search'].'%')
-                  ->orWhere('description', 'like', '%'.$filters['search'].'%');
+                    ->orWhere('description', 'like', '%'.$filters['search'].'%');
             });
         }
 

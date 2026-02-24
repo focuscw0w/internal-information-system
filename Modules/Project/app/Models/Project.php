@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Project\Enums\ProjectPermission;
+use Modules\Project\Database\Factories\ProjectFactory;
 
 class Project extends Model
 {
@@ -124,8 +126,33 @@ class Project extends Model
         ]);
     }
 
+    public function userPermissions(User $user): array
+    {
+        if ($this->owner_id === $user->id) {
+            return ProjectPermission::values();
+        }
+
+        $teamMember = $this->team()->where('user_id', $user->id)->first();
+
+        if (!$teamMember) {
+            return [];
+        }
+
+        $permissions = $teamMember->pivot->permissions;
+
+        if (is_string($permissions)) {
+            $permissions = json_decode($permissions, true) ?? [];
+        }
+
+        return is_array($permissions) ? $permissions : [];
+    }
+
     public function userHasPermission(User $user, string $permission): bool
     {
+        if ($this->owner_id === $user->id) {
+            return true;
+        }
+
         $teamMember = $this->team()->where('user_id', $user->id)->first();
 
         if (!$teamMember) {
@@ -134,11 +161,17 @@ class Project extends Model
 
         $permissions = $teamMember->pivot->permissions;
 
-        return in_array($permission, $permissions);
+        if (is_string($permissions)) {
+            $permissions = json_decode($permissions, true) ?? [];
+        }
+
+        return in_array($permission, (array) $permissions, strict: true);
     }
 
     public function userHasAnyPermission(User $user, array $permissions): bool
     {
+        if ($this->owner_id === $user->id) return true;
+
         foreach ($permissions as $permission) {
             if ($this->userHasPermission($user, $permission)) {
                 return true;
@@ -150,6 +183,8 @@ class Project extends Model
 
     public function userHasAllPermissions(User $user, array $permissions): bool
     {
+        if ($this->owner_id === $user->id) return true;
+
         foreach ($permissions as $permission) {
             if (!$this->userHasPermission($user, $permission)) {
                 return false;

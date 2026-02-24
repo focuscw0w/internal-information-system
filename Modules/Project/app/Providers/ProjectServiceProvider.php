@@ -2,9 +2,12 @@
 
 namespace Modules\Project\Providers;
 
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\Project\App\Services\ProjectService;
+use Modules\Project\Models\Project;
+use Modules\Project\Policies\ProjectPolicy;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -30,6 +33,8 @@ class ProjectServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->registerMiddleware();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+
+        Gate::policy(Project::class, ProjectPolicy::class);
     }
 
     /**
@@ -57,7 +62,7 @@ class ProjectServiceProvider extends ServiceProvider
 {
     $router = $this->app->make(Router::class);
     $router->aliasMiddleware(
-        'check.project.permission', 
+        'check.project.permission',
         \Modules\Project\Http\Middleware\CheckProjectPermission::class
     );
 }
