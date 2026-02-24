@@ -75,11 +75,11 @@ export const EditTaskDialog = ({
             trigger={
                 <button
                     onClick={(e) => e.stopPropagation()}
-                    className="cursor-pointer flex items-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    className="cursor-pointer flex items-center justify-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
                     title="Upraviť úlohu"
                 >
                     <Edit size={18} />
-                    <span className="text-sm">{text}</span>
+                    {text && <span className="text-sm">{text}</span>}
                 </button>
             }
             title="Upraviť úlohu"

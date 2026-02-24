@@ -2,7 +2,7 @@ import { Calendar, Clock, DollarSign, TrendingUp } from 'lucide-react';
 import { Project } from '../../../types/types';
 import { StatCard } from '../../ui/statcard';
 import { Allocations } from '../allocations';
-import { TaskList } from '../task-list/task-list';
+import { TaskTable } from '../task-list/task-list';
 
 interface ProjectOverviewProps {
     project: Project;
@@ -70,7 +70,7 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
 
             {can('view_budget') && <Allocations project={project} />}
 
-            {can('view_tasks') && <TaskList project={project} />}
+            {can('view_tasks') && <TaskTable project={project} />}
         </div>
     );
 }
