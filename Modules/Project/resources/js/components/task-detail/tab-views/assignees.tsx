@@ -1,20 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users } from 'lucide-react';
-import { Task } from '../../../types/types';
+import { Project, Task } from '../../../types/types';
 import { AssignTaskDialog } from '../dialogs/assign-users';
 
 interface AssigneesProps {
     task: Task;
-    projectId: number;
+    project: Project;
 }
 
-export const Assignees = ({ task, projectId }: AssigneesProps) => {
+export const Assignees = ({ task, project }: AssigneesProps) => {
     const assignees = task.assigned_users ?? [];
 
     return (
         <div className="space-y-6">
             <div className="flex justify-end">
-                <AssignTaskDialog task={task} projectId={projectId} />
+                <AssignTaskDialog task={task} project={project} />
             </div>
             <Card className="border-gray-100 shadow-sm">
                 <CardHeader>

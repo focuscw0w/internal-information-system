@@ -380,4 +380,89 @@ class ProjectPermissionTest extends TestCase
 
         $this->assertEquals($assigned, $project->userPermissions($member));
     }
+
+    // =========================================================================
+    // SYNC TEAM – maintaining existing permissions
+    // =========================================================================
+
+    public function test_existing_member_permissions_are_preserved_when_adding_new_member(): void
+    {
+        $owner = User::factory()->create();
+        $existingMember = User::factory()->create();
+        $newMember = User::factory()->create();
+        $project = $this->createProject($owner);
+
+        $this->attachMember($project, $existingMember, [
+            ProjectPermission::VIEW_PROJECT->value,
+            ProjectPermission::CREATE_TASKS->value,
+        ]);
+
+        $this->actingAs($owner)
+            ->put("/projects/{$project->id}/team", [
+                'team_members' => [$existingMember->id, $newMember->id],
+                'team_settings' => [
+                    $newMember->id => [
+                        'permissions' => [ProjectPermission::VIEW_PROJECT->value],
+                        'allocation' => 100,
+                    ],
+                ],
+            ])
+            ->assertRedirect();
+
+        $project->refresh();
+        $permissions = $project->userPermissions($existingMember);
+
+        $this->assertContains(ProjectPermission::VIEW_PROJECT->value, $permissions);
+        $this->assertContains(ProjectPermission::CREATE_TASKS->value, $permissions);
+    }
+
+    public function test_new_member_gets_default_permissions_when_no_settings_provided(): void
+    {
+        $owner = User::factory()->create();
+        $newMember = User::factory()->create();
+        $project = $this->createProject($owner);
+
+        $this->actingAs($owner)
+            ->put("/projects/{$project->id}/team", [
+                'team_members' => [$newMember->id],
+                'team_settings' => [],
+            ])
+            ->assertRedirect();
+
+        $project->refresh();
+        $permissions = $project->userPermissions($newMember);
+
+        $this->assertContains(ProjectPermission::VIEW_PROJECT->value, $permissions);
+    }
+
+    public function test_member_permissions_are_updated_when_settings_are_provided(): void
+    {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $project = $this->createProject($owner);
+
+        $this->attachMember($project, $member, [ProjectPermission::VIEW_PROJECT->value]);
+
+        $this->actingAs($owner)
+            ->put("/projects/{$project->id}/team", [
+                'team_members' => [$member->id],
+                'team_settings' => [
+                    $member->id => [
+                        'permissions' => [
+                            ProjectPermission::VIEW_PROJECT->value,
+                            ProjectPermission::CREATE_TASKS->value,
+                            ProjectPermission::EDIT_TASKS->value,
+                        ],
+                        'allocation' => 80,
+                    ],
+                ],
+            ])
+            ->assertRedirect();
+
+        $project->refresh();
+        $permissions = $project->userPermissions($member);
+
+        $this->assertContains(ProjectPermission::CREATE_TASKS->value, $permissions);
+        $this->assertContains(ProjectPermission::EDIT_TASKS->value, $permissions);
+    }
 }

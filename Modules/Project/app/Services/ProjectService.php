@@ -431,15 +431,33 @@ class ProjectService implements ProjectServiceInterface
      */
     protected function syncTeamMembers(Project $project, array $userIds, array $settings): void
     {
+        $existing = $project->team()
+            ->wherePivotIn('user_id', $userIds)
+            ->get()
+            ->keyBy('id');
+
         $syncData = [];
 
         foreach ($userIds as $userId) {
-            $userSettings = $settings[$userId] ?? [];
+            $userSettings = $settings[$userId] ?? null;
+            $existingMember = $existing->get($userId);
 
-            $syncData[$userId] = [
-                'permissions' => json_encode($userSettings['permissions'] ?? ['view_project']),
-                'allocation' => $userSettings['allocation'] ?? 100,
-            ];
+            if ($userSettings !== null) {
+                $syncData[$userId] = [
+                    'permissions' => json_encode($userSettings['permissions'] ?? ['view_project']),
+                    'allocation' => $userSettings['allocation'] ?? 100,
+                ];
+            } elseif ($existingMember) {
+                $syncData[$userId] = [
+                    'permissions' => $existingMember->pivot->permissions,
+                    'allocation' => $existingMember->pivot->allocation,
+                ];
+            } else {
+                $syncData[$userId] = [
+                    'permissions' => json_encode(['view_project']),
+                    'allocation' => 100,
+                ];
+            }
         }
 
         Log::info('Syncing team members', [

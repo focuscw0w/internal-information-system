@@ -1,5 +1,3 @@
-import { TeamMember } from '../../../types/types';
-
 export const PERMISSION_GROUPS = [
     {
         label: 'Projekt',
@@ -46,24 +44,3 @@ export const PERMISSION_LABELS: Record<string, string> =
         acc[perm.value] = perm.label;
         return acc;
     }, {});
-
-export const hasPermission = (
-    teamMember: TeamMember,
-    permission: string,
-): boolean => {
-    return teamMember.permissions.includes(permission);
-};
-
-export const hasAnyPermission = (
-    teamMember: TeamMember,
-    permissions: string[],
-): boolean => {
-    return permissions.some((p) => teamMember.permissions.includes(p));
-};
-
-export const hasAllPermissions = (
-    teamMember: TeamMember,
-    permissions: string[],
-): boolean => {
-    return permissions.every((p) => teamMember.permissions.includes(p));
-};

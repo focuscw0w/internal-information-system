@@ -10,6 +10,7 @@ use Modules\Project\Http\Requests\CreateTaskRequest;
 use Modules\Project\Http\Requests\UpdateTaskRequest;
 use Modules\Project\Http\Requests\UpdateTaskStatusRequest;
 use Modules\Project\Http\Requests\AssignTaskRequest;
+use Modules\Project\Transformers\ProjectResource;
 
 class TaskController extends Controller
 {
@@ -44,9 +45,11 @@ class TaskController extends Controller
             return redirect()->route('projects.show', $projectId);
         }
 
+        $project->load(['owner', 'team', 'tasks.assignedUsers', 'allocations.user', 'activities.user']);
+
         return Inertia::render('Project/Task', [
             'task' => $task,
-            'project' => $project,
+            'project' => (new ProjectResource($project))->resolve(),
         ]);
     }
 

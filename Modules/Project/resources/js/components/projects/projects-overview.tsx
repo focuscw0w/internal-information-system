@@ -7,7 +7,11 @@ import { ProjectsHeader } from './projects-header';
 import { Card } from './views/card';
 import { Row } from './views/row';
 
-export const CapacityOverview = ({ projects }: { projects: Project[] }) => {
+interface ProjectsOverviewProps {
+    projects: Project[];
+}
+
+export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
     const handleProjectClick = (projectId: number) => {

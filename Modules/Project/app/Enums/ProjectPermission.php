@@ -8,22 +8,22 @@ enum ProjectPermission: string
     case VIEW_PROJECT = 'view_project';
     case EDIT_PROJECT = 'edit_project';
     case DELETE_PROJECT = 'delete_project';
-    
+
     // Task permissions
     case VIEW_TASKS = 'view_tasks';
     case CREATE_TASKS = 'create_tasks';
     case EDIT_TASKS = 'edit_tasks';
     case DELETE_TASKS = 'delete_tasks';
     case ASSIGN_TASKS = 'assign_tasks';
-    
+
     // Team permissions
     case VIEW_TEAM = 'view_team';
     case MANAGE_TEAM = 'manage_team';
-    
+
     // Budget permissions
     case VIEW_BUDGET = 'view_budget';
     case EDIT_BUDGET = 'edit_budget';
-    
+
     // Data permissions
     case EXPORT_DATA = 'export_data';
 
@@ -85,53 +85,18 @@ enum ProjectPermission: string
     public function category(): string
     {
         return match($this) {
-            self::VIEW_PROJECT, self::EDIT_PROJECT, self::DELETE_PROJECT 
+            self::VIEW_PROJECT, self::EDIT_PROJECT, self::DELETE_PROJECT
                 => 'Projekt',
-            self::VIEW_TASKS, self::CREATE_TASKS, self::EDIT_TASKS, 
-            self::DELETE_TASKS, self::ASSIGN_TASKS 
+            self::VIEW_TASKS, self::CREATE_TASKS, self::EDIT_TASKS,
+            self::DELETE_TASKS, self::ASSIGN_TASKS
                 => 'Úlohy',
-            self::VIEW_TEAM, self::MANAGE_TEAM 
+            self::VIEW_TEAM, self::MANAGE_TEAM
                 => 'Tím',
-            self::VIEW_BUDGET, self::EDIT_BUDGET 
+            self::VIEW_BUDGET, self::EDIT_BUDGET
                 => 'Rozpočet',
-            self::EXPORT_DATA 
+            self::EXPORT_DATA
                 => 'Dáta',
         };
-    }
-
-    /**
-     * Get icon for permission
-     */
-    public function icon(): string
-    {
-        return match($this) {
-            self::VIEW_PROJECT => '👁️',
-            self::EDIT_PROJECT => '✏️',
-            self::DELETE_PROJECT => '🗑️',
-            self::VIEW_TASKS => '📋',
-            self::CREATE_TASKS => '➕',
-            self::EDIT_TASKS => '✏️',
-            self::DELETE_TASKS => '❌',
-            self::ASSIGN_TASKS => '👤',
-            self::VIEW_TEAM => '👥',
-            self::MANAGE_TEAM => '👨‍💼',
-            self::VIEW_BUDGET => '💰',
-            self::EDIT_BUDGET => '💵',
-            self::EXPORT_DATA => '📤',
-        };
-    }
-
-    /**
-     * Check if permission is dangerous (requires extra confirmation)
-     */
-    public function isDangerous(): bool
-    {
-        return in_array($this, [
-            self::DELETE_PROJECT,
-            self::DELETE_TASKS,
-            self::MANAGE_TEAM,
-            self::EDIT_BUDGET,
-        ]);
     }
 
     /**
@@ -153,7 +118,7 @@ enum ProjectPermission: string
     public static function groupedByCategory(): array
     {
         $grouped = [];
-        
+
         foreach (self::cases() as $permission) {
             $category = $permission->category();
             $grouped[$category][] = [
@@ -165,7 +130,7 @@ enum ProjectPermission: string
                 'readOnly' => $permission->isReadOnly(),
             ];
         }
-        
+
         return $grouped;
     }
 

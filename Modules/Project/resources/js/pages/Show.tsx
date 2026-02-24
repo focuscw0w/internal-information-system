@@ -4,14 +4,17 @@ import { Head } from '@inertiajs/react';
 import { Calendar, FileText, KanbanIcon, Users } from 'lucide-react';
 import { Kanban } from '../components/project-detail/kanban/kanban';
 import { ProjectOverview } from '../components/project-detail/tab-views/project-overview';
-import { Header } from '../components/ui/header';
-import { BadgeLabel } from '../components/ui/badge';
-import { EditProjectDialog } from '../components/projects/dialogs/edit-project';
 import { Team } from '../components/project-detail/tab-views/team';
 import { Timeline } from '../components/project-detail/tab-views/timeline';
+import { EditProjectDialog } from '../components/projects/dialogs/edit-project';
+import { BadgeLabel } from '../components/ui/badge';
+import { Header } from '../components/ui/header';
 import { Project } from '../types/types';
 
 export default function Show({ project }: { project: Project }) {
+    const permissions = project.current_user_permissions ?? [];
+    const can = (permission: string) => permissions.includes(permission);
+
     return (
         <AppLayout>
             <Head title={`Detail projektu - ${project.name}`} />
@@ -69,13 +72,15 @@ export default function Show({ project }: { project: Project }) {
                                 <Calendar className="h-4 w-4" />
                                 Časová os
                             </TabsTrigger>
-                            <TabsTrigger
-                                value="team"
-                                className="flex cursor-pointer items-center gap-2 py-2.5"
-                            >
-                                <Users className="h-4 w-4" />
-                                Tím
-                            </TabsTrigger>
+                            {can('view_team') && (
+                                <TabsTrigger
+                                    value="team"
+                                    className="flex cursor-pointer items-center gap-2 py-2.5"
+                                >
+                                    <Users className="h-4 w-4" />
+                                    Tím
+                                </TabsTrigger>
+                            )}
                         </TabsList>
                     </div>
 
@@ -88,9 +93,11 @@ export default function Show({ project }: { project: Project }) {
                     <TabsContent value="timeline" className="mt-6">
                         <Timeline project={project} />
                     </TabsContent>
-                    <TabsContent value="team" className="mt-6">
-                        <Team project={project} />
-                    </TabsContent>
+                    {can('view_team') && (
+                        <TabsContent value="team" className="mt-6">
+                            <Team project={project} />
+                        </TabsContent>
+                    )}
                 </Tabs>
             </div>
         </AppLayout>

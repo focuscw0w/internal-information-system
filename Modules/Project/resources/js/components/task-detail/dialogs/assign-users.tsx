@@ -5,17 +5,17 @@ import { AlertCircle, Loader2, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { TeamMemberSelect } from '../../ui/team-member-select';
-import { Task } from '../../../types/types';
+import { Project, Task } from '../../../types/types';
 
 interface AssignTaskDialogProps {
     task: Task;
-    projectId: number;
+    project: Project;
 }
 
-export const AssignTaskDialog = ({ task, projectId }: AssignTaskDialogProps) => {
+export const AssignTaskDialog = ({ task, project }: AssignTaskDialogProps) => {
     const [open, setOpen] = useState(false);
 
-    const { data: users = [], isLoading, isError } = useUsers();
+    const { isLoading, isError } = useUsers();
 
     const initialMembers = task.assigned_users?.map((u) => u.id) ?? [];
 
@@ -33,7 +33,7 @@ export const AssignTaskDialog = ({ task, projectId }: AssignTaskDialogProps) => 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        post(`/projects/${projectId}/tasks/${task.id}/assign`, {
+        post(`/projects/${project.id}/tasks/${task.id}/assign`, {
             onSuccess: () => setOpen(false),
         });
     };
@@ -74,7 +74,7 @@ export const AssignTaskDialog = ({ task, projectId }: AssignTaskDialogProps) => 
 
             {!isLoading && !isError && (
                 <TeamMemberSelect
-                    allUsers={users}
+                    allUsers={project.team}
                     selectedMembers={data.assigned_users}
                     onChange={(members) => setData('assigned_users', members)}
                 />

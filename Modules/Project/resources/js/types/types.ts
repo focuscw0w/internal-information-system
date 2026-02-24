@@ -23,6 +23,7 @@ export interface Project {
     id: number;
     name: string;
     description: string | null;
+    current_user_permissions: string[];
     status: ProjectStatus;
     workload: WorkloadLevel;
     start_date: string;

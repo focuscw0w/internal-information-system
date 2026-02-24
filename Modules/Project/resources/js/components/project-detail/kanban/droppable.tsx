@@ -4,11 +4,13 @@ import { ReactNode } from 'react';
 interface DroppableProps {
     id: string;
     children: ReactNode;
+    disabled?: boolean;
 }
 
-export function Droppable({ id, children }: DroppableProps) {
+export function Droppable({ id, children, disabled }: DroppableProps) {
     const { setNodeRef, isOver } = useDroppable({
         id: id,
+        disabled: disabled,
     });
 
     const style = {
