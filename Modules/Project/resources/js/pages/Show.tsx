@@ -13,6 +13,7 @@ import { Project } from '../types/types';
 
 export default function Show({ project }: { project: Project }) {
     const permissions = project.current_user_permissions ?? [];
+
     const can = (permission: string) => permissions.includes(permission);
 
     return (

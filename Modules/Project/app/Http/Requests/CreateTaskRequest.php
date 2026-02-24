@@ -19,8 +19,8 @@ class CreateTaskRequest extends FormRequest
             'description' => 'nullable|string',
             'status' => ['required', Rule::in(TaskStatus::values())],
             'priority' => ['required', Rule::in(TaskPriority::values())],
-            'estimated_hours' => 'nullable|numeric|min:0',
-            'due_date' => 'nullable|date',
+            'estimated_hours' => 'required|numeric|min:0',
+            'due_date' => 'required|date',
             'assigned_users' => 'sometimes|array',
             'assigned_users.*' => 'exists:users,id',
         ];
@@ -42,9 +42,17 @@ class CreateTaskRequest extends FormRequest
         return [
             'title.required' => 'Názov úlohy je povinný.',
             'title.max' => 'Názov úlohy môže mať maximálne 255 znakov.',
+            'status.required' => 'Stav úlohy je povinný.',
+            'status.in' => 'Neplatný stav úlohy.',
             'priority.required' => 'Priorita je povinná.',
             'priority.in' => 'Priorita musí byť low, medium alebo high.',
-            'assigned_to.exists' => 'Vybraný používateľ neexistuje.',
+            'estimated_hours.required' => 'Odhadovaný čas je povinný.',
+            'estimated_hours.numeric' => 'Odhadovaný čas musí byť číslo.',
+            'estimated_hours.min' => 'Odhadovaný čas nemôže byť záporný.',
+            'due_date.required' => 'Termín dokončenia je povinný.',
+            'due_date.date' => 'Termín dokončenia musí byť platný dátum.',
+            'assigned_users.array' => 'Priradení používatelia musia byť pole.',
+            'assigned_users.*.exists' => 'Vybraný používateľ neexistuje.',
         ];
     }
 

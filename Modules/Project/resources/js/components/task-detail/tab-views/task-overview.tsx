@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LogHoursDialog } from '../dialogs/log-hours';
 import { Calendar, Clock, Target, User } from 'lucide-react';
 import { Project, Task } from '../../../types/types';
 
@@ -15,6 +16,8 @@ export const TaskOverview = ({ task, project }: TaskOverviewProps) => {
         task.estimated_hours && task.estimated_hours > 0
             ? Math.min((task.actual_hours / task.estimated_hours) * 100, 100)
             : 0;
+
+    console.log(task.actual_hours)
 
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -44,6 +47,7 @@ export const TaskOverview = ({ task, project }: TaskOverviewProps) => {
                         <CardTitle className="text-lg">
                             Sledovanie času
                         </CardTitle>
+                        <LogHoursDialog taskId={task.id} projectId={project.id} />
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-2 gap-4">

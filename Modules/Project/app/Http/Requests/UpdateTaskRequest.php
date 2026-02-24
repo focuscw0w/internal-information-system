@@ -19,11 +19,31 @@ class UpdateTaskRequest extends FormRequest
             'description' => 'nullable|string',
             'status' => ['sometimes', Rule::in(TaskStatus::values())],
             'priority' => ['sometimes', Rule::in(TaskPriority::values())],
-            'estimated_hours' => 'nullable|numeric|min:0',
-            'due_date' => 'nullable|date',
+            'estimated_hours' => 'sometimes|required|numeric|min:0',
+            'due_date' => 'sometimes|required|date',
             'assigned_users' => 'sometimes|array',
             'assigned_users.*' => 'exists:users,id',
         ];
+    }
+
+    /**
+     * Get custom error messages for validator errors.
+     */
+    public function messages()
+    {
+       return [
+           'title.required' => 'Názov úlohy je povinný.',
+           'title.max' => 'Názov úlohy môže mať maximálne 255 znakov.',
+           'status.in' => 'Neplatný stav úlohy.',
+           'priority.in' => 'Priorita musí byť low, medium alebo high.',
+           'estimated_hours.required' => 'Odhadovaný čas je povinný.',
+           'estimated_hours.numeric' => 'Odhadovaný čas musí byť číslo.',
+           'estimated_hours.min' => 'Odhadovaný čas nemôže byť záporný.',
+           'due_date.required' => 'Termín dokončenia je povinný.',
+           'due_date.date' => 'Termín dokončenia musí byť platný dátum.',
+           'assigned_users.array' => 'Priradení používatelia musia byť pole.',
+           'assigned_users.*.exists' => 'Vybraný používateľ neexistuje.',
+       ];
     }
 
     /**

@@ -10,6 +10,7 @@ use Modules\Project\Http\Requests\CreateTaskRequest;
 use Modules\Project\Http\Requests\UpdateTaskRequest;
 use Modules\Project\Http\Requests\UpdateTaskStatusRequest;
 use Modules\Project\Http\Requests\AssignTaskRequest;
+use Modules\Project\Http\Requests\LogHoursRequest;
 use Modules\Project\Transformers\ProjectResource;
 
 class TaskController extends Controller
@@ -95,6 +96,18 @@ class TaskController extends Controller
         $this->taskService->updateTaskStatus($taskId, $request->validated('status'));
 
         return back()->with('success', 'Status was successfully updated.');
+    }
+
+    /**
+     * Increment actual hours on a task by the given amount.
+     */
+    public function logHours(LogHoursRequest $request, int $projectId, int $taskId)
+    {
+        $this->taskService->logHours($taskId, $request->validated('hours'));
+
+        return redirect()
+            ->route('projects.tasks.show', [$projectId, $taskId])
+            ->with('success', 'Hodiny boli zaznamenané.');
     }
 
     /**

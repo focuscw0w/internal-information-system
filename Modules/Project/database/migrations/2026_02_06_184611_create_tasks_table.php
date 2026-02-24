@@ -20,7 +20,7 @@ return new class extends Migration {
 
             $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             $table->integer('estimated_hours')->nullable();
-            $table->integer('actual_hours')->nullable();
+            $table->integer('actual_hours')->default(0);
 
             $table->date('due_date')->nullable();
             $table->timestamp('completed_at')->nullable();

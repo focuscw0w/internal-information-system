@@ -214,4 +214,15 @@ class TaskService implements TaskServiceInterface
         // AI implementácia (OpenAI API volanie)
         return 8.0;
     }
+
+    /**
+     * Log worked hours to a task by incrementing actual_hours.
+     */
+    public function logHours(int $taskId, float $hours): Task
+    {
+        $task = $this->getTaskById($taskId);
+        $task->increment('actual_hours', $hours);
+
+        return $task->fresh();
+    }
 }

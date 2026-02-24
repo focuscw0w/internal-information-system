@@ -41,6 +41,7 @@ Route::middleware(['web', 'auth'])
                 Route::get('/{task}/edit', [TaskController::class, 'edit'])->name('edit');
                 Route::put('/{task}', [TaskController::class, 'update'])->name('update');
                 Route::patch('/{task}/status', [TaskController::class, 'updateStatus'])->name('update-status');
+                Route::patch('/{task}/log-hours', [TaskController::class, 'logHours'])->name('log-hours');
             });
 
             Route::middleware('check.project.permission:assign_tasks')->group(function () {
