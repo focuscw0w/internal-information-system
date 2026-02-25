@@ -26,8 +26,6 @@ class ProjectFactory extends Factory
             'capacity_available' => 100,
             'tasks_total' => 0,
             'tasks_completed' => 0,
-            'budget' => 0,
-            'budget_spent' => 0,
             'owner_id' => User::factory(),
         ];
     }

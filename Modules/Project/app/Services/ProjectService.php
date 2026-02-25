@@ -84,14 +84,12 @@ class ProjectService implements ProjectServiceInterface
                 'workload' => $data['workload'] ?? 'medium',
                 'start_date' => $data['start_date'],
                 'end_date' => $data['end_date'],
-                'budget' => $data['budget'] ?? null,
                 'owner_id' => auth()->id(),
                 'progress' => 0,
                 'tasks_total' => 0,
                 'tasks_completed' => 0,
                 'capacity_used' => 0,
                 'capacity_available' => 100,
-                'budget_spent' => 0,
             ]);
 
             // Attach team members if provided
@@ -137,7 +135,6 @@ class ProjectService implements ProjectServiceInterface
                 'workload' => $data['workload'] ?? $project->workload,
                 'start_date' => $data['start_date'] ?? $project->start_date,
                 'end_date' => $data['end_date'] ?? $project->end_date,
-                'budget' => $data['budget'] ?? $project->budget,
                 'progress' => $data['progress'] ?? $project->progress,
             ]);
 

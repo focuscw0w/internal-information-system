@@ -35,8 +35,6 @@ export interface Project {
     capacity_available: number;
     tasks_total: number;
     tasks_completed: number;
-    budget: number;
-    budget_spent: number;
     owner_id: number | null;
     owner?: User;
     team: TeamMember[];

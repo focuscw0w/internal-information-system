@@ -1,7 +1,6 @@
-import { Calendar, Clock, DollarSign, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, TrendingUp } from 'lucide-react';
 import { Project } from '../../../types/types';
 import { StatCard } from '../../ui/statcard';
-import { Allocations } from '../allocations';
 import { TaskTable } from '../task-list/task-list';
 
 interface ProjectOverviewProps {
@@ -12,9 +11,6 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
     const permissions = project.current_user_permissions ?? [];
     const can = (permission: string) => permissions.includes(permission);
 
-    const budgetSpent = project.budget_spent ?? 0;
-    const budget = project.budget ?? 0;
-    const budgetPercentage = budget > 0 ? (budgetSpent / budget) * 100 : 0;
     const capacityPercentage =
         project.capacity_available > 0
             ? (project.capacity_used / project.capacity_available) * 100
@@ -32,19 +28,6 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
                     iconColor="text-blue-600"
                     iconBgColor="bg-blue-50"
                 />
-
-                {can('view_budget') && (
-                    <StatCard
-                        title="Rozpočet"
-                        value={`${budgetSpent.toFixed(2)}€`}
-                        subtitle={`z ${budget.toFixed(2)}€`}
-                        icon={DollarSign}
-                        iconColor="text-emerald-600"
-                        iconBgColor="bg-emerald-50"
-                        progress={budgetPercentage}
-                        progressLabel={`${budgetPercentage.toFixed(0)}% vyčerpané`}
-                    />
-                )}
 
                 <StatCard
                     title="Kapacita"
@@ -67,8 +50,6 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
                     progress={project.progress}
                 />
             </div>
-
-            {can('view_budget') && <Allocations project={project} />}
 
             {can('view_tasks') && <TaskTable project={project} />}
         </div>

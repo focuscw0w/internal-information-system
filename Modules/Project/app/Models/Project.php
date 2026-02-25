@@ -32,8 +32,6 @@ class Project extends Model
         'capacity_available',
         'tasks_total',
         'tasks_completed',
-        'budget',
-        'budget_spent',
         'owner_id',
     ];
 
@@ -47,8 +45,6 @@ class Project extends Model
         'capacity_available' => 'integer',
         'tasks_total' => 'integer',
         'tasks_completed' => 'integer',
-        'budget' => 'decimal:2',
-        'budget_spent' => 'decimal:2',
     ];
 
     protected $appends = [

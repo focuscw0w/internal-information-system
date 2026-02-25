@@ -21,9 +21,4 @@ class ProjectPolicy
     {
         return $project->userHasPermission($user, 'manage_team');
     }
-
-    public function viewBudget(User $user, Project $project): bool
-    {
-        return $project->userHasPermission($user, 'view_budget');
-    }
 }
