@@ -107,7 +107,7 @@ class TaskController extends Controller
 
         return redirect()
             ->route('projects.tasks.show', [$projectId, $taskId])
-            ->with('success', 'Hodiny boli zaznamenané.');
+            ->with('success', 'Hours were successfully logged.');
     }
 
     /**

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Project\Http\Controllers\ProjectController;
 use Modules\Project\Http\Controllers\TaskController;
 use Modules\Project\Http\Controllers\SubtaskController;
+use Modules\Project\Http\Controllers\TeamController;
 
 Route::middleware(['web', 'auth'])
     ->prefix('projects')
