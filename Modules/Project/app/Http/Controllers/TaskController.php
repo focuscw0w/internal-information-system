@@ -4,7 +4,7 @@ namespace Modules\Project\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
-use Modules\Project\App\Services\ProjectService;
+use Modules\Project\Services\ProjectService;
 use Modules\Project\Services\TaskService;
 use Modules\Project\Http\Requests\CreateTaskRequest;
 use Modules\Project\Http\Requests\UpdateTaskRequest;

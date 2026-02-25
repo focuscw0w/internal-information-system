@@ -16,6 +16,8 @@ export default function Show({ project }: { project: Project }) {
 
     const can = (permission: string) => permissions.includes(permission);
 
+    console.log(project.team)
+
     return (
         <AppLayout>
             <Head title={`Detail projektu - ${project.name}`} />

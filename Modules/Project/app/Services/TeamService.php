@@ -194,9 +194,9 @@ class TeamService implements TeamServiceInterface
     }
 
     /**
-     * Sync team members with their settings (protected helper)
+     * Sync team members with their settings 
      */
-    protected function syncTeamMembers(Project $project, array $userIds, array $settings): void
+    public function syncTeamMembers(Project $project, array $userIds, array $settings): void
     {
         $existing = $project->team()
             ->wherePivotIn('user_id', $userIds)

@@ -1,15 +1,21 @@
 <?php
 
-namespace Modules\Project\App\Services;
+namespace Modules\Project\Services;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Modules\Project\App\Contracts\ProjectServiceInterface;
+use Modules\Project\Contracts\ProjectServiceInterface;
+use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Models\Project;
 
 class ProjectService implements ProjectServiceInterface
 {
+    public function __construct(
+        protected TeamServiceInterface $teamService
+    ) {
+    }
+
     /**
      * Get all projects with optional filters
      */
@@ -90,7 +96,7 @@ class ProjectService implements ProjectServiceInterface
 
             // Attach team members if provided
             if (isset($data['team_members']) && is_array($data['team_members']) && !empty($data['team_members'])) {
-                $this->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
+                $this->teamService->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
             }
 
             DB::commit();
@@ -138,7 +144,7 @@ class ProjectService implements ProjectServiceInterface
             // Sync team members if provided
             if (array_key_exists('team_members', $data)) {
                 if (is_array($data['team_members']) && !empty($data['team_members'])) {
-                    $this->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
+                    $this->teamService->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
                 } else {
                     Log::info('Removing all team members from project', ['project_id' => $id]);
                     $project->team()->sync([]);

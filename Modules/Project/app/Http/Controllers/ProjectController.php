@@ -5,7 +5,7 @@ namespace Modules\Project\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Modules\Project\App\Services\ProjectService;
+use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Http\Requests\UpdateProjectRequest;
 use Modules\Project\Http\Requests\CreateProjectRequest;
 use Modules\Project\Transformers\ProjectResource;
@@ -13,7 +13,7 @@ use Modules\Project\Transformers\ProjectResource;
 class ProjectController extends Controller
 {
     public function __construct(
-        protected ProjectService $projectService
+        protected ProjectServiceInterface $projectService
     ) {
     }
 

@@ -3,13 +3,13 @@
 namespace Modules\Project\Http\Controllers;
 
 use Illuminate\Routing\Controller;
-use Modules\Project\Services\SubtaskService;
+use Modules\Project\Contracts\SubtaskServiceInterface;
 use Modules\Project\Http\Requests\CreateSubtaskRequest;
 use Modules\Project\Http\Requests\UpdateSubtaskRequest;
 
 class SubtaskController extends Controller
 {
-    public function __construct(protected SubtaskService $subtaskService)
+    public function __construct(protected SubtaskServiceInterface $subtaskService)
     {
     }
 
