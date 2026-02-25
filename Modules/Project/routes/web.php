@@ -66,7 +66,7 @@ Route::middleware(['web', 'auth'])
 
         // Team management
         Route::middleware('check.project.permission:manage_team')->group(function () {
-            Route::put('/{id}/team', [ProjectController::class, 'updateTeam'])->name('team.update');
+            Route::put('/{id}/team', [TeamController::class, 'updateTeam'])->name('team.update');
         });
 
         // AI estimate endpoint

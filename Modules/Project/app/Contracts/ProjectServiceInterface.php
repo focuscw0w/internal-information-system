@@ -52,36 +52,4 @@ interface ProjectServiceInterface
      * Get overdue projects
      */
     public function getOverdueProjects(): Collection;
-
-    // ===== Team Management Methods =====
-
-    /**
-     * Update project team (bulk update)
-     */
-    public function updateProjectTeam(int $id, array $data): ?Project;
-
-    /**
-     * Add single team member to project
-     */
-    public function addTeamMember(
-        int $projectId,
-        int $userId,
-        array $permissions = ['view_project'],
-        int $allocation = 100
-    ): ?Project;
-
-    /**
-     * Remove single team member from project
-     */
-    public function removeTeamMember(int $projectId, int $userId): ?Project;
-
-    /**
-     * Update team member settings (permissions and/or allocation)
-     */
-    public function updateTeamMemberSettings(
-        int $projectId,
-        int $userId,
-        ?array $permissions = null,
-        ?int $allocation = null
-    ): ?Project;
 }
