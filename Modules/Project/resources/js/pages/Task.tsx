@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { FileText, ListChecks, Users } from 'lucide-react';
-import { EditTaskDialog } from '../components/project-detail/task-list/dialogs/edit-task';
+import { EditTaskDialog } from '../components/project-detail/task-table/dialogs/edit-task';
 import { Comments } from '../components/task-detail/comments';
 import { Assignees } from '../components/task-detail/tab-views/assignees';
 import { Subtasks } from '../components/task-detail/tab-views/subtasks';

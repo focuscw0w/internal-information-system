@@ -1,7 +1,7 @@
 import { Calendar, Clock, TrendingUp } from 'lucide-react';
 import { Project } from '../../../types/types';
 import { StatCard } from '../../ui/statcard';
-import { TaskTable } from '../task-list/task-list';
+import { TaskTable } from '../task-table/task-table';
 
 interface ProjectOverviewProps {
     project: Project;
