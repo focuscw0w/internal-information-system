@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useForm, usePage } from '@inertiajs/react';
 import { MessageSquare, Send } from 'lucide-react';
 import { Task } from '../../types/types';
-import { User } from '@/types';
+import { SharedData } from '@/types';
 
 interface TaskCommentsProps {
     task: Task;
@@ -11,8 +11,7 @@ interface TaskCommentsProps {
 
 export const Comments = ({ task }: TaskCommentsProps) => {
     const comments = task.comments ?? [];
-    const currentUser: User = usePage().props.auth?.user;
-    console.log(currentUser.id);
+    const currentUser = usePage<SharedData>().props.auth.user;
 
     const { data, setData, post, processing, reset } = useForm({
         body: '',

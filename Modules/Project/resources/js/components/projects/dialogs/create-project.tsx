@@ -2,12 +2,13 @@ import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
 import { Button } from '@/components/ui/button';
 import { useUsers } from '@/hooks/use-users';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { statusOptions, workloadOptions } from '../utils';
 import { ProjectStatus, WorkloadLevel } from '../../../types/types';
 import { TeamMemberSelect } from '../../ui/team-member-select';
+import { SharedData } from '@/types';
 
 interface CreateProjectFormData {
     name: string;
@@ -23,6 +24,8 @@ export const CreateProjectDialog = () => {
     const [open, setOpen] = useState(false);
 
     const { data: users = [], isLoading, isError } = useUsers();
+    const currentUser = usePage<SharedData>().props.auth.user;
+    const otherUsers = users.filter((user) => user.id !== currentUser.id);
 
     const { data, setData, post, processing, errors, reset } =
         useForm<CreateProjectFormData>({
@@ -152,7 +155,7 @@ export const CreateProjectDialog = () => {
 
             {!isLoading && !isError && (
                 <TeamMemberSelect
-                    allUsers={users}
+                    allUsers={otherUsers}
                     selectedMembers={data.team_members}
                     onChange={(members) => {
                         setData('team_members', members);
