@@ -17,6 +17,8 @@ use Modules\Project\Contracts\ActivityLogServiceInterface;
 use Modules\Project\Services\ActivityLogService;
 use Modules\Project\Contracts\SubtaskServiceInterface;
 use Modules\Project\Services\SubtaskService;
+use Modules\Project\Services\CommentService;
+use Modules\Project\Contracts\CommentServiceInterface;
 
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
@@ -60,6 +62,7 @@ class ProjectServiceProvider extends ServiceProvider
         $this->app->bind(ProjectServiceInterface::class, ProjectService::class);
         $this->app->bind(ActivityLogServiceInterface::class, ActivityLogService::class);
         $this->app->bind(SubtaskServiceInterface::class, SubtaskService::class);
+        $this->app->bind(CommentServiceInterface::class, CommentService::class);
     }
 
     /**

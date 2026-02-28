@@ -5,6 +5,8 @@ use Modules\Project\Http\Controllers\ProjectController;
 use Modules\Project\Http\Controllers\TaskController;
 use Modules\Project\Http\Controllers\SubtaskController;
 use Modules\Project\Http\Controllers\TeamController;
+use Modules\Project\Http\Controllers\CommentController;
+
 
 Route::middleware(['web', 'auth'])
     ->prefix('projects')
@@ -52,6 +54,11 @@ Route::middleware(['web', 'auth'])
             Route::middleware('check.project.permission:delete_tasks')->group(function () {
                 Route::delete('/{task}', [TaskController::class, 'destroy'])->name('destroy');
             });
+
+            // Comments
+            Route::post('/{task}/comments', [CommentController::class, 'store'])
+                ->name('comments.store')
+                ->middleware('check.project.permission:view_tasks');
 
             // Subtasks
             Route::prefix('{task}/subtasks')->name('subtasks.')
