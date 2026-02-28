@@ -16,7 +16,6 @@ interface CreateProjectFormData {
     workload: WorkloadLevel;
     start_date: string;
     end_date: string;
-    budget: string;
     team_members: number[];
 }
 
@@ -33,7 +32,6 @@ export const CreateProjectDialog = () => {
             workload: 'medium',
             start_date: '',
             end_date: '',
-            budget: '',
             team_members: [],
         });
 
@@ -133,18 +131,6 @@ export const CreateProjectDialog = () => {
                     options={workloadOptions}
                 />
             </div>
-
-            <FormField
-                label="Rozpočet (€)"
-                id="budget"
-                type="number"
-                value={data.budget}
-                onChange={(value) => setData('budget', value)}
-                error={errors.budget}
-                placeholder="napr. 25000"
-                min="0"
-                step="0.01"
-            />
 
             {isLoading && (
                 <div className="flex items-center justify-center py-8">

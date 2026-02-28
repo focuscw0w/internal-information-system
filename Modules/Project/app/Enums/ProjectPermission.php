@@ -20,10 +20,6 @@ enum ProjectPermission: string
     case VIEW_TEAM = 'view_team';
     case MANAGE_TEAM = 'manage_team';
 
-    // Budget permissions
-    case VIEW_BUDGET = 'view_budget';
-    case EDIT_BUDGET = 'edit_budget';
-
     // Data permissions
     case EXPORT_DATA = 'export_data';
 
@@ -51,8 +47,6 @@ enum ProjectPermission: string
             self::ASSIGN_TASKS => 'Priradiť úlohy',
             self::VIEW_TEAM => 'Zobraziť tím',
             self::MANAGE_TEAM => 'Spravovať tím',
-            self::VIEW_BUDGET => 'Zobraziť rozpočet',
-            self::EDIT_BUDGET => 'Upraviť rozpočet',
             self::EXPORT_DATA => 'Exportovať dáta',
         };
     }
@@ -73,8 +67,6 @@ enum ProjectPermission: string
             self::ASSIGN_TASKS => 'Môže priraďovať úlohy členom tímu',
             self::VIEW_TEAM => 'Môže zobraziť členov tímu',
             self::MANAGE_TEAM => 'Môže pridávať a odstraňovať členov tímu',
-            self::VIEW_BUDGET => 'Môže zobraziť rozpočet projektu',
-            self::EDIT_BUDGET => 'Môže upravovať rozpočet a výdavky',
             self::EXPORT_DATA => 'Môže exportovať dáta projektu',
         };
     }
@@ -92,8 +84,6 @@ enum ProjectPermission: string
                 => 'Úlohy',
             self::VIEW_TEAM, self::MANAGE_TEAM
                 => 'Tím',
-            self::VIEW_BUDGET, self::EDIT_BUDGET
-                => 'Rozpočet',
             self::EXPORT_DATA
                 => 'Dáta',
         };
@@ -108,7 +98,6 @@ enum ProjectPermission: string
             self::VIEW_PROJECT,
             self::VIEW_TASKS,
             self::VIEW_TEAM,
-            self::VIEW_BUDGET,
         ]);
     }
 
@@ -143,7 +132,6 @@ enum ProjectPermission: string
             self::VIEW_PROJECT->value,
             self::VIEW_TASKS->value,
             self::VIEW_TEAM->value,
-            self::VIEW_BUDGET->value,
         ];
     }
 
@@ -157,7 +145,6 @@ enum ProjectPermission: string
             self::CREATE_TASKS->value,
             self::EDIT_TASKS->value,
             self::ASSIGN_TASKS->value,
-            self::EDIT_BUDGET->value,
         ];
     }
 

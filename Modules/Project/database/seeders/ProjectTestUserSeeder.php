@@ -68,8 +68,6 @@ class ProjectTestUserSeeder extends Seeder
                 'capacity_available' => 100,
                 'tasks_total' => 0,
                 'tasks_completed' => 0,
-                'budget' => 10000,
-                'budget_spent' => 0,
                 'owner_id' => $owner->id,
             ]
         );
@@ -94,7 +92,6 @@ class ProjectTestUserSeeder extends Seeder
                     ProjectPermission::DELETE_TASKS->value,
                     ProjectPermission::VIEW_TEAM->value,
                     ProjectPermission::MANAGE_TEAM->value,
-                    ProjectPermission::VIEW_BUDGET->value,
                 ]),
                 'allocation' => 100,
             ]);
@@ -123,7 +120,7 @@ class ProjectTestUserSeeder extends Seeder
             ['Rola', 'Email', 'Heslo', 'Permissions'],
             [
                 ['Owner', 'owner@test.com', 'password', 'all (automatically)'],
-                ['Full access', 'member.full@test.com', 'password', 'view, edit, tasks, team, budget'],
+                ['Full access', 'member.full@test.com', 'password', 'view, edit, tasks, team'],
                 ['Read only', 'member.readonly@test.com', 'password', 'view project, view tasks, view team'],
                 ['Outsider', 'outsider@test.com', 'password', 'none (not in the team)'],
             ]

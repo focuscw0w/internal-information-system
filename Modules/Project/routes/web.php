@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Project\Http\Controllers\ProjectController;
 use Modules\Project\Http\Controllers\TaskController;
 use Modules\Project\Http\Controllers\SubtaskController;
-use Modules\Project\Http\Controllers\CommentController;
+use Modules\Project\Http\Controllers\TeamController;
 
 Route::middleware(['web', 'auth'])
     ->prefix('projects')
@@ -53,11 +53,6 @@ Route::middleware(['web', 'auth'])
                 Route::delete('/{task}', [TaskController::class, 'destroy'])->name('destroy');
             });
 
-            // Comments
-            Route::post('{task}/comments', [CommentController::class, 'store'])
-                ->name('comments.store')
-                ->middleware('check.project.permission:view_tasks');
-
             // Subtasks
             Route::prefix('{task}/subtasks')->name('subtasks.')
                 ->middleware('check.project.permission:edit_tasks')
@@ -71,7 +66,7 @@ Route::middleware(['web', 'auth'])
 
         // Team management
         Route::middleware('check.project.permission:manage_team')->group(function () {
-            Route::put('/{id}/team', [ProjectController::class, 'updateTeam'])->name('team.update');
+            Route::put('/{id}/team', [TeamController::class, 'updateTeam'])->name('team.update');
         });
 
         // AI estimate endpoint

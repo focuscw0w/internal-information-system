@@ -24,7 +24,6 @@ interface EditProjectFormData {
     workload: WorkloadLevel;
     start_date: string;
     end_date: string;
-    budget: string;
     team_members: number[];
 }
 
@@ -46,7 +45,6 @@ export const EditProjectDialog = ({
             workload: project.workload || 'medium',
             start_date: project.start_date || '',
             end_date: project.end_date || '',
-            budget: project.budget?.toString() || '',
             team_members: initialTeamMembers,
         });
 
@@ -59,7 +57,6 @@ export const EditProjectDialog = ({
                 workload: project.workload || 'medium',
                 start_date: project.start_date || '',
                 end_date: project.end_date || '',
-                budget: project.budget?.toString() || '',
                 team_members: initialTeamMembers,
             });
         }
@@ -162,18 +159,6 @@ export const EditProjectDialog = ({
                     options={workloadOptions}
                 />
             </div>
-
-            <FormField
-                label="Rozpočet (€)"
-                id="budget"
-                type="number"
-                value={data.budget}
-                onChange={(value) => setData('budget', value)}
-                error={errors.budget}
-                placeholder="napr. 25000"
-                min="0"
-                step="0.01"
-            />
 
             {isLoading && (
                 <div className="flex items-center justify-center py-8">

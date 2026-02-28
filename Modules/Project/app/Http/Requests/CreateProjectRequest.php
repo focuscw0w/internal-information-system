@@ -30,7 +30,6 @@ class CreateProjectRequest extends FormRequest
             'workload' => ['required', Rule::in(ProjectWorkload::values())],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'budget' => ['nullable', 'numeric', 'min:0'],
 
             // Team members validation
             'team_members' => ['nullable', 'array'],
@@ -55,8 +54,6 @@ class CreateProjectRequest extends FormRequest
         return [
             'name.required' => 'Názov projektu je povinný.',
             'end_date.after_or_equal' => 'Dátum konca musí byť rovnaký alebo neskorší ako dátum začiatku.',
-            'budget.numeric' => 'Rozpočet musí byť číslo.',
-            'budget.min' => 'Rozpočet nemôže byť záporný.',
             'team_members.array' => 'Členovia tímu musia byť pole.',
             'team_members.*.exists' => 'Vybraný používateľ neexistuje.',
             'team_settings.*.allocation.integer' => 'Alokácia musí byť celé číslo.',

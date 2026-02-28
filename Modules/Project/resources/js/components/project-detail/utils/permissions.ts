@@ -25,13 +25,6 @@ export const PERMISSION_GROUPS = [
         ],
     },
     {
-        label: 'Rozpočet',
-        permissions: [
-            { value: 'view_budget', label: 'Zobrazenie rozpočtu' },
-            { value: 'edit_budget', label: 'Úprava rozpočtu' },
-        ],
-    },
-    {
         label: 'Ostatné',
         permissions: [{ value: 'export_data', label: 'Export dát' }],
     },

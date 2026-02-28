@@ -30,9 +30,6 @@ class ProjectResource extends JsonResource
             'capacity_used' => (int) $this->capacity_used,
             'capacity_available' => (int) $this->capacity_available,
 
-            'budget' => (float) ($this->budget ?? 0),
-            'budget_spent' => (float) ($this->budget_spent ?? 0),
-
             'owner_id' => $this->owner_id,
             'is_overdue' => $this->is_overdue,
             'days_remaining' => $this->days_remaining,

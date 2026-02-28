@@ -5,17 +5,16 @@ namespace Modules\Project\Services;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Modules\Project\Contracts\ActivityLogServiceInterface;
+use Modules\Project\Contracts\TaskServiceInterface;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
-use Modules\Project\Contracts\TaskServiceInterface;
 
 class TaskService implements TaskServiceInterface
 {
     public function __construct(
-        protected ActivityLogService $activityLog
-    )
-    {
-    }
+        protected ActivityLogServiceInterface $activityLog
+    ) {}
 
     /**
      * Detect changes between model and new data
@@ -75,7 +74,7 @@ class TaskService implements TaskServiceInterface
                 'due_date' => $data['due_date'] ?? null,
             ]);
 
-            if (!empty($data['assigned_users'])) {
+            if (! empty($data['assigned_users'])) {
                 $task->assignedUsers()->sync($data['assigned_users']);
             }
 
@@ -115,7 +114,7 @@ class TaskService implements TaskServiceInterface
             $task->assignedUsers()->sync($data['assigned_users']);
         }
 
-        if (!empty($changes)) {
+        if (! empty($changes)) {
             $this->activityLog->log(
                 $task->project_id,
                 'task_updated',

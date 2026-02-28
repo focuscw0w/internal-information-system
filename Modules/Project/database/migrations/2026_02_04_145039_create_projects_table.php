@@ -34,10 +34,6 @@ return new class extends Migration {
             $table->integer('tasks_total')->default(0);
             $table->integer('tasks_completed')->default(0);
 
-            // Budget (optional)
-            $table->decimal('budget', 12, 2)->nullable();
-            $table->decimal('budget_spent', 12, 2)->default(0);
-
             // Relations
             $table->foreignId('owner_id')->nullable()->constrained('users')->nullOnDelete();
 

@@ -5,16 +5,15 @@ namespace Modules\Project\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Modules\Project\App\Services\ProjectService;
+use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Http\Requests\UpdateProjectRequest;
 use Modules\Project\Http\Requests\CreateProjectRequest;
-use Modules\Project\Http\Requests\UpdateProjectTeamRequest;
 use Modules\Project\Transformers\ProjectResource;
 
 class ProjectController extends Controller
 {
     public function __construct(
-        protected ProjectService $projectService
+        protected ProjectServiceInterface $projectService
     ) {
     }
 
@@ -107,19 +106,5 @@ class ProjectController extends Controller
         }
 
         return redirect()->back()->with('success', 'Project was successfully deleted.');
-    }
-
-    /**
-     * Update project team
-     */
-    public function updateTeam(UpdateProjectTeamRequest $request, $id)
-    {
-        $project = $this->projectService->updateProjectTeam($id, $request->validated());
-
-        if (!$project) {
-            return redirect()->back()->with('error', 'Project team was not updated.');
-        }
-
-        return redirect()->back()->with('success', 'Team was successfully updated.');
     }
 }

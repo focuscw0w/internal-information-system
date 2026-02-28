@@ -4,7 +4,7 @@ namespace Modules\Project\Contracts;
 
 use Illuminate\Database\Eloquent\Collection;
 use Modules\Project\Models\Task;
-
+ 
 interface TaskServiceInterface
 {
     public function getAllTasks(int $projectId): Collection;
