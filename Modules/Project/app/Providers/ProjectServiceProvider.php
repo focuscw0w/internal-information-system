@@ -6,8 +6,10 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\Project\App\Services\ProjectService;
+use Modules\Project\Contracts\CommentServiceInterface;
 use Modules\Project\Models\Project;
 use Modules\Project\Policies\ProjectPolicy;
+use Modules\Project\Services\CommentService;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -44,6 +46,11 @@ class ProjectServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+        $this->app->bind(
+            CommentServiceInterface::class,
+            CommentService::class
+        );
+
         $this->app->singleton(ProjectService::class);
     }
 
