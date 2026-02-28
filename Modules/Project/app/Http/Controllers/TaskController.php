@@ -41,6 +41,8 @@ class TaskController extends Controller
             return redirect()->route('projects.show', $projectId);
         }
 
+        $task->load(['subtasks', 'assignedUsers', 'comments.user']);
+
         $project = $this->projectService->getProjectById($projectId);
         if (!$project) {
             return redirect()->route('projects.show', $projectId);

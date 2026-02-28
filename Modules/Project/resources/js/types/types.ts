@@ -83,6 +83,7 @@ export interface Task {
     created_at: string;
     updated_at: string;
     subtasks?: Subtask[];
+    comments?: Comment[];
 }
 
 export interface Subtask {
@@ -92,6 +93,16 @@ export interface Subtask {
     is_completed: boolean;
     created_at: string;
     updated_at: string;
+}
+
+export interface Comment {
+    id: number;
+    body: string;
+    user: {
+        id: number;
+        name: string;
+    };
+    created_at: string;
 }
 
 export interface Activity {

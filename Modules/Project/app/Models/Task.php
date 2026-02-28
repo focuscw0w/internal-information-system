@@ -33,8 +33,9 @@ class Task extends Model
         'actual_hours' => 'integer',
     ];
 
-    protected static function boot() {
-         parent::boot();
+    protected static function boot()
+    {
+        parent::boot();
 
         // After creating a task-detail
         static::created(function ($task) {
@@ -83,6 +84,11 @@ class Task extends Model
         return $this->belongsToMany(User::class, 'assigned_users');
     }
 
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class)->orderBy('created_at', 'asc');
+    }
+
     /*
     public function timeEntries(): HasMany
     {
@@ -124,7 +130,7 @@ class Task extends Model
     public function isOverdue(): bool
     {
         return $this->due_date &&
-               $this->due_date < now() &&
-               $this->status !== 'done';
+            $this->due_date < now() &&
+            $this->status !== 'done';
     }
 }
