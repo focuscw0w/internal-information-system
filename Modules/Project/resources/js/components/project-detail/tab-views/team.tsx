@@ -1,24 +1,29 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { CheckCircle2, Crown, Users } from 'lucide-react';
-import { PERMISSION_GROUPS, PERMISSION_LABELS } from '../utils/permissions';
 import { Project } from '../../../types/types';
 import { ManageTeamDialog } from '../dialogs/team/manage-team';
+import { PERMISSION_GROUPS, PERMISSION_LABELS } from '../utils/permissions';
 
 interface TeamProps {
     project: Project;
 }
 
 export const Team = ({ project }: TeamProps) => {
+    const permissions = project.current_user_permissions ?? [];
+    const can = (permission: string) => permissions.includes(permission);
+
     const owner = project.owner;
     const teamMembers = project.team || [];
 
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex justify-end">
-                <ManageTeamDialog project={project} />
-            </div>
+            {can('manage_team') && (
+                <div className="flex justify-end">
+                    <ManageTeamDialog project={project} />
+                </div>
+            )}
 
             {/* Owner Card */}
             {owner && (
