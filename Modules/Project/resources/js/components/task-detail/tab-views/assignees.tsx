@@ -9,13 +9,19 @@ interface AssigneesProps {
 }
 
 export const Assignees = ({ task, project }: AssigneesProps) => {
+    const permissions = project.current_user_permissions ?? [];
+    const can = (permission: string) => permissions.includes(permission);
+
     const assignees = task.assigned_users ?? [];
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-end">
-                <AssignTaskDialog task={task} project={project} />
-            </div>
+            {can('manage_team') && (
+                <div className="flex justify-end">
+                    <AssignTaskDialog task={task} project={project} />
+                </div>
+            )}
+
             <Card className="border-gray-100 shadow-sm">
                 <CardHeader>
                     <CardTitle className="text-lg">

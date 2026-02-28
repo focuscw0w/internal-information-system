@@ -17,8 +17,6 @@ export const TaskOverview = ({ task, project }: TaskOverviewProps) => {
             ? Math.min((task.actual_hours / task.estimated_hours) * 100, 100)
             : 0;
 
-    console.log(task.actual_hours)
-
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* Left - Main content */}

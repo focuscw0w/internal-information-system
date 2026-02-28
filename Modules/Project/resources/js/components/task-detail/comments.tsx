@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { MessageSquare, Send } from 'lucide-react';
 import { Task } from '../../types/types';
+import { User } from '@/types';
 
 interface TaskCommentsProps {
     task: Task;
@@ -10,6 +11,8 @@ interface TaskCommentsProps {
 
 export const Comments = ({ task }: TaskCommentsProps) => {
     const comments = task.comments ?? [];
+    const currentUser: User = usePage().props.auth?.user;
+    console.log(currentUser.id);
 
     const { data, setData, post, processing, reset } = useForm({
         body: '',
@@ -65,41 +68,61 @@ export const Comments = ({ task }: TaskCommentsProps) => {
                         Zatiaľ žiadne komentáre.
                     </p>
                 ) : (
-                    <div className="space-y-4">
-                        {comments.map((comment) => (
-                            <div
-                                key={comment.id}
-                                className="flex gap-3"
-                            >
-                                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-xs font-semibold text-white">
-                                    {comment.user?.name
-                                        ?.split(' ')
-                                        .map((n) => n[0])
-                                        .join('')
-                                        .toUpperCase() ?? '?'}
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-gray-900">
-                                            {comment.user?.name}
-                                        </span>
-                                        <span className="text-xs text-gray-400">
-                                            {new Date(
-                                                comment.created_at,
-                                            ).toLocaleDateString('sk-SK', {
-                                                day: 'numeric',
-                                                month: 'short',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            })}
-                                        </span>
+                    <div className="space-y-5">
+                        {comments.map((comment) => {
+                            const isOwn = comment.user?.id === currentUser?.id;
+
+                            return (
+                                <div
+                                    key={comment.id}
+                                    className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}
+                                >
+                                    <div
+                                        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${
+                                            isOwn
+                                                ? 'bg-gradient-to-br from-green-500 to-green-600'
+                                                : 'bg-gradient-to-br from-blue-500 to-blue-600'
+                                        }`}
+                                    >
+                                        {comment.user?.name
+                                            ?.split(' ')
+                                            .map((n) => n[0])
+                                            .join('')
+                                            .toUpperCase() ?? '?'}
                                     </div>
-                                    <p className="mt-1 text-sm text-gray-600">
-                                        {comment.body}
-                                    </p>
+                                    <div className={`flex-1 ${isOwn ? 'text-right' : ''}`}>
+                                        <div
+                                            className={`flex items-center gap-2 ${
+                                                isOwn ? 'justify-end' : ''
+                                            }`}
+                                        >
+                                            <span className="text-sm font-medium text-gray-900">
+                                                {comment.user?.name}
+                                            </span>
+                                            <span className="text-xs text-gray-400">
+                                                {new Date(
+                                                    comment.created_at,
+                                                ).toLocaleDateString('sk-SK', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                })}
+                                            </span>
+                                        </div>
+                                        <div
+                                            className={`mt-1 inline-block rounded-lg px-3 py-2 text-sm ${
+                                                isOwn
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'bg-gray-100 text-gray-600'
+                                            }`}
+                                        >
+                                            {comment.body}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </CardContent>
