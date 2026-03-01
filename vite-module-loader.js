@@ -40,6 +40,7 @@ async function collectModuleAssetsPaths(paths, modulesPath) {
           }
         } catch (error) {
           // vite.config.js does not exist, skip this module
+            console.log(error);
         }
       }
     }
