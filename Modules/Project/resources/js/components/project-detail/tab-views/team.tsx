@@ -3,6 +3,8 @@ import { Card } from '@/components/ui/card';
 import { CheckCircle2, Crown, Users } from 'lucide-react';
 import { Project } from '../../../types/types';
 import { ManageTeamDialog } from '../dialogs/team/manage-team';
+import { EditTeamMemberDialog } from '../dialogs/team/edit-team-member';
+import { RemoveTeamMemberDialog } from '../dialogs/team/delete-team-member';
 import { PERMISSION_GROUPS, PERMISSION_LABELS } from '../utils/permissions';
 
 interface TeamProps {
@@ -150,8 +152,8 @@ export const Team = ({ project }: TeamProps) => {
                                                                                     className="bg-primary px-3 py-2 text-xs text-white"
                                                                                 >
                                                                                     {PERMISSION_LABELS[
-                                                                                        perm
-                                                                                    ] ||
+                                                                                            perm
+                                                                                            ] ||
                                                                                         perm}
                                                                                 </Badge>
                                                                             ),
@@ -166,22 +168,20 @@ export const Team = ({ project }: TeamProps) => {
                                     </div>
                                 </div>
 
-                                {/* Allocation */}
-                                <div className="text-right">
-                                    <p
-                                        className={`text-2xl font-bold ${
-                                            member.allocation > 100
-                                                ? 'text-red-600'
-                                                : member.allocation > 80
-                                                  ? 'text-orange-600'
-                                                  : 'text-green-600'
-                                        }`}
-                                    >
-                                        {member.allocation}%
-                                    </p>
-                                    <p className="text-xs text-gray-500">
-                                        Alokácia
-                                    </p>
+                                {/* Actions */}
+                                <div className="flex flex-col items-end gap-2">
+                                    {can('manage_team') && (
+                                        <div className="flex items-center gap-3">
+                                            <EditTeamMemberDialog
+                                                project={project}
+                                                member={member}
+                                            />
+                                            <RemoveTeamMemberDialog
+                                                project={project}
+                                                member={member}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </Card>

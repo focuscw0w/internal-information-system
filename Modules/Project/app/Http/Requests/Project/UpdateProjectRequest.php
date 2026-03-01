@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Project\Http\Requests;
+namespace Modules\Project\Http\Requests\Project;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Enums\ProjectStatus;
 use Modules\Project\Enums\ProjectWorkload;
-use Modules\Project\Enums\ProjectPermission;
 
 class UpdateProjectRequest extends FormRequest
 {

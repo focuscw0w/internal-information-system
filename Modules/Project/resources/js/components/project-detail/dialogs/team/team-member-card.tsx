@@ -1,12 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { User } from '@/types';
-import { ChevronDown, ChevronRight, Shield, Trash2 } from 'lucide-react';
-import { useState } from 'react';
-import { PERMISSION_GROUPS } from '../../utils/permissions';
+import { Trash2 } from 'lucide-react';
 import { TeamMemberSettings } from '../../../../types/types';
-import { PermissionGroup } from './permission-group';
+import { TeamMemberSettingsForm } from '../../team/team-member-settings';
 
 interface TeamMemberCardProps {
     user: User;
@@ -17,14 +13,12 @@ interface TeamMemberCardProps {
 }
 
 export const TeamMemberCard = ({
-    user,
-    settings,
-    onRemove,
-    onSettingChange,
-    onTogglePermission,
-}: TeamMemberCardProps) => {
-    const [showPermissions, setShowPermissions] = useState(false);
-
+                                   user,
+                                   settings,
+                                   onRemove,
+                                   onSettingChange,
+                                   onTogglePermission,
+                               }: TeamMemberCardProps) => {
     return (
         <div className="rounded-lg border bg-white p-4 shadow-sm">
             {/* Header */}
@@ -56,61 +50,13 @@ export const TeamMemberCard = ({
                 </Button>
             </div>
 
-            {/* Allocation */}
-            <div className="mb-3">
-                <Label className="mb-1 text-xs text-gray-600">
-                    Alokácia (%)
-                </Label>
-                <Input
-                    type="number"
-                    min="0"
-                    max="200"
-                    value={settings.allocation}
-                    onChange={(e) =>
-                        onSettingChange(
-                            'allocation',
-                            parseInt(e.target.value) || 0,
-                        )
-                    }
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                    {settings.allocation}% kapacity
-                </p>
-            </div>
-
-            {/* Permissions Toggle */}
-            <button
-                type="button"
-                onClick={() => setShowPermissions(!showPermissions)}
-                className="flex w-full items-center gap-2 rounded-md p-2 text-sm text-gray-600 transition-colors hover:bg-gray-50"
-            >
-                {showPermissions ? (
-                    <ChevronDown size={16} />
-                ) : (
-                    <ChevronRight size={16} />
-                )}
-                <Shield size={14} />
-                <span>Oprávnenia</span>
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
-                    {settings.permissions.length}
-                </span>
-            </button>
-
-            {/* Permissions Content */}
-            {showPermissions && (
-                <div className="mt-2 space-y-2 border-t pt-3">
-                    {PERMISSION_GROUPS.map((group) => (
-                        <PermissionGroup
-                            key={group.label}
-                            userId={user.id}
-                            groupLabel={group.label}
-                            permissions={group.permissions}
-                            selectedPermissions={settings.permissions}
-                            onToggle={onTogglePermission}
-                        />
-                    ))}
-                </div>
-            )}
+            {/* Settings */}
+            <TeamMemberSettingsForm
+                userId={user.id}
+                settings={settings}
+                onSettingChange={onSettingChange}
+                onTogglePermission={onTogglePermission}
+            />
         </div>
     );
 };

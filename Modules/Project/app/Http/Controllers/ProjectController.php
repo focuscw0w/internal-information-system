@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\Project\Contracts\ProjectServiceInterface;
-use Modules\Project\Http\Requests\UpdateProjectRequest;
-use Modules\Project\Http\Requests\CreateProjectRequest;
+use Modules\Project\Http\Requests\Project\CreateProjectRequest;
+use Modules\Project\Http\Requests\Project\UpdateProjectRequest;
 use Modules\Project\Transformers\ProjectResource;
 
 class ProjectController extends Controller

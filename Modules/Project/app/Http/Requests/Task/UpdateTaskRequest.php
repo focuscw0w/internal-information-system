@@ -1,11 +1,11 @@
 <?php
 
-namespace Modules\Project\Http\Requests;
+namespace Modules\Project\Http\Requests\Task;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Modules\Project\Enums\TaskStatus;
 use Modules\Project\Enums\TaskPriority;
+use Modules\Project\Enums\TaskStatus;
 
 class UpdateTaskRequest extends FormRequest
 {

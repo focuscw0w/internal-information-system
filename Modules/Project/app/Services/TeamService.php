@@ -49,7 +49,17 @@ class TeamService implements TeamServiceInterface
     }
 
     /**
-     * Sync team members with their settings 
+     * Remove a user from the project team.
+     */
+    public function removeMember(int $projectId, int $userId): bool
+    {
+        $project = Project::findOrFail($projectId);
+
+        return $project->team()->detach($userId) > 0;
+    }
+
+    /**
+     * Sync team members with their settings
      */
     public function syncTeamMembers(Project $project, array $userIds, array $settings): void
     {

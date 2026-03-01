@@ -4,8 +4,8 @@ namespace Modules\Project\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Modules\Project\Contracts\SubtaskServiceInterface;
-use Modules\Project\Http\Requests\CreateSubtaskRequest;
-use Modules\Project\Http\Requests\UpdateSubtaskRequest;
+use Modules\Project\Http\Requests\Subtask\CreateSubtaskRequest;
+use Modules\Project\Http\Requests\Subtask\UpdateSubtaskRequest;
 
 class SubtaskController extends Controller
 {

@@ -5,7 +5,7 @@ namespace Modules\Project\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Modules\Project\Contracts\CommentServiceInterface;
-use Modules\Project\Http\Requests\StoreCommentRequest;
+use Modules\Project\Http\Requests\Comment\StoreCommentRequest;
 use Modules\Project\Models\Task;
 
 class CommentController extends Controller

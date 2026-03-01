@@ -40,12 +40,14 @@ export default function Show({ project }: { project: Project }) {
                             showLabel
                         />
                     </Header.Badges>
-                    <Header.Actions>
-                        <EditProjectDialog
-                            project={project}
-                            text="Upraviť projekt"
-                        />
-                    </Header.Actions>
+                    {can('edit_project') && (
+                        <Header.Actions>
+                            <EditProjectDialog
+                                project={project}
+                                text="Upraviť projekt"
+                            />
+                        </Header.Actions>
+                    )}
                 </Header>
 
                 {/* Tabs */}

@@ -3,9 +3,9 @@ import { router } from '@inertiajs/react';
 import { CircleDashed, Filter } from 'lucide-react';
 import { useState } from 'react';
 import { Project, Task, TaskPriority, TaskStatus } from '../../../types/types';
+import { Column, DataTable } from '../../ui/data-table';
 import { CreateTaskDialog } from './dialogs/create-task';
 import { TaskActions } from './task-actions';
-import { Column, DataTable } from '../../ui/data-table';
 import { TaskColumns } from './task-columns';
 import { TaskFilters } from './task-filters';
 
@@ -15,10 +15,19 @@ interface TaskTableProps {
 
 export const TaskTable = ({ project }: TaskTableProps) => {
     const [statusFilter, setStatusFilter] = useState<TaskStatus | null>(null);
-    const [priorityFilter, setPriorityFilter] = useState<TaskPriority | null>(null);
+    const [priorityFilter, setPriorityFilter] = useState<TaskPriority | null>(
+        null,
+    );
     const [assigneeFilter, setAssigneeFilter] = useState<number | null>(null);
 
-    const hasActiveFilters = !!(statusFilter || priorityFilter || assigneeFilter);
+    const hasActiveFilters = !!(
+        statusFilter ||
+        priorityFilter ||
+        assigneeFilter
+    );
+
+    const permissions = project.current_user_permissions ?? [];
+    const can = (permission: string) => permissions.includes(permission);
 
     const clearFilters = () => {
         setStatusFilter(null);
@@ -45,21 +54,25 @@ export const TaskTable = ({ project }: TaskTableProps) => {
 
     const allColumns: Column<Task>[] = [
         ...TaskColumns,
-        {
-            key: 'actions',
-            label: 'Akcie',
-            width: 'w-16',
-            align: 'center',
-            render: (task) => (
-                <div onClick={(e) => e.stopPropagation()}>
-                    <TaskActions
-                        task={task}
-                        projectId={project.id}
-                        team={project.team}
-                    />
-                </div>
-            ),
-        },
+        ...(can('edit_tasks')
+            ? [
+                  {
+                      key: 'actions',
+                      label: 'Akcie',
+                      width: 'w-16',
+                      align: 'center' as const,
+                      render: (task: Task) => (
+                          <div onClick={(e) => e.stopPropagation()}>
+                              <TaskActions
+                                  task={task}
+                                  projectId={project.id}
+                                  team={project.team}
+                              />
+                          </div>
+                      ),
+                  },
+              ]
+            : []),
     ];
 
     return (
@@ -70,7 +83,8 @@ export const TaskTable = ({ project }: TaskTableProps) => {
                         Úlohy
                         {allTasks.length > 0 && (
                             <span className="ml-2 text-sm font-normal text-gray-500">
-                                ({project.tasks_completed}/{project.tasks_total})
+                                ({project.tasks_completed}/{project.tasks_total}
+                                )
                             </span>
                         )}
                     </CardTitle>

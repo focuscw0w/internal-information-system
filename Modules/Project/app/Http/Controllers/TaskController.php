@@ -4,13 +4,13 @@ namespace Modules\Project\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
+use Modules\Project\Http\Requests\Task\AssignTaskRequest;
+use Modules\Project\Http\Requests\Task\CreateTaskRequest;
+use Modules\Project\Http\Requests\Task\LogHoursRequest;
+use Modules\Project\Http\Requests\Task\UpdateTaskRequest;
+use Modules\Project\Http\Requests\Task\UpdateTaskStatusRequest;
 use Modules\Project\Services\ProjectService;
 use Modules\Project\Services\TaskService;
-use Modules\Project\Http\Requests\CreateTaskRequest;
-use Modules\Project\Http\Requests\UpdateTaskRequest;
-use Modules\Project\Http\Requests\UpdateTaskStatusRequest;
-use Modules\Project\Http\Requests\AssignTaskRequest;
-use Modules\Project\Http\Requests\LogHoursRequest;
 use Modules\Project\Transformers\ProjectResource;
 
 class TaskController extends Controller
