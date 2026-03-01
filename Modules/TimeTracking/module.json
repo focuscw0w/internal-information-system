@@ -1,0 +1,11 @@
+{
+    "name": "TimeTracking",
+    "alias": "timetracking",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\TimeTracking\\Providers\\TimeTrackingServiceProvider"
+    ],
+    "files": []
+}

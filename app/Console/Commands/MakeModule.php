@@ -10,48 +10,46 @@ class MakeModule extends Command
 {
     /**
      * The name and signature of the console command.
-     *
-     * @var string
      */
     protected $signature = 'make:module
-        {module : Názov modulu / namespace (napr. Projects)}
-        {title : Názov v sidebare (napr. "Projekty")}
-        {group : Skupina v sidebare (napr. "Práca & Čas")}';
+        {module : Názov modulu (napr. TimeTracking)}
+        {title : Názov v sidebare (napr. "Sledovanie času")}
+        {group : Skupina v sidebare (napr. "Kapacitný manažment")}
+        {--force : Prepísať existujúce súbory}';
 
-    // php artisan  make:module Project "Projekty" "Kapacitný manažment"
     /**
      * The console command description.
-     *
-     * @var string
      */
-    protected $description = 'Create a nwidart module + navigation item + basic React page';
+    protected $description = 'Create a nwidart module + navigation config + React page';
 
     /**
      * Execute the console command.
      */
     public function handle(Filesystem $fs): int
     {
-         $fs = new \Illuminate\Filesystem\Filesystem();
+        $module = Str::studly($this->argument('module'));
+        $title  = $this->argument('title');
+        $group  = $this->argument('group');
+        $force  = $this->option('force');
 
-        $module = Str::studly($this->argument('module')); // Blog
-        $title  = $this->argument('title');               // Projekty
-        $group  = $this->argument('group');               // Práca & Čas
-
-        $slug      = Str::kebab($module);                 // blog
-        $routeName = Str::snake($slug) . '.projects';        // blog.projects
-
-        $this->info("Vytváram modul: {$module}");
-
-        // 1) nwidart module:make
-        $this->call('module:make', ['name' => [$module]]);
-
+        $slug       = Str::kebab($module);
+        $routeName  = $slug . '.index';
         $modulePath = base_path("Modules/{$module}");
-        if (!$fs->isDirectory($modulePath)) {
-            $this->error("Modul sa nevytvoril: {$modulePath}");
-            return self::FAILURE;
+
+        // 1) Let nwidart generate the module (controller, routes, providers, etc.)
+        if ($fs->isDirectory($modulePath)) {
+            $this->warn("Modul {$module} už existuje, preskakujem module:make.");
+        } else {
+            $this->info("Vytváram modul: {$module}");
+            $this->call('module:make', ['name' => [$module]]);
+
+            if (! $fs->isDirectory($modulePath)) {
+                $this->error("Modul sa nevytvoril: {$modulePath}");
+                return self::FAILURE;
+            }
         }
 
-        // 2) navigation.php
+        // 2) Create navigation.php
         $navPath = "{$modulePath}/config/navigation.php";
         $navContent = <<<PHP
 <?php
@@ -67,9 +65,15 @@ return [
     ],
 ];
 PHP;
-        $fs->put($navPath, $navContent);
 
-        // 3) React page
+        if ($force || ! $fs->exists($navPath)) {
+            $fs->put($navPath, $navContent);
+            $this->info("Vytvorený: config/navigation.php");
+        } else {
+            $this->warn("navigation.php už existuje, preskakujem.");
+        }
+
+        // 3) Create React page
         $pageDir  = "{$modulePath}/resources/js/pages";
         $pagePath = "{$pageDir}/Index.tsx";
         $fs->ensureDirectoryExists($pageDir);
@@ -92,131 +96,34 @@ export default function Index({ title }: { title: string }) {
   );
 }
 TSX;
-        if (!$fs->exists($pagePath)) {
+
+        if ($force || ! $fs->exists($pagePath)) {
             $fs->put($pagePath, $pageContent);
-        }
-
-        // 4) Patch controller projects() -> Inertia::render
-        $controllerPath = "{$modulePath}/app/Http/Controllers/{$module}Controller.php";
-        if (!$fs->exists($controllerPath)) {
-            $this->error("Nenašiel som controller: {$controllerPath}");
-            $this->warn("Tip: skontroluj, či nwidart stubs generujú {$module}Controller.php.");
-            return self::FAILURE;
-        }
-
-        $controller = $fs->get($controllerPath);
-
-        // 4a) ensure imports
-        $controller = $this->ensureUse($controller, "use Inertia\\Inertia;");
-        $controller = $this->ensureUse($controller, "use Illuminate\\Http\\Request;");
-
-        // 4b) replace projects() method body
-        $newIndex = <<<PHP
-    public function projects(Request \$request)
-    {
-        return Inertia::render('{$module}/Index', [
-            'title' => '{$this->escape($title)}',
-        ]);
-    }
-PHP;
-
-        $controller2 = $this->replaceMethod($controller, 'projects', $newIndex);
-
-        if ($controller2 === null) {
-            $this->error("Nepodarilo sa nájsť/replace-núť metódu projects() v controlleri.");
-            $this->warn("Otvor súbor a uisti sa, že obsahuje 'public function projects()' alebo 'public function projects(Request \$request)'.");
-            return self::FAILURE;
-        }
-
-        $fs->put($controllerPath, $controller2);
-
-        // 5) Patch routes/web.php
-        $routesPath = "{$modulePath}/routes/web.php";
-        if ($fs->exists($routesPath)) {
-            $routes = $fs->get($routesPath);
-
-
-            if (!str_contains($routes, "->prefix('{$slug}')")) {
-                $routes = <<<PHP
-<?php
-
-use Illuminate\\Support\\Facades\\Route;
-use Modules\\{$module}\\Http\\Controllers\\{$module}Controller;
-
-Route::middleware(['web', 'auth'])
-    ->prefix('{$slug}')
-    ->name('{$slug}.')
-    ->group(function () {
-        Route::get('/', [{$module}Controller::class, 'projects'])->name('projects');
-    });
-
-PHP;
-                $fs->put($routesPath, $routes);
-            }
+            $this->info("Vytvorený: resources/js/pages/Index.tsx");
         } else {
-            $routes = <<<PHP
-<?php
-
-use Illuminate\\Support\\Facades\\Route;
-use Modules\\{$module}\\Http\\Controllers\\{$module}Controller;
-
-Route::middleware(['web', 'auth'])
-    ->prefix('{$slug}')
-    ->name('{$slug}.')
-    ->group(function () {
-        Route::get('/', [{$module}Controller::class, 'projects'])->name('projects');
-    });
-
-PHP;
-            $fs->ensureDirectoryExists(dirname($routesPath));
-            $fs->put($routesPath, $routes);
+            $this->warn("Index.tsx už existuje, preskakujem.");
         }
 
-        $this->info("Hotovo.");
-        $this->line("URL: /{$slug}");
-        $this->line("Route: {$routeName}");
-        $this->line("Page: Modules/{$module}/resources/js/pages/Index.tsx");
-        $this->line("Controller patched: Modules/{$module}/app/Http/Controllers/{$module}Controller.php");
+        // Summary
+        $this->newLine();
+        $this->info("✅ Modul {$module} je pripravený.");
+        $this->line("   URL:        /{$slug}");
+        $this->line("   Route:      {$routeName}");
+        $this->line("   Page:       Modules/{$module}/resources/js/pages/Index.tsx");
+        $this->line("   Controller: Modules/{$module}/app/Http/Controllers/{$module}Controller.php");
+        $this->newLine();
+        $this->line("   Ďalšie kroky:");
+        $this->line("   1) Uprav controller – pridaj Inertia::render()");
+        $this->line("   2) Uprav routes/web.php – nastav routy podľa potreby");
 
         return self::SUCCESS;
     }
 
+    /**
+     * Escape single quotes and backslashes for PHP string literals.
+     */
     private function escape(string $value): string
     {
         return str_replace(['\\', "'"], ['\\\\', "\\'"], $value);
-    }
-
-       private function ensureUse(string $content, string $useLine): string
-    {
-        if (str_contains($content, $useLine)) {
-            return $content;
-        }
-
-        $pattern = '/^namespace\s+[^\n;]+;\s*\R/m';
-        if (preg_match($pattern, $content, $m, PREG_OFFSET_CAPTURE)) {
-            $pos = $m[0][1] + strlen($m[0][0]);
-            return substr($content, 0, $pos) . $useLine . "\n" . substr($content, $pos);
-        }
-
-        return preg_replace('/^<\?php\s*/', "<?php\n\n{$useLine}\n", $content) ?? $content;
-    }
-
-      /**
-     * Nahradí existujúcu metódu (podľa názvu) novým obsahom.
-     * Vráti null, ak metódu nenájde.
-     */
-    private function replaceMethod(string $content, string $methodName, string $replacement): ?string
-    {
-        $pattern = '/\R\s*public\s+function\s+' . preg_quote($methodName, '/') . '\s*\([^)]*\)\s*\{.*?\R\s*\}\s*/s';
-
-        if (!preg_match($pattern, $content)) {
-            $pattern2 = '/\R\s*\/\*\*.*?\*\/\s*\R\s*public\s+function\s+' . preg_quote($methodName, '/') . '\s*\([^)]*\)\s*\{.*?\R\s*\}\s*/s';
-            if (!preg_match($pattern2, $content)) {
-                return null;
-            }
-            return preg_replace($pattern2, "\n\n{$replacement}\n", $content, 1);
-        }
-
-        return preg_replace($pattern, "\n\n{$replacement}\n", $content, 1);
     }
 }

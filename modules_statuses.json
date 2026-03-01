@@ -3,5 +3,6 @@
     "Test": true,
     "TestModule": true,
     "Blog": true,
-    "Product": true
+    "Product": true,
+    "TimeTracking": true
 }
