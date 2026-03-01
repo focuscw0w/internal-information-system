@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\TimeTracking\Models\TimeEntry;
 use App\Models\User;
 
 class Task extends Model
@@ -89,12 +90,10 @@ class Task extends Model
         return $this->hasMany(Comment::class)->orderBy('created_at', 'asc');
     }
 
-    /*
     public function timeEntries(): HasMany
     {
         return $this->hasMany(TimeEntry::class);
     }
-    */
 
     // Scopes
     public function scopeTodo($query)
