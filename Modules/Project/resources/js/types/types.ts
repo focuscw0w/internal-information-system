@@ -108,7 +108,7 @@ export interface Activity {
     project_id: number;
     type: string;
     description: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     user: {
         id: number;
         name: string;
