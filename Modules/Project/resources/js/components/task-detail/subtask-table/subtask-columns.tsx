@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Check, Trash2, X } from 'lucide-react';
 import { Subtask } from '../../../types/types';
-import { Column } from '../../ui/data-table';
+import { Column } from '@/components/ui/data-table';
 import { EditSubtaskDialog } from '../dialogs/subtask/edit-subtask';
 import { DeleteSubtaskDialog } from '../dialogs/subtask/delete-subtask';
 

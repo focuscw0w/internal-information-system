@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { Task } from '../../../types/types';
 import { BadgeLabel } from '../../ui/badge';
-import { Column } from '../../ui/data-table';
+import { Column } from '@/components/ui/data-table';
 
 const getStatusIcon = (status: string) => {
     switch (status) {

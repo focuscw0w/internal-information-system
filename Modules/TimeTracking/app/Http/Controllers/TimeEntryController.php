@@ -26,7 +26,7 @@ class TimeEntryController extends Controller
 
         $entries = $this->timeEntryService->getByProject($projectId);
 
-        return Inertia::render('TimeTracking/Index', [
+        return Inertia::render('TimeTracking/TimeEntry', [
             'project' => $project,
             'entries' => $entries,
         ]);

@@ -4,7 +4,7 @@ import { Filter, ListChecks } from 'lucide-react';
 import { useState } from 'react';
 import { Subtask, Task } from '../../../types/types';
 import { CreateSubtaskDialog } from '../dialogs/subtask/create-subtask';
-import { DataTable } from '../../ui/data-table';
+import { DataTable } from '@/components/ui/data-table';
 import { getSubtaskColumns } from './subtask-columns';
 import { CompletionFilter, SubtaskFilters } from './subtask-filters';
 

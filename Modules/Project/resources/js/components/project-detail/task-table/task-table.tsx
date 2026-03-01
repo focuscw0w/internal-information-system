@@ -3,7 +3,7 @@ import { router } from '@inertiajs/react';
 import { CircleDashed, Filter } from 'lucide-react';
 import { useState } from 'react';
 import { Project, Task, TaskPriority, TaskStatus } from '../../../types/types';
-import { Column, DataTable } from '../../ui/data-table';
+import { Column, DataTable } from '@/components/ui/data-table';
 import { CreateTaskDialog } from './dialogs/create-task';
 import { TaskActions } from './task-actions';
 import { TaskColumns } from './task-columns';

@@ -1,0 +1,134 @@
+import { FormDialog } from '@/components/dialogs/form-dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { useForm } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { Task } from 'Modules/Project/resources/js/types/types';
+
+interface CreateTimeEntryDialogProps {
+    projectId: number;
+    tasks: Task[];
+}
+
+export const CreateTimeEntryDialog = ({
+                                          projectId,
+                                          tasks,
+                                      }: CreateTimeEntryDialogProps) => {
+    const [open, setOpen] = useState(false);
+
+    const { data, setData, post, processing, errors, reset } = useForm({
+        task_id: '',
+        entry_date: new Date().toISOString().split('T')[0],
+        hours: '',
+        description: '',
+    });
+
+    const handleOpen = (newOpen: boolean) => {
+        if (newOpen) {
+            reset();
+            setData('entry_date', new Date().toISOString().split('T')[0]);
+        }
+        setOpen(newOpen);
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(`/projects/${projectId}/time-entries`, {
+            preserveScroll: true,
+            onSuccess: () => setOpen(false),
+        });
+    };
+
+    return (
+        <FormDialog
+            open={open}
+            onOpenChange={handleOpen}
+            trigger={
+                <Button>
+                    <Plus className="mr-1 h-4 w-4" />
+                    Zaznamenať čas
+                </Button>
+            }
+            title="Zaznamenať čas"
+            description="Pridajte nový záznam o odpracovanom čase."
+            onSubmit={handleSubmit}
+            processing={processing}
+            submitLabel="Uložiť"
+        >
+            <div className="space-y-4">
+                {/* Task */}
+                <div>
+                    <Label htmlFor="task_id">Úloha *</Label>
+                    <select
+                        id="task_id"
+                        value={data.task_id}
+                        onChange={(e) => setData('task_id', e.target.value)}
+                        className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                        <option value="">Vyberte úlohu...</option>
+                        {tasks.map((task) => (
+                            <option key={task.id} value={task.id}>
+                                {task.title}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.task_id && (
+                        <p className="mt-1 text-xs text-red-500">{errors.task_id}</p>
+                    )}
+                </div>
+
+                {/* Date */}
+                <div>
+                    <Label htmlFor="entry_date">Dátum *</Label>
+                    <Input
+                        id="entry_date"
+                        type="date"
+                        value={data.entry_date}
+                        onChange={(e) => setData('entry_date', e.target.value)}
+                        className="mt-1"
+                    />
+                    {errors.entry_date && (
+                        <p className="mt-1 text-xs text-red-500">{errors.entry_date}</p>
+                    )}
+                </div>
+
+                {/* Hours */}
+                <div>
+                    <Label htmlFor="hours">Hodiny *</Label>
+                    <Input
+                        id="hours"
+                        type="number"
+                        min="0.25"
+                        max="24"
+                        step="0.25"
+                        value={data.hours}
+                        onChange={(e) => setData('hours', e.target.value)}
+                        placeholder="napr. 2.5"
+                        className="mt-1"
+                    />
+                    {errors.hours && (
+                        <p className="mt-1 text-xs text-red-500">{errors.hours}</p>
+                    )}
+                </div>
+
+                {/* Description */}
+                <div>
+                    <Label htmlFor="description">Popis</Label>
+                    <textarea
+                        id="description"
+                        value={data.description}
+                        onChange={(e) => setData('description', e.target.value)}
+                        placeholder="Čo ste robili..."
+                        rows={3}
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    {errors.description && (
+                        <p className="mt-1 text-xs text-red-500">{errors.description}</p>
+                    )}
+                </div>
+            </div>
+        </FormDialog>
+    );
+};
