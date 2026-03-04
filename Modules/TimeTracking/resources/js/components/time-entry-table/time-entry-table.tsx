@@ -7,7 +7,7 @@ import { Column, DataTable } from '@/components/ui/data-table';
 import { timeEntryColumns } from './time-entry-columns';
 import { TimeEntryFilters } from './time-entry-filters';
 import { TimeEntryActions } from './time-entry-actions';
-import { CreateTimeEntryDialog } from './dialogs/ create-time-entry';
+import { CreateTimeEntryDialog } from './dialogs/create-time-entry';
 
 interface TimeEntryTableProps {
     project: Project;
