@@ -5,8 +5,8 @@ namespace Modules\TimeTracking\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
-use Inertia\Response;
-use Modules\Project\Models\Project;
+use Modules\Project\Contracts\ProjectServiceInterface;
+use Modules\Project\Transformers\ProjectResource;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Http\Requests\StoreTimeEntryRequest;
 use Modules\TimeTracking\Http\Requests\UpdateTimeEntryRequest;
@@ -15,19 +15,23 @@ class TimeEntryController extends Controller
 {
     public function __construct(
         private readonly TimeEntryServiceInterface $timeEntryService,
+        private readonly ProjectServiceInterface $projectService
     ) {}
 
     /**
      * Display time entries for a project.
      */
-    public function index(int $projectId): Response
+    public function index(int $projectId)
     {
-        $project = Project::with(['tasks', 'team'])->findOrFail($projectId);
+        $project = $this->projectService->getProjectById($projectId);
+        if (! $project) {
+            return back()->with('error', 'Project not found.');
+        }
 
         $entries = $this->timeEntryService->getByProject($projectId);
 
         return Inertia::render('TimeTracking/TimeEntry', [
-            'project' => $project,
+            'project' => (new ProjectResource($project))->resolve(),
             'entries' => $entries,
         ]);
     }
@@ -43,7 +47,7 @@ class TimeEntryController extends Controller
             'user_id' => auth()->id(),
         ]);
 
-        return back()->with('success', 'Čas bol zaznamenaný.');
+        return back()->with('success', 'Time entry added successfully.');
     }
 
     /**
@@ -54,10 +58,10 @@ class TimeEntryController extends Controller
         $updated = $this->timeEntryService->update($entryId, $request->validated());
 
         if (! $updated) {
-            return back()->with('error', 'Záznam sa nepodarilo aktualizovať.');
+            return back()->with('error', 'Time entry update failed.');
         }
 
-        return back()->with('success', 'Záznam bol aktualizovaný.');
+        return back()->with('success', 'Time entry updated successfully.');
     }
 
     /**
@@ -68,9 +72,9 @@ class TimeEntryController extends Controller
         $deleted = $this->timeEntryService->delete($entryId);
 
         if (! $deleted) {
-            return back()->with('error', 'Záznam sa nepodarilo odstrániť.');
+            return back()->with('error', 'Time entry delete failed.');
         }
 
-        return back()->with('success', 'Záznam bol odstránený.');
+        return back()->with('success', 'Time entry deleted successfully.');
     }
 }

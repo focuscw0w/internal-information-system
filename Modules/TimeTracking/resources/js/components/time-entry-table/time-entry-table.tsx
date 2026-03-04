@@ -83,6 +83,7 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
                     <TimeEntryFilters
                         taskFilter={taskFilter}
                         userFilter={userFilter}
+                        project={project}
                         tasks={tasks}
                         users={users}
                         filteredCount={filteredEntries.length}

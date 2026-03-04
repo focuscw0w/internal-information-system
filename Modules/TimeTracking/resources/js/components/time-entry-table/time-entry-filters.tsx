@@ -1,5 +1,5 @@
 import { Filter, X } from 'lucide-react';
-import { Task, TeamMember } from 'Modules/Project/resources/js/types/types';
+import { Project, Task } from 'Modules/Project/resources/js/types/types';
 
 interface TimeEntryFiltersProps {
     taskFilter: number | null;
@@ -7,6 +7,7 @@ interface TimeEntryFiltersProps {
     tasks: Task[];
     users: { id: number; name: string }[];
     filteredCount: number;
+    project: Project;
     totalCount: number;
     onTaskChange: (value: number | null) => void;
     onUserChange: (value: number | null) => void;
@@ -14,17 +15,21 @@ interface TimeEntryFiltersProps {
 }
 
 export const TimeEntryFilters = ({
-                                     taskFilter,
-                                     userFilter,
-                                     tasks,
-                                     users,
-                                     filteredCount,
-                                     totalCount,
-                                     onTaskChange,
-                                     onUserChange,
-                                     onClear,
-                                 }: TimeEntryFiltersProps) => {
+    taskFilter,
+    userFilter,
+    tasks,
+    users,
+    filteredCount,
+    project,
+    totalCount,
+    onTaskChange,
+    onUserChange,
+    onClear,
+}: TimeEntryFiltersProps) => {
     const hasActiveFilters = !!(taskFilter || userFilter);
+
+    const permissions = project.current_user_permissions ?? [];
+    const can = (permission: string) => permissions.includes(permission);
 
     return (
         <div className="flex items-center gap-2 pt-2">
@@ -33,9 +38,11 @@ export const TimeEntryFilters = ({
             <select
                 value={taskFilter ?? ''}
                 onChange={(e) =>
-                    onTaskChange(e.target.value ? parseInt(e.target.value) : null)
+                    onTaskChange(
+                        e.target.value ? parseInt(e.target.value) : null,
+                    )
                 }
-                className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
             >
                 <option value="">Všetky úlohy</option>
                 {tasks.map((task) => (
@@ -45,20 +52,24 @@ export const TimeEntryFilters = ({
                 ))}
             </select>
 
-            <select
-                value={userFilter ?? ''}
-                onChange={(e) =>
-                    onUserChange(e.target.value ? parseInt(e.target.value) : null)
-                }
-                className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-                <option value="">Všetci používatelia</option>
-                {users.map((user) => (
-                    <option key={user.id} value={user.id}>
-                        {user.name}
-                    </option>
-                ))}
-            </select>
+            {can('manage_team') && (
+                <select
+                    value={userFilter ?? ''}
+                    onChange={(e) =>
+                        onUserChange(
+                            e.target.value ? parseInt(e.target.value) : null,
+                        )
+                    }
+                    className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                >
+                    <option value="">Všetci používatelia</option>
+                    {users.map((user) => (
+                        <option key={user.id} value={user.id}>
+                            {user.name}
+                        </option>
+                    ))}
+                </select>
+            )}
 
             {hasActiveFilters && (
                 <>
