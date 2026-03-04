@@ -3,6 +3,7 @@
 namespace Modules\TimeTracking\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Modules\Project\Contracts\ProjectServiceInterface;
@@ -10,6 +11,7 @@ use Modules\Project\Transformers\ProjectResource;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Http\Requests\StoreTimeEntryRequest;
 use Modules\TimeTracking\Http\Requests\UpdateTimeEntryRequest;
+use Modules\Project\Models\Project;
 
 class TimeEntryController extends Controller
 {
@@ -76,5 +78,19 @@ class TimeEntryController extends Controller
         }
 
         return back()->with('success', 'Time entry deleted successfully.');
+    }
+
+    public function timerProjects(): JsonResponse
+    {
+        $userId = auth()->id();
+
+        $projects = Project::with('tasks:id,project_id,title')
+            ->where(function ($q) use ($userId) {
+                $q->where('owner_id', $userId)
+                    ->orWhereHas('team', fn ($q) => $q->where('user_id', $userId));
+            })
+            ->get(['id', 'name']);
+
+        return response()->json($projects);
     }
 }

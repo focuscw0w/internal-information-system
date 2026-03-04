@@ -30,7 +30,7 @@ export const StartTimerDialog = ({
         if (open) {
             setLoading(true);
             axios
-                .get('/api/v1/projects')
+                .get('/api/timer/projects')
                 .then((res) => setProjects(res.data.data ?? res.data))
                 .catch(() => setProjects([]))
                 .finally(() => setLoading(false));

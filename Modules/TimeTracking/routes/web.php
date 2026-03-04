@@ -12,6 +12,11 @@ Route::middleware(['web', 'auth'])->group(function () {
             Route::get('/', [TimeTrackingController::class, 'index'])->name('index');
         });
 
+    // Timer API
+    Route::get('/api/timer/projects', [TimeEntryController::class, 'timerProjects'])
+        ->name('timer.projects');
+
+
     // Time entries scoped to project
     Route::prefix('projects/{projectId}/time-entries')
         ->name('projects.time-entries.')
