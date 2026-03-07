@@ -5,15 +5,20 @@ import { Clock } from 'lucide-react';
 import { Project } from 'Modules/Project/resources/js/types/types';
 import { TimeEntry } from '../types/types';
 import { WeeklyChart } from '../components/weekly-chart';
+import { BreadcrumbItem } from '@/types';
 
 interface IndexProps {
     projects: Project[];
     entries: TimeEntry[];
 }
 
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Sledovanie času', href: '/time-tracking' },
+];
+
 export default function Index({ projects, entries }: IndexProps) {
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Sledovanie času" />
             <div className=" space-y-6 p-6">
                 <h1 className="text-2xl font-semibold text-gray-900">

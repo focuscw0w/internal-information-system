@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Project } from 'Modules/Project/resources/js/types/types';
 import { TimeEntry } from '../types/types';
 import { TimeEntryTable } from '../components/time-entry-table/time-entry-table';
+import { BreadcrumbItem } from '@/types';
 
 interface TimeEntryProps {
     project: Project;
@@ -10,8 +11,13 @@ interface TimeEntryProps {
 }
 
 export default function TimeEntryPage({ project, entries }: TimeEntryProps) {
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Sledovanie času', href: '/time-tracking' },
+        { title: project.name, href: `/projects/${project.id}/time-entries` },
+    ];
+
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Sledovanie času – ${project.name}`} />
             <div className=" space-y-6 p-6">
                 <div>
