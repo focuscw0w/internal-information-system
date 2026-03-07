@@ -2,21 +2,31 @@ import { FormDialog } from '@/components/dialogs/form-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
+import { SharedData } from '@/types';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
-import { Task } from 'Modules/Project/resources/js/types/types';
+import { Project, Task } from 'Modules/Project/resources/js/types/types';
 
 interface CreateTimeEntryDialogProps {
-    projectId: number;
+    project: Project;
     tasks: Task[];
 }
 
 export const CreateTimeEntryDialog = ({
-                                          projectId,
+                                          project,
                                           tasks,
                                       }: CreateTimeEntryDialogProps) => {
     const [open, setOpen] = useState(false);
+    const currentUserId = usePage<SharedData>().props.auth.user.id;
+    const permissions = project.current_user_permissions ?? [];
+    const canManageTeam = permissions.includes('manage_team');
+
+    const availableTasks = canManageTeam
+        ? tasks
+        : tasks.filter((task) =>
+            task.assigned_users?.some((u) => u.id === currentUserId),
+        );
 
     const { data, setData, post, processing, errors, reset } = useForm({
         task_id: '',
@@ -35,7 +45,7 @@ export const CreateTimeEntryDialog = ({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(`/projects/${projectId}/time-entries`, {
+        post(`/projects/${project.id}/time-entries`, {
             preserveScroll: true,
             onSuccess: () => setOpen(false),
         });
@@ -58,7 +68,6 @@ export const CreateTimeEntryDialog = ({
             submitLabel="Uložiť"
         >
             <div className="space-y-4">
-                {/* Task */}
                 <div>
                     <Label htmlFor="task_id">Úloha *</Label>
                     <select
@@ -68,7 +77,7 @@ export const CreateTimeEntryDialog = ({
                         className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     >
                         <option value="">Vyberte úlohu...</option>
-                        {tasks.map((task) => (
+                        {availableTasks.map((task) => (
                             <option key={task.id} value={task.id}>
                                 {task.title}
                             </option>
@@ -79,7 +88,6 @@ export const CreateTimeEntryDialog = ({
                     )}
                 </div>
 
-                {/* Date */}
                 <div>
                     <Label htmlFor="entry_date">Dátum *</Label>
                     <Input
@@ -94,7 +102,6 @@ export const CreateTimeEntryDialog = ({
                     )}
                 </div>
 
-                {/* Hours */}
                 <div>
                     <Label htmlFor="hours">Hodiny *</Label>
                     <Input
@@ -113,7 +120,6 @@ export const CreateTimeEntryDialog = ({
                     )}
                 </div>
 
-                {/* Description */}
                 <div>
                     <Label htmlFor="description">Popis</Label>
                     <textarea

@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import { Project, Task, TeamMember } from 'Modules/Project/resources/js/types/types';
+import { Project } from 'Modules/Project/resources/js/types/types';
 import { TimeEntry } from '../types/types';
 import { TimeEntryTable } from '../components/time-entry-table/time-entry-table';
 

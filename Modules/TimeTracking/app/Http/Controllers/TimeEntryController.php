@@ -30,7 +30,13 @@ class TimeEntryController extends Controller
             return back()->with('error', 'Project not found.');
         }
 
-        $entries = $this->timeEntryService->getByProject($projectId);
+        $filters = [];
+
+        if (! $project->userHasPermission(auth()->user(), 'manage_team')) {
+            $filters['user_id'] = auth()->id();
+        }
+
+        $entries = $this->timeEntryService->getByProject($projectId, $filters);
 
         return Inertia::render('TimeTracking/TimeEntry', [
             'project' => (new ProjectResource($project))->resolve(),

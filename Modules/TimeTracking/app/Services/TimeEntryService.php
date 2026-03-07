@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Models\TimeEntry;
+use Modules\Project\Models\Project;
 
 class TimeEntryService implements TimeEntryServiceInterface
 {
@@ -66,14 +67,19 @@ class TimeEntryService implements TimeEntryServiceInterface
     public function update(int $entryId, array $data): bool
     {
         $entry = TimeEntry::findOrFail($entryId);
-        $oldTaskId = $entry->task_id;
+        $project = Project::findOrFail($entry->project_id);
 
+        if (!$project->userHasPermission(auth()->user(), 'manage_team')
+            && $entry->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $oldTaskId = $entry->task_id;
         $updated = $entry->update($data);
 
         if ($updated) {
             $this->syncTaskHours($oldTaskId);
 
-            // Ak sa zmenil task, synchni aj nový
             if (isset($data['task_id']) && $data['task_id'] !== $oldTaskId) {
                 $this->syncTaskHours($data['task_id']);
             }
@@ -88,8 +94,14 @@ class TimeEntryService implements TimeEntryServiceInterface
     public function delete(int $entryId): bool
     {
         $entry = TimeEntry::findOrFail($entryId);
-        $taskId = $entry->task_id;
+        $project = Project::findOrFail($entry->project_id);
 
+        if (!$project->userHasPermission(auth()->user(), 'manage_team')
+            && $entry->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $taskId = $entry->task_id;
         $deleted = $entry->delete();
 
         if ($deleted) {

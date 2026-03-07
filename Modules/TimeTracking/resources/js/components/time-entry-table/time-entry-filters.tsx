@@ -20,16 +20,12 @@ export const TimeEntryFilters = ({
     tasks,
     users,
     filteredCount,
-    project,
     totalCount,
     onTaskChange,
     onUserChange,
     onClear,
 }: TimeEntryFiltersProps) => {
     const hasActiveFilters = !!(taskFilter || userFilter);
-
-    const permissions = project.current_user_permissions ?? [];
-    const can = (permission: string) => permissions.includes(permission);
 
     return (
         <div className="flex items-center gap-2 pt-2">
@@ -52,7 +48,7 @@ export const TimeEntryFilters = ({
                 ))}
             </select>
 
-            {can('manage_team') && (
+            {users.length > 1 && (
                 <select
                     value={userFilter ?? ''}
                     onChange={(e) =>

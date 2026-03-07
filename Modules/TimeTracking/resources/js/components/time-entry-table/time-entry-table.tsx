@@ -1,13 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, Filter } from 'lucide-react';
-import { useState } from 'react';
-import { Project } from 'Modules/Project/resources/js/types/types';
-import { TimeEntry } from '../../types/types';
 import { Column, DataTable } from '@/components/ui/data-table';
+import { SharedData } from '@/types';
+import { usePage } from '@inertiajs/react';
+import { Clock, Filter } from 'lucide-react';
+import { Project } from 'Modules/Project/resources/js/types/types';
+import { useState } from 'react';
+import { TimeEntry } from '../../types/types';
+import { CreateTimeEntryDialog } from './dialogs/create-time-entry';
+import { TimeEntryActions } from './time-entry-actions';
 import { timeEntryColumns } from './time-entry-columns';
 import { TimeEntryFilters } from './time-entry-filters';
-import { TimeEntryActions } from './time-entry-actions';
-import { CreateTimeEntryDialog } from './dialogs/create-time-entry';
 
 interface TimeEntryTableProps {
     project: Project;
@@ -38,7 +40,14 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
         return true;
     });
 
-    const totalHours = filteredEntries.reduce((sum, e) => sum + Number(e.hours), 0);
+    const totalHours = filteredEntries.reduce(
+        (sum, e) => sum + Number(e.hours),
+        0,
+    );
+
+    const currentUserId = usePage<SharedData>().props.auth.user.id;
+    const permissions = project.current_user_permissions ?? [];
+    const canManageTeam = permissions.includes('manage_team');
 
     const allColumns: Column<TimeEntry>[] = [
         ...timeEntryColumns,
@@ -47,15 +56,16 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
             label: 'Akcie',
             width: 'w-24',
             align: 'center' as const,
-            render: (entry: TimeEntry) => (
-                <div onClick={(e) => e.stopPropagation()}>
-                    <TimeEntryActions
-                        entry={entry}
-                        projectId={project.id}
-                        tasks={tasks}
-                    />
-                </div>
-            ),
+            render: (entry: TimeEntry) =>
+                canManageTeam || entry.user_id === currentUserId ? (
+                    <div onClick={(e) => e.stopPropagation()}>
+                        <TimeEntryActions
+                            entry={entry}
+                            projectId={project.id}
+                            tasks={tasks}
+                        />
+                    </div>
+                ) : null,
         },
     ];
 
@@ -68,13 +78,14 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
                             Záznamy času
                             {entries.length > 0 && (
                                 <span className="ml-2 text-sm font-normal text-gray-500">
-                                    ({filteredEntries.length} záznamov · {totalHours.toFixed(1)}h)
+                                    ({filteredEntries.length} záznamov ·{' '}
+                                    {totalHours.toFixed(1)}h)
                                 </span>
                             )}
                         </CardTitle>
                     </div>
                     <CreateTimeEntryDialog
-                        projectId={project.id}
+                        project={project}
                         tasks={tasks}
                     />
                 </div>
@@ -126,7 +137,7 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
                             </button>
                         ) : (
                             <CreateTimeEntryDialog
-                                projectId={project.id}
+                                project={project}
                                 tasks={tasks}
                             />
                         )
