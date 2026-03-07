@@ -3,13 +3,17 @@
 namespace Modules\TimeTracking\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
+use Modules\TimeTracking\Database\Factories\TimeEntryFactory;
 
 class TimeEntry extends Model
 {
+    use HasFactory;
+
     /**
      * The attributes that are mass assignable.
      */
@@ -55,5 +59,10 @@ class TimeEntry extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    protected static function newFactory()
+    {
+        return TimeEntryFactory::new();
     }
 }

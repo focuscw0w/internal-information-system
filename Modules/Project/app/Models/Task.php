@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Project\Database\Factories\TaskFactory;
 use Modules\TimeTracking\Models\TimeEntry;
 use App\Models\User;
 
@@ -131,5 +132,10 @@ class Task extends Model
         return $this->due_date &&
             $this->due_date < now() &&
             $this->status !== 'done';
+    }
+
+    protected static function newFactory(): TaskFactory
+    {
+        return TaskFactory::new();
     }
 }
