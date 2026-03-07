@@ -3,12 +3,15 @@ import AppLayout from '@/layouts/app-layout';
 import { router } from '@inertiajs/react';
 import { Clock } from 'lucide-react';
 import { Project } from 'Modules/Project/resources/js/types/types';
+import { TimeEntry } from '../types/types';
+import { WeeklyChart } from '../components/weekly-chart';
 
 interface IndexProps {
     projects: Project[];
+    entries: TimeEntry[];
 }
 
-export default function Index({ projects }: IndexProps) {
+export default function Index({ projects, entries }: IndexProps) {
     return (
         <AppLayout>
             <Head title="Sledovanie času" />
@@ -16,6 +19,8 @@ export default function Index({ projects }: IndexProps) {
                 <h1 className="text-2xl font-semibold text-gray-900">
                     Sledovanie času
                 </h1>
+
+                <WeeklyChart entries={entries} />
 
                 {projects.length > 0 ? (
                     <div className="grid gap-4">

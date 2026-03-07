@@ -3,6 +3,7 @@
 namespace Modules\TimeTracking\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Modules\Project\Models\Project;
 
 class StoreTimeEntryRequest extends FormRequest
 {
@@ -20,7 +21,27 @@ class StoreTimeEntryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'task_id' => ['required', 'integer', 'exists:tasks,id'],
+            'task_id' => [
+                'required',
+                'integer',
+                'exists:tasks,id',
+                function ($attribute, $value, $fail) {
+                    $project = Project::find($this->route('projectId'));
+
+                    if ($project && $project->userHasPermission(auth()->user(), 'manage_team')) {
+                        return;
+                    }
+
+                    $isAssigned = \DB::table('assigned_users')
+                        ->where('task_id', $value)
+                        ->where('user_id', auth()->id())
+                        ->exists();
+
+                    if (! $isAssigned) {
+                        $fail('You are not assigned to this task.');
+                    }
+                },
+            ],
             'entry_date' => ['required', 'date'],
             'hours' => ['required', 'numeric', 'min:0.25', 'max:24'],
             'description' => ['nullable', 'string', 'max:1000'],

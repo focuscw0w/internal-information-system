@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogHoursDialog } from '../dialogs/log-hours';
 import { Calendar, Clock, Target, User } from 'lucide-react';
+import { TaskTimeSummary } from '../../../../../../TimeTracking/resources/js/components/task-time-summary';
 import { Project, Task } from '../../../types/types';
 
 interface TaskOverviewProps {
@@ -9,14 +9,6 @@ interface TaskOverviewProps {
 }
 
 export const TaskOverview = ({ task, project }: TaskOverviewProps) => {
-    const isOverEstimate =
-        task.estimated_hours && task.actual_hours > task.estimated_hours;
-
-    const estimateProgress =
-        task.estimated_hours && task.estimated_hours > 0
-            ? Math.min((task.actual_hours / task.estimated_hours) * 100, 100)
-            : 0;
-
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* Left - Main content */}
@@ -40,69 +32,7 @@ export const TaskOverview = ({ task, project }: TaskOverviewProps) => {
                 </Card>
 
                 {/* Time tracking summary */}
-                <Card className="border-gray-100 shadow-sm">
-                    <CardHeader>
-                        <CardTitle className="text-lg">
-                            Sledovanie času
-                        </CardTitle>
-                        <LogHoursDialog taskId={task.id} projectId={project.id} />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="rounded-lg bg-gray-50 p-4">
-                                <p className="text-sm text-gray-500">Odhad</p>
-                                <p className="mt-1 text-2xl font-bold text-gray-900">
-                                    {task.estimated_hours ?? '—'}
-                                    <span className="ml-1 text-sm font-normal text-gray-500">
-                                        hod
-                                    </span>
-                                </p>
-                            </div>
-                            <div className="rounded-lg bg-gray-50 p-4">
-                                <p className="text-sm text-gray-500">
-                                    Skutočnosť
-                                </p>
-                                <p
-                                    className={`mt-1 text-2xl font-bold ${
-                                        isOverEstimate
-                                            ? 'text-red-600'
-                                            : 'text-gray-900'
-                                    }`}
-                                >
-                                    {task.actual_hours ?? 0}
-                                    <span className="ml-1 text-sm font-normal text-gray-500">
-                                        hod
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Progress bar */}
-                        {task.estimated_hours && task.estimated_hours > 0 && (
-                            <div className="mt-4">
-                                <div className="mb-1 flex justify-between text-xs text-gray-500">
-                                    <span>Priebeh</span>
-                                    <span>
-                                        {task.actual_hours ?? 0} /{' '}
-                                        {task.estimated_hours} hod
-                                    </span>
-                                </div>
-                                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-                                    <div
-                                        className={`h-full rounded-full transition-all ${
-                                            isOverEstimate
-                                                ? 'bg-red-500'
-                                                : 'bg-blue-600'
-                                        }`}
-                                        style={{
-                                            width: `${Math.min(estimateProgress, 100)}%`,
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                <TaskTimeSummary task={task} project={project} />
             </div>
 
             {/* Right - Sidebar */}
@@ -125,17 +55,22 @@ export const TaskOverview = ({ task, project }: TaskOverviewProps) => {
                             </div>
                         </div>
 
-                        {task.assigned_users && task.assigned_users.length > 0 && (
-                            <div className="flex items-center gap-3">
-                                <User className="h-4 w-4 text-gray-400" />
-                                <div>
-                                    <p className="text-xs text-gray-500">Priradení</p>
-                                    <p className="text-sm font-medium text-gray-900">
-                                        {task.assigned_users.map((u) => u.name).join(', ')}
-                                    </p>
+                        {task.assigned_users &&
+                            task.assigned_users.length > 0 && (
+                                <div className="flex items-center gap-3">
+                                    <User className="h-4 w-4 text-gray-400" />
+                                    <div>
+                                        <p className="text-xs text-gray-500">
+                                            Priradení
+                                        </p>
+                                        <p className="text-sm font-medium text-gray-900">
+                                            {task.assigned_users
+                                                .map((u) => u.name)
+                                                .join(', ')}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
                         {task.due_date && (
                             <div className="flex items-center gap-3">

@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\Project\Contracts\ProjectServiceInterface;
+use Modules\TimeTracking\Models\TimeEntry;
 
 class TimeTrackingController extends Controller
 {
@@ -20,7 +21,15 @@ class TimeTrackingController extends Controller
     {
         $projects = $this->projectService->getAllProjects();
 
-        return Inertia::render('TimeTracking/Index', ['projects' => $projects]);
+        $entries = TimeEntry::with(['task', 'project'])
+            ->where('user_id', auth()->id())
+            ->orderByDesc('entry_date')
+            ->get();
+
+        return Inertia::render('TimeTracking/Index', [
+            'projects' => $projects,
+            'entries' => $entries
+        ]);
     }
 
     /**
