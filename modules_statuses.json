@@ -4,5 +4,6 @@
     "TestModule": true,
     "Blog": true,
     "Product": true,
-    "TimeTracking": true
+    "TimeTracking": true,
+    "User": true
 }

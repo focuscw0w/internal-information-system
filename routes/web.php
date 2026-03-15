@@ -16,7 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // TODO: presunúť do user-modulu
-Route::get('/users', [UserController::class, 'index']);
+//Route::get('/users', [UserController::class, 'index']);
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
