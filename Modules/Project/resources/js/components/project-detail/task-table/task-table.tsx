@@ -65,7 +65,7 @@ export const TaskTable = ({ project }: TaskTableProps) => {
                           <div onClick={(e) => e.stopPropagation()}>
                               <TaskActions
                                   task={task}
-                                  projectId={project.id}
+                                  project={project}
                                   team={project.team}
                               />
                           </div>

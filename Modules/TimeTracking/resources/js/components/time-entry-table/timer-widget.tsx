@@ -1,17 +1,12 @@
-import { Clock, Play, Square } from 'lucide-react';
+import { Clock, Square } from 'lucide-react';
 import { useState } from 'react';
 import { useTimer } from '../../context/timer-context';
-import { StartTimerDialog } from './dialogs/start-timer';
 import { StopTimerDialog } from './dialogs/stop-timer';
 
-/**
- * Format seconds to HH:MM:SS.
- */
 const formatElapsed = (seconds: number): string => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
-
     return [
         h.toString().padStart(2, '0'),
         m.toString().padStart(2, '0'),
@@ -21,26 +16,10 @@ const formatElapsed = (seconds: number): string => {
 
 export const TimerWidget = () => {
     const { timer } = useTimer();
-    const [showStart, setShowStart] = useState(false);
     const [showStop, setShowStop] = useState(false);
 
     if (!timer.isRunning) {
-        return (
-            <>
-                <button
-                    onClick={() => setShowStart(true)}
-                    className="fixed right-6 bottom-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl"
-                    title="Spustiť časovač"
-                >
-                    <Play className="ml-0.5 h-6 w-6" />
-                </button>
-
-                <StartTimerDialog
-                    open={showStart}
-                    onOpenChange={setShowStart}
-                />
-            </>
-        );
+        return null;
     }
 
     return (

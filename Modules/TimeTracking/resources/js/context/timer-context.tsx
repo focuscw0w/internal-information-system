@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {
     createContext,
     ReactNode,
@@ -41,9 +42,6 @@ const defaultState: TimerState = {
 
 const TimerContext = createContext<TimerContextType | null>(null);
 
-/**
- * Load timer state from localStorage (survives page refresh).
- */
 const loadState = (): TimerState => {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -62,9 +60,6 @@ const loadState = (): TimerState => {
     }
 };
 
-/**
- * Save timer state to localStorage.
- */
 const saveState = (state: TimerState) => {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -102,6 +97,26 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
             project: { id: number; name: string },
             task: { id: number; title: string },
         ) => {
+            // Ak už beží timer, automaticky ulož predchádzajúci
+            if (timer.isRunning && timer.projectId && timer.taskId) {
+                const hours = Math.max(
+                    0.25,
+                    Math.round((timer.elapsed / 3600) * 4) / 4,
+                );
+
+                // Fire and forget – uloží na pozadí
+                axios
+                    .post(`/projects/${timer.projectId}/time-entries`, {
+                        task_id: timer.taskId,
+                        entry_date: new Date().toISOString().split('T')[0],
+                        hours: hours.toFixed(2),
+                        description: '',
+                    })
+                    .catch(() => {
+                        // silent fail – user uvidí že entry sa nevytvoril
+                    });
+            }
+
             setTimer({
                 isRunning: true,
                 startedAt: Date.now(),
@@ -112,7 +127,7 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
                 elapsed: 0,
             });
         },
-        [],
+        [timer],
     );
 
     const stopTimer = useCallback(() => {
