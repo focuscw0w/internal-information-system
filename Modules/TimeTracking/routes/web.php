@@ -18,6 +18,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 
 
     // Time entries scoped to project
+    // TODO: pridať middleware
     Route::prefix('projects/{projectId}/time-entries')
         ->name('projects.time-entries.')
         ->group(function () {
