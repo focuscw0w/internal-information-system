@@ -1,18 +1,15 @@
 <?php
 
-namespace Database\Seeders;
+namespace Modules\User\Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
-use App\Models\User;
 use App\Enums\PermissionEnum;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
 
 class PermissionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         foreach (PermissionEnum::all() as $permission) {
@@ -25,7 +22,7 @@ class PermissionSeeder extends Seeder
                 'name' => 'Admin',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
-            ]
+            ],
         );
 
         $admin->givePermissionTo(PermissionEnum::all());
