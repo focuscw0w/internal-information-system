@@ -5,58 +5,38 @@ namespace Modules\User\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
+use Modules\User\Http\Requests\StoreUserRequest;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(): JsonResponse
     {
-        $users = User::select('id', 'name', 'email')
+        $users = User::query()
+            ->select('id', 'name', 'email')
             ->orderBy('name')
             ->get();
 
         return response()->json($users);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function manage(): Response
     {
-        return view('user::create');
+        return Inertia::render('User/Manage', [
+            'users' => User::query()
+                ->select('id', 'name', 'email', 'created_at')
+                ->orderBy('name')
+                ->get(),
+            'status' => session('status'),
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function store(StoreUserRequest $request): RedirectResponse
     {
-        return view('user::show');
+        User::create($request->validated());
+
+        return to_route('user.index')->with('status', 'Používateľ bol úspešne vytvorený.');
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('user::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
 }
