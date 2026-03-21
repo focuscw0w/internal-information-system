@@ -10,9 +10,12 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Modules\User\Http\Requests\StoreUserRequest;
 use Modules\User\Models\User;
+use Modules\User\Contracts\UserServiceInterface;
 
 class UserController extends Controller
 {
+    public function __construct(protected UserServiceInterface $userService) {}
+
     public function index(): JsonResponse
     {
         $users = User::query()
@@ -37,7 +40,7 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request): RedirectResponse
     {
-        User::create($request->validated());
+        $this->userService->createUser($request->validated());
 
         return to_route('user.index')->with('status', 'Používateľ bol úspešne vytvorený.');
     }

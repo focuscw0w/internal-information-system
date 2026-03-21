@@ -48,7 +48,7 @@ class ProjectServiceProvider extends ServiceProvider
 
         Gate::policy(Project::class, ProjectPolicy::class);
     }
-
+ 
     /**
      * Register the service provider.
      */

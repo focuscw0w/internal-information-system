@@ -10,7 +10,7 @@ use Modules\Project\Models\Task;
 
 class CommentController extends Controller
 {
-    public function __construct(private readonly CommentServiceInterface $commentService)
+    public function __construct(protected CommentServiceInterface $commentService)
     {
     }
 
