@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
-use App\Models\User;
+use Modules\User\Models\User;
 use App\Enums\PermissionEnum;
 use Illuminate\Support\Facades\Hash;
 

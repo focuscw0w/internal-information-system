@@ -5,7 +5,7 @@ namespace Modules\TimeTracking\Tests\Feature;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\User;
+use Modules\User\Models\User;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 

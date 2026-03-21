@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace Modules\User\Http\Requests;
 
-use App\Models\User;
+use Modules\User\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;

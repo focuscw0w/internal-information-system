@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Project\Database\Factories\TaskFactory;
 use Modules\TimeTracking\Models\TimeEntry;
-use App\Models\User;
+use Modules\User\Models\User;
 
 class Task extends Model
 {

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use Modules\User\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
 
 test('login screen can be rendered', function () {

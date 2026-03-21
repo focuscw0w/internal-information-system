@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\PermissionEnum;
-use App\Models\User;
+use Modules\User\Models\User;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {

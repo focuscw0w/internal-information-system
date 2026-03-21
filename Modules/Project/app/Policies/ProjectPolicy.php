@@ -2,7 +2,7 @@
 
 namespace Modules\Project\Policies;
 
-use App\Models\User;
+use Modules\User\Models\User;
 use Modules\Project\Models\Project;
 
 class ProjectPolicy

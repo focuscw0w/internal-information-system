@@ -2,7 +2,7 @@
 
 namespace Modules\Project\Database\Factories;
 
-use App\Models\User;
+use Modules\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Project\Models\Project;
 

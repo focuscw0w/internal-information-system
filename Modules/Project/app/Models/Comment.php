@@ -5,7 +5,7 @@ namespace Modules\Project\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\User;
+use Modules\User\Models\User;
 // use Modules\Project\Database\Factories\CommentFactory;
 
 class Comment extends Model

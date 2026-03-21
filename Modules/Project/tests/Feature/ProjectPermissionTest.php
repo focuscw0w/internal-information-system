@@ -2,7 +2,7 @@
 
 namespace Modules\Project\Tests\Feature;
 
-use App\Models\User;
+use Modules\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Models\Project;
