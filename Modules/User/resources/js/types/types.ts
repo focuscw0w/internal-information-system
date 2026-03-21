@@ -2,6 +2,7 @@ export interface ManagedUser {
     id: number;
     name: string;
     email: string;
+    permissions: string[];
     created_at: string;
 }
 

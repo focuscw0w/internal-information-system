@@ -5,19 +5,60 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-
-interface ManagedUser {
-    id: number;
-    name: string;
-    email: string;
-    created_at: string;
-}
+import { Column, DataTable } from '@/components/ui/data-table';
+import { router } from '@inertiajs/react';
+import { Users } from 'lucide-react';
+import { AvailablePermissions, ManagedUser } from '../types/types';
+import { DeleteUserDialog } from './dialogs/delete-user';
+import { EditUserDialog } from './dialogs/edit-user';
 
 interface UserTableProps {
     users: ManagedUser[];
+    availablePermissions: AvailablePermissions;
 }
 
-export const UserTable = ({ users }: UserTableProps) => {
+export const UserTable = ({ users, availablePermissions }: UserTableProps) => {
+    const columns: Column<ManagedUser>[] = [
+        {
+            key: 'name',
+            label: 'Meno',
+            render: (user) => <span className="font-medium">{user.name}</span>,
+        },
+        {
+            key: 'email',
+            label: 'Email',
+            render: (user) => (
+                <span className="text-muted-foreground">{user.email}</span>
+            ),
+        },
+        {
+            key: 'created_at',
+            label: 'Vytvorený',
+            render: (user) => (
+                <span className="text-muted-foreground">
+                    {new Date(user.created_at).toLocaleDateString('sk-SK')}
+                </span>
+            ),
+        },
+        {
+            key: 'actions',
+            label: '',
+            align: 'right',
+            render: (user) => (
+                <div
+                    className="flex items-center justify-end gap-1"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <EditUserDialog
+                        user={user}
+                        availablePermissions={availablePermissions}
+                    />
+                    <DeleteUserDialog user={user} />
+                </div>
+            ),
+        },
+    ];
+
     return (
         <Card>
             <CardHeader>
@@ -27,39 +68,15 @@ export const UserTable = ({ users }: UserTableProps) => {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full text-left text-sm">
-                        <thead className="border-b text-muted-foreground">
-                            <tr>
-                                <th className="py-3 pr-4 font-medium">Meno</th>
-                                <th className="py-3 pr-4 font-medium">
-                                    Email
-                                </th>
-                                <th className="py-3 font-medium">Vytvorený</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map((user) => (
-                                <tr
-                                    key={user.id}
-                                    className="border-b last:border-0"
-                                >
-                                    <td className="py-3 pr-4 font-medium">
-                                        {user.name}
-                                    </td>
-                                    <td className="py-3 pr-4 text-muted-foreground">
-                                        {user.email}
-                                    </td>
-                                    <td className="py-3 text-muted-foreground">
-                                        {new Date(
-                                            user.created_at,
-                                        ).toLocaleDateString('sk-SK')}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable
+                    columns={columns}
+                    data={users}
+                    keyExtractor={(user) => user.id}
+                    onRowClick={(user) => router.visit(`/users/${user.id}`)}
+                    emptyIcon={<Users className="h-8 w-8 text-gray-400" />}
+                    emptyTitle="Žiadni používatelia"
+                    emptyDescription="Vytvorte prvého používateľa pomocou formulára."
+                />
             </CardContent>
         </Card>
     );

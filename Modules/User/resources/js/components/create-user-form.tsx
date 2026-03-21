@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
-    CardDescription,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
@@ -51,9 +50,6 @@ export const CreateUserForm = ({
         <Card>
             <CardHeader>
                 <CardTitle>Vytvoriť používateľa</CardTitle>
-                <CardDescription>
-                    Minimalistický formulár pre admina.
-                </CardDescription>
             </CardHeader>
             <CardContent>
                 <form onSubmit={submit} className="space-y-6">

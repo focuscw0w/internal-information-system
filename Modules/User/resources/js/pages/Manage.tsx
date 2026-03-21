@@ -44,7 +44,10 @@ export default function Manage({
                     <CreateUserForm
                         availablePermissions={availablePermissions}
                     />
-                    <UserTable users={users} />
+                    <UserTable
+                        users={users}
+                        availablePermissions={availablePermissions}
+                    />
                 </div>
             </div>
         </AppLayout>
