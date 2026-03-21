@@ -2,13 +2,14 @@
 
 namespace Modules\User\Http\Controllers;
 
+use App\Enums\PermissionEnum;
 use App\Http\Controllers\Controller;
-use Modules\User\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\User\Http\Requests\StoreUserRequest;
+use Modules\User\Models\User;
 
 class UserController extends Controller
 {
@@ -29,6 +30,7 @@ class UserController extends Controller
                 ->select('id', 'name', 'email', 'created_at')
                 ->orderBy('name')
                 ->get(),
+            'availablePermissions' => PermissionEnum::groupedForFrontend(),
             'status' => session('status'),
         ]);
     }
