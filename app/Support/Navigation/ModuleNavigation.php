@@ -9,12 +9,13 @@ class ModuleNavigation
     public static function build(): array
     {
         $groups = [];
+        $user = auth()->user();
 
         foreach (Module::allEnabled() as $m) {
-            $name = $m->getName(); 
+            $name = $m->getName();
             $path = base_path("Modules/{$name}/config/navigation.php");
 
-            if (!is_file($path)) {
+            if (! is_file($path)) {
                 continue;
             }
 
@@ -24,7 +25,13 @@ class ModuleNavigation
             $items = $nav['items'] ?? [];
 
             foreach ($items as $item) {
-                if (!empty($item['route'])) {
+                $requiredPermission = $item['permission'] ?? null;
+
+                if ($requiredPermission && (! $user || ! $user->can($requiredPermission))) {
+                    continue;
+                }
+
+                if (! empty($item['route'])) {
                     $item['href'] = route($item['route']);
                 }
 
