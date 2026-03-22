@@ -10,6 +10,7 @@ enum PermissionEnum: string
 
     // Projects
     case PROJECTS_CREATE = 'projects.create';
+    case PROJECTS_VIEW_ALL = 'projects.view_all';
 
     public static function all(): array
     {
@@ -22,6 +23,7 @@ enum PermissionEnum: string
             self::USERS_VIEW => 'Zobrazenie používateľov',
             self::USERS_MANAGE => 'Správa používateľov',
             self::PROJECTS_CREATE => 'Vytváranie projektov',
+            self::PROJECTS_VIEW_ALL => 'Zobrazenie všetkých projektov',
         };
     }
 
@@ -31,6 +33,7 @@ enum PermissionEnum: string
             self::USERS_VIEW => 'Používateľ vidí zoznam ostatných používateľov v systéme.',
             self::USERS_MANAGE => 'Používateľ môže vytvárať nové kontá a spravovať existujúcich používateľov.',
             self::PROJECTS_CREATE => 'Používateľ môže zakladať nové projekty.',
+            self::PROJECTS_VIEW_ALL => 'Používateľ vidí všetky projekty bez nutnosti byť členom tímu projektu.',
         };
     }
 
@@ -38,7 +41,7 @@ enum PermissionEnum: string
     {
         return match ($this) {
             self::USERS_VIEW, self::USERS_MANAGE => 'Používatelia',
-            self::PROJECTS_CREATE => 'Projekty',
+            self::PROJECTS_CREATE, self::PROJECTS_VIEW_ALL => 'Projekty',
         };
     }
 

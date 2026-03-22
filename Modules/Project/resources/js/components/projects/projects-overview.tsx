@@ -22,6 +22,8 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
 
     const totalTeam = projects.reduce((sum, p) => sum + p.team_size, 0);
 
+    console.log(projects)
+
     const avgCapacity =
         projects.length > 0
             ? Math.round(

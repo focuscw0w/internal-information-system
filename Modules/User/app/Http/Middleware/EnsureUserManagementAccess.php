@@ -11,11 +11,10 @@ class EnsureUserManagementAccess
 {
     public function handle(Request $request, Closure $next): Response
     {
-        /*
+
         if (! $request->user()?->can(PermissionEnum::USERS_MANAGE->value)) {
             abort(403);
         }
-        */
 
         return $next($request);
     }

@@ -3,7 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Project\Database\Seeders\ProjectTestUserSeeder;
+use Modules\User\Database\Seeders\UserDatabaseSeeder;
+use Modules\Project\Database\Seeders\ProjectDatabaseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,11 +15,10 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $this->call([
-            ProjectTestUserSeeder::class,
+            PermissionSeeder::class,
+            UserDatabaseSeeder::class,
+            ProjectDatabaseSeeder::class,
         ]);
 
-        $this->call([
-            PermissionSeeder::class
-        ]);
     }
 }

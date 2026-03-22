@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Modules\Project\Models\Project;
 use Symfony\Component\HttpFoundation\Response;
+use App\Enums\PermissionEnum;
 
 class CheckProjectPermission
 {
@@ -16,6 +17,10 @@ class CheckProjectPermission
 
         if (!$user) {
             abort(401, 'You must be logged in to access this source.');
+        }
+
+        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
+            return $next($request);
         }
 
         $projectId = $request->route('id');
