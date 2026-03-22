@@ -15,9 +15,7 @@ use Modules\Project\Transformers\ProjectResource;
 
 class TaskController extends Controller
 {
-    public function __construct(protected TaskService $taskService, protected ProjectService $projectService)
-    {
-    }
+    public function __construct(private readonly TaskService $taskService, private readonly ProjectService $projectService) {}
 
     /**
      * Store a newly created task-detail
@@ -37,14 +35,14 @@ class TaskController extends Controller
     public function show(int $projectId, int $taskId)
     {
         $task = $this->taskService->getTaskById($taskId);
-        if (!$task) {
+        if (! $task) {
             return redirect()->route('projects.show', $projectId);
         }
 
         $task->load(['subtasks', 'assignedUsers', 'comments.user']);
 
         $project = $this->projectService->getProjectById($projectId);
-        if (!$project) {
+        if (! $project) {
             return redirect()->route('projects.show', $projectId);
         }
 

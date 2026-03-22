@@ -10,7 +10,7 @@ use Modules\Project\Http\Requests\Project\UpdateProjectTeamRequest;
 class TeamController extends Controller
 {
     public function __construct(
-        protected TeamServiceInterface $teamService
+        private readonly TeamServiceInterface $teamService
     ) {}
 
     /**

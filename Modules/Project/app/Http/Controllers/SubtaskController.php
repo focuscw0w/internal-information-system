@@ -9,9 +9,7 @@ use Modules\Project\Http\Requests\Subtask\UpdateSubtaskRequest;
 
 class SubtaskController extends Controller
 {
-    public function __construct(protected SubtaskServiceInterface $subtaskService)
-    {
-    }
+    public function __construct(private readonly SubtaskServiceInterface $subtaskService) {}
 
     /**
      * Store a new subtask

@@ -13,9 +13,8 @@ use Modules\Project\Transformers\ProjectResource;
 class ProjectController extends Controller
 {
     public function __construct(
-        protected ProjectServiceInterface $projectService
-    ) {
-    }
+        private readonly ProjectServiceInterface $projectService
+    ) {}
 
     /**
      * Display a listing of the resource.
@@ -61,7 +60,7 @@ class ProjectController extends Controller
     {
         $project = $this->projectService->getProjectById($id);
 
-        if (!$project) {
+        if (! $project) {
             return redirect()
                 ->route('projects.projects')
                 ->with('error', 'Project not found.');
@@ -88,7 +87,7 @@ class ProjectController extends Controller
     public function update(UpdateProjectRequest $request, $id)
     {
         $project = $this->projectService->updateProject($id, $request->validated());
-        if (!$project) {
+        if (! $project) {
             return redirect()->back()->with('error', 'Project not found.');
         }
 
@@ -101,7 +100,7 @@ class ProjectController extends Controller
     public function destroy($id)
     {
         $isDeleted = $this->projectService->deleteProject($id);
-        if (!$isDeleted) {
+        if (! $isDeleted) {
             return redirect()->back()->with('error', 'Project was not deleted.');
         }
 

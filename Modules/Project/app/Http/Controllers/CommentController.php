@@ -10,9 +10,7 @@ use Modules\Project\Models\Task;
 
 class CommentController extends Controller
 {
-    public function __construct(protected CommentServiceInterface $commentService)
-    {
-    }
+    public function __construct(private readonly CommentServiceInterface $commentService) {}
 
     /**
      * Store a newly created resource in storage.
@@ -27,5 +25,4 @@ class CommentController extends Controller
 
         return back();
     }
-
 }
