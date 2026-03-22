@@ -33,7 +33,7 @@ class ProfileController extends Controller
             'timeTracking' => $this->timeEntryService->getUserSummary($user),
         ]);
     }
-
+    
     private function getUserPermissions($user): array
     {
         $userPermissions = $user->getPermissionNames()->toArray();
