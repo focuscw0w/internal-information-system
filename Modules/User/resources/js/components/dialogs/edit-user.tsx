@@ -3,7 +3,7 @@ import InputError from '@/components/input-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
-import { Pencil } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { useState } from 'react';
 import { AvailablePermissions, ManagedUser } from '../../types/types';
 import { PermissionList } from '../permission-list';
@@ -63,7 +63,7 @@ export const EditUserDialog = ({
                     className="cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
                     title="Upraviť používateľa"
                 >
-                    <Pencil size={18} />
+                    <Edit size={18} />
                 </button>
             }
             title={`Upraviť používateľa – ${user.name}`}

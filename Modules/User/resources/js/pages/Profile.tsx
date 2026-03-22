@@ -40,24 +40,31 @@ interface ProfilePageProps {
         email: string;
         created_at: string;
     };
+    isOwnProfile: boolean;
     permissions: ProfilePermission[];
     projects: ProfileProject[];
     timeTracking: TimeTrackingSummary;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Môj profil', href: '/profile' },
-];
-
 export default function Profile({
     user,
+    isOwnProfile,
     permissions,
     projects,
     timeTracking,
 }: ProfilePageProps) {
+    const breadcrumbs: BreadcrumbItem[] = isOwnProfile
+        ? [{ title: 'Môj profil', href: '/profile' }]
+        : [
+              { title: 'Používatelia', href: '/users' },
+              { title: user.name, href: `/users/${user.id}` },
+          ];
+
+    const pageTitle = isOwnProfile ? 'Môj profil' : user.name;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Môj profil" />
+            <Head title={pageTitle} />
 
             <div className="space-y-6 p-4 md:p-6">
                 <div className="grid gap-6 md:grid-cols-2">

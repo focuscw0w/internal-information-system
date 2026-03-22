@@ -6,7 +6,7 @@ use Modules\User\Http\Controllers\UserController;
 use Modules\User\Http\Middleware\EnsureUserManagementAccess;
 
 Route::middleware(['web', 'auth'])->group(function () {
-    Route::get('/profile', ProfileController::class)->name('user.profile');
+    Route::get('/profile', [ProfileController::class, 'me'])->name('user.profile');
 
     // User management
     Route::prefix('users')
@@ -17,7 +17,7 @@ Route::middleware(['web', 'auth'])->group(function () {
             Route::middleware(EnsureUserManagementAccess::class)->group(function () {
                 Route::get('/', [UserController::class, 'manage'])->name('index');
                 Route::post('/', [UserController::class, 'store'])->name('store');
-                Route::get('/{user}', [UserController::class, 'show'])->name('show');
+                Route::get('/{user}', [ProfileController::class, 'show'])->name('show');
                 Route::put('/{user}', [UserController::class, 'update'])->name('update');
                 Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
             });
