@@ -7,6 +7,9 @@ use Modules\User\Models\User;
 
 class UserService implements UserServiceInterface
 {
+    /**
+     * Create a new user and assign permissions
+     */
     public function createUser(array $data): void
     {
         $user = User::create($data);
@@ -16,16 +19,27 @@ class UserService implements UserServiceInterface
         }
     }
 
+    /**
+     * Update user information and permissions
+     */
     public function updateUser(User $user, array $data): void
     {
-        $user->update([
+        $updateData = [
             'name' => $data['name'],
             'email' => $data['email'],
-        ]);
+        ];
 
+        if (! empty($data['password'])) {
+            $updateData['password'] = $data['password'];
+        }
+
+        $user->update($updateData);
         $user->syncPermissions($data['permissions'] ?? []);
     }
 
+    /**
+     * Delete a user
+     */
     public function deleteUser(User $user): void
     {
         $user->delete();

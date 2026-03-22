@@ -22,6 +22,7 @@ export const EditUserDialog = ({
     const { data, setData, put, processing, errors } = useForm({
         name: user.name,
         email: user.email,
+        password: '',
         permissions: user.permissions ?? [],
     });
 
@@ -30,6 +31,7 @@ export const EditUserDialog = ({
             setData({
                 name: user.name,
                 email: user.email,
+                password: '',
                 permissions: user.permissions ?? [],
             });
         }
@@ -67,7 +69,7 @@ export const EditUserDialog = ({
                 </button>
             }
             title={`Upraviť používateľa – ${user.name}`}
-            description="Zmena mena, emailu a oprávnení."
+            description="Zmena mena, emailu, hesla a oprávnení."
             onSubmit={handleSubmit}
             processing={processing}
             submitLabel="Uložiť zmeny"
@@ -92,6 +94,20 @@ export const EditUserDialog = ({
                         onChange={(e) => setData('email', e.target.value)}
                     />
                     <InputError message={errors.email} />
+                </div>
+
+                <div className="grid gap-2">
+                    <Label htmlFor={`edit-password-${user.id}`}>
+                        Nové heslo
+                    </Label>
+                    <Input
+                        id={`edit-password-${user.id}`}
+                        type="password"
+                        value={data.password}
+                        onChange={(e) => setData('password', e.target.value)}
+                        placeholder="Ponechať prázdne = bez zmeny"
+                    />
+                    <InputError message={errors.password} />
                 </div>
 
                 <PermissionList

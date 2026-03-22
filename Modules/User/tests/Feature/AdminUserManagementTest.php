@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\User\Models\User;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Hash;
 
 class AdminUserManagementTest extends TestCase
 {
@@ -162,6 +163,46 @@ class AdminUserManagementTest extends TestCase
         $this->actingAs($admin)
             ->get("/users/{$user->id}")
             ->assertOk();
+    }
+
+    public function test_admin_can_change_user_password(): void
+    {
+        $admin = $this->createAdmin();
+        $user = $this->createRegularUser();
+        $oldPassword = $user->password;
+
+        $this->actingAs($admin)
+            ->put("/users/{$user->id}", [
+                'name' => $user->name,
+                'email' => $user->email,
+                'password' => 'noveheslo123',
+                'permissions' => [],
+            ])
+            ->assertRedirect();
+
+        $user->refresh();
+        $this->assertNotEquals($oldPassword, $user->password);
+        $this->assertTrue(Hash::check('noveheslo123', $user->password));
+    }
+
+    public function test_admin_can_update_user_without_changing_password(): void
+    {
+        $admin = $this->createAdmin();
+        $user = $this->createRegularUser();
+        $oldPassword = $user->password;
+
+        $this->actingAs($admin)
+            ->put("/users/{$user->id}", [
+                'name' => 'Nové meno',
+                'email' => $user->email,
+                'password' => '',
+                'permissions' => [],
+            ])
+            ->assertRedirect();
+
+        $user->refresh();
+        $this->assertEquals('Nové meno', $user->name);
+        $this->assertEquals($oldPassword, $user->password);
     }
 
     // =========================================================================

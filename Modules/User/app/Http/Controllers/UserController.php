@@ -37,9 +37,17 @@ class UserController extends Controller
     {
         return Inertia::render('User/Manage', [
             'users' => User::query()
+                ->with('permissions')
                 ->select('id', 'name', 'email', 'created_at')
                 ->orderBy('name')
-                ->get(),
+                ->get()
+                ->map(fn (User $user) => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'permissions' => $user->getPermissionNames()->toArray(),
+                    'created_at' => $user->created_at,
+                ]),
             'availablePermissions' => PermissionEnum::groupedForFrontend(),
             'status' => session('status'),
         ]);
