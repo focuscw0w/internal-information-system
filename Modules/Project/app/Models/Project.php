@@ -2,14 +2,15 @@
 
 namespace Modules\Project\Models;
 
-use Modules\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Database\Factories\ProjectFactory;
+use Modules\Project\Enums\ProjectPermission;
+use Modules\User\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 class Project extends Model
 {
@@ -69,7 +70,6 @@ class Project extends Model
         return max(0, now()->diffInDays($this->end_date, false));
     }
 
-
     // Scopes
     public function scopeActive($query)
     {
@@ -90,7 +90,6 @@ class Project extends Model
     {
         return $this->belongsTo(User::class, 'owner_id');
     }
-
 
     public function tasks(): HasMany
     {
@@ -130,7 +129,7 @@ class Project extends Model
 
         $teamMember = $this->team()->where('user_id', $user->id)->first();
 
-        if (!$teamMember) {
+        if (! $teamMember) {
             return [];
         }
 
@@ -151,7 +150,7 @@ class Project extends Model
 
         $teamMember = $this->team()->where('user_id', $user->id)->first();
 
-        if (!$teamMember) {
+        if (! $teamMember) {
             return false;
         }
 
@@ -166,7 +165,9 @@ class Project extends Model
 
     public function userHasAnyPermission(User $user, array $permissions): bool
     {
-        if ($this->owner_id === $user->id) return true;
+        if ($this->owner_id === $user->id) {
+            return true;
+        }
 
         foreach ($permissions as $permission) {
             if ($this->userHasPermission($user, $permission)) {
@@ -179,15 +180,23 @@ class Project extends Model
 
     public function userHasAllPermissions(User $user, array $permissions): bool
     {
-        if ($this->owner_id === $user->id) return true;
+        if ($this->owner_id === $user->id) {
+            return true;
+        }
 
         foreach ($permissions as $permission) {
-            if (!$this->userHasPermission($user, $permission)) {
+            if (! $this->userHasPermission($user, $permission)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    public function scopeForUser(Builder $query, int $userId): Builder
+    {
+        return $query->where('owner_id', $userId)
+            ->orWhereHas('team', fn (Builder $q) => $q->where('user_id', $userId));
     }
 
     // Factory

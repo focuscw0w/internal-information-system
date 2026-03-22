@@ -42,11 +42,11 @@ export const UserTable = ({ users, availablePermissions }: UserTableProps) => {
         },
         {
             key: 'actions',
-            label: '',
-            align: 'right',
+            label: 'Akcie',
+            align: 'center',
             render: (user) => (
                 <div
-                    className="flex items-center justify-end gap-1"
+                    className="flex items-center justify-center gap-1"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <EditUserDialog

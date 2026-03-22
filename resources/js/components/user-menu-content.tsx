@@ -8,7 +8,7 @@ import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
 import { type User } from '@/types';
 import { Link, router } from '@inertiajs/react';
-import { LogOut } from 'lucide-react';
+import { LogOut, UserRound } from 'lucide-react';
 
 interface UserMenuContentProps {
     user: User;
@@ -30,6 +30,16 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                 </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+                <Link
+                    className="block w-full"
+                    href="/profile"
+                    onClick={cleanup}
+                >
+                    <UserRound className="mr-2" />
+                    Môj profil
+                </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
                 <Link
                     className="block w-full"

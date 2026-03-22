@@ -2,13 +2,14 @@
 
 namespace Modules\TimeTracking\Models;
 
-use Modules\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Database\Factories\TimeEntryFactory;
+use Modules\User\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 class TimeEntry extends Model
 {
@@ -59,6 +60,27 @@ class TimeEntry extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeForUser(Builder $query, int $userId): Builder
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    public function scopeThisWeek(Builder $query): Builder
+    {
+        return $query->whereBetween('entry_date', [
+            now()->startOfWeek(),
+            now()->endOfWeek(),
+        ]);
+    }
+
+    public function scopeThisMonth(Builder $query): Builder
+    {
+        return $query->whereBetween('entry_date', [
+            now()->startOfMonth(),
+            now()->endOfMonth(),
+        ]);
     }
 
     protected static function newFactory()

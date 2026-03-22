@@ -8,13 +8,14 @@ use Illuminate\Support\Facades\Log;
 use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Models\Project;
+use Modules\User\Models\User;
+use Modules\Project\Transformers\ProjectSummaryResource;
 
 class ProjectService implements ProjectServiceInterface
 {
     public function __construct(
         protected TeamServiceInterface $teamService
-    ) {
-    }
+    ) {}
 
     /**
      * Get all projects with optional filters
@@ -60,7 +61,7 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::with(['owner', 'team', 'tasks'])->find($id);
 
-        if (!$project) {
+        if (! $project) {
             Log::warning('Project not found', ['project_id' => $id]);
         }
 
@@ -93,7 +94,7 @@ class ProjectService implements ProjectServiceInterface
             ]);
 
             // Attach team members if provided
-            if (isset($data['team_members']) && is_array($data['team_members']) && !empty($data['team_members'])) {
+            if (isset($data['team_members']) && is_array($data['team_members']) && ! empty($data['team_members'])) {
                 $this->teamService->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
             }
 
@@ -117,8 +118,9 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($id);
 
-        if (!$project) {
+        if (! $project) {
             Log::warning('Project not found for update', ['project_id' => $id]);
+
             return null;
         }
 
@@ -140,7 +142,7 @@ class ProjectService implements ProjectServiceInterface
 
             // Sync team members if provided
             if (array_key_exists('team_members', $data)) {
-                if (is_array($data['team_members']) && !empty($data['team_members'])) {
+                if (is_array($data['team_members']) && ! empty($data['team_members'])) {
                     $this->teamService->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
                 } else {
                     Log::info('Removing all team members from project', ['project_id' => $id]);
@@ -169,8 +171,9 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = $this->getProjectById($id);
 
-        if (!$project) {
+        if (! $project) {
             Log::warning('Project not found for deletion', ['project_id' => $id]);
+
             return false;
         }
 
@@ -212,8 +215,9 @@ class ProjectService implements ProjectServiceInterface
     {
         $project = Project::find($projectId);
 
-        if (!$project) {
+        if (! $project) {
             Log::warning('Project not found for progress update', ['project_id' => $projectId]);
+
             return null;
         }
 
@@ -241,5 +245,17 @@ class ProjectService implements ProjectServiceInterface
             ->whereNotIn('status', ['completed', 'cancelled'])
             ->with(['owner', 'team'])
             ->get();
+    }
+
+    /**
+     * Get summary of user's projects
+     */
+    public function getUserProjectsSummary(User $user): array
+    {
+        $projects = Project::forUser($user->id)
+            ->with(['team', 'tasks'])
+            ->get();
+
+        return ProjectSummaryResource::collectionForUser($projects, $user->id)->toArray();
     }
 }

@@ -4,6 +4,7 @@ namespace Modules\TimeTracking\Contracts;
 
 use Illuminate\Support\Collection;
 use Modules\TimeTracking\Models\TimeEntry;
+use Modules\User\Models\User;
 
 interface TimeEntryServiceInterface
 {
@@ -31,4 +32,9 @@ interface TimeEntryServiceInterface
      * Delete a time entry.
      */
     public function delete(int $entryId): bool;
+
+    /**
+     * Get a summary of time tracking for a user.
+     */
+    public function getUserSummary(User $user): array;
 }

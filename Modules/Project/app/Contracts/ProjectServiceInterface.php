@@ -3,8 +3,8 @@
 namespace Modules\Project\Contracts;
 
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Modules\Project\Models\Project;
+use Modules\User\Models\User;
 
 interface ProjectServiceInterface
 {
@@ -52,4 +52,9 @@ interface ProjectServiceInterface
      * Get overdue projects
      */
     public function getOverdueProjects(): Collection;
+
+    /**
+     * Get summary of user's projects
+     */
+    public function getUserProjectsSummary(User $user): array;
 }

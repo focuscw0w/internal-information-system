@@ -3,10 +3,12 @@
 namespace Modules\TimeTracking\Services;
 
 use Illuminate\Support\Collection;
+use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Models\TimeEntry;
-use Modules\Project\Models\Project;
+use Modules\TimeTracking\Transformers\TimeEntryResource;
+use Modules\User\Models\User;
 
 class TimeEntryService implements TimeEntryServiceInterface
 {
@@ -69,7 +71,7 @@ class TimeEntryService implements TimeEntryServiceInterface
         $entry = TimeEntry::findOrFail($entryId);
         $project = Project::findOrFail($entry->project_id);
 
-        if (!$project->userHasPermission(auth()->user(), 'manage_team')
+        if (! $project->userHasPermission(auth()->user(), 'manage_team')
             && $entry->user_id !== auth()->id()) {
             abort(403);
         }
@@ -96,7 +98,7 @@ class TimeEntryService implements TimeEntryServiceInterface
         $entry = TimeEntry::findOrFail($entryId);
         $project = Project::findOrFail($entry->project_id);
 
-        if (!$project->userHasPermission(auth()->user(), 'manage_team')
+        if (! $project->userHasPermission(auth()->user(), 'manage_team')
             && $entry->user_id !== auth()->id()) {
             abort(403);
         }
@@ -121,5 +123,25 @@ class TimeEntryService implements TimeEntryServiceInterface
         Task::where('id', $taskId)->update([
             'actual_hours' => $total,
         ]);
+    }
+
+    /**
+     * Get a summary of user's time tracking data for profile page.
+     */
+    public function getUserSummary(User $user): array
+    {
+        $baseQuery = TimeEntry::forUser($user->id);
+
+        return [
+            'total_hours_this_week' => (clone $baseQuery)->thisWeek()->sum('hours'),
+            'total_hours_this_month' => (clone $baseQuery)->thisMonth()->sum('hours'),
+            'recent_entries' => TimeEntryResource::collection(
+                (clone $baseQuery)
+                    ->with(['task', 'project'])
+                    ->latest('entry_date')
+                    ->limit(5)
+                    ->get()
+            )->resolve(),
+        ];
     }
 }
