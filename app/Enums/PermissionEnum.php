@@ -12,6 +12,9 @@ enum PermissionEnum: string
     case PROJECTS_CREATE = 'projects.create';
     case PROJECTS_VIEW_ALL = 'projects.view_all';
 
+    // Capacity
+    case CAPACITY_MANAGE = 'capacity.manage';
+
     public static function all(): array
     {
         return array_column(self::cases(), 'value');
@@ -24,6 +27,7 @@ enum PermissionEnum: string
             self::USERS_MANAGE => 'Správa používateľov',
             self::PROJECTS_CREATE => 'Vytváranie projektov',
             self::PROJECTS_VIEW_ALL => 'Zobrazenie všetkých projektov',
+            self::CAPACITY_MANAGE => 'Správa kapacít',
         };
     }
 
@@ -34,6 +38,7 @@ enum PermissionEnum: string
             self::USERS_MANAGE => 'Používateľ môže vytvárať nové kontá a spravovať existujúcich používateľov.',
             self::PROJECTS_CREATE => 'Používateľ môže zakladať nové projekty.',
             self::PROJECTS_VIEW_ALL => 'Používateľ vidí všetky projekty bez nutnosti byť členom tímu projektu.',
+            self::CAPACITY_MANAGE => 'Používateľ môže upravovať týždenné kapacity zamestnancov.',
         };
     }
 
@@ -42,6 +47,7 @@ enum PermissionEnum: string
         return match ($this) {
             self::USERS_VIEW, self::USERS_MANAGE => 'Používatelia',
             self::PROJECTS_CREATE, self::PROJECTS_VIEW_ALL => 'Projekty',
+            self::CAPACITY_MANAGE => 'Kapacity',
         };
     }
 

@@ -2,7 +2,9 @@
 
 namespace Modules\CapacityManagement\Http\Controllers;
 
+use App\Enums\PermissionEnum;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\CapacityManagement\Http\Requests\UpdateEmployeeCapacityRequest;
 use Modules\CapacityManagement\Services\CapacityManagementService;
@@ -13,10 +15,11 @@ class CapacityManagementController extends Controller
     {
     }
 
-    public function index()
+    public function index(Request $request)
     {
         return Inertia::render('CapacityManagement/Index', [
             'dashboard' => $this->capacityService->buildDashboard(),
+            'can_manage' => $request->user()?->can(PermissionEnum::CAPACITY_MANAGE->value) ?? false,
         ]);
     }
 

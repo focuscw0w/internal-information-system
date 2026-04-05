@@ -2,6 +2,7 @@
 
 namespace Modules\TimeTracking\Tests\Feature;
 
+use Database\Seeders\PermissionSeeder;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -23,6 +24,7 @@ class TimeEntryControllerTest extends TestCase
     {
         parent::setUp();
         $this->withoutVite();
+        $this->seed(PermissionSeeder::class);
 
         $this->owner = User::factory()->create();
         $this->member = User::factory()->create();

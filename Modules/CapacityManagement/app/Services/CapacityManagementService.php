@@ -5,7 +5,6 @@ namespace Modules\CapacityManagement\Services;
 use Carbon\Carbon;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
 use Modules\Project\Models\Project;
-use Modules\Project\Models\Task;
 use Modules\TimeTracking\Models\TimeEntry;
 use Modules\User\Models\User;
 
@@ -34,8 +33,17 @@ class CapacityManagementService
         $capacities = EmployeeCapacity::query()->pluck('weekly_capacity_hours', 'user_id');
         $weeksInMonth = max(1, (int) ceil($startOfMonth->diffInDays($endOfMonth->copy()->addDay()) / 7));
 
-        $people = $users->map(function (User $user) use ($weeklyByUser, $monthlyByUser, $capacities, $weeksInMonth) {
-            $weeklyCapacity = (int) ($capacities[$user->id] ?? 40);
+        // Build capacities map (user_id => hours) with defaults
+        $capacitiesMap = $users->mapWithKeys(fn (User $u) => [
+            $u->id => (int) ($capacities[$u->id] ?? 40),
+        ])->all();
+
+        $userIds = $users->pluck('id')->all();
+
+        $history = $this->buildHistory($capacitiesMap, $userIds);
+
+        $people = $users->map(function (User $user) use ($weeklyByUser, $monthlyByUser, $capacitiesMap, $weeksInMonth, $history) {
+            $weeklyCapacity = $capacitiesMap[$user->id];
             $weeklyLoadHours = (float) ($weeklyByUser[$user->id] ?? 0);
             $monthlyLoadHours = (float) ($monthlyByUser[$user->id] ?? 0);
             $monthlyCapacity = $weeklyCapacity * $weeksInMonth;
@@ -57,6 +65,7 @@ class CapacityManagementService
                 'free_capacity_hours' => round($freeCapacity, 2),
                 'status' => $this->statusByUtilization($utilization),
                 'is_over_capacity' => $utilization > 100,
+                'history' => $history['by_user'][$user->id] ?? [],
             ];
         })->values();
 
@@ -92,8 +101,8 @@ class CapacityManagementService
                 'load_hours' => round($teamMonthlyLoad, 2),
                 'utilization' => $this->toPercentage($teamMonthlyLoad, $teamMonthlyCapacity),
             ],
-            'prediction' => $this->buildPrediction($people),
-            'history' => $this->buildHistory($teamWeeklyCapacity),
+            'prediction' => $this->buildPrediction($people, $teamWeeklyCapacity),
+            'history' => $history['team'],
         ];
     }
 
@@ -105,49 +114,115 @@ class CapacityManagementService
         );
     }
 
-    private function buildPrediction($people): array
+    private function buildPrediction($people, int $teamWeeklyCapacity): array
     {
-        $remainingProjectHours = (float) Task::query()
-            ->whereIn('project_id', Project::query()->where('status', 'active')->pluck('id'))
-            ->selectRaw('COALESCE(SUM(
-            CASE
-                WHEN estimated_hours - actual_hours > 0
-                THEN estimated_hours - actual_hours
-                ELSE 0
-            END
-        ), 0) as remaining')
-            ->value('remaining');
+        $activeProjects = Project::query()
+            ->where('status', 'active')
+            ->with(['tasks' => fn ($q) => $q->whereNotIn('status', ['done'])
+                ->select('id', 'project_id', 'estimated_hours', 'actual_hours'),
+            ])
+            ->get(['id', 'name', 'end_date']);
 
-        $availableNextFourWeeks = (int) $people->sum('weekly_capacity_hours') * 4;
+        $availableNextFourWeeks = $teamWeeklyCapacity * 4;
+
+        $perProject = $activeProjects->map(function (Project $project) use ($availableNextFourWeeks) {
+            $remaining = (float) $project->tasks->sum(
+                fn ($task) => max(0, (int) ($task->estimated_hours ?? 0) - (int) ($task->actual_hours ?? 0))
+            );
+
+            return [
+                'id' => $project->id,
+                'name' => $project->name,
+                'remaining_hours' => round($remaining, 2),
+                'available_hours_next_4_weeks' => $availableNextFourWeeks,
+                'can_finish' => $availableNextFourWeeks >= $remaining,
+                'confidence' => min(100, $this->toPercentage($availableNextFourWeeks, max(1.0, $remaining))),
+                'days_remaining' => max(0, (int) now()->diffInDays($project->end_date, false)),
+                'is_overdue' => $project->end_date !== null && $project->end_date < now(),
+            ];
+        })->values();
+
+        $totalRemaining = (float) $perProject->sum('remaining_hours');
 
         return [
-            'remaining_project_hours' => round($remainingProjectHours, 2),
+            'remaining_project_hours' => round($totalRemaining, 2),
             'available_hours_next_4_weeks' => $availableNextFourWeeks,
-            'can_finish' => $availableNextFourWeeks >= $remainingProjectHours,
-            'confidence' => $this->toPercentage($availableNextFourWeeks, max(1.0, $remainingProjectHours)),
+            'can_finish' => $availableNextFourWeeks >= $totalRemaining,
+            'confidence' => min(100, $this->toPercentage($availableNextFourWeeks, max(1.0, $totalRemaining))),
+            'projects' => $perProject,
         ];
     }
 
-    private function buildHistory(int $teamWeeklyCapacity): array
+    /**
+     * Build 12-week history for the team and per-user in a single batch query.
+     */
+    private function buildHistory(array $capacitiesMap, array $userIds): array
     {
-        $result = [];
+        $twelveWeeksAgo = Carbon::now()->startOfWeek()->subWeeks(11);
+        $totalTeamCapacity = max(1, array_sum($capacitiesMap));
+
+        // Single batch query: all entries in the 12-week window grouped by user and ISO year-week
+        $rawEntries = TimeEntry::query()
+            ->where('entry_date', '>=', $twelveWeeksAgo)
+            ->get()
+            ->groupBy(function ($entry) {
+                return $entry->user_id.'-'.$entry->entry_date->format('o-W'); // ISO week
+            })
+            ->map(function ($group) {
+                return [
+                    'user_id' => $group->first()->user_id,
+                    'yw' => $group->first()->entry_date->format('o-W'),
+                    'total' => $group->sum('hours'),
+                ];
+            })
+            ->values();
+
+        $byYwAndUser = [];
+        foreach ($rawEntries as $row) {
+            $byYwAndUser[$row['yw']][$row['user_id']] = (float) $row['total'];
+        }
+
+        $teamHistory = [];
+        $byUser = array_fill_keys($userIds, []);
 
         for ($i = 11; $i >= 0; $i--) {
             $weekStart = Carbon::now()->startOfWeek()->subWeeks($i);
             $weekEnd = $weekStart->copy()->endOfWeek();
+            $yw = $weekStart->format('o-W'); // ISO year-week string, e.g. "2026-14"
 
-            $load = (float) TimeEntry::query()
-                ->whereBetween('entry_date', [$weekStart, $weekEnd])
-                ->sum('hours');
+            $weekUserHours = $byYwAndUser[$yw] ?? [];
 
-            $result[] = [
-                'week_label' => $weekStart->format('d.m').'-'.$weekEnd->format('d.m'),
-                'load_hours' => round($load, 2),
-                'utilization' => $this->toPercentage($load, max(1, $teamWeeklyCapacity)),
+            // Team load for this week
+            $teamLoad = (float) array_sum($weekUserHours);
+
+            // Per-week capacity: sum capacities of users who had entries;
+            // fall back to total team capacity when nobody logged anything
+            $activeUserCapacity = 0;
+            foreach (array_keys($weekUserHours) as $uid) {
+                $activeUserCapacity += $capacitiesMap[$uid] ?? 40;
+            }
+            $weekCapacity = $activeUserCapacity > 0 ? $activeUserCapacity : $totalTeamCapacity;
+
+            $label = $weekStart->format('d.m').'-'.$weekEnd->format('d.m');
+
+            $teamHistory[] = [
+                'week_label' => $label,
+                'load_hours' => round($teamLoad, 2),
+                'utilization' => $this->toPercentage($teamLoad, $weekCapacity),
             ];
+
+            foreach ($userIds as $uid) {
+                $userLoad = (float) ($weekUserHours[$uid] ?? 0);
+                $userCap = $capacitiesMap[$uid] ?? 40;
+                $byUser[$uid][] = [
+                    'week_label' => $label,
+                    'load_hours' => round($userLoad, 2),
+                    'utilization' => $this->toPercentage($userLoad, $userCap),
+                ];
+            }
         }
 
-        return $result;
+        return ['team' => $teamHistory, 'by_user' => $byUser];
     }
 
     private function toPercentage(float $part, float $whole): float
