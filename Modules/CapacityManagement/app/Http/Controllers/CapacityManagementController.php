@@ -6,12 +6,12 @@ use App\Enums\PermissionEnum;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
 use Modules\CapacityManagement\Http\Requests\UpdateEmployeeCapacityRequest;
-use Modules\CapacityManagement\Services\CapacityManagementService;
 
 class CapacityManagementController extends Controller
 {
-    public function __construct(private readonly CapacityManagementService $capacityService)
+    public function __construct(private readonly CapacityManagementServiceInterface $capacityService)
     {
     }
 

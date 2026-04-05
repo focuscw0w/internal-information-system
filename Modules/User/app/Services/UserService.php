@@ -2,11 +2,17 @@
 
 namespace Modules\User\Services;
 
+use Illuminate\Database\Eloquent\Collection;
 use Modules\User\Contracts\UserServiceInterface;
 use Modules\User\Models\User;
 
 class UserService implements UserServiceInterface
 {
+    public function getAllUsers(): Collection
+    {
+        return User::query()->orderBy('name')->get(['id', 'name', 'email']);
+    }
+
     /**
      * Create a new user and assign permissions
      */

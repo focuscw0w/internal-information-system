@@ -261,4 +261,14 @@ class ProjectService implements ProjectServiceInterface
 
         return ProjectSummaryResource::collectionForUser($projects, $user->id)->toArray();
     }
+
+    public function getActiveProjectsWithIncompleteTasks(): Collection
+    {
+        return Project::query()
+            ->where('status', 'active')
+            ->with(['tasks' => fn ($q) => $q->whereNotIn('status', ['done'])
+                ->select('id', 'project_id', 'estimated_hours', 'actual_hours'),
+            ])
+            ->get(['id', 'name', 'end_date']);
+    }
 }

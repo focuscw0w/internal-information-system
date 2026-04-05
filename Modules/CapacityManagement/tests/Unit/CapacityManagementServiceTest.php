@@ -4,8 +4,8 @@ namespace Modules\CapacityManagement\Tests\Unit;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
-use Modules\CapacityManagement\Services\CapacityManagementService;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Models\TimeEntry;
@@ -17,13 +17,13 @@ class CapacityManagementServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    private CapacityManagementService $service;
+    private CapacityManagementServiceInterface $service;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->service = new CapacityManagementService();
+        $this->service = app(CapacityManagementServiceInterface::class);
         // 2026-04-01 is a Wednesday; week starts Mon 2026-03-30, ends Sun 2026-04-05
         Carbon::setTestNow('2026-04-01 10:00:00');
     }

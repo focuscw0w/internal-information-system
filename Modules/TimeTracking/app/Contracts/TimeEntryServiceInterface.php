@@ -2,12 +2,28 @@
 
 namespace Modules\TimeTracking\Contracts;
 
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Modules\TimeTracking\Models\TimeEntry;
 use Modules\User\Models\User;
 
 interface TimeEntryServiceInterface
 {
+    /**
+     * Get total hours per user within a date range.
+     *
+     * @return Collection<int, float>  keyed by user_id
+     */
+    public function getTotalHoursPerUserInPeriod(Carbon $from, Carbon $to): Collection;
+
+    /**
+     * Get hours indexed as ['isoYearWeek' => [userId => hours]] for the given date range.
+     * Used for building historical capacity charts.
+     *
+     * @return array<string, array<int, float>>
+     */
+    public function getHoursGroupedByWeekAndUser(Carbon $from, Carbon $to): array;
+
     /**
      * Get all time entries for a project.
      */

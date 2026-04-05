@@ -2,6 +2,7 @@
 
 namespace Modules\TimeTracking\Services;
 
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
@@ -12,6 +13,30 @@ use Modules\User\Models\User;
 
 class TimeEntryService implements TimeEntryServiceInterface
 {
+    public function getTotalHoursPerUserInPeriod(Carbon $from, Carbon $to): Collection
+    {
+        return TimeEntry::query()
+            ->selectRaw('user_id, COALESCE(SUM(hours), 0) as total')
+            ->whereBetween('entry_date', [$from, $to])
+            ->groupBy('user_id')
+            ->pluck('total', 'user_id');
+    }
+
+    public function getHoursGroupedByWeekAndUser(Carbon $from, Carbon $to): array
+    {
+        return TimeEntry::query()
+            ->where('entry_date', '>=', $from)
+            ->where('entry_date', '<=', $to)
+            ->get(['user_id', 'entry_date', 'hours'])
+            ->groupBy(fn ($e) => $e->entry_date->format('o-W'))
+            ->map(fn ($week) =>
+                $week->groupBy('user_id')
+                    ->map(fn ($u) => (float) $u->sum('hours'))
+                    ->all()
+            )
+            ->all();
+    }
+
     /**
      * Get all time entries for a project.
      */

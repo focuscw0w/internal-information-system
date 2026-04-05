@@ -2,6 +2,7 @@
 
 namespace Modules\Project\Tests\Feature;
 
+use Database\Seeders\PermissionSeeder;
 use Modules\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Project\Enums\ProjectPermission;
@@ -11,6 +12,13 @@ use Tests\TestCase;
 class ProjectPermissionTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutVite();
+        $this->seed(PermissionSeeder::class);
+    }
 
     // -------------------------------------------------------------------------
     // Helpers

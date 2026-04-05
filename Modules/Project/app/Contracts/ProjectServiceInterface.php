@@ -57,4 +57,12 @@ interface ProjectServiceInterface
      * Get summary of user's projects
      */
     public function getUserProjectsSummary(User $user): array;
+
+    /**
+     * Get active projects with their non-completed tasks.
+     * Used for capacity prediction calculations.
+     *
+     * @return Collection<int, \Modules\Project\Models\Project>
+     */
+    public function getActiveProjectsWithIncompleteTasks(): Collection;
 }

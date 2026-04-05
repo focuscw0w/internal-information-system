@@ -3,46 +3,42 @@
 namespace Modules\CapacityManagement\Services;
 
 use Carbon\Carbon;
+use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
-use Modules\Project\Models\Project;
-use Modules\TimeTracking\Models\TimeEntry;
-use Modules\User\Models\User;
+use Modules\Project\Contracts\ProjectServiceInterface;
+use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
+use Modules\User\Contracts\UserServiceInterface;
 
-class CapacityManagementService
+class CapacityManagementService implements CapacityManagementServiceInterface
 {
+    public function __construct(
+        private readonly UserServiceInterface $userService,
+        private readonly TimeEntryServiceInterface $timeEntryService,
+        private readonly ProjectServiceInterface $projectService,
+    ) {}
+
     public function buildDashboard(): array
     {
-        $users = User::query()->orderBy('name')->get(['id', 'name', 'email']);
+        $users = $this->userService->getAllUsers();
         $startOfWeek = now()->startOfWeek();
         $endOfWeek = now()->endOfWeek();
         $startOfMonth = now()->startOfMonth();
         $endOfMonth = now()->endOfMonth();
 
-        $weeklyByUser = TimeEntry::query()
-            ->selectRaw('user_id, COALESCE(SUM(hours), 0) as total')
-            ->whereBetween('entry_date', [$startOfWeek, $endOfWeek])
-            ->groupBy('user_id')
-            ->pluck('total', 'user_id');
-
-        $monthlyByUser = TimeEntry::query()
-            ->selectRaw('user_id, COALESCE(SUM(hours), 0) as total')
-            ->whereBetween('entry_date', [$startOfMonth, $endOfMonth])
-            ->groupBy('user_id')
-            ->pluck('total', 'user_id');
+        $weeklyByUser = $this->timeEntryService->getTotalHoursPerUserInPeriod($startOfWeek, $endOfWeek);
+        $monthlyByUser = $this->timeEntryService->getTotalHoursPerUserInPeriod($startOfMonth, $endOfMonth);
 
         $capacities = EmployeeCapacity::query()->pluck('weekly_capacity_hours', 'user_id');
         $weeksInMonth = max(1, (int) ceil($startOfMonth->diffInDays($endOfMonth->copy()->addDay()) / 7));
 
-        // Build capacities map (user_id => hours) with defaults
-        $capacitiesMap = $users->mapWithKeys(fn (User $u) => [
+        $capacitiesMap = $users->mapWithKeys(fn ($u) => [
             $u->id => (int) ($capacities[$u->id] ?? 40),
         ])->all();
 
         $userIds = $users->pluck('id')->all();
-
         $history = $this->buildHistory($capacitiesMap, $userIds);
 
-        $people = $users->map(function (User $user) use ($weeklyByUser, $monthlyByUser, $capacitiesMap, $weeksInMonth, $history) {
+        $people = $users->map(function ($user) use ($weeklyByUser, $monthlyByUser, $capacitiesMap, $weeksInMonth, $history) {
             $weeklyCapacity = $capacitiesMap[$user->id];
             $weeklyLoadHours = (float) ($weeklyByUser[$user->id] ?? 0);
             $monthlyLoadHours = (float) ($monthlyByUser[$user->id] ?? 0);
@@ -116,16 +112,10 @@ class CapacityManagementService
 
     private function buildPrediction($people, int $teamWeeklyCapacity): array
     {
-        $activeProjects = Project::query()
-            ->where('status', 'active')
-            ->with(['tasks' => fn ($q) => $q->whereNotIn('status', ['done'])
-                ->select('id', 'project_id', 'estimated_hours', 'actual_hours'),
-            ])
-            ->get(['id', 'name', 'end_date']);
-
+        $activeProjects = $this->projectService->getActiveProjectsWithIncompleteTasks();
         $availableNextFourWeeks = $teamWeeklyCapacity * 4;
 
-        $perProject = $activeProjects->map(function (Project $project) use ($availableNextFourWeeks) {
+        $perProject = $activeProjects->map(function ($project) use ($availableNextFourWeeks) {
             $remaining = (float) $project->tasks->sum(
                 fn ($task) => max(0, (int) ($task->estimated_hours ?? 0) - (int) ($task->actual_hours ?? 0))
             );
@@ -153,34 +143,12 @@ class CapacityManagementService
         ];
     }
 
-    /**
-     * Build 12-week history for the team and per-user in a single batch query.
-     */
     private function buildHistory(array $capacitiesMap, array $userIds): array
     {
         $twelveWeeksAgo = Carbon::now()->startOfWeek()->subWeeks(11);
         $totalTeamCapacity = max(1, array_sum($capacitiesMap));
 
-        // Single batch query: all entries in the 12-week window grouped by user and ISO year-week
-        $rawEntries = TimeEntry::query()
-            ->where('entry_date', '>=', $twelveWeeksAgo)
-            ->get()
-            ->groupBy(function ($entry) {
-                return $entry->user_id.'-'.$entry->entry_date->format('o-W'); // ISO week
-            })
-            ->map(function ($group) {
-                return [
-                    'user_id' => $group->first()->user_id,
-                    'yw' => $group->first()->entry_date->format('o-W'),
-                    'total' => $group->sum('hours'),
-                ];
-            })
-            ->values();
-
-        $byYwAndUser = [];
-        foreach ($rawEntries as $row) {
-            $byYwAndUser[$row['yw']][$row['user_id']] = (float) $row['total'];
-        }
+        $byYwAndUser = $this->timeEntryService->getHoursGroupedByWeekAndUser($twelveWeeksAgo, Carbon::now());
 
         $teamHistory = [];
         $byUser = array_fill_keys($userIds, []);
@@ -188,15 +156,11 @@ class CapacityManagementService
         for ($i = 11; $i >= 0; $i--) {
             $weekStart = Carbon::now()->startOfWeek()->subWeeks($i);
             $weekEnd = $weekStart->copy()->endOfWeek();
-            $yw = $weekStart->format('o-W'); // ISO year-week string, e.g. "2026-14"
+            $yw = $weekStart->format('o-W');
 
             $weekUserHours = $byYwAndUser[$yw] ?? [];
-
-            // Team load for this week
             $teamLoad = (float) array_sum($weekUserHours);
 
-            // Per-week capacity: sum capacities of users who had entries;
-            // fall back to total team capacity when nobody logged anything
             $activeUserCapacity = 0;
             foreach (array_keys($weekUserHours) as $uid) {
                 $activeUserCapacity += $capacitiesMap[$uid] ?? 40;
