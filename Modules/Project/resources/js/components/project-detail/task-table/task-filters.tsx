@@ -1,4 +1,4 @@
-import { Filter, X } from 'lucide-react';
+import { Filter, Search, X } from 'lucide-react';
 import { TaskPriority, TaskStatus } from '../../../types/types';
 
 const statusFilterOptions: { value: TaskStatus; label: string }[] = [
@@ -15,12 +15,14 @@ const priorityFilterOptions: { value: TaskPriority; label: string }[] = [
 ];
 
 interface TaskFiltersProps {
+    searchQuery: string;
     statusFilter: TaskStatus | null;
     priorityFilter: TaskPriority | null;
     assigneeFilter: number | null;
     assignees: { id: number; name: string }[];
     filteredCount: number;
     totalCount: number;
+    onSearchChange: (value: string) => void;
     onStatusChange: (value: TaskStatus | null) => void;
     onPriorityChange: (value: TaskPriority | null) => void;
     onAssigneeChange: (value: number | null) => void;
@@ -28,21 +30,33 @@ interface TaskFiltersProps {
 }
 
 export const TaskFilters = ({
+    searchQuery,
     statusFilter,
     priorityFilter,
     assigneeFilter,
     assignees,
     filteredCount,
     totalCount,
+    onSearchChange,
     onStatusChange,
     onPriorityChange,
     onAssigneeChange,
     onClear,
 }: TaskFiltersProps) => {
-    const hasActiveFilters = statusFilter || priorityFilter || assigneeFilter;
+    const hasActiveFilters = searchQuery || statusFilter || priorityFilter || assigneeFilter;
 
     return (
         <div className="flex flex-wrap items-center gap-2 pt-2">
+            <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+                <input
+                    type="text"
+                    placeholder="Hľadať úlohu..."
+                    value={searchQuery}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    className="w-44 rounded-md border border-gray-200 bg-white py-1.5 pl-7 pr-3 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
+                />
+            </div>
             <Filter className="h-4 w-4 text-gray-400" />
 
             <select

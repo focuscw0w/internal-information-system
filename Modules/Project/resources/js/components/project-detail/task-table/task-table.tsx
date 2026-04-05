@@ -14,22 +14,18 @@ interface TaskTableProps {
 }
 
 export const TaskTable = ({ project }: TaskTableProps) => {
+    const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<TaskStatus | null>(null);
-    const [priorityFilter, setPriorityFilter] = useState<TaskPriority | null>(
-        null,
-    );
+    const [priorityFilter, setPriorityFilter] = useState<TaskPriority | null>(null);
     const [assigneeFilter, setAssigneeFilter] = useState<number | null>(null);
 
-    const hasActiveFilters = !!(
-        statusFilter ||
-        priorityFilter ||
-        assigneeFilter
-    );
+    const hasActiveFilters = !!(searchQuery || statusFilter || priorityFilter || assigneeFilter);
 
     const permissions = project.current_user_permissions ?? [];
     const can = (permission: string) => permissions.includes(permission);
 
     const clearFilters = () => {
+        setSearchQuery('');
         setStatusFilter(null);
         setPriorityFilter(null);
         setAssigneeFilter(null);
@@ -42,13 +38,10 @@ export const TaskTable = ({ project }: TaskTableProps) => {
         .filter((u, i, arr) => arr.findIndex((a) => a.id === u.id) === i);
 
     const tasks = allTasks.filter((task) => {
+        if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
         if (statusFilter && task.status !== statusFilter) return false;
         if (priorityFilter && task.priority !== priorityFilter) return false;
-        if (
-            assigneeFilter &&
-            !(task.assigned_users ?? []).some((u) => u.id === assigneeFilter)
-        )
-            return false;
+        if (assigneeFilter && !(task.assigned_users ?? []).some((u) => u.id === assigneeFilter)) return false;
         return true;
     });
 
@@ -96,12 +89,14 @@ export const TaskTable = ({ project }: TaskTableProps) => {
 
                 {allTasks.length > 0 && (
                     <TaskFilters
+                        searchQuery={searchQuery}
                         statusFilter={statusFilter}
                         priorityFilter={priorityFilter}
                         assigneeFilter={assigneeFilter}
                         assignees={assignees}
                         filteredCount={tasks.length}
                         totalCount={allTasks.length}
+                        onSearchChange={setSearchQuery}
                         onStatusChange={setStatusFilter}
                         onPriorityChange={setPriorityFilter}
                         onAssigneeChange={setAssigneeFilter}
