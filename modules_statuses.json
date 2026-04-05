@@ -5,5 +5,6 @@
     "Blog": true,
     "Product": true,
     "TimeTracking": true,
-    "User": true
+    "User": true,
+    "CapacityManagement": true
 }
