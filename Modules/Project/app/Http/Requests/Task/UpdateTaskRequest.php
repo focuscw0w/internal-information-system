@@ -20,6 +20,7 @@ class UpdateTaskRequest extends FormRequest
             'status' => ['sometimes', Rule::in(TaskStatus::values())],
             'priority' => ['sometimes', Rule::in(TaskPriority::values())],
             'estimated_hours' => 'sometimes|required|numeric|min:0',
+            'start_date' => 'nullable|date',
             'due_date' => 'sometimes|required|date',
             'assigned_users' => 'sometimes|array',
             'assigned_users.*' => 'exists:users,id',

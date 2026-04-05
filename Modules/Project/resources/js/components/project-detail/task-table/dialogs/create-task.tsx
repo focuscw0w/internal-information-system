@@ -20,6 +20,7 @@ export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
         status: 'todo',
         priority: 'medium',
         estimated_hours: '',
+        start_date: '',
         due_date: '',
         assigned_users: [] as number[],
     });
@@ -111,15 +112,12 @@ export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <FormField
-                    label="Odhadované hodiny"
-                    id="estimated_hours"
-                    type="number"
-                    value={data.estimated_hours}
-                    onChange={(value) => setData('estimated_hours', value)}
-                    error={errors.estimated_hours}
-                    placeholder="napr. 8"
-                    min="0"
-                    step="0.5"
+                    label="Dátum začiatku"
+                    id="start_date"
+                    type="date"
+                    value={data.start_date}
+                    onChange={(value: string) => setData('start_date', value)}
+                    error={errors.start_date}
                 />
 
                 <FormField
@@ -131,6 +129,18 @@ export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
                     error={errors.due_date}
                 />
             </div>
+
+            <FormField
+                label="Odhadované hodiny"
+                id="estimated_hours"
+                type="number"
+                value={data.estimated_hours}
+                onChange={(value) => setData('estimated_hours', value)}
+                error={errors.estimated_hours}
+                placeholder="napr. 8"
+                min="0"
+                step="0.5"
+            />
 
             <TeamMemberSelect
                 allUsers={team}

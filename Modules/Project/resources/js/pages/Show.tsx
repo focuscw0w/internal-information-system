@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
-import { Calendar, FileText, KanbanIcon, Users } from 'lucide-react';
+import { Calendar, FileText, GanttChartSquare, KanbanIcon, Users } from 'lucide-react';
+import { GanttChart } from '../components/project-detail/tab-views/gantt';
 import { Kanban } from '../components/project-detail/kanban/kanban';
 import { ProjectOverview } from '../components/project-detail/tab-views/project-overview';
 import { Team } from '../components/project-detail/tab-views/team';
@@ -53,7 +54,7 @@ export default function Show({ project }: { project: Project }) {
                 {/* Tabs */}
                 <Tabs defaultValue="overview" className="mb-12 w-full">
                     <div className="flex items-center justify-between">
-                        <TabsList className="grid w-full max-w-lg grid-cols-4 gap-3 bg-white">
+                        <TabsList className="grid w-full max-w-2xl grid-cols-5 gap-3 bg-white">
                             <TabsTrigger
                                 value="overview"
                                 className="flex cursor-pointer items-center gap-2 py-2.5"
@@ -75,6 +76,13 @@ export default function Show({ project }: { project: Project }) {
                                 <Calendar className="h-4 w-4" />
                                 Časová os
                             </TabsTrigger>
+                            <TabsTrigger
+                                value="gantt"
+                                className="flex cursor-pointer items-center gap-2 py-2.5"
+                            >
+                                <GanttChartSquare className="h-4 w-4" />
+                                Gantt
+                            </TabsTrigger>
                             {can('view_team') && (
                                 <TabsTrigger
                                     value="team"
@@ -95,6 +103,9 @@ export default function Show({ project }: { project: Project }) {
                     </TabsContent>
                     <TabsContent value="timeline" className="mt-6">
                         <Timeline project={project} />
+                    </TabsContent>
+                    <TabsContent value="gantt" className="mt-6">
+                        <GanttChart project={project} />
                     </TabsContent>
                     {can('view_team') && (
                         <TabsContent value="team" className="mt-6">

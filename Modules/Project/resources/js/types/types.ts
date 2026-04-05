@@ -72,6 +72,7 @@ export interface Task {
     priority: 'low' | 'medium' | 'high';
     estimated_hours: number;
     actual_hours: number;
+    start_date: string | null;
     due_date: string | null;
     completed_at: string | null;
     assigned_users?: {

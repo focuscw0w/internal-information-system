@@ -54,6 +54,7 @@ class ProjectResource extends JsonResource
                         'priority' => $task->priority,
                         'estimated_hours' => (int) $task->estimated_hours,
                         'actual_hours' => (int) $task->actual_hours,
+                        'start_date' => $task->start_date?->format('Y-m-d') ?? $task->created_at->format('Y-m-d'),
                         'due_date' => $task->due_date?->format('Y-m-d'),
                         'assigned_users' => $task->assignedUsers->map(function ($user) {
                             return [

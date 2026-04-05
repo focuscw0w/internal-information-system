@@ -20,6 +20,7 @@ class CreateTaskRequest extends FormRequest
             'status' => ['required', Rule::in(TaskStatus::values())],
             'priority' => ['required', Rule::in(TaskPriority::values())],
             'estimated_hours' => 'required|numeric|min:0',
+            'start_date' => 'nullable|date',
             'due_date' => 'required|date',
             'assigned_users' => 'sometimes|array',
             'assigned_users.*' => 'exists:users,id',

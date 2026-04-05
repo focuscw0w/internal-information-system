@@ -29,6 +29,7 @@ export const EditTaskDialog = ({
         status: task.status,
         priority: task.priority,
         estimated_hours: task.estimated_hours?.toString() || '',
+        start_date: task.start_date || '',
         due_date: task.due_date || '',
         assigned_users: initialMembers,
     });
@@ -41,6 +42,7 @@ export const EditTaskDialog = ({
                 status: task.status,
                 priority: task.priority,
                 estimated_hours: task.estimated_hours?.toString() || '',
+                start_date: task.start_date || '',
                 due_date: task.due_date || '',
                 assigned_users: initialMembers
             });
@@ -137,13 +139,11 @@ export const EditTaskDialog = ({
 
             <div className="grid grid-cols-2 gap-4">
                 <FormField
-                    label="Odhad hodín"
-                    id="estimated_hours"
-                    type="number"
-                    value={data.estimated_hours}
-                    onChange={(value) => setData('estimated_hours', value)}
-                    placeholder="8"
-                    step="0.5"
+                    label="Dátum začiatku"
+                    id="start_date"
+                    type="date"
+                    value={data.start_date}
+                    onChange={(value) => setData('start_date', value)}
                 />
 
                 <FormField
@@ -154,6 +154,16 @@ export const EditTaskDialog = ({
                     onChange={(value) => setData('due_date', value)}
                 />
             </div>
+
+            <FormField
+                label="Odhad hodín"
+                id="estimated_hours"
+                type="number"
+                value={data.estimated_hours}
+                onChange={(value) => setData('estimated_hours', value)}
+                placeholder="8"
+                step="0.5"
+            />
 
             <TeamMemberSelect
                 allUsers={team}
