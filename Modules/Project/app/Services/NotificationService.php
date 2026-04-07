@@ -10,6 +10,7 @@ use Modules\Project\Models\Task;
 use Modules\Project\Notifications\AtRiskNotification;
 use Modules\Project\Notifications\DeadlineApproachingNotification;
 use Modules\Project\Notifications\ProjectOverdueNotification;
+use Modules\Project\Notifications\ProjectAssignedNotification;
 use Modules\Project\Notifications\TaskAssignedNotification;
 use Modules\Project\Notifications\TaskStatusChangedNotification;
 use Modules\User\Models\User;
@@ -55,6 +56,19 @@ class NotificationService implements NotificationServiceInterface
         $users = User::whereIn('id', $newUserIds)->get();
 
         $notification = new TaskAssignedNotification($task, $assignedBy);
+
+        $users->reject(fn (User $u) => $u->id === $assignedBy->id)
+            ->each(fn (User $u) => $u->notify($notification));
+    }
+
+    public function notifyProjectAssigned(Project $project, array $newUserIds, User $assignedBy): void
+    {
+        if (empty($newUserIds)) {
+            return;
+        }
+
+        $users = User::whereIn('id', $newUserIds)->get();
+        $notification = new ProjectAssignedNotification($project, $assignedBy);
 
         $users->reject(fn (User $u) => $u->id === $assignedBy->id)
             ->each(fn (User $u) => $u->notify($notification));

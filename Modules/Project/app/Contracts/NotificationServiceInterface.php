@@ -13,6 +13,8 @@ interface NotificationServiceInterface
 
     public function notifyTaskAssigned(Task $task, array $newUserIds, User $assignedBy): void;
 
+    public function notifyProjectAssigned(Project $project, array $newUserIds, User $assignedBy): void;
+
     public function notifyDeadlineApproaching(Task $task, int $daysRemaining): void;
 
     public function notifyAtRisk(Task|Project $subject, string $reason): void;

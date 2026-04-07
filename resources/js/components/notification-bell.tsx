@@ -26,6 +26,7 @@ function getNotificationIcon(type: AppNotificationType) {
         case 'task_status_changed':
             return <ArrowRightLeft className="h-4 w-4 text-blue-500" />;
         case 'task_assigned':
+        case 'project_assigned':
             return <UserPlus className="h-4 w-4 text-emerald-500" />;
         case 'task_at_risk':
             return <AlertTriangle className="h-4 w-4 text-orange-500" />;

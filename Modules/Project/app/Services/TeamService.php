@@ -4,11 +4,16 @@ namespace Modules\Project\Services;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Models\Project;
 
 class TeamService implements TeamServiceInterface
 {
+    public function __construct(
+        private readonly NotificationServiceInterface $notificationService
+    ) {}
+
     /**
      * Update project team (bulk update)
      */
@@ -28,7 +33,13 @@ class TeamService implements TeamServiceInterface
             DB::beginTransaction();
 
             if (is_array($data['team_members']) && ! empty($data['team_members'])) {
+                $oldUserIds = $project->team()->pluck('users.id')->toArray();
                 $this->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
+
+                $newUserIds = array_values(array_diff($data['team_members'], $oldUserIds));
+                if (! empty($newUserIds) && auth()->check()) {
+                    $this->notificationService->notifyProjectAssigned($project, $newUserIds, auth()->user());
+                }
             } else {
                 Log::info('Removing all team members from project', ['project_id' => $id]);
                 $project->team()->sync([]);

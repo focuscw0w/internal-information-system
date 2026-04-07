@@ -28,6 +28,7 @@ export type AppNotificationType =
     | 'deadline_approaching'
     | 'task_status_changed'
     | 'task_assigned'
+    | 'project_assigned'
     | 'task_at_risk'
     | 'project_overdue';
 

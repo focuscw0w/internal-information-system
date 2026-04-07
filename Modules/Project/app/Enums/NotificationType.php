@@ -7,6 +7,7 @@ enum NotificationType: string
     case DEADLINE_APPROACHING = 'deadline_approaching';
     case TASK_STATUS_CHANGED  = 'task_status_changed';
     case TASK_ASSIGNED        = 'task_assigned';
+    case PROJECT_ASSIGNED     = 'project_assigned';
     case TASK_AT_RISK         = 'task_at_risk';
     case PROJECT_OVERDUE      = 'project_overdue';
 
@@ -16,6 +17,7 @@ enum NotificationType: string
             self::DEADLINE_APPROACHING => 'Blížiaci sa termín',
             self::TASK_STATUS_CHANGED  => 'Zmena stavu úlohy',
             self::TASK_ASSIGNED        => 'Priradenie úlohy',
+            self::PROJECT_ASSIGNED     => 'Pridanie do projektu',
             self::TASK_AT_RISK         => 'Ohrozená úloha',
             self::PROJECT_OVERDUE      => 'Oneskorený projekt',
         };
@@ -27,6 +29,7 @@ enum NotificationType: string
             self::DEADLINE_APPROACHING => 'clock',
             self::TASK_STATUS_CHANGED  => 'arrow-right-left',
             self::TASK_ASSIGNED        => 'user-plus',
+            self::PROJECT_ASSIGNED     => 'user-plus',
             self::TASK_AT_RISK         => 'alert-triangle',
             self::PROJECT_OVERDUE      => 'alert-circle',
         };
@@ -38,6 +41,7 @@ enum NotificationType: string
             self::DEADLINE_APPROACHING => 'high',
             self::TASK_STATUS_CHANGED  => 'low',
             self::TASK_ASSIGNED        => 'medium',
+            self::PROJECT_ASSIGNED     => 'medium',
             self::TASK_AT_RISK         => 'high',
             self::PROJECT_OVERDUE      => 'high',
         };

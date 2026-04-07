@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
+use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Notifications\DeadlineApproachingNotification;
+use Modules\Project\Notifications\ProjectAssignedNotification;
 use Modules\Project\Notifications\TaskAssignedNotification;
 use Modules\Project\Notifications\TaskStatusChangedNotification;
 use Modules\Project\Services\NotificationService;
@@ -43,6 +45,21 @@ class NotificationServiceTest extends TestCase
 
         Notification::assertSentTo($assignee, TaskAssignedNotification::class);
         Notification::assertNotSentTo($assignedBy, TaskAssignedNotification::class);
+    }
+
+    #[Test]
+    public function it_notifies_new_project_members_except_the_assigning_user(): void
+    {
+        Notification::fake();
+
+        $assignedBy = User::factory()->create();
+        $member = User::factory()->create();
+        $project = Project::factory()->create(['owner_id' => $assignedBy->id]);
+
+        $this->service->notifyProjectAssigned($project, [$member->id, $assignedBy->id], $assignedBy);
+
+        Notification::assertSentTo($member, ProjectAssignedNotification::class);
+        Notification::assertNotSentTo($assignedBy, ProjectAssignedNotification::class);
     }
 
     #[Test]
@@ -166,6 +183,40 @@ class NotificationServiceTest extends TestCase
 
         Notification::assertSentTo($newAssignee, TaskAssignedNotification::class);
         Notification::assertNotSentTo($existingAssignee, TaskAssignedNotification::class);
+    }
+
+    #[Test]
+    public function updating_project_team_notifies_only_new_members(): void
+    {
+        Notification::fake();
+
+        $actor = User::factory()->create();
+        $existingMember = User::factory()->create();
+        $newMember = User::factory()->create();
+        $project = Project::factory()->create(['owner_id' => $actor->id]);
+        $project->team()->attach($existingMember->id, [
+            'permissions' => json_encode(['view_project', 'view_tasks']),
+            'allocation' => 100,
+        ]);
+
+        $this->actingAs($actor);
+
+        app(TeamServiceInterface::class)->updateProjectTeam($project->id, [
+            'team_members' => [$existingMember->id, $newMember->id],
+            'team_settings' => [
+                $existingMember->id => [
+                    'permissions' => ['view_project', 'view_tasks'],
+                    'allocation' => 100,
+                ],
+                $newMember->id => [
+                    'permissions' => ['view_project', 'view_tasks'],
+                    'allocation' => 100,
+                ],
+            ],
+        ]);
+
+        Notification::assertSentTo($newMember, ProjectAssignedNotification::class);
+        Notification::assertNotSentTo($existingMember, ProjectAssignedNotification::class);
     }
 
     private function createDatabaseNotification(User $user, mixed $readAt = null): mixed
