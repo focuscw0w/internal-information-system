@@ -136,6 +136,21 @@ class CapacityManagementServiceTest extends TestCase
         $this->assertEquals('Overloaded', $dashboard['alerts'][0]['name']);
     }
 
+    #[Test]
+    public function zero_capacity_record_does_not_cause_division_errors_and_returns_zero_utilization(): void
+    {
+        $user = User::factory()->create(['name' => 'Zero Capacity']);
+        EmployeeCapacity::create(['user_id' => $user->id, 'weekly_capacity_hours' => 0]);
+        $this->createWeeklyEntry($user, 8);
+
+        $person = collect($this->service->buildDashboard()['people'])->firstWhere('id', $user->id);
+
+        $this->assertEquals(0, $person['weekly_capacity_hours']);
+        $this->assertEquals(0.0, $person['weekly_utilization']);
+        $this->assertFalse($person['is_over_capacity']);
+        $this->assertEquals('green', $person['status']);
+    }
+
     // ── buildDashboard – free people ────────────────────────
 
     #[Test]

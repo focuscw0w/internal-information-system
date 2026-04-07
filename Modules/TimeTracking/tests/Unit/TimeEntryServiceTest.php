@@ -257,6 +257,33 @@ class TimeEntryServiceTest extends TestCase
     }
 
     #[Test]
+    public function date_range_filter_is_inclusive_of_boundary_dates(): void
+    {
+        TimeEntry::factory()->create([
+            'project_id' => $this->project->id,
+            'task_id' => $this->task->id,
+            'user_id' => $this->user->id,
+            'entry_date' => '2026-03-03',
+            'hours' => 1.5,
+        ]);
+
+        TimeEntry::factory()->create([
+            'project_id' => $this->project->id,
+            'task_id' => $this->task->id,
+            'user_id' => $this->user->id,
+            'entry_date' => '2026-03-07',
+            'hours' => 2.0,
+        ]);
+
+        $entries = $this->service->getByProject($this->project->id, [
+            'date_from' => '2026-03-03',
+            'date_to' => '2026-03-07',
+        ]);
+
+        $this->assertCount(2, $entries);
+    }
+
+    #[Test]
     public function it_returns_entries_by_task(): void
     {
         TimeEntry::factory()->count(2)->create([

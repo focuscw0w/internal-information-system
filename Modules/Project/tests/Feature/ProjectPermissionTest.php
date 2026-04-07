@@ -473,4 +473,34 @@ class ProjectPermissionTest extends TestCase
         $this->assertContains(ProjectPermission::CREATE_TASKS->value, $permissions);
         $this->assertContains(ProjectPermission::EDIT_TASKS->value, $permissions);
     }
+
+    public function test_user_permissions_returns_empty_array_for_invalid_json_in_pivot(): void
+    {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $project = $this->createProject($owner);
+
+        $project->team()->attach($member->id, [
+            'permissions' => '{broken-json}',
+            'allocation' => 100,
+        ]);
+
+        $this->assertSame([], $project->userPermissions($member));
+        $this->assertFalse($project->userHasPermission($member, ProjectPermission::VIEW_PROJECT->value));
+    }
+
+    public function test_update_progress_does_not_change_when_tasks_total_is_zero(): void
+    {
+        $project = Project::factory()->create([
+            'owner_id' => User::factory()->create()->id,
+            'tasks_total' => 0,
+            'tasks_completed' => 10,
+            'progress' => 55,
+        ]);
+
+        $project->updateProgress();
+        $project->refresh();
+
+        $this->assertSame(55, $project->progress);
+    }
 }

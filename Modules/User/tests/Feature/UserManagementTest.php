@@ -164,6 +164,23 @@ class UserManagementTest extends TestCase
         $this->assertFalse($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
     }
 
+     public function test_update_with_null_permissions_removes_existing_permissions(): void
+    {
+        $admin = $this->createAdmin();
+        $user = $this->createRegularUser();
+        $user->givePermissionTo(PermissionEnum::PROJECTS_CREATE->value);
+        $this->assertTrue($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
+
+        $this->actingAs($admin)->put("/users/{$user->id}", [
+            'name' => $user->name,
+            'email' => $user->email,
+            'permissions' => null,
+        ])->assertRedirect();
+
+        $user->refresh();
+        $this->assertFalse($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
+    }
+
     // =========================================================================
     // ADMIN – CHANGE PASSWORD
     // =========================================================================
