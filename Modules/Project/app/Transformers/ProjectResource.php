@@ -35,6 +35,7 @@ class ProjectResource extends JsonResource
             'owner_id' => $this->owner_id,
             'is_overdue' => $this->is_overdue,
             'days_remaining' => $this->days_remaining,
+            'is_at_risk' => $this->is_at_risk,
 
             'owner' => $this->whenLoaded('owner', function () {
                 return [
@@ -56,6 +57,8 @@ class ProjectResource extends JsonResource
                         'actual_hours' => (int) $task->actual_hours,
                         'start_date' => $task->start_date?->format('Y-m-d') ?? $task->created_at->format('Y-m-d'),
                         'due_date' => $task->due_date?->format('Y-m-d'),
+                        'is_at_risk' => $task->is_at_risk,
+                        'at_risk_reason' => $task->at_risk_reason,
                         'assigned_users' => $task->assignedUsers->map(function ($user) {
                             return [
                                 'id' => $user->id,

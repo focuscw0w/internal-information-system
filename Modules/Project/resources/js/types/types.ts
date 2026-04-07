@@ -1,6 +1,7 @@
 import { User } from '@/types';
 
 export type ProjectStatus = 'active' | 'planning' | 'completed' | 'on_hold' | 'cancelled';
+export type AtRiskReason = 'overdue' | 'stale' | 'no_progress';
 export type WorkloadLevel = 'low' | 'medium' | 'high' | 'overloaded';
 export type TaskPriority = 'low' | 'medium' | 'high';
 export type TaskStatus = 'todo' | 'in_progress' | 'testing' | 'done';
@@ -41,6 +42,7 @@ export interface Project {
     team_size: number;
     is_overdue: boolean;
     days_remaining: number;
+    is_at_risk?: boolean;
     tasks: Task[];
     allocations: ProjectAllocation[];
     activities?: Activity[];
@@ -75,6 +77,8 @@ export interface Task {
     start_date: string | null;
     due_date: string | null;
     completed_at: string | null;
+    is_at_risk?: boolean;
+    at_risk_reason?: AtRiskReason | null;
     assigned_users?: {
         id: number;
         name: string;

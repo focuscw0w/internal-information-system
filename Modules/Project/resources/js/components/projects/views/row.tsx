@@ -1,4 +1,4 @@
-import { Users } from 'lucide-react';
+import { AlertTriangle, Users } from 'lucide-react';
 import { Project } from '../../../types/types';
 import { BadgeLabel } from '../../ui/badge';
 import {
@@ -24,9 +24,17 @@ export const Row = ({ project, onClick }: RowProps) => {
                 <div className="flex items-center justify-between gap-6">
                     {/* Názov a status */}
                     <div className="min-w-0 lg:flex-1">
-                        <h3 className="mb-2 text-lg font-semibold text-gray-900">
-                            {project.name}
-                        </h3>
+                        <div className="mb-2 flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                                {project.name}
+                            </h3>
+                            {project.is_at_risk && (
+                                <span title="Projekt je ohrozený" className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                                    <AlertTriangle className="h-3 w-3" />
+                                    Ohrozený
+                                </span>
+                            )}
+                        </div>
                         <span
                             className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${getStatusColor(project.status)}`}
                         >

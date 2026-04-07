@@ -1,5 +1,6 @@
 import {
     AlertCircle,
+    AlertTriangle,
     CheckCircle,
     CircleDashed,
     PlayCircle,
@@ -29,9 +30,22 @@ export const TaskColumns: Column<Task>[] = [
             <div className="flex items-center gap-2 pr-4">
                 {getStatusIcon(task.status)}
                 <div>
-                    <p className="text-sm font-medium text-gray-900">
-                        {task.title}
-                    </p>
+                    <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-medium text-gray-900">
+                            {task.title}
+                        </p>
+                        {task.is_at_risk && (
+                            <span
+                                title={
+                                    task.at_risk_reason === 'overdue' ? 'Úloha je po termíne' :
+                                    task.at_risk_reason === 'stale' ? 'Žiadna aktivita viac ako 7 dní' :
+                                    'Blíži sa termín, úloha ešte nezačala'
+                                }
+                            >
+                                <AlertTriangle className="h-3.5 w-3.5 text-orange-500" />
+                            </span>
+                        )}
+                    </div>
                     {task.assigned_users && task.assigned_users.length > 0 && (
                         <p className="mt-0.5 text-xs text-gray-400">
                             👤{' '}
@@ -68,7 +82,7 @@ export const TaskColumns: Column<Task>[] = [
         width: 'w-32',
         render: (task) =>
             task.due_date ? (
-                <span className="text-sm text-gray-600">
+                <span className={`text-sm ${task.at_risk_reason === 'overdue' ? 'font-medium text-red-600' : 'text-gray-600'}`}>
                     {new Date(task.due_date).toLocaleDateString('sk-SK')}
                 </span>
             ) : (

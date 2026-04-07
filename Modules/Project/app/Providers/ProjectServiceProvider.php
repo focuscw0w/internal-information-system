@@ -19,7 +19,12 @@ use Modules\Project\Contracts\SubtaskServiceInterface;
 use Modules\Project\Services\SubtaskService;
 use Modules\Project\Services\CommentService;
 use Modules\Project\Contracts\CommentServiceInterface;
+use Modules\Project\Contracts\NotificationServiceInterface;
+use Modules\Project\Services\NotificationService;
 
+use Illuminate\Console\Scheduling\Schedule;
+use Modules\Project\Console\Commands\CheckAtRiskCommand;
+use Modules\Project\Console\Commands\CheckDeadlinesCommand;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -63,6 +68,7 @@ class ProjectServiceProvider extends ServiceProvider
         $this->app->bind(ActivityLogServiceInterface::class, ActivityLogService::class);
         $this->app->bind(SubtaskServiceInterface::class, SubtaskService::class);
         $this->app->bind(CommentServiceInterface::class, CommentService::class);
+        $this->app->bind(NotificationServiceInterface::class, NotificationService::class);
     }
 
     /**
@@ -70,7 +76,10 @@ class ProjectServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            CheckDeadlinesCommand::class,
+            CheckAtRiskCommand::class,
+        ]);
     }
 
      /**
@@ -90,10 +99,11 @@ class ProjectServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+            $schedule->command('project:check-deadlines')->dailyAt('08:00');
+            $schedule->command('project:check-at-risk')->dailyAt('09:00');
+        });
     }
 
     /**

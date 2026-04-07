@@ -134,7 +134,7 @@ export function Kanban({ project }: KanbanProps) {
                                                 id={task.id}
                                             >
                                                 <Card
-                                                    className={`transition-shadow hover:shadow-md ${canViewTasks ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
+                                                    className={`transition-shadow hover:shadow-md ${canViewTasks ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'} ${task.is_at_risk ? 'border-l-4 border-l-orange-400' : ''}`}
                                                     onClick={() =>
                                                         handleTaskClick(task.id)
                                                     }
@@ -170,7 +170,7 @@ export function Kanban({ project }: KanbanProps) {
                                         ) : (
                                             <Card
                                                 key={task.id}
-                                                className={`transition-shadow hover:shadow-md ${canViewTasks ? 'cursor-pointer' : 'cursor-default'}`}
+                                                className={`transition-shadow hover:shadow-md ${canViewTasks ? 'cursor-pointer' : 'cursor-default'} ${task.is_at_risk ? 'border-l-4 border-l-orange-400' : ''}`}
                                                 onClick={() =>
                                                     handleTaskClick(task.id)
                                                 }

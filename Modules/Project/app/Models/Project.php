@@ -52,6 +52,7 @@ class Project extends Model
         'team_size',
         'is_overdue',
         'days_remaining',
+        'is_at_risk',
     ];
 
     // Accessors
@@ -68,6 +69,23 @@ class Project extends Model
     public function getDaysRemainingAttribute(): int
     {
         return max(0, now()->diffInDays($this->end_date, false));
+    }
+
+    public function getIsAtRiskAttribute(): bool
+    {
+        if ($this->is_overdue) {
+            return true;
+        }
+
+        $activeTasks = $this->tasks->filter(fn (Task $t) => $t->status !== 'done');
+
+        if ($activeTasks->isEmpty()) {
+            return false;
+        }
+
+        $atRiskCount = $activeTasks->filter(fn (Task $t) => $t->is_at_risk)->count();
+
+        return ($atRiskCount / $activeTasks->count()) > 0.30;
     }
 
     // Scopes

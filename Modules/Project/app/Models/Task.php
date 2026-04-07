@@ -37,6 +37,8 @@ class Task extends Model
         'actual_hours' => 'integer',
     ];
 
+    protected $appends = ['is_at_risk', 'at_risk_reason'];
+
     protected static function boot()
     {
         parent::boot();
@@ -134,6 +136,56 @@ class Task extends Model
         return $this->due_date &&
             $this->due_date < now() &&
             $this->status !== 'done';
+    }
+
+    public function getIsAtRiskAttribute(): bool
+    {
+        if ($this->status === 'done') {
+            return false;
+        }
+
+        if ($this->isOverdue()) {
+            return true;
+        }
+
+        if (in_array($this->status, ['in_progress', 'testing'])
+            && $this->updated_at->lt(now()->subDays(7))) {
+            return true;
+        }
+
+        if ($this->due_date
+            && $this->due_date->isFuture()
+            && $this->due_date->diffInDays(now(), false) >= -3
+            && $this->status === 'todo') {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function getAtRiskReasonAttribute(): ?string
+    {
+        if ($this->status === 'done') {
+            return null;
+        }
+
+        if ($this->isOverdue()) {
+            return 'overdue';
+        }
+
+        if (in_array($this->status, ['in_progress', 'testing'])
+            && $this->updated_at->lt(now()->subDays(7))) {
+            return 'stale';
+        }
+
+        if ($this->due_date
+            && $this->due_date->isFuture()
+            && $this->due_date->diffInDays(now(), false) >= -3
+            && $this->status === 'todo') {
+            return 'no_progress';
+        }
+
+        return null;
     }
 
     protected static function newFactory(): TaskFactory

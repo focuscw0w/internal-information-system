@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Project\Http\Controllers\NotificationController;
 use Modules\Project\Http\Controllers\ProjectController;
 use Modules\Project\Http\Controllers\TaskController;
 use Modules\Project\Http\Controllers\SubtaskController;
@@ -80,4 +81,13 @@ Route::middleware(['web', 'auth'])
         // AI estimate endpoint
         Route::post('/tasks/estimate-ai', [TaskController::class, 'estimateWithAI'])
             ->name('tasks.estimate-ai');
+    });
+
+Route::middleware(['web', 'auth'])
+    ->prefix('notifications')
+    ->name('notifications.')
+    ->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::patch('/{id}/read', [NotificationController::class, 'markAsRead'])->name('mark-read');
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
     });

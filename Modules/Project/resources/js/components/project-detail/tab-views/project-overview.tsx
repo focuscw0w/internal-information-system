@@ -1,4 +1,4 @@
-import { Calendar, Clock, TrendingUp } from 'lucide-react';
+import { AlertTriangle, Calendar, Clock, TrendingUp } from 'lucide-react';
 import { Project } from '../../../types/types';
 import { StatCard } from '../../ui/statcard';
 import { TaskTable } from '../task-table/task-table';
@@ -15,6 +15,8 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
         project.capacity_available > 0
             ? (project.capacity_used / project.capacity_available) * 100
             : 0;
+
+    const atRiskTaskCount = project.tasks?.filter((t) => t.is_at_risk && t.status !== 'done').length ?? 0;
 
     return (
         <div className="space-y-6">
@@ -48,6 +50,15 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
                     iconColor="text-purple-600"
                     iconBgColor="bg-purple-50"
                     progress={project.progress}
+                />
+
+                <StatCard
+                    title="Ohrozené úlohy"
+                    value={String(atRiskTaskCount)}
+                    subtitle={atRiskTaskCount > 0 ? 'úlohy vyžadujú pozornosť' : 'žiadne problémy'}
+                    icon={AlertTriangle}
+                    iconColor={atRiskTaskCount > 0 ? 'text-red-600' : 'text-gray-400'}
+                    iconBgColor={atRiskTaskCount > 0 ? 'bg-red-50' : 'bg-gray-50'}
                 />
             </div>
 

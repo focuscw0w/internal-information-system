@@ -28,6 +28,7 @@ export const Card = ({ project, onClick }: CardProps) => {
                     name={project.name}
                     status={project.status}
                     workload={project.workload}
+                    isAtRisk={project.is_at_risk}
                 />
 
                 <div className="mb-4">

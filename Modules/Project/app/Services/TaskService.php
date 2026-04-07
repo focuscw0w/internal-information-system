@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Project\Contracts\ActivityLogServiceInterface;
+use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Contracts\TaskServiceInterface;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
@@ -13,7 +14,8 @@ use Modules\Project\Models\Task;
 class TaskService implements TaskServiceInterface
 {
     public function __construct(
-        protected ActivityLogServiceInterface $activityLog
+        protected ActivityLogServiceInterface $activityLog,
+        protected NotificationServiceInterface $notificationService
     ) {}
 
     /**
@@ -166,6 +168,11 @@ class TaskService implements TaskServiceInterface
             ['old_users' => $oldUsers, 'new_users' => $userIds]
         );
 
+        $newUserIds = array_values(array_diff($userIds, $oldUsers));
+        if (! empty($newUserIds) && auth()->check()) {
+            $this->notificationService->notifyTaskAssigned($task, $newUserIds, auth()->user());
+        }
+
         return $task->fresh(['assignedUsers']);
     }
 
@@ -188,6 +195,8 @@ class TaskService implements TaskServiceInterface
             $task,
             ['old_status' => $oldStatus, 'new_status' => $status]
         );
+
+        $this->notificationService->notifyTaskStatusChanged($task, $oldStatus, $status);
 
         return $task->fresh();
     }
