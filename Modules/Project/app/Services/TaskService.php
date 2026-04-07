@@ -78,6 +78,10 @@ class TaskService implements TaskServiceInterface
 
             if (! empty($data['assigned_users'])) {
                 $task->assignedUsers()->sync($data['assigned_users']);
+
+                if (auth()->check()) {
+                    $this->notificationService->notifyTaskAssigned($task, $data['assigned_users'], auth()->user());
+                }
             }
 
             $this->activityLog->log(
@@ -113,7 +117,13 @@ class TaskService implements TaskServiceInterface
         ]);
 
         if (array_key_exists('assigned_users', $data)) {
+            $oldUsers = $task->assignedUsers()->pluck('users.id')->toArray();
             $task->assignedUsers()->sync($data['assigned_users']);
+
+            $newUserIds = array_values(array_diff($data['assigned_users'], $oldUsers));
+            if (! empty($newUserIds) && auth()->check()) {
+                $this->notificationService->notifyTaskAssigned($task, $newUserIds, auth()->user());
+            }
         }
 
         if (! empty($changes)) {

@@ -11,6 +11,7 @@ use Modules\Project\Notifications\DeadlineApproachingNotification;
 use Modules\Project\Notifications\TaskAssignedNotification;
 use Modules\Project\Notifications\TaskStatusChangedNotification;
 use Modules\Project\Services\NotificationService;
+use Modules\Project\Services\TaskService;
 use Modules\User\Models\User;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -120,6 +121,51 @@ class NotificationServiceTest extends TestCase
         $this->assertSame(2, $marked);
         $this->assertSame(0, $user->unreadNotifications()->count());
         $this->assertSame(1, $otherUser->unreadNotifications()->count());
+    }
+
+    #[Test]
+    public function creating_a_task_notifies_initial_assignees(): void
+    {
+        Notification::fake();
+
+        $actor = User::factory()->create();
+        $assignee = User::factory()->create();
+        $project = Project::factory()->create(['owner_id' => $actor->id]);
+
+        $this->actingAs($actor);
+
+        app(TaskService::class)->createTask($project->id, [
+            'title' => 'Nová úloha',
+            'description' => null,
+            'priority' => 'medium',
+            'estimated_hours' => 4,
+            'due_date' => now()->addWeek()->toDateString(),
+            'assigned_users' => [$assignee->id],
+        ]);
+
+        Notification::assertSentTo($assignee, TaskAssignedNotification::class);
+    }
+
+    #[Test]
+    public function updating_a_task_notifies_only_new_assignees(): void
+    {
+        Notification::fake();
+
+        $actor = User::factory()->create();
+        $existingAssignee = User::factory()->create();
+        $newAssignee = User::factory()->create();
+        $project = Project::factory()->create(['owner_id' => $actor->id]);
+        $task = Task::factory()->create(['project_id' => $project->id]);
+        $task->assignedUsers()->attach($existingAssignee->id);
+
+        $this->actingAs($actor);
+
+        app(TaskService::class)->updateTask($task->id, [
+            'assigned_users' => [$existingAssignee->id, $newAssignee->id],
+        ]);
+
+        Notification::assertSentTo($newAssignee, TaskAssignedNotification::class);
+        Notification::assertNotSentTo($existingAssignee, TaskAssignedNotification::class);
     }
 
     private function createDatabaseNotification(User $user, mixed $readAt = null): mixed
