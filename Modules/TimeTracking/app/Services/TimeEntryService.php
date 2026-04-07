@@ -55,11 +55,11 @@ class TimeEntryService implements TimeEntryServiceInterface
         }
 
         if (isset($filters['date_from'])) {
-            $query->where('entry_date', '>=', $filters['date_from']);
+            $query->whereDate('entry_date', '>=', $filters['date_from']);
         }
 
         if (isset($filters['date_to'])) {
-            $query->where('entry_date', '<=', $filters['date_to']);
+            $query->whereDate('entry_date', '<=', $filters['date_to']);
         }
 
         return $query->get();
