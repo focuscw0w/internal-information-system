@@ -36,7 +36,7 @@ class TaskStatusChangedNotification extends Notification implements ShouldQueue
         return [
             'type'         => $type->value,
             'title'        => $type->label(),
-            'message'      => "{$this->changedBy->name} zmenil stav úlohy \"{$this->task->title}\" z „{$oldLabel}" na „{$newLabel}".",
+            'message'      => "{$this->changedBy->name} zmenil stav úlohy \"{$this->task->title}\" z \"{$oldLabel}\" na \"{$newLabel}\".",
             'project_id'   => $this->task->project_id,
             'project_name' => $this->task->project?->name ?? '',
             'task_id'      => $this->task->id,

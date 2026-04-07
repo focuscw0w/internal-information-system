@@ -10,6 +10,7 @@ interface NotificationMeta {
 
 interface NotificationsResponse {
     data: AppNotification[];
+    unread_count: number;
     meta: NotificationMeta;
 }
 

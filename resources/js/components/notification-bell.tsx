@@ -81,14 +81,13 @@ function NotificationItem({ notification, onRead }: { notification: AppNotificat
 
 export function NotificationBell() {
     const { props } = usePage<SharedData>();
-    const unreadCount = props.notifications?.unread_count ?? 0;
-
     const [open, setOpen] = useState(false);
     const { data, isLoading } = useNotifications();
     const { mutate: markAsRead } = useMarkAsRead();
     const { mutate: markAllAsRead } = useMarkAllAsRead();
 
     const notifications = data?.data ?? [];
+    const unreadCount = data?.unread_count ?? props.notifications?.unread_count ?? 0;
 
     return (
         <DropdownMenu open={open} onOpenChange={setOpen}>
