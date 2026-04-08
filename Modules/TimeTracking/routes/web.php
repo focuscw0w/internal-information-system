@@ -18,9 +18,9 @@ Route::middleware(['web', 'auth'])->group(function () {
 
 
     // Time entries scoped to project
-    // TODO: pridať middleware
     Route::prefix('projects/{projectId}/time-entries')
         ->name('projects.time-entries.')
+        ->middleware('check.project.permission:view_project')
         ->group(function () {
             Route::get('/', [TimeEntryController::class, 'index'])->name('index');
             Route::post('/', [TimeEntryController::class, 'store'])->name('store');

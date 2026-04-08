@@ -23,7 +23,7 @@ class CheckProjectPermission
             return $next($request);
         }
 
-        $projectId = $request->route('id');
+        $projectId = $request->route('id') ?? $request->route('projectId');
         $project = Project::findOrFail($projectId);
 
         foreach ($permissions as $permission) {

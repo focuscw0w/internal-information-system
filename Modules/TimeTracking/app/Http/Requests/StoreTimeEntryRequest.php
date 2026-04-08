@@ -4,6 +4,7 @@ namespace Modules\TimeTracking\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Project\Models\Project;
+use Modules\Project\Models\Task;
 
 class StoreTimeEntryRequest extends FormRequest
 {
@@ -26,7 +27,15 @@ class StoreTimeEntryRequest extends FormRequest
                 'integer',
                 'exists:tasks,id',
                 function ($attribute, $value, $fail) {
-                    $project = Project::find($this->route('projectId'));
+                    $routeProjectId = (int) $this->route('projectId');
+                    $task = Task::find($value);
+
+                    if (! $task || $task->project_id !== $routeProjectId) {
+                        $fail('The selected task does not belong to this project.');
+                        return;
+                    }
+
+                    $project = Project::find($routeProjectId);
 
                     if ($project && $project->userHasPermission(auth()->user(), 'manage_team')) {
                         return;

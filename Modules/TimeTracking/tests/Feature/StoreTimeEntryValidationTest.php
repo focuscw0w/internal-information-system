@@ -2,6 +2,7 @@
 
 namespace Modules\TimeTracking\Tests\Feature;
 
+use Database\Seeders\PermissionSeeder;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,6 +21,7 @@ class StoreTimeEntryValidationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(PermissionSeeder::class);
 
         $this->user = User::factory()->create();
         $this->project = Project::factory()->create(['owner_id' => $this->user->id]);

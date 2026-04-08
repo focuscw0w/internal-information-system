@@ -12,6 +12,7 @@ use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Http\Requests\StoreTimeEntryRequest;
 use Modules\TimeTracking\Http\Requests\UpdateTimeEntryRequest;
 use Modules\Project\Models\Project;
+use Modules\TimeTracking\Models\TimeEntry;
 
 class TimeEntryController extends Controller
 {
@@ -63,6 +64,11 @@ class TimeEntryController extends Controller
      */
     public function update(UpdateTimeEntryRequest $request, int $projectId, int $entryId): RedirectResponse
     {
+        $entry = TimeEntry::find($entryId);
+        if (! $entry || $entry->project_id !== $projectId) {
+            return back()->with('error', 'Time entry not found.');
+        }
+
         $updated = $this->timeEntryService->update($entryId, $request->validated());
 
         if (! $updated) {
@@ -77,6 +83,11 @@ class TimeEntryController extends Controller
      */
     public function destroy(int $projectId, int $entryId): RedirectResponse
     {
+        $entry = TimeEntry::find($entryId);
+        if (! $entry || $entry->project_id !== $projectId) {
+            return back()->with('error', 'Time entry not found.');
+        }
+
         $deleted = $this->timeEntryService->delete($entryId);
 
         if (! $deleted) {

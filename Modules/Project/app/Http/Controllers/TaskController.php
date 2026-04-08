@@ -36,14 +36,14 @@ class TaskController extends Controller
     {
         $task = $this->taskService->getTaskById($taskId);
         if (! $task) {
-            return redirect()->route('projects.show', $projectId);
+            return redirect()->route('projects.project-detail', $projectId);
         }
 
         $task->load(['subtasks', 'assignedUsers', 'comments.user']);
 
         $project = $this->projectService->getProjectById($projectId);
         if (! $project) {
-            return redirect()->route('projects.show', $projectId);
+            return redirect()->route('projects.projects');
         }
 
         $project->load(['owner', 'team', 'tasks.assignedUsers', 'allocations.user', 'activities.user']);
