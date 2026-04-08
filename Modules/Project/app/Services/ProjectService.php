@@ -14,12 +14,15 @@ use App\Enums\PermissionEnum;
 
 class ProjectService implements ProjectServiceInterface
 {
+    /**
+     * Create a new project service instance.
+     */
     public function __construct(
         protected TeamServiceInterface $teamService
     ) {}
 
     /**
-     * Get all projects with optional filters
+     * Get all projects with optional filters.
      */
     public function getAllProjects(array $filters = []): Collection
     {
@@ -58,7 +61,7 @@ class ProjectService implements ProjectServiceInterface
     }
 
     /**
-     * Get project by ID
+     * Get a project by its identifier.
      */
     public function getProjectById(int $id): ?Project
     {
@@ -72,7 +75,7 @@ class ProjectService implements ProjectServiceInterface
     }
 
     /**
-     * Create new project
+     * Create a new project.
      */
     public function createProject(array $data): Project
     {
@@ -115,7 +118,7 @@ class ProjectService implements ProjectServiceInterface
     }
 
     /**
-     * Update project
+     * Update an existing project.
      */
     public function updateProject(int $id, array $data): ?Project
     {
@@ -168,7 +171,7 @@ class ProjectService implements ProjectServiceInterface
     }
 
     /**
-     * Delete project
+     * Delete a project.
      */
     public function deleteProject(int $id): bool
     {
@@ -186,7 +189,7 @@ class ProjectService implements ProjectServiceInterface
     }
 
     /**
-     * Get project statistics
+     * Get project statistics.
      */
     public function getProjectStatistics(): array
     {
@@ -212,7 +215,7 @@ class ProjectService implements ProjectServiceInterface
     }
 
     /**
-     * Update project progress based on tasks
+     * Update project progress based on tasks.
      */
     public function updateProjectProgress(int $projectId): ?Project
     {
@@ -230,7 +233,7 @@ class ProjectService implements ProjectServiceInterface
     }
 
     /**
-     * Get projects by status
+     * Get projects by status.
      */
     public function getProjectsByStatus(string $status): Collection
     {
@@ -240,7 +243,7 @@ class ProjectService implements ProjectServiceInterface
     }
 
     /**
-     * Get overdue projects
+     * Get overdue projects.
      */
     public function getOverdueProjects(): Collection
     {
@@ -251,7 +254,7 @@ class ProjectService implements ProjectServiceInterface
     }
 
     /**
-     * Get summary of user's projects
+     * Get a summary of the user's projects.
      */
     public function getUserProjectsSummary(User $user): array
     {
@@ -262,6 +265,9 @@ class ProjectService implements ProjectServiceInterface
         return ProjectSummaryResource::collectionForUser($projects, $user->id)->toArray();
     }
 
+    /**
+     * Get active projects with incomplete tasks for forecasting.
+     */
     public function getActiveProjectsWithIncompleteTasks(): Collection
     {
         return Project::query()

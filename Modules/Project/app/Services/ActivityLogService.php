@@ -10,7 +10,7 @@ use Modules\Project\Models\ActivityLog;
 class ActivityLogService implements ActivityLogServiceInterface
 {
     /**
-     * Log an activity
+     * Log an activity.
      */
     public function log(
         int $projectId,
@@ -31,7 +31,7 @@ class ActivityLogService implements ActivityLogServiceInterface
     }
 
     /**
-     * Get activities for a project
+     * Get activities for a project.
      */
     public function getProjectActivities(int $projectId, int $limit = 50): Collection
     {

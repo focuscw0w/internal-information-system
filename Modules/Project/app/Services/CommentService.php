@@ -8,6 +8,9 @@ use Modules\Project\Models\Task;
 
 class CommentService implements CommentServiceInterface
 {
+    /**
+     * Store a new comment for the given task.
+     */
     public function store(Task $task, int $userId, array $data): Comment
     {
         return $task->comments()->create([

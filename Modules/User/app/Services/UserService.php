@@ -8,13 +8,16 @@ use Modules\User\Models\User;
 
 class UserService implements UserServiceInterface
 {
+    /**
+     * Get all users for capacity and assignment lookups.
+     */
     public function getAllUsers(): Collection
     {
         return User::query()->orderBy('name')->get(['id', 'name', 'email']);
     }
 
     /**
-     * Create a new user and assign permissions
+     * Create a new user and assign permissions.
      */
     public function createUser(array $data): void
     {
@@ -26,7 +29,7 @@ class UserService implements UserServiceInterface
     }
 
     /**
-     * Update user information and permissions
+     * Update user information and permissions.
      */
     public function updateUser(User $user, array $data): void
     {
@@ -44,7 +47,7 @@ class UserService implements UserServiceInterface
     }
 
     /**
-     * Delete a user
+     * Delete a user.
      */
     public function deleteUser(User $user): void
     {

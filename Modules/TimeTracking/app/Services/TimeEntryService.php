@@ -13,6 +13,9 @@ use Modules\User\Models\User;
 
 class TimeEntryService implements TimeEntryServiceInterface
 {
+    /**
+     * Get total tracked hours per user in a time period.
+     */
     public function getTotalHoursPerUserInPeriod(Carbon $from, Carbon $to): Collection
     {
         return TimeEntry::query()
@@ -22,6 +25,9 @@ class TimeEntryService implements TimeEntryServiceInterface
             ->pluck('total', 'user_id');
     }
 
+    /**
+     * Get tracked hours grouped by week and user.
+     */
     public function getHoursGroupedByWeekAndUser(Carbon $from, Carbon $to): array
     {
         return TimeEntry::query()

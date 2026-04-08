@@ -17,21 +17,14 @@ use Modules\User\Models\User;
 
 class NotificationService implements NotificationServiceInterface
 {
+    /**
+     * Notify task stakeholders about a status change.
+     */
     public function notifyTaskStatusChanged(Task $task, string $oldStatus, string $newStatus): void
     {
         $task->load(['assignedUsers', 'project.owner']);
-
         $actorId = Auth::id();
-
-        $recipients = collect();
-
-        if ($task->assignedUsers) {
-            $recipients = $recipients->merge($task->assignedUsers);
-        }
-
-        if ($task->project?->owner) {
-            $recipients->push($task->project->owner);
-        }
+        $recipients = $this->getTaskRecipients($task);
 
         $notification = new TaskStatusChangedNotification(
             $task,
@@ -45,6 +38,9 @@ class NotificationService implements NotificationServiceInterface
             ->each(fn (User $user) => $user->notify($notification));
     }
 
+    /**
+     * Notify newly assigned users about a task assignment.
+     */
     public function notifyTaskAssigned(Task $task, array $newUserIds, User $assignedBy): void
     {
         if (empty($newUserIds)) {
@@ -61,6 +57,9 @@ class NotificationService implements NotificationServiceInterface
             ->each(fn (User $u) => $u->notify($notification));
     }
 
+    /**
+     * Notify newly assigned users about a project assignment.
+     */
     public function notifyProjectAssigned(Project $project, array $newUserIds, User $assignedBy): void
     {
         if (empty($newUserIds)) {
@@ -74,19 +73,13 @@ class NotificationService implements NotificationServiceInterface
             ->each(fn (User $u) => $u->notify($notification));
     }
 
+    /**
+     * Notify task stakeholders about an upcoming deadline.
+     */
     public function notifyDeadlineApproaching(Task $task, int $daysRemaining): void
     {
         $task->load(['assignedUsers', 'project.owner']);
-
-        $recipients = collect();
-
-        if ($task->assignedUsers) {
-            $recipients = $recipients->merge($task->assignedUsers);
-        }
-
-        if ($task->project?->owner) {
-            $recipients->push($task->project->owner);
-        }
+        $recipients = $this->getTaskRecipients($task);
 
         $notification = new DeadlineApproachingNotification($task, $daysRemaining);
 
@@ -108,21 +101,18 @@ class NotificationService implements NotificationServiceInterface
         });
     }
 
+    /**
+     * Notify stakeholders that a task or project is at risk.
+     */
     public function notifyAtRisk(Task|Project $subject, string $reason): void
     {
-        $recipients = collect();
-
         if ($subject instanceof Task) {
             $subject->load(['assignedUsers', 'project.owner']);
-            if ($subject->assignedUsers) {
-                $recipients = $recipients->merge($subject->assignedUsers);
-            }
-            if ($subject->project?->owner) {
-                $recipients->push($subject->project->owner);
-            }
+            $recipients = $this->getTaskRecipients($subject);
             $notificationClass = AtRiskNotification::class;
         } else {
             $subject->load('owner');
+            $recipients = collect();
             if ($subject->owner) {
                 $recipients->push($subject->owner);
             }
@@ -151,6 +141,9 @@ class NotificationService implements NotificationServiceInterface
         });
     }
 
+    /**
+     * Notify the project owner that a project is overdue.
+     */
     public function notifyProjectOverdue(Project $project): void
     {
         $project->load('owner');
@@ -174,11 +167,17 @@ class NotificationService implements NotificationServiceInterface
         }
     }
 
+    /**
+     * Get paginated notifications for a user.
+     */
     public function getUserNotifications(User $user, int $perPage = 20): LengthAwarePaginator
     {
         return $user->notifications()->paginate($perPage);
     }
 
+    /**
+     * Mark a single notification as read.
+     */
     public function markAsRead(string $notificationId, User $user): bool
     {
         $notification = $user->notifications()->where('id', $notificationId)->first();
@@ -192,11 +191,32 @@ class NotificationService implements NotificationServiceInterface
         return true;
     }
 
+    /**
+     * Mark all unread notifications as read.
+     */
     public function markAllAsRead(User $user): int
     {
         $count = $user->unreadNotifications()->count();
         $user->unreadNotifications()->update(['read_at' => now()]);
 
         return $count;
+    }
+
+    /**
+     * Get all task recipients for notifications.
+     */
+    private function getTaskRecipients(Task $task)
+    {
+        $recipients = collect();
+
+        if ($task->assignedUsers) {
+            $recipients = $recipients->merge($task->assignedUsers);
+        }
+
+        if ($task->project?->owner) {
+            $recipients->push($task->project->owner);
+        }
+
+        return $recipients;
     }
 }

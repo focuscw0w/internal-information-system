@@ -10,12 +10,15 @@ use Modules\Project\Models\Project;
 
 class TeamService implements TeamServiceInterface
 {
+    /**
+     * Create a new team service instance.
+     */
     public function __construct(
         private readonly NotificationServiceInterface $notificationService
     ) {}
 
     /**
-     * Update project team (bulk update)
+     * Update project team in a single operation.
      */
     public function updateProjectTeam(int $id, array $data): ?Project
     {
@@ -70,7 +73,7 @@ class TeamService implements TeamServiceInterface
     }
 
     /**
-     * Sync team members with their settings
+     * Sync team members with their settings.
      */
     public function syncTeamMembers(Project $project, array $userIds, array $settings): void
     {

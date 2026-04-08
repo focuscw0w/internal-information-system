@@ -13,13 +13,16 @@ use Modules\Project\Models\Task;
 
 class TaskService implements TaskServiceInterface
 {
+    /**
+     * Create a new task service instance.
+     */
     public function __construct(
         protected ActivityLogServiceInterface $activityLog,
         protected NotificationServiceInterface $notificationService
     ) {}
 
     /**
-     * Detect changes between model and new data
+     * Detect changes between the task and new payload.
      */
     private function detectChanges(Task $task, array $data, array $fields): array
     {
@@ -38,7 +41,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Get all tasks for a project
+     * Get all tasks for a project.
      */
     public function getAllTasks(int $projectId): Collection
     {
@@ -50,7 +53,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Get task-detail by ID
+     * Get a task by its identifier.
      */
     public function getTaskById(int $taskId): ?Task
     {
@@ -59,7 +62,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Create new task-detail
+     * Create a new task for the given project.
      */
     public function createTask(int $projectId, array $data): Task
     {
@@ -96,7 +99,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Update existing task-detail
+     * Update an existing task.
      */
     public function updateTask(int $taskId, array $data): Task
     {
@@ -140,7 +143,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Delete task-detail
+     * Delete an existing task.
      */
     public function deleteTask(int $taskId): bool
     {
@@ -160,7 +163,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Assign task-detail to user
+     * Assign users to a task.
      */
     public function assignTask(int $taskId, array $userIds): Task
     {
@@ -187,7 +190,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Update task-detail status
+     * Update the status of a task.
      */
     public function updateTaskStatus(int $taskId, string $status): Task
     {
@@ -212,7 +215,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Get all tasks assigned to user
+     * Get all tasks assigned to a user.
      */
     public function getTasksByUser(int $userId): Collection
     {
@@ -225,7 +228,7 @@ class TaskService implements TaskServiceInterface
     }
 
     /**
-     * Estimate task-detail hours using AI
+     * Estimate task hours using AI.
      */
     public function estimateTaskWithAI(string $title, string $description): float
     {

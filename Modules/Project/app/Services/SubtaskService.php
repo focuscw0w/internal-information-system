@@ -10,7 +10,7 @@ use Modules\Project\Models\Task;
 class SubtaskService implements SubtaskServiceInterface
 {
     /**
-     * Create a new subtask
+     * Create a new subtask.
      */
     public function createSubtask(int $taskId, array $data): Subtask
     {
@@ -28,7 +28,7 @@ class SubtaskService implements SubtaskServiceInterface
     }
 
     /**
-     * Update a subtask
+     * Update a subtask.
      */
     public function updateSubtask(int $subtaskId, array $data): Subtask
     {
@@ -42,7 +42,7 @@ class SubtaskService implements SubtaskServiceInterface
     }
 
     /**
-     * Toggle subtask completion
+     * Toggle subtask completion.
      */
     public function toggleSubtask(int $subtaskId): Subtask
     {
@@ -59,7 +59,7 @@ class SubtaskService implements SubtaskServiceInterface
     }
 
     /**
-     * Delete a subtask
+     * Delete a subtask.
      */
     public function deleteSubtask(int $subtaskId): bool
     {
