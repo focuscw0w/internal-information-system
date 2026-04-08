@@ -94,4 +94,4 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/settings.php';
-require base_path('Modules/User/Routes/auth.php');
+require base_path('Modules/User/routes/auth.php');
