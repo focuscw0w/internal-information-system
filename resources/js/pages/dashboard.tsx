@@ -62,9 +62,6 @@ interface TimeWeekToDate {
     logged_hours: number;
     today_hours: number;
     entries_count: number;
-    unsubmitted_hours: number;
-    approved_hours: number;
-    approval_enabled: boolean;
 }
 
 interface DashboardProps {
@@ -162,7 +159,7 @@ export default function Dashboard({
                                     po termíne.
                                 </CardDescription>
                             </div>
-                            <Button variant="outline" size="sm" asChild>
+                            <Button variant="default" size="sm" asChild>
                                 <Link href="/projects">Otvoriť projekty</Link>
                             </Button>
                         </CardHeader>
@@ -231,21 +228,8 @@ export default function Dashboard({
                                 label="Počet záznamov"
                                 value={String(timeWeekToDate.entries_count)}
                             />
-                            <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
-                                Approval workflow zatiaľ nie je v dátach
-                                zapnutý, preto sa všetky WTD hodiny zobrazujú
-                                ako neodoslané.
-                            </div>
-                            <MetricRow
-                                label="Neodoslané"
-                                value={`${formatHours(timeWeekToDate.unsubmitted_hours)} h`}
-                            />
-                            <MetricRow
-                                label="Schválené"
-                                value={`${formatHours(timeWeekToDate.approved_hours)} h`}
-                            />
                             <Button
-                                variant="outline"
+                                variant="default"
                                 className="w-full"
                                 asChild
                             >
