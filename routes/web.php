@@ -7,7 +7,9 @@ use Modules\Project\Models\Task;
 use Modules\TimeTracking\Models\TimeEntry;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
 })->name('home');
 
 Route::middleware('auth')->group(function () {
