@@ -11,38 +11,35 @@ use Modules\User\Contracts\UserServiceInterface;
 
 class CapacityManagementService implements CapacityManagementServiceInterface
 {
+    /**
+     * Create a new capacity management service instance.
+     */
     public function __construct(
         private readonly UserServiceInterface $userService,
         private readonly TimeEntryServiceInterface $timeEntryService,
         private readonly ProjectServiceInterface $projectService,
     ) {}
 
+    /**
+     * Build capacity dashboard data for the whole team.
+     */
     public function buildDashboard(): array
     {
         $users = $this->userService->getAllUsers();
-        $startOfWeek = now()->startOfWeek();
-        $endOfWeek = now()->endOfWeek();
-        $startOfMonth = now()->startOfMonth();
-        $endOfMonth = now()->endOfMonth();
+        $periods = $this->getDashboardPeriods();
+        $capacityData = $this->getCapacityData($users, $periods['start_of_month'], $periods['end_of_month']);
 
-        $weeklyByUser = $this->timeEntryService->getTotalHoursPerUserInPeriod($startOfWeek, $endOfWeek);
-        $monthlyByUser = $this->timeEntryService->getTotalHoursPerUserInPeriod($startOfMonth, $endOfMonth);
-
-        $capacities = EmployeeCapacity::query()->pluck('weekly_capacity_hours', 'user_id');
-        $weeksInMonth = max(1, (int) ceil($startOfMonth->diffInDays($endOfMonth->copy()->addDay()) / 7));
-
-        $capacitiesMap = $users->mapWithKeys(fn ($u) => [
-            $u->id => (int) ($capacities[$u->id] ?? 40),
-        ])->all();
+        $weeklyByUser = $this->timeEntryService->getTotalHoursPerUserInPeriod($periods['start_of_week'], $periods['end_of_week']);
+        $monthlyByUser = $this->timeEntryService->getTotalHoursPerUserInPeriod($periods['start_of_month'], $periods['end_of_month']);
 
         $userIds = $users->pluck('id')->all();
-        $history = $this->buildHistory($capacitiesMap, $userIds);
+        $history = $this->buildHistory($capacityData['capacities_map'], $userIds);
 
-        $people = $users->map(function ($user) use ($weeklyByUser, $monthlyByUser, $capacitiesMap, $weeksInMonth, $history) {
-            $weeklyCapacity = $capacitiesMap[$user->id];
+        $people = $users->map(function ($user) use ($weeklyByUser, $monthlyByUser, $capacityData, $history) {
+            $weeklyCapacity = $capacityData['capacities_map'][$user->id];
             $weeklyLoadHours = (float) ($weeklyByUser[$user->id] ?? 0);
             $monthlyLoadHours = (float) ($monthlyByUser[$user->id] ?? 0);
-            $monthlyCapacity = $weeklyCapacity * $weeksInMonth;
+            $monthlyCapacity = $weeklyCapacity * $capacityData['weeks_in_month'];
 
             $utilization = $this->toPercentage($weeklyLoadHours, $weeklyCapacity);
             $monthlyUtilization = $this->toPercentage($monthlyLoadHours, $monthlyCapacity);
@@ -65,43 +62,22 @@ class CapacityManagementService implements CapacityManagementServiceInterface
             ];
         })->values();
 
-        $teamWeeklyCapacity = (int) $people->sum('weekly_capacity_hours');
-        $teamWeeklyLoad = (float) $people->sum('weekly_load_hours');
-        $teamMonthlyCapacity = (int) $people->sum('monthly_capacity_hours');
-        $teamMonthlyLoad = (float) $people->sum('monthly_load_hours');
-
-        $freePeople = $people
-            ->where('weekly_utilization', '<', 80)
-            ->sortByDesc('free_capacity_hours')
-            ->values();
-
-        $alerts = $people
-            ->where('is_over_capacity', true)
-            ->map(fn (array $person) => [
-                'id' => $person['id'],
-                'name' => $person['name'],
-                'weekly_utilization' => $person['weekly_utilization'],
-            ])->values();
+        $overview = $this->buildOverview($people);
 
         return [
             'people' => $people,
-            'alerts' => $alerts,
-            'free_people' => $freePeople,
-            'weekly_overview' => [
-                'capacity_hours' => $teamWeeklyCapacity,
-                'load_hours' => round($teamWeeklyLoad, 2),
-                'utilization' => $this->toPercentage($teamWeeklyLoad, $teamWeeklyCapacity),
-            ],
-            'monthly_overview' => [
-                'capacity_hours' => $teamMonthlyCapacity,
-                'load_hours' => round($teamMonthlyLoad, 2),
-                'utilization' => $this->toPercentage($teamMonthlyLoad, $teamMonthlyCapacity),
-            ],
-            'prediction' => $this->buildPrediction($people, $teamWeeklyCapacity),
+            'alerts' => $this->buildAlerts($people),
+            'free_people' => $this->getFreePeople($people),
+            'weekly_overview' => $overview['weekly'],
+            'monthly_overview' => $overview['monthly'],
+            'prediction' => $this->buildPrediction($overview['weekly']['capacity_hours']),
             'history' => $history['team'],
         ];
     }
 
+    /**
+     * Store weekly capacity hours for a user.
+     */
     public function setWeeklyCapacityForUser(int $userId, int $hours): void
     {
         EmployeeCapacity::query()->updateOrCreate(
@@ -110,7 +86,90 @@ class CapacityManagementService implements CapacityManagementServiceInterface
         );
     }
 
-    private function buildPrediction($people, int $teamWeeklyCapacity): array
+    /**
+     * Get the date periods used across dashboard calculations.
+     */
+    private function getDashboardPeriods(): array
+    {
+        return [
+            'start_of_week' => now()->startOfWeek(),
+            'end_of_week' => now()->endOfWeek(),
+            'start_of_month' => now()->startOfMonth(),
+            'end_of_month' => now()->endOfMonth(),
+        ];
+    }
+
+    /**
+     * Prepare capacity mapping and derived monthly values.
+     */
+    private function getCapacityData($users, Carbon $startOfMonth, Carbon $endOfMonth): array
+    {
+        $capacities = EmployeeCapacity::query()->pluck('weekly_capacity_hours', 'user_id');
+        $weeksInMonth = max(1, (int) ceil($startOfMonth->diffInDays($endOfMonth->copy()->addDay()) / 7));
+
+        $capacitiesMap = $users->mapWithKeys(fn ($user) => [
+            $user->id => (int) ($capacities[$user->id] ?? 40),
+        ])->all();
+
+        return [
+            'capacities_map' => $capacitiesMap,
+            'weeks_in_month' => $weeksInMonth,
+        ];
+    }
+
+    /**
+     * Build weekly and monthly capacity overviews.
+     */
+    private function buildOverview($people): array
+    {
+        $teamWeeklyCapacity = (int) $people->sum('weekly_capacity_hours');
+        $teamWeeklyLoad = (float) $people->sum('weekly_load_hours');
+        $teamMonthlyCapacity = (int) $people->sum('monthly_capacity_hours');
+        $teamMonthlyLoad = (float) $people->sum('monthly_load_hours');
+
+        return [
+            'weekly' => [
+                'capacity_hours' => $teamWeeklyCapacity,
+                'load_hours' => round($teamWeeklyLoad, 2),
+                'utilization' => $this->toPercentage($teamWeeklyLoad, $teamWeeklyCapacity),
+            ],
+            'monthly' => [
+                'capacity_hours' => $teamMonthlyCapacity,
+                'load_hours' => round($teamMonthlyLoad, 2),
+                'utilization' => $this->toPercentage($teamMonthlyLoad, $teamMonthlyCapacity),
+            ],
+        ];
+    }
+
+    /**
+     * Get users with available capacity this week.
+     */
+    private function getFreePeople($people)
+    {
+        return $people
+            ->where('weekly_utilization', '<', 80)
+            ->sortByDesc('free_capacity_hours')
+            ->values();
+    }
+
+    /**
+     * Build alerts for users over weekly capacity.
+     */
+    private function buildAlerts($people)
+    {
+        return $people
+            ->where('is_over_capacity', true)
+            ->map(fn (array $person) => [
+                'id' => $person['id'],
+                'name' => $person['name'],
+                'weekly_utilization' => $person['weekly_utilization'],
+            ])->values();
+    }
+
+    /**
+     * Build project delivery prediction from team capacity.
+     */
+    private function buildPrediction(int $teamWeeklyCapacity): array
     {
         $activeProjects = $this->projectService->getActiveProjectsWithIncompleteTasks();
         $availableNextFourWeeks = $teamWeeklyCapacity * 4;
@@ -143,6 +202,9 @@ class CapacityManagementService implements CapacityManagementServiceInterface
         ];
     }
 
+    /**
+     * Build historical utilization for team and users.
+     */
     private function buildHistory(array $capacitiesMap, array $userIds): array
     {
         $twelveWeeksAgo = Carbon::now()->startOfWeek()->subWeeks(11);
@@ -189,6 +251,9 @@ class CapacityManagementService implements CapacityManagementServiceInterface
         return ['team' => $teamHistory, 'by_user' => $byUser];
     }
 
+    /**
+     * Convert a value pair into a percentage.
+     */
     private function toPercentage(float $part, float $whole): float
     {
         if ($whole <= 0) {
@@ -198,6 +263,9 @@ class CapacityManagementService implements CapacityManagementServiceInterface
         return round(($part / $whole) * 100, 1);
     }
 
+    /**
+     * Resolve capacity status color from utilization.
+     */
     private function statusByUtilization(float $utilization): string
     {
         return match (true) {
