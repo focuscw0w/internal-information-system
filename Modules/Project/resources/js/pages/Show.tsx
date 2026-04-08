@@ -1,5 +1,4 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Calendar, FileText, GanttChartSquare, KanbanIcon, Users } from 'lucide-react';
 import { GanttChart } from '../components/project-detail/tab-views/gantt';
@@ -10,6 +9,7 @@ import { Timeline } from '../components/project-detail/tab-views/timeline';
 import { EditProjectDialog } from '../components/projects/dialogs/edit-project';
 import { BadgeLabel } from '../components/ui/badge';
 import { Header } from '../components/ui/header';
+import ProjectLayout from '../layouts/project-layout';
 import { Project } from '../types/types';
 
 export default function Show({ project }: { project: Project }) {
@@ -18,7 +18,7 @@ export default function Show({ project }: { project: Project }) {
     const can = (permission: string) => permissions.includes(permission);
 
     return (
-        <AppLayout>
+        <ProjectLayout project={project}>
             <Head title={`Detail projektu - ${project.name}`} />
 
             <div className="min-h-screen space-y-6 p-6">
@@ -114,6 +114,6 @@ export default function Show({ project }: { project: Project }) {
                     )}
                 </Tabs>
             </div>
-        </AppLayout>
+        </ProjectLayout>
     );
 }

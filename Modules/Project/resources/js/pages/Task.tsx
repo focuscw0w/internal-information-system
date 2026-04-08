@@ -1,5 +1,4 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { FileText, ListChecks, Users } from 'lucide-react';
 import { EditTaskDialog } from '../components/project-detail/task-table/dialogs/edit-task';
@@ -7,6 +6,7 @@ import { Comments } from '../components/task-detail/comments';
 import { Assignees } from '../components/task-detail/tab-views/assignees';
 import { Subtasks } from '../components/task-detail/tab-views/subtasks';
 import { TaskOverview } from '../components/task-detail/tab-views/task-overview';
+import ProjectLayout from '../layouts/project-layout';
 import { BadgeLabel } from '../components/ui/badge';
 import { Header } from '../components/ui/header';
 import { Project, Task } from '../types/types';
@@ -24,7 +24,7 @@ export default function TaskPage({ task, project }: TaskProps) {
     const tabCount = 1 + (can('edit_tasks') ? 1 : 0) + (can('assign_tasks') ? 1 : 0);
 
     return (
-        <AppLayout>
+        <ProjectLayout project={project} task={task}>
             <Head title={`${task.title} - ${project.name}`} />
 
             <div className="min-h-screen space-y-6 p-6">
@@ -116,6 +116,6 @@ export default function TaskPage({ task, project }: TaskProps) {
                 {/* Comments */}
                 <Comments task={task} />
             </div>
-        </AppLayout>
+        </ProjectLayout>
     );
 }
