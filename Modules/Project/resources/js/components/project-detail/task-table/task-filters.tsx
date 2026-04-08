@@ -43,51 +43,56 @@ export const TaskFilters = ({
     onAssigneeChange,
     onClear,
 }: TaskFiltersProps) => {
-    const hasActiveFilters = searchQuery || statusFilter || priorityFilter || assigneeFilter;
+    const hasActiveFilters =
+        searchQuery || statusFilter || priorityFilter || assigneeFilter;
 
     return (
-        <div className="flex flex-wrap items-center gap-2 pt-2">
+        <div className="flex flex-wrap items-center gap-6 pt-2">
             <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+                <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
                 <input
                     type="text"
                     placeholder="Hľadať úlohu..."
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    className="w-44 rounded-md border border-gray-200 bg-white py-1.5 pl-7 pr-3 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
+                    className="w-44 rounded-md border border-gray-200 bg-white py-1.5 pr-3 pl-7 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
                 />
             </div>
-            <Filter className="h-4 w-4 text-gray-400" />
+            <div className="flex items-center gap-2.5">
+                <Filter className="h-4 w-4 text-gray-400" />
 
-            <select
-                value={statusFilter ?? ''}
-                onChange={(e) =>
-                    onStatusChange((e.target.value as TaskStatus) || null)
-                }
-                className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-            >
-                <option value="">Všetky stavy</option>
-                {statusFilterOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                    </option>
-                ))}
-            </select>
+                <select
+                    value={statusFilter ?? ''}
+                    onChange={(e) =>
+                        onStatusChange((e.target.value as TaskStatus) || null)
+                    }
+                    className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                >
+                    <option value="">Všetky stavy</option>
+                    {statusFilterOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
+                </select>
 
-            <select
-                value={priorityFilter ?? ''}
-                onChange={(e) =>
-                    onPriorityChange((e.target.value as TaskPriority) || null)
-                }
-                className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-            >
-                <option value="">Všetky priority</option>
-                {priorityFilterOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                    </option>
-                ))}
-            </select>
+                <select
+                    value={priorityFilter ?? ''}
+                    onChange={(e) =>
+                        onPriorityChange(
+                            (e.target.value as TaskPriority) || null,
+                        )
+                    }
+                    className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                >
+                    <option value="">Všetky priority</option>
+                    {priorityFilterOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
             {assignees.length > 0 && (
                 <select

@@ -1,3 +1,4 @@
+import { resolveIcon } from '@/config/main-nav';
 import {
     SidebarGroup,
     SidebarGroupLabel,
@@ -6,8 +7,8 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import type { NavGroup } from '@/types';
+import { cn } from '@/lib/utils';
 import { Link, usePage } from '@inertiajs/react';
-import { FolderKanban } from 'lucide-react';
 
 export function NavMain({
     moduleNavItems = [],
@@ -28,15 +29,18 @@ export function NavMain({
                                     ? item.href
                                     : item.href.url;
 
+                            const isActive = page.url.startsWith(href);
+                            const Icon = resolveIcon(item.icon);
+
                             return (
                                 <SidebarMenuItem key={href}>
                                     <SidebarMenuButton
                                         asChild
-                                        isActive={page.url.startsWith(href)}
+                                        isActive={isActive}
                                         tooltip={{ children: item.title }}
                                     >
                                         <Link href={item.href} prefetch>
-                                            <FolderKanban className="h-4 w-4" />
+                                            <Icon className={cn('h-4 w-4', isActive && 'text-sidebar-primary')} />
                                             <span>{item.title}</span>
                                         </Link>
                                     </SidebarMenuButton>

@@ -1,7 +1,10 @@
-import { FolderKanban } from 'lucide-react';
+import { Clock, FolderKanban, LayoutDashboard, Users } from 'lucide-react';
 
 export const iconMap = {
     FolderKanban,
+    Clock,
+    Users,
+    LayoutDashboard,
 } as const;
 
 export type IconName = keyof typeof iconMap;

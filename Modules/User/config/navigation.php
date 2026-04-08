@@ -6,6 +6,7 @@ return [
         [
             'title' => 'Používatelia',
             'route' => 'user.index',
+            'icon' => 'Users',
             'permission' => 'users.manage',
             'order' => 50,
         ],

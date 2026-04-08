@@ -6,6 +6,7 @@ return [
         [
             'title' => 'Sledovanie času',
             'route' => 'time-tracking.index',
+            'icon' => 'Clock',
             'order' => 50,
         ],
     ],
