@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'group' => 'Kapacitný manažment',
+    'group' => 'Projektový manažment',
     'items' => [
         [
             'title' => 'Projekty',

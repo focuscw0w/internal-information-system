@@ -43,7 +43,7 @@ export const AtRiskProjectsCard = ({ projects }: AtRiskProjectsCardProps) => {
             </CardHeader>
             <CardContent>
                 {projects.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-10 text-center">
+                    <div className="flex flex-col items-center justify-center rounded-lg py-10 text-center">
                         <FolderKanban className="h-8 w-8 text-gray-300" />
                         <p className="mt-3 text-sm font-medium text-gray-900">
                             Žiadne rizikové projekty

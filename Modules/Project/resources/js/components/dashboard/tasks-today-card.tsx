@@ -41,7 +41,7 @@ export const TasksTodayCard = ({ tasks }: TasksTodayCardProps) => {
         <Card className="xl:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between gap-3">
                 <div>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 mb-1">
                         <CalendarCheck className="h-4 w-4 text-blue-500" />
                         Moje úlohy dnes
                     </CardTitle>
@@ -55,7 +55,7 @@ export const TasksTodayCard = ({ tasks }: TasksTodayCardProps) => {
             </CardHeader>
             <CardContent>
                 {tasks.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-10 text-center">
+                    <div className="flex flex-col items-center justify-center rounded-lg py-10 text-center">
                         <CheckCircle2 className="h-8 w-8 text-gray-300" />
                         <p className="mt-3 text-sm font-medium text-gray-900">
                             Žiadne urgentné úlohy
