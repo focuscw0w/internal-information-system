@@ -1,6 +1,9 @@
+import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
+import { ChevronDown } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import {
     Area,
@@ -281,29 +284,32 @@ export default function Index({
                                                 }))
                                             }
                                         />
-                                        <button
-                                            type="submit"
-                                            className="rounded bg-gray-900 px-3 py-1 text-xs text-white"
-                                        >
+                                        <Button type="submit" size="sm">
                                             Uložiť
-                                        </button>
+                                        </Button>
                                     </form>
                                 )}
 
                                 {/* Individual history toggle */}
-                                <button
-                                    type="button"
-                                    onClick={() => toggleHistory(person.id)}
-                                    className="mt-2 text-xs text-indigo-600 hover:underline"
+                                <Collapsible
+                                    open={!!expandedHistory[person.id]}
+                                    onOpenChange={() => toggleHistory(person.id)}
+                                    className="mt-3"
                                 >
-                                    {expandedHistory[person.id] ? 'Skryť históriu' : 'Zobraziť 12-týždenný trend'}
-                                </button>
-
-                                {expandedHistory[person.id] && person.history.length > 0 && (
-                                    <div className="mt-3">
-                                        <HistoryChart data={person.history} height={130} />
-                                    </div>
-                                )}
+                                    <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md border px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50">
+                                        <span>12-týždenný trend</span>
+                                        <ChevronDown
+                                            className={`h-4 w-4 transition-transform ${expandedHistory[person.id] ? 'rotate-180' : ''}`}
+                                        />
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent>
+                                        {person.history.length > 0 && (
+                                            <div className="mt-2">
+                                                <HistoryChart data={person.history} height={130} />
+                                            </div>
+                                        )}
+                                    </CollapsibleContent>
+                                </Collapsible>
                             </div>
                         ))}
                     </div>

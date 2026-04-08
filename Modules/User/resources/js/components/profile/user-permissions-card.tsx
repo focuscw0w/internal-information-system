@@ -33,9 +33,9 @@ export const UserPermissionsCard = ({
             </CardHeader>
             <CardContent>
                 {permissions.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 rounded-md bg-gray-50 p-2">
                         {permissions.map((perm) => (
-                            <Badge key={perm.value} variant="secondary">
+                            <Badge key={perm.value} variant="outline" className="bg-primary px-3 py-2 text-xs text-white">
                                 {perm.label}
                             </Badge>
                         ))}
