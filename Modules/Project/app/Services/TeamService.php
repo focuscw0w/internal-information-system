@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Contracts\TeamServiceInterface;
+use Modules\Project\Enums\ProjectWorkload;
 use Modules\Project\Models\Project;
 
 class TeamService implements TeamServiceInterface
@@ -42,6 +43,11 @@ class TeamService implements TeamServiceInterface
                 $newUserIds = array_values(array_diff($data['team_members'], $oldUserIds));
                 if (! empty($newUserIds) && auth()->check()) {
                     $this->notificationService->notifyProjectAssigned($project, $newUserIds, auth()->user());
+
+                    $workload = ProjectWorkload::tryFrom($project->workload);
+                    if ($workload && $workload->isCritical()) {
+                        $this->notificationService->notifyProjectHighWorkload($project, $newUserIds, auth()->user());
+                    }
                 }
             } else {
                 Log::info('Removing all team members from project', ['project_id' => $id]);

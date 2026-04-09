@@ -30,14 +30,19 @@ export type AppNotificationType =
     | 'task_assigned'
     | 'project_assigned'
     | 'task_at_risk'
-    | 'project_overdue';
+    | 'project_overdue'
+    | 'user_overloaded'
+    | 'project_capacity_at_risk'
+    | 'project_high_workload'
+    | 'task_hours_exceeded'
+    | 'project_status_changed';
 
 export interface AppNotificationData {
     type: AppNotificationType;
     title: string;
     message: string;
-    project_id: number;
-    project_name: string;
+    project_id: number | null;
+    project_name: string | null;
     task_id?: number | null;
     task_title?: string | null;
     url: string;
@@ -46,6 +51,12 @@ export interface AppNotificationData {
     old_status?: string;
     new_status?: string;
     reason?: AtRiskReason;
+    utilization?: number;
+    remaining_hours?: number;
+    confidence?: number;
+    workload?: string;
+    estimated_hours?: number;
+    actual_hours?: number;
 }
 
 export interface AppNotification {

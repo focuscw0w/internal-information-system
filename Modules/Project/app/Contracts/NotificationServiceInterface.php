@@ -21,6 +21,16 @@ interface NotificationServiceInterface
 
     public function notifyProjectOverdue(Project $project): void;
 
+    public function notifyUserOverloaded(User $user, float $utilization): void;
+
+    public function notifyProjectCapacityAtRisk(Project $project, float $remainingHours, float $confidence): void;
+
+    public function notifyProjectHighWorkload(Project $project, array $newUserIds, User $assignedBy): void;
+
+    public function notifyTaskHoursExceeded(Task $task): void;
+
+    public function notifyProjectStatusChanged(Project $project, string $oldStatus, string $newStatus, User $changedBy): void;
+
     public function getUserNotifications(User $user, int $perPage = 20): LengthAwarePaginator;
 
     public function markAsRead(string $notificationId, User $user): bool;

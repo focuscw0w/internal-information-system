@@ -4,6 +4,7 @@ namespace Modules\TimeTracking\Services;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
@@ -13,6 +14,9 @@ use Modules\User\Models\User;
 
 class TimeEntryService implements TimeEntryServiceInterface
 {
+    public function __construct(
+        private readonly NotificationServiceInterface $notificationService
+    ) {}
     /**
      * Get total tracked hours per user in a time period.
      */
@@ -154,6 +158,11 @@ class TimeEntryService implements TimeEntryServiceInterface
         Task::where('id', $taskId)->update([
             'actual_hours' => $total,
         ]);
+
+        $task = Task::find($taskId);
+        if ($task && $task->estimated_hours > 0 && $task->actual_hours > $task->estimated_hours) {
+            $this->notificationService->notifyTaskHoursExceeded($task);
+        }
     }
 
     /**

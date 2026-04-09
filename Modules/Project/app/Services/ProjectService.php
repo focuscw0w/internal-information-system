@@ -5,6 +5,7 @@ namespace Modules\Project\Services;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Models\Project;
@@ -18,7 +19,8 @@ class ProjectService implements ProjectServiceInterface
      * Create a new project service instance.
      */
     public function __construct(
-        protected TeamServiceInterface $teamService
+        protected TeamServiceInterface $teamService,
+        protected NotificationServiceInterface $notificationService
     ) {}
 
     /**
@@ -135,6 +137,8 @@ class ProjectService implements ProjectServiceInterface
         try {
             DB::beginTransaction();
 
+            $oldStatus = $project->status;
+
             // Update basic project fields
             $project->update([
                 'name' => $data['name'] ?? $project->name,
@@ -157,6 +161,15 @@ class ProjectService implements ProjectServiceInterface
             }
 
             DB::commit();
+
+            if (isset($data['status']) && $data['status'] !== $oldStatus && auth()->check()) {
+                $this->notificationService->notifyProjectStatusChanged(
+                    $project->fresh(['owner', 'team']),
+                    $oldStatus,
+                    $data['status'],
+                    auth()->user()
+                );
+            }
 
             return $project->fresh(['owner', 'team', 'tasks']);
         } catch (\Exception $e) {

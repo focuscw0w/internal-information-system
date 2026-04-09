@@ -9,10 +9,15 @@ use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\Project\Notifications\AtRiskNotification;
 use Modules\Project\Notifications\DeadlineApproachingNotification;
+use Modules\Project\Notifications\ProjectCapacityAtRiskNotification;
+use Modules\Project\Notifications\ProjectHighWorkloadNotification;
 use Modules\Project\Notifications\ProjectOverdueNotification;
 use Modules\Project\Notifications\ProjectAssignedNotification;
+use Modules\Project\Notifications\ProjectStatusChangedNotification;
 use Modules\Project\Notifications\TaskAssignedNotification;
+use Modules\Project\Notifications\TaskHoursExceededNotification;
 use Modules\Project\Notifications\TaskStatusChangedNotification;
+use Modules\Project\Notifications\UserOverloadedNotification;
 use Modules\User\Models\User;
 
 class NotificationService implements NotificationServiceInterface
@@ -165,6 +170,118 @@ class NotificationService implements NotificationServiceInterface
         if (! $alreadySent) {
             $project->owner->notify(new ProjectOverdueNotification($project));
         }
+    }
+
+    /**
+     * Notify a user that their weekly utilization exceeds 100%.
+     */
+    public function notifyUserOverloaded(User $user, float $utilization): void
+    {
+        $alreadySent = $user->notifications()
+            ->where('type', UserOverloadedNotification::class)
+            ->whereNull('read_at')
+            ->where('created_at', '>=', now()->subHours(24))
+            ->exists();
+
+        if (! $alreadySent) {
+            $user->notify(new UserOverloadedNotification($user, $utilization));
+        }
+    }
+
+    /**
+     * Notify project owner and team that capacity prediction shows project won't finish on time.
+     */
+    public function notifyProjectCapacityAtRisk(Project $project, float $remainingHours, float $confidence): void
+    {
+        $project->load(['owner', 'team']);
+
+        $recipients = collect();
+        if ($project->owner) {
+            $recipients->push($project->owner);
+        }
+        $recipients = $recipients->merge($project->team);
+
+        $notification = new ProjectCapacityAtRiskNotification($project, $remainingHours, $confidence);
+        $projectId = $project->id;
+
+        $recipients->unique('id')->each(function (User $user) use ($projectId, $notification) {
+            $alreadySent = $user->notifications()
+                ->where('type', ProjectCapacityAtRiskNotification::class)
+                ->whereNull('read_at')
+                ->where('created_at', '>=', now()->subHours(24))
+                ->get()
+                ->contains(function ($n) use ($projectId) {
+                    $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
+                    return ($data['project_id'] ?? null) === $projectId;
+                });
+
+            if (! $alreadySent) {
+                $user->notify($notification);
+            }
+        });
+    }
+
+    /**
+     * Notify newly assigned users that the project has high or overloaded workload.
+     */
+    public function notifyProjectHighWorkload(Project $project, array $newUserIds, User $assignedBy): void
+    {
+        if (empty($newUserIds)) {
+            return;
+        }
+
+        $users = User::whereIn('id', $newUserIds)->get();
+        $notification = new ProjectHighWorkloadNotification($project, $assignedBy, $project->workload);
+
+        $users->reject(fn (User $u) => $u->id === $assignedBy->id)
+            ->each(fn (User $u) => $u->notify($notification));
+    }
+
+    /**
+     * Notify task stakeholders that actual hours exceeded the estimated hours.
+     */
+    public function notifyTaskHoursExceeded(Task $task): void
+    {
+        $task->load(['assignedUsers', 'project.owner']);
+        $recipients = $this->getTaskRecipients($task);
+        $notification = new TaskHoursExceededNotification($task);
+        $taskId = $task->id;
+
+        $recipients->unique('id')->each(function (User $user) use ($taskId, $notification) {
+            $alreadySent = $user->notifications()
+                ->where('type', TaskHoursExceededNotification::class)
+                ->whereNull('read_at')
+                ->where('created_at', '>=', now()->subHours(24))
+                ->get()
+                ->contains(function ($n) use ($taskId) {
+                    $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
+                    return ($data['task_id'] ?? null) === $taskId;
+                });
+
+            if (! $alreadySent) {
+                $user->notify($notification);
+            }
+        });
+    }
+
+    /**
+     * Notify project team members about a project status change.
+     */
+    public function notifyProjectStatusChanged(Project $project, string $oldStatus, string $newStatus, User $changedBy): void
+    {
+        $project->load(['owner', 'team']);
+
+        $recipients = collect();
+        if ($project->owner) {
+            $recipients->push($project->owner);
+        }
+        $recipients = $recipients->merge($project->team);
+
+        $notification = new ProjectStatusChangedNotification($project, $oldStatus, $newStatus, $changedBy);
+
+        $recipients->unique('id')
+            ->reject(fn (User $u) => $u->id === $changedBy->id)
+            ->each(fn (User $u) => $u->notify($notification));
     }
 
     /**

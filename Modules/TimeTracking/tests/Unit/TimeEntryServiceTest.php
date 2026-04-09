@@ -5,6 +5,7 @@ namespace Modules\TimeTracking\Tests\Unit;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\User\Models\User;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
@@ -24,7 +25,8 @@ class TimeEntryServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->service = new TimeEntryService();
+        $notificationService = $this->createMock(NotificationServiceInterface::class);
+        $this->service = new TimeEntryService($notificationService);
         $this->user = User::factory()->create();
         $this->project = Project::factory()->create(['owner_id' => $this->user->id]);
         $this->task = Task::factory()->create([

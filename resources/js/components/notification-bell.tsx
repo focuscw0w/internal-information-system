@@ -6,6 +6,9 @@ import {
     ArrowRightLeft,
     Bell,
     Clock,
+    Flame,
+    RefreshCw,
+    TrendingDown,
     UserPlus,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -32,6 +35,16 @@ function getNotificationIcon(type: AppNotificationType) {
             return <AlertTriangle className="h-4 w-4 text-orange-500" />;
         case 'project_overdue':
             return <AlertCircle className="h-4 w-4 text-red-500" />;
+        case 'user_overloaded':
+            return <AlertTriangle className="h-4 w-4 text-red-600" />;
+        case 'project_capacity_at_risk':
+            return <TrendingDown className="h-4 w-4 text-red-500" />;
+        case 'project_high_workload':
+            return <Flame className="h-4 w-4 text-orange-500" />;
+        case 'task_hours_exceeded':
+            return <Clock className="h-4 w-4 text-red-500" />;
+        case 'project_status_changed':
+            return <RefreshCw className="h-4 w-4 text-blue-500" />;
         default:
             return <Bell className="h-4 w-4 text-gray-400" />;
     }
