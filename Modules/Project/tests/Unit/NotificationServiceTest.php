@@ -10,8 +10,13 @@ use Modules\Project\Models\Task;
 use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Notifications\DeadlineApproachingNotification;
 use Modules\Project\Notifications\ProjectAssignedNotification;
+use Modules\Project\Notifications\ProjectCapacityAtRiskNotification;
+use Modules\Project\Notifications\ProjectHighWorkloadNotification;
+use Modules\Project\Notifications\ProjectStatusChangedNotification;
 use Modules\Project\Notifications\TaskAssignedNotification;
+use Modules\Project\Notifications\TaskHoursExceededNotification;
 use Modules\Project\Notifications\TaskStatusChangedNotification;
+use Modules\Project\Notifications\UserOverloadedNotification;
 use Modules\Project\Services\NotificationService;
 use Modules\Project\Services\TaskService;
 use Modules\User\Models\User;
@@ -217,6 +222,221 @@ class NotificationServiceTest extends TestCase
 
         Notification::assertSentTo($newMember, ProjectAssignedNotification::class);
         Notification::assertNotSentTo($existingMember, ProjectAssignedNotification::class);
+    }
+
+    // ── notifyUserOverloaded ──────────────────────────────────────────────────
+
+    #[Test]
+    public function it_sends_user_overloaded_notification_to_the_user(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+
+        $this->service->notifyUserOverloaded($user, 115.5);
+
+        Notification::assertSentTo($user, UserOverloadedNotification::class);
+    }
+
+    #[Test]
+    public function it_does_not_send_duplicate_user_overloaded_notification_within_24_hours(): void
+    {
+        $user = User::factory()->create();
+
+        $user->notifications()->create([
+            'id' => (string) Str::uuid(),
+            'type' => UserOverloadedNotification::class,
+            'data' => ['type' => 'user_overloaded'],
+            'read_at' => null,
+            'created_at' => now()->subHour(),
+            'updated_at' => now()->subHour(),
+        ]);
+
+        $this->service->notifyUserOverloaded($user, 120.0);
+
+        $this->assertSame(1, $user->notifications()->where('type', UserOverloadedNotification::class)->count());
+    }
+
+    #[Test]
+    public function it_sends_user_overloaded_again_after_24_hours(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+
+        $user->notifications()->create([
+            'id' => (string) Str::uuid(),
+            'type' => UserOverloadedNotification::class,
+            'data' => ['type' => 'user_overloaded'],
+            'read_at' => null,
+            'created_at' => now()->subHours(25),
+            'updated_at' => now()->subHours(25),
+        ]);
+
+        $this->service->notifyUserOverloaded($user, 110.0);
+
+        Notification::assertSentTo($user, UserOverloadedNotification::class);
+    }
+
+    // ── notifyProjectCapacityAtRisk ───────────────────────────────────────────
+
+    #[Test]
+    public function it_sends_project_capacity_at_risk_to_owner_and_team(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $project = Project::factory()->create(['owner_id' => $owner->id]);
+        $project->team()->attach($member->id, [
+            'permissions' => json_encode(['view_project', 'view_tasks']),
+            'allocation' => 100,
+        ]);
+
+        $this->service->notifyProjectCapacityAtRisk($project, 80.0, 45.0);
+
+        Notification::assertSentTo($owner, ProjectCapacityAtRiskNotification::class);
+        Notification::assertSentTo($member, ProjectCapacityAtRiskNotification::class);
+    }
+
+    #[Test]
+    public function it_does_not_send_duplicate_project_capacity_at_risk_within_24_hours(): void
+    {
+        $owner = User::factory()->create();
+        $project = Project::factory()->create(['owner_id' => $owner->id]);
+
+        $owner->notifications()->create([
+            'id' => (string) Str::uuid(),
+            'type' => ProjectCapacityAtRiskNotification::class,
+            'data' => ['project_id' => $project->id],
+            'read_at' => null,
+            'created_at' => now()->subHour(),
+            'updated_at' => now()->subHour(),
+        ]);
+
+        $this->service->notifyProjectCapacityAtRisk($project, 80.0, 45.0);
+
+        $this->assertSame(1, $owner->notifications()->where('type', ProjectCapacityAtRiskNotification::class)->count());
+    }
+
+    // ── notifyProjectHighWorkload ─────────────────────────────────────────────
+
+    #[Test]
+    public function it_sends_project_high_workload_to_new_members_except_assigner(): void
+    {
+        Notification::fake();
+
+        $assignedBy = User::factory()->create();
+        $newMember = User::factory()->create();
+        $project = Project::factory()->create(['workload' => 'high']);
+
+        $this->service->notifyProjectHighWorkload($project, [$newMember->id, $assignedBy->id], $assignedBy);
+
+        Notification::assertSentTo($newMember, ProjectHighWorkloadNotification::class);
+        Notification::assertNotSentTo($assignedBy, ProjectHighWorkloadNotification::class);
+    }
+
+    #[Test]
+    public function it_does_not_send_project_high_workload_when_user_ids_empty(): void
+    {
+        Notification::fake();
+
+        $assignedBy = User::factory()->create();
+        $project = Project::factory()->create(['workload' => 'high']);
+
+        $this->service->notifyProjectHighWorkload($project, [], $assignedBy);
+
+        Notification::assertNothingSent();
+    }
+
+    // ── notifyTaskHoursExceeded ───────────────────────────────────────────────
+
+    #[Test]
+    public function it_sends_task_hours_exceeded_to_assignees_and_owner(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $assignee = User::factory()->create();
+        $project = Project::factory()->create(['owner_id' => $owner->id]);
+        $task = Task::factory()->create([
+            'project_id' => $project->id,
+            'estimated_hours' => 5,
+            'actual_hours' => 7,
+        ]);
+        $task->assignedUsers()->attach($assignee->id);
+
+        $this->service->notifyTaskHoursExceeded($task);
+
+        Notification::assertSentTo($owner, TaskHoursExceededNotification::class);
+        Notification::assertSentTo($assignee, TaskHoursExceededNotification::class);
+    }
+
+    #[Test]
+    public function it_does_not_send_duplicate_task_hours_exceeded_within_24_hours(): void
+    {
+        $owner = User::factory()->create();
+        $project = Project::factory()->create(['owner_id' => $owner->id]);
+        $task = Task::factory()->create([
+            'project_id' => $project->id,
+            'estimated_hours' => 5,
+            'actual_hours' => 7,
+        ]);
+
+        $owner->notifications()->create([
+            'id' => (string) Str::uuid(),
+            'type' => TaskHoursExceededNotification::class,
+            'data' => ['task_id' => $task->id],
+            'read_at' => null,
+            'created_at' => now()->subHour(),
+            'updated_at' => now()->subHour(),
+        ]);
+
+        $this->service->notifyTaskHoursExceeded($task);
+
+        $this->assertSame(1, $owner->notifications()->where('type', TaskHoursExceededNotification::class)->count());
+    }
+
+    // ── notifyProjectStatusChanged ────────────────────────────────────────────
+
+    #[Test]
+    public function it_sends_project_status_changed_to_owner_and_team_excluding_actor(): void
+    {
+        Notification::fake();
+
+        $actor = User::factory()->create();
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $project = Project::factory()->create(['owner_id' => $owner->id]);
+        $project->team()->attach($member->id, [
+            'permissions' => json_encode(['view_project', 'view_tasks']),
+            'allocation' => 100,
+        ]);
+
+        $this->service->notifyProjectStatusChanged($project, 'active', 'on_hold', $actor);
+
+        Notification::assertSentTo($owner, ProjectStatusChangedNotification::class);
+        Notification::assertSentTo($member, ProjectStatusChangedNotification::class);
+        Notification::assertNotSentTo($actor, ProjectStatusChangedNotification::class);
+    }
+
+    #[Test]
+    public function it_excludes_owner_from_project_status_changed_when_owner_is_the_actor(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $project = Project::factory()->create(['owner_id' => $owner->id]);
+        $project->team()->attach($member->id, [
+            'permissions' => json_encode(['view_project', 'view_tasks']),
+            'allocation' => 100,
+        ]);
+
+        $this->service->notifyProjectStatusChanged($project, 'active', 'completed', $owner);
+
+        Notification::assertNotSentTo($owner, ProjectStatusChangedNotification::class);
+        Notification::assertSentTo($member, ProjectStatusChangedNotification::class);
     }
 
     private function createDatabaseNotification(User $user, mixed $readAt = null): mixed
