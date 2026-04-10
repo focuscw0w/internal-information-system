@@ -39,9 +39,18 @@ class CapacityManagementServiceProvider extends ServiceProvider
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
 
+        $this->app->singleton(
+            \Modules\CapacityManagement\Services\CapacityCalculator::class,
+        );
+
         $this->app->bind(
             \Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface::class,
             \Modules\CapacityManagement\Services\CapacityManagementService::class,
+        );
+
+        $this->app->bind(
+            \Modules\CapacityManagement\Contracts\SimulationServiceInterface::class,
+            \Modules\CapacityManagement\Services\SimulationService::class,
         );
     }
 

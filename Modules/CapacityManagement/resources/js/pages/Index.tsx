@@ -2,9 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ChevronDown } from 'lucide-react';
 import { FormEvent, useState } from 'react';
+import { UtilizationBar } from '../components/shared/utilization';
 import {
     Area,
     AreaChart,
@@ -62,25 +63,6 @@ type DashboardData = {
 };
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Kapacitný dashboard', href: '/capacity-management' }];
-
-function utilizationColor(utilization: number): string {
-    if (utilization >= 100) return '#ef4444';
-    if (utilization >= 80) return '#f97316';
-    return '#10b981';
-}
-
-function UtilizationBar({ utilization }: { utilization: number }) {
-    const color = utilizationColor(utilization);
-    const width = Math.min(100, utilization);
-    return (
-        <div className="mt-2 h-2 w-full rounded bg-gray-100">
-            <div
-                className="h-2 rounded transition-all"
-                style={{ width: `${width}%`, backgroundColor: color }}
-            />
-        </div>
-    );
-}
 
 function HistoryChart({ data, height = 160 }: { data: WeekPoint[]; height?: number }) {
     return (
@@ -150,7 +132,17 @@ export default function Index({
             <Head title="Kapacitný dashboard" />
 
             <div className="space-y-6 p-6">
-                <h1 className="text-2xl font-semibold">Kapacitný manažment</h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-semibold">Kapacitný manažment</h1>
+                    {can_manage && (
+                        <Link
+                            href="/capacity-management/simulation"
+                            className="rounded border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                        >
+                            Spustiť simuláciu →
+                        </Link>
+                    )}
+                </div>
 
                 {/* Alerts */}
                 {dashboard.alerts.length > 0 && (
