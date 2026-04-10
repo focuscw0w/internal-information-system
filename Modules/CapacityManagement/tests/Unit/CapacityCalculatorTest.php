@@ -47,6 +47,25 @@ class CapacityCalculatorTest extends TestCase
         return (object) ['estimated_hours' => $estimated, 'actual_hours' => $actual, 'status' => $status];
     }
 
+    private function makeAllocation(
+        int $id,
+        int $projectId,
+        int $userId,
+        int $allocatedHours,
+        string $startDate = '2026-04-01',
+        string $endDate = '2026-04-30',
+    ): object {
+        return (object) [
+            'id' => $id,
+            'project_id' => $projectId,
+            'user_id' => $userId,
+            'allocated_hours' => $allocatedHours,
+            'percentage' => 100,
+            'start_date' => Carbon::parse($startDate),
+            'end_date' => Carbon::parse($endDate),
+        ];
+    }
+
     private function makeInputs(array $override = []): CapacityInputs
     {
         return new CapacityInputs(
@@ -64,6 +83,7 @@ class CapacityCalculatorTest extends TestCase
             activeProjects: $override['activeProjects'] ?? collect(),
             historyByYwAndUser: $override['historyByYwAndUser'] ?? [],
             now: $override['now'] ?? $this->now,
+            forecastAllocations: $override['forecastAllocations'] ?? null,
         );
     }
 
@@ -217,6 +237,26 @@ class CapacityCalculatorTest extends TestCase
 
         $this->assertFalse($result['prediction']['can_finish']);
         $this->assertLessThan(100, $result['prediction']['confidence']);
+    }
+
+    #[Test]
+    public function prediction_uses_project_specific_forecast_allocations_when_provided(): void
+    {
+        $project = $this->makeProject(1, 'Alpha', '2026-04-20', [
+            $this->makeTask(100, 0),
+        ]);
+
+        $result = $this->calculator->compute($this->makeInputs([
+            'users' => collect([$this->makeUser(1)]),
+            'capacitiesMap' => [1 => 40],
+            'activeProjects' => collect([$project]),
+            'forecastAllocations' => collect([
+                $this->makeAllocation(1, 1, 1, 40),
+            ]),
+        ]));
+
+        $this->assertEquals(40.0, $result['prediction']['projects'][0]['available_hours_next_4_weeks']);
+        $this->assertFalse($result['prediction']['projects'][0]['can_finish']);
     }
 
     #[Test]

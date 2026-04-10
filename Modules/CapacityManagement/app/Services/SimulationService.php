@@ -32,23 +32,17 @@ class SimulationService implements SimulationServiceInterface
         // Load all ProjectAllocations (used for load derivation in simulation)
         $currentAllocations = ProjectAllocation::query()->get();
 
-        // 2. Build baseline load from allocations (planning-based, forward-looking)
-        $baselineWeeklyByUser  = $this->deriveWeeklyLoad($currentAllocations, $baselineInputs->capacitiesMap, $now);
-        $baselineMonthlyByUser = $this->deriveMonthlyLoad($currentAllocations, $baselineInputs->capacitiesMap, $now, $baselineInputs->weeksInMonth);
+        $baseline = $this->calculator->compute($baselineInputs);
 
-        $baselineCapacityInputs = new CapacityInputs(
-            users: $baselineInputs->users,
-            capacitiesMap: $baselineInputs->capacitiesMap,
-            weeklyByUser: $baselineWeeklyByUser,
-            monthlyByUser: $baselineMonthlyByUser,
-            weeksInMonth: $baselineInputs->weeksInMonth,
-            periods: $baselineInputs->periods,
-            activeProjects: $baselineInputs->activeProjects,
-            historyByYwAndUser: $baselineInputs->historyByYwAndUser,
-            now: $now,
-        );
-
-        $baseline = $this->calculator->compute($baselineCapacityInputs);
+        if ($input->isEmpty()) {
+            return new SimulationResult(
+                baseline: $baseline,
+                simulated: $baseline,
+                delta: $this->computeDelta($baseline, $baseline),
+                suggestions: [],
+                input: $input,
+            );
+        }
 
         // 3. Apply overrides in-memory
         $simulatedCapacitiesMap  = $this->applyCapacityOverrides($baselineInputs->capacitiesMap, $input);
@@ -70,13 +64,21 @@ class SimulationService implements SimulationServiceInterface
             activeProjects: $simulatedActiveProjects,
             historyByYwAndUser: $baselineInputs->historyByYwAndUser,
             now: $now,
+            forecastAllocations: $simulatedAllocations,
         );
 
         $simulated = $this->calculator->compute($simulatedCapacityInputs);
 
         // 5. Compute delta and suggestions
         $delta       = $this->computeDelta($baseline, $simulated);
-        $suggestions = $this->suggestionEngine->generate($baseline, $simulated, $input, $simulatedCapacitiesMap);
+        $suggestions = $this->suggestionEngine->generate(
+            $baseline,
+            $simulated,
+            $input,
+            $simulatedCapacitiesMap,
+            $simulatedAllocations,
+            $now,
+        );
 
         return new SimulationResult(
             baseline: $baseline,

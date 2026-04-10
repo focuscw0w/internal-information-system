@@ -2,6 +2,8 @@
 
 namespace Modules\CapacityManagement\Services;
 
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Modules\CapacityManagement\DTO\CapacityInputs;
 
 /**
@@ -112,9 +114,11 @@ class CapacityCalculator
 
     private function buildPrediction(int $teamWeeklyCapacity, CapacityInputs $inputs): array
     {
-        $availableNextFourWeeks = $teamWeeklyCapacity * 4;
+        $windowStart = $inputs->now->copy()->startOfDay();
+        $windowEnd = $inputs->now->copy()->addWeeks(4)->endOfDay();
+        $perProjectAvailability = $this->buildProjectAvailabilityMap($inputs->forecastAllocations, $windowStart, $windowEnd);
 
-        $perProject = $inputs->activeProjects->map(function ($project) use ($availableNextFourWeeks, $inputs) {
+        $perProject = $inputs->activeProjects->map(function ($project) use ($teamWeeklyCapacity, $inputs, $perProjectAvailability) {
             $remaining = (float) $project->tasks->sum(
                 fn ($task) => max(0, (int) ($task->estimated_hours ?? 0) - (int) ($task->actual_hours ?? 0))
             );
@@ -122,6 +126,10 @@ class CapacityCalculator
             $endDate = $project->end_date instanceof \Carbon\Carbon
                 ? $project->end_date
                 : ($project->end_date ? \Carbon\Carbon::parse($project->end_date) : null);
+
+            $availableNextFourWeeks = $inputs->forecastAllocations !== null
+                ? round((float) ($perProjectAvailability[$project->id] ?? 0.0), 2)
+                : $teamWeeklyCapacity * 4;
 
             return [
                 'id' => $project->id,
@@ -136,12 +144,15 @@ class CapacityCalculator
         })->values();
 
         $totalRemaining = (float) $perProject->sum('remaining_hours');
+        $totalAvailable = $inputs->forecastAllocations !== null
+            ? round((float) $perProject->sum('available_hours_next_4_weeks'), 2)
+            : $teamWeeklyCapacity * 4;
 
         return [
             'remaining_project_hours' => round($totalRemaining, 2),
-            'available_hours_next_4_weeks' => $availableNextFourWeeks,
-            'can_finish' => $availableNextFourWeeks >= $totalRemaining,
-            'confidence' => min(100, $this->toPercentage($availableNextFourWeeks, max(1.0, $totalRemaining))),
+            'available_hours_next_4_weeks' => $totalAvailable,
+            'can_finish' => $totalAvailable >= $totalRemaining,
+            'confidence' => min(100, $this->toPercentage($totalAvailable, max(1.0, $totalRemaining))),
             'projects' => $perProject,
         ];
     }
@@ -219,5 +230,60 @@ class CapacityCalculator
             $utilization <= 100 => 'orange',
             default => 'red',
         };
+    }
+
+    private function buildProjectAvailabilityMap(?Collection $allocations, Carbon $windowStart, Carbon $windowEnd): array
+    {
+        if ($allocations === null) {
+            return [];
+        }
+
+        $availability = [];
+
+        foreach ($allocations as $allocation) {
+            $projectId = (int) ($allocation->project_id ?? 0);
+
+            if ($projectId <= 0) {
+                continue;
+            }
+
+            $availability[$projectId] = ($availability[$projectId] ?? 0.0)
+                + $this->hoursWithinWindow($allocation, $windowStart, $windowEnd);
+        }
+
+        return $availability;
+    }
+
+    private function hoursWithinWindow(object $allocation, Carbon $windowStart, Carbon $windowEnd): float
+    {
+        if (($allocation->start_date ?? null) === null || ($allocation->end_date ?? null) === null) {
+            return 0.0;
+        }
+
+        $start = $allocation->start_date instanceof Carbon ? $allocation->start_date->copy() : Carbon::parse($allocation->start_date);
+        $end = $allocation->end_date instanceof Carbon ? $allocation->end_date->copy() : Carbon::parse($allocation->end_date);
+
+        if ($end->lt($windowStart) || $start->gt($windowEnd)) {
+            return 0.0;
+        }
+
+        $effectiveStart = $start->gt($windowStart) ? $start : $windowStart;
+        $effectiveEnd = $end->lt($windowEnd) ? $end : $windowEnd;
+
+        $totalDays = max(1, $start->diffInDays($end->copy()->addDay()));
+        $overlapDays = max(0, $effectiveStart->diffInDays($effectiveEnd->copy()->addDay()));
+
+        if ($overlapDays <= 0) {
+            return 0.0;
+        }
+
+        $allocatedHours = (float) ($allocation->allocated_hours ?? 0);
+        if ($allocatedHours > 0) {
+            return round($allocatedHours * ($overlapDays / $totalDays), 2);
+        }
+
+        $percentage = (float) ($allocation->percentage ?? 0);
+
+        return round(($percentage / 100) * 40 * ($overlapDays / 7), 2);
     }
 }

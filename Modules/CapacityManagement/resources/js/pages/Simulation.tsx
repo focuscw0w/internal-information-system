@@ -8,9 +8,11 @@ import { AlertDiffList } from '../components/simulation/AlertDiffList';
 import { SuggestionList } from '../components/simulation/SuggestionList';
 import type {
     AllocationRecord,
+    AllocationOverride,
     ProjectOption,
     SimulationInputPayload,
     SimulationResult,
+    TeamChange,
     UserOption,
 } from '../types/simulation';
 
@@ -68,18 +70,72 @@ export default function Simulation({
         );
     };
 
+    const mergeAllocationOverrides = (
+        current: AllocationOverride[],
+        incoming: AllocationOverride[],
+    ): AllocationOverride[] => {
+        const merged = [...current];
+
+        for (const next of incoming) {
+            const idx = merged.findIndex((item) => {
+                if (next.allocation_id != null || item.allocation_id != null) {
+                    return item.allocation_id === next.allocation_id;
+                }
+
+                return (
+                    item.project_id === next.project_id &&
+                    item.user_id === next.user_id &&
+                    (item.start_date ?? '') === (next.start_date ?? '') &&
+                    (item.end_date ?? '') === (next.end_date ?? '')
+                );
+            });
+
+            if (idx >= 0) {
+                merged[idx] = { ...merged[idx], ...next };
+            } else {
+                merged.push(next);
+            }
+        }
+
+        return merged;
+    };
+
+    const mergeTeamChanges = (current: TeamChange[], incoming: TeamChange[]): TeamChange[] => {
+        const merged = [...current];
+
+        for (const next of incoming) {
+            const idx = merged.findIndex(
+                (item) =>
+                    item.project_id === next.project_id &&
+                    item.user_id === next.user_id &&
+                    item.action === next.action,
+            );
+
+            if (idx < 0) {
+                merged.push(next);
+            }
+        }
+
+        return merged;
+    };
+
     const handleApplySuggestion = (change: Partial<SimulationInputPayload>) => {
         const merged: SimulationInputPayload = {
             capacity_overrides: { ...formInput.capacity_overrides, ...(change.capacity_overrides ?? {}) },
-            allocation_overrides: [
-                ...formInput.allocation_overrides,
-                ...(change.allocation_overrides ?? []),
-            ],
+            allocation_overrides: mergeAllocationOverrides(
+                formInput.allocation_overrides,
+                change.allocation_overrides ?? [],
+            ),
             deadline_overrides: [
-                ...formInput.deadline_overrides,
+                ...formInput.deadline_overrides.filter(
+                    (item) =>
+                        !(change.deadline_overrides ?? []).some(
+                            (next) => next.project_id === item.project_id,
+                        ),
+                ),
                 ...(change.deadline_overrides ?? []),
             ],
-            team_changes: [...formInput.team_changes, ...(change.team_changes ?? [])],
+            team_changes: mergeTeamChanges(formInput.team_changes, change.team_changes ?? []),
         };
         setFormInput(merged);
         runSimulation(merged);
@@ -127,6 +183,7 @@ export default function Simulation({
                             users={users}
                             projects={projects}
                             allocations={allocations}
+                            baselinePeople={simulation.baseline.people}
                             value={formInput}
                             onChange={setFormInput}
                             onSubmit={() => runSimulation()}

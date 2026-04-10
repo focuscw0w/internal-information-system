@@ -2,6 +2,8 @@
 
 namespace Modules\CapacityManagement\Tests\Unit;
 
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Modules\CapacityManagement\DTO\SimulationInput;
 use Modules\CapacityManagement\Services\SimulationSuggestionEngine;
 use PHPUnit\Framework\Attributes\Test;
@@ -10,11 +12,13 @@ use PHPUnit\Framework\TestCase;
 class SimulationSuggestionEngineTest extends TestCase
 {
     private SimulationSuggestionEngine $engine;
+    private Carbon $now;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->engine = new SimulationSuggestionEngine;
+        $this->now = Carbon::parse('2026-04-01 10:00:00');
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -68,6 +72,31 @@ class SimulationSuggestionEngineTest extends TestCase
         ];
     }
 
+    private function emptyAllocations(): Collection
+    {
+        return collect();
+    }
+
+    private function makeAllocation(
+        int $id,
+        int $projectId,
+        int $userId,
+        int $allocatedHours = 160,
+        int $percentage = 100,
+        string $startDate = '2026-04-01',
+        string $endDate = '2026-04-30',
+    ): object {
+        return (object) [
+            'id' => $id,
+            'project_id' => $projectId,
+            'user_id' => $userId,
+            'allocated_hours' => $allocatedHours,
+            'percentage' => $percentage,
+            'start_date' => Carbon::parse($startDate),
+            'end_date' => Carbon::parse($endDate),
+        ];
+    }
+
     // ── Rule A: Overloaded users ──────────────────────────────────────────────
 
     #[Test]
@@ -79,10 +108,20 @@ class SimulationSuggestionEngineTest extends TestCase
         $simulated['people']  = [$this->makePerson(1, 'Jana', 120.0)];
         $simulated['free_people'] = [];
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40]);
+        $suggestions = $this->engine->generate(
+            $baseline,
+            $simulated,
+            new SimulationInput,
+            [1 => 40],
+            collect([$this->makeAllocation(10, 9, 1, 160)]),
+            $this->now,
+        );
 
         $types = array_column($suggestions, 'type');
         $this->assertContains('REDUCE_ALLOCATION', $types);
+
+        $reduce = collect($suggestions)->firstWhere('type', 'REDUCE_ALLOCATION');
+        $this->assertNotEmpty($reduce->proposedChange['allocation_overrides']);
     }
 
     #[Test]
@@ -94,10 +133,20 @@ class SimulationSuggestionEngineTest extends TestCase
         $simulated['people']     = [$this->makePerson(1, 'Jana', 120.0), $this->makePerson(2, 'Peter', 40.0)];
         $simulated['free_people'] = [$this->makePerson(2, 'Peter', 40.0)];
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40, 2 => 40]);
+        $suggestions = $this->engine->generate(
+            $baseline,
+            $simulated,
+            new SimulationInput,
+            [1 => 40, 2 => 40],
+            collect([$this->makeAllocation(10, 9, 1, 160)]),
+            $this->now,
+        );
 
         $types = array_column($suggestions, 'type');
         $this->assertContains('REASSIGN_TO_FREE_USER', $types);
+
+        $reassign = collect($suggestions)->firstWhere('type', 'REASSIGN_TO_FREE_USER');
+        $this->assertCount(2, $reassign->proposedChange['allocation_overrides']);
     }
 
     #[Test]
@@ -109,7 +158,14 @@ class SimulationSuggestionEngineTest extends TestCase
         $simulated['people']  = [$this->makePerson(1, 'Jana', 120.0)];
         $simulated['free_people'] = [];
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40]);
+        $suggestions = $this->engine->generate(
+            $baseline,
+            $simulated,
+            new SimulationInput,
+            [1 => 40],
+            collect([$this->makeAllocation(10, 9, 1, 160)]),
+            $this->now,
+        );
 
         $types = array_column($suggestions, 'type');
         $this->assertNotContains('REASSIGN_TO_FREE_USER', $types);
@@ -126,7 +182,7 @@ class SimulationSuggestionEngineTest extends TestCase
             $this->makeProject(1, 'Alpha', 200.0, 160.0),
         ];
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40]);
+        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40], $this->emptyAllocations(), $this->now);
 
         $types = array_column($suggestions, 'type');
         $this->assertContains('EXTEND_DEADLINE', $types);
@@ -142,10 +198,20 @@ class SimulationSuggestionEngineTest extends TestCase
         ];
         $simulated['free_people'] = [$this->makePerson(5, 'Marta', 30.0)];
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40]);
+        $suggestions = $this->engine->generate(
+            $baseline,
+            $simulated,
+            new SimulationInput,
+            [1 => 40],
+            collect([$this->makeAllocation(1, 1, 5, 80, 50)]),
+            $this->now,
+        );
 
         $types = array_column($suggestions, 'type');
         $this->assertContains('ADD_TEAM_MEMBER', $types);
+
+        $addMember = collect($suggestions)->firstWhere('type', 'ADD_TEAM_MEMBER');
+        $this->assertNotEmpty($addMember->proposedChange['allocation_overrides']);
     }
 
     #[Test]
@@ -157,7 +223,7 @@ class SimulationSuggestionEngineTest extends TestCase
             $this->makeProject(1, 'Late', 200.0, 160.0, true, 0),
         ];
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40]);
+        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40], $this->emptyAllocations(), $this->now);
 
         $ids = array_map(fn ($s) => $s->id, $suggestions);
         foreach ($ids as $id) {
@@ -174,7 +240,7 @@ class SimulationSuggestionEngineTest extends TestCase
             $this->makeProject(7, 'Beta', 200.0, 160.0, false, 10),
         ];
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40]);
+        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40], $this->emptyAllocations(), $this->now);
 
         $extend = collect($suggestions)->firstWhere('type', 'EXTEND_DEADLINE');
         $this->assertNotNull($extend);
@@ -193,7 +259,7 @@ class SimulationSuggestionEngineTest extends TestCase
             $this->makeProject(1, 'Overdue', 10.0, 160.0, true, 0),
         ];
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40]);
+        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40], $this->emptyAllocations(), $this->now);
 
         $deadlineSugg = collect($suggestions)->firstWhere('type', 'DEADLINE_IN_PAST');
         $this->assertNotNull($deadlineSugg);
@@ -212,10 +278,20 @@ class SimulationSuggestionEngineTest extends TestCase
             $this->makeProject(1, 'Tiny', 10.0, 500.0),
         ];
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40]);
+        $suggestions = $this->engine->generate(
+            $baseline,
+            $simulated,
+            new SimulationInput,
+            [1 => 40],
+            collect([$this->makeAllocation(11, 1, 3, 500, 100)]),
+            $this->now,
+        );
 
         $types = array_column($suggestions, 'type');
         $this->assertContains('REDUCE_OVERESTIMATED_ALLOCATION', $types);
+
+        $reduce = collect($suggestions)->firstWhere('type', 'REDUCE_OVERESTIMATED_ALLOCATION');
+        $this->assertNotEmpty($reduce->proposedChange['allocation_overrides']);
     }
 
     // ── Rule E: Positive signal ───────────────────────────────────────────────
@@ -231,7 +307,7 @@ class SimulationSuggestionEngineTest extends TestCase
         $simulated['alerts'] = [];
         $simulated['people'] = [$this->makePerson(1, 'Tom', 60.0)];  // now 60%, freed
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40]);
+        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40], $this->emptyAllocations(), $this->now);
 
         $freed = collect($suggestions)->firstWhere('type', 'CAPACITY_FREED');
         $this->assertNotNull($freed);
@@ -250,7 +326,14 @@ class SimulationSuggestionEngineTest extends TestCase
         $simulated['alerts'] = [$this->makeAlert(1, 'Jana', 120.0)];
         $simulated['people'] = [$this->makePerson(1, 'Jana', 120.0)];
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [1 => 40]);
+        $suggestions = $this->engine->generate(
+            $baseline,
+            $simulated,
+            new SimulationInput,
+            [1 => 40],
+            collect([$this->makeAllocation(10, 9, 1, 160)]),
+            $this->now,
+        );
 
         $reduceAlloc = array_filter($suggestions, fn ($s) => $s->type === 'REDUCE_ALLOCATION' && $s->affectsUserId === 1);
         $this->assertCount(1, $reduceAlloc);
@@ -275,7 +358,7 @@ class SimulationSuggestionEngineTest extends TestCase
         $simulated['alerts'] = [$this->makeAlert(3, 'Busy', 110.0)];
         $simulated['people'] = [$this->makePerson(3, 'Busy', 110.0)];
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [3 => 40]);
+        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, [3 => 40], $this->emptyAllocations(), $this->now);
 
         $severities = array_map(fn ($s) => $s->severity, $suggestions);
         // All criticals must appear before any warning/info
@@ -310,15 +393,17 @@ class SimulationSuggestionEngineTest extends TestCase
         $alerts  = [];
         $people  = [];
         $capMap  = [];
+        $allocations = [];
         for ($i = 1; $i <= 12; $i++) {
             $alerts[]  = $this->makeAlert($i, "User$i", 130.0);
             $people[]  = $this->makePerson($i, "User$i", 130.0);
             $capMap[$i] = 40;
+            $allocations[] = $this->makeAllocation($i, 100 + $i, $i, 160);
         }
         $simulated['alerts'] = $alerts;
         $simulated['people'] = $people;
 
-        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, $capMap);
+        $suggestions = $this->engine->generate($baseline, $simulated, new SimulationInput, $capMap, collect($allocations), $this->now);
 
         $this->assertLessThanOrEqual(10, count($suggestions));
     }

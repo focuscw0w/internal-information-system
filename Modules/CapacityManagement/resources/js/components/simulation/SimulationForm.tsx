@@ -5,6 +5,7 @@ import type {
     AllocationOverride,
     AllocationRecord,
     DeadlineOverride,
+    Person,
     ProjectOption,
     SimulationInputPayload,
     TeamChange,
@@ -15,6 +16,7 @@ type Props = {
     users: UserOption[];
     projects: ProjectOption[];
     allocations: AllocationRecord[];
+    baselinePeople: Person[];
     value: SimulationInputPayload;
     onChange: (payload: SimulationInputPayload) => void;
     onSubmit: () => void;
@@ -51,16 +53,25 @@ export function SimulationForm({
     users,
     projects,
     allocations,
+    baselinePeople,
     value,
     onChange,
     onSubmit,
     onReset,
     loading,
 }: Props) {
-    const setCapacity = (userId: number, hours: number) => {
+    const setCapacity = (userId: number, hours?: number) => {
+        const nextCapacities = { ...value.capacity_overrides };
+
+        if (hours === undefined || Number.isNaN(hours)) {
+            delete nextCapacities[userId];
+        } else {
+            nextCapacities[userId] = hours;
+        }
+
         onChange({
             ...value,
-            capacity_overrides: { ...value.capacity_overrides, [userId]: hours },
+            capacity_overrides: nextCapacities,
         });
     };
 
@@ -123,7 +134,9 @@ export function SimulationForm({
             <Section title="Kapacity zamestnancov" defaultOpen>
                 <div className="space-y-2">
                     {users.map((user) => {
-                        const current = value.capacity_overrides[user.id] ?? '';
+                        const baselineCapacity =
+                            baselinePeople.find((person) => person.id === user.id)?.weekly_capacity_hours ?? '';
+                        const current = value.capacity_overrides[user.id] ?? baselineCapacity;
                         return (
                             <div key={user.id} className="flex items-center gap-3">
                                 <span className="w-40 truncate text-sm text-gray-700">{user.name}</span>
@@ -135,7 +148,7 @@ export function SimulationForm({
                                     className="w-20 rounded border px-2 py-1 text-sm"
                                     value={current}
                                     onChange={(e) =>
-                                        setCapacity(user.id, e.target.value ? Number(e.target.value) : (undefined as unknown as number))
+                                        setCapacity(user.id, e.target.value ? Number(e.target.value) : undefined)
                                     }
                                 />
                                 <span className="text-xs text-gray-400">h/týždeň</span>
@@ -241,6 +254,58 @@ export function SimulationForm({
                                                                     user_id: alloc.user_id,
                                                                     allocation_id: alloc.id,
                                                                     allocated_hours: Number(e.target.value),
+                                                                },
+                                                            ],
+                                                        });
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <label className="text-xs text-gray-500">Od</label>
+                                            <input
+                                                type="date"
+                                                className="w-32 rounded border px-2 py-1 text-xs"
+                                                value={override?.start_date ?? alloc.start_date?.slice(0, 10)}
+                                                onChange={(e) => {
+                                                    if (overrideIdx >= 0) {
+                                                        setAllocation(overrideIdx, { start_date: e.target.value });
+                                                    } else {
+                                                        onChange({
+                                                            ...value,
+                                                            allocation_overrides: [
+                                                                ...value.allocation_overrides,
+                                                                {
+                                                                    project_id: alloc.project_id,
+                                                                    user_id: alloc.user_id,
+                                                                    allocation_id: alloc.id,
+                                                                    start_date: e.target.value,
+                                                                },
+                                                            ],
+                                                        });
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <label className="text-xs text-gray-500">Do</label>
+                                            <input
+                                                type="date"
+                                                className="w-32 rounded border px-2 py-1 text-xs"
+                                                value={override?.end_date ?? alloc.end_date?.slice(0, 10)}
+                                                onChange={(e) => {
+                                                    if (overrideIdx >= 0) {
+                                                        setAllocation(overrideIdx, { end_date: e.target.value });
+                                                    } else {
+                                                        onChange({
+                                                            ...value,
+                                                            allocation_overrides: [
+                                                                ...value.allocation_overrides,
+                                                                {
+                                                                    project_id: alloc.project_id,
+                                                                    user_id: alloc.user_id,
+                                                                    allocation_id: alloc.id,
+                                                                    end_date: e.target.value,
                                                                 },
                                                             ],
                                                         });

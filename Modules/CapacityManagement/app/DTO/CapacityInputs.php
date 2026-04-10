@@ -17,6 +17,8 @@ class CapacityInputs
      * @param  Collection                   $activeProjects     Project models with tasks eager-loaded
      * @param  array<string,array<int,float>> $historyByYwAndUser  [ISO-year-week][user_id] = hours
      * @param  Carbon                       $now                Injectable reference time (allows frozen tests)
+     * @param  ?Collection                  $forecastAllocations Optional allocation records used for simulation-only
+     *                                                              per-project capacity forecasting
      */
     public function __construct(
         public readonly Collection $users,
@@ -28,5 +30,6 @@ class CapacityInputs
         public readonly Collection $activeProjects,
         public readonly array $historyByYwAndUser,
         public readonly Carbon $now,
+        public readonly ?Collection $forecastAllocations = null,
     ) {}
 }

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\CapacityManagement\Contracts\SimulationServiceInterface;
+use Modules\CapacityManagement\Services\CapacityManagementService;
 use Modules\CapacityManagement\DTO\SimulationAllocationOverride;
 use Modules\CapacityManagement\DTO\SimulationDeadlineOverride;
 use Modules\CapacityManagement\DTO\SimulationInput;
@@ -15,6 +16,7 @@ use Modules\CapacityManagement\Models\EmployeeCapacity;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\ProjectAllocation;
 use Modules\Project\Models\Task;
+use Modules\TimeTracking\Models\TimeEntry;
 use Modules\User\Models\User;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -106,10 +108,51 @@ class SimulationServiceTest extends TestCase
             capacityOverrides: [$user->id => 80],
         ));
 
-        $baselineUtil  = collect($result->baseline['people'])->firstWhere('id', $user->id)['weekly_utilization'];
-        $simulatedUtil = collect($result->simulated['people'])->firstWhere('id', $user->id)['weekly_utilization'];
+        $simulatedPerson = collect($result->simulated['people'])->firstWhere('id', $user->id);
 
-        $this->assertLessThan($baselineUtil, $simulatedUtil);
+        $this->assertEquals(80, $simulatedPerson['weekly_capacity_hours']);
+        $this->assertEquals(32.0, $simulatedPerson['weekly_load_hours']);
+        $this->assertEquals(40.0, $simulatedPerson['weekly_utilization']);
+    }
+
+    #[Test]
+    public function simulation_baseline_matches_dashboard_baseline_even_when_allocations_differ_from_time_entries(): void
+    {
+        $user = User::factory()->create();
+        $project = Project::factory()->create([
+            'owner_id' => $user->id,
+            'status' => 'active',
+            'end_date' => now()->addDays(15)->toDateString(),
+        ]);
+        EmployeeCapacity::create(['user_id' => $user->id, 'weekly_capacity_hours' => 40]);
+        Task::factory()->create([
+            'project_id' => $project->id,
+            'status' => 'todo',
+            'estimated_hours' => 20,
+            'actual_hours' => 0,
+        ]);
+
+        $this->createAllocation([
+            'user_id' => $user->id,
+            'project_id' => $project->id,
+            'allocated_hours' => 160,
+            'percentage' => 100,
+        ]);
+
+        TimeEntry::factory()->create([
+            'project_id' => $project->id,
+            'task_id' => Task::factory()->create(['project_id' => $project->id])->id,
+            'user_id' => $user->id,
+            'entry_date' => now()->toDateString(),
+            'hours' => 5,
+        ]);
+
+        $dashboard = app(CapacityManagementService::class)->buildDashboard();
+        $simulation = $this->service->simulate(new SimulationInput);
+
+        $this->assertEquals($dashboard['weekly_overview'], $simulation->baseline['weekly_overview']);
+        $this->assertEquals($dashboard['monthly_overview'], $simulation->baseline['monthly_overview']);
+        $this->assertEquals($dashboard['prediction'], $simulation->baseline['prediction']);
     }
 
     // ── Allocation override ───────────────────────────────────────────────────
@@ -134,10 +177,10 @@ class SimulationServiceTest extends TestCase
             ],
         ));
 
-        $baselineUtil  = collect($result->baseline['people'])->firstWhere('id', $user->id)['weekly_utilization'];
-        $simulatedUtil = collect($result->simulated['people'])->firstWhere('id', $user->id)['weekly_utilization'];
+        $simulatedPerson = collect($result->simulated['people'])->firstWhere('id', $user->id);
 
-        $this->assertGreaterThan($simulatedUtil, $baselineUtil);
+        $this->assertEquals(16.0, $simulatedPerson['weekly_load_hours']);
+        $this->assertEquals(40.0, $simulatedPerson['weekly_utilization']);
     }
 
     #[Test]

@@ -2,6 +2,8 @@
 
 namespace Modules\CapacityManagement\Services;
 
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Modules\CapacityManagement\DTO\SimulationInput;
 use Modules\CapacityManagement\DTO\SimulationSuggestion;
 
@@ -16,6 +18,7 @@ class SimulationSuggestionEngine
      * @param  array           $simulated
      * @param  SimulationInput $input
      * @param  array<int,int>  $simulatedCapacitiesMap
+     * @param  Collection<int,object> $simulatedAllocations
      * @return SimulationSuggestion[]
      */
     public function generate(
@@ -23,13 +26,15 @@ class SimulationSuggestionEngine
         array $simulated,
         SimulationInput $input,
         array $simulatedCapacitiesMap,
+        Collection $simulatedAllocations,
+        Carbon $now,
     ): array {
         $suggestions = [];
 
-        $suggestions = array_merge($suggestions, $this->ruleA_OverloadedUsers($baseline, $simulated, $simulatedCapacitiesMap));
-        $suggestions = array_merge($suggestions, $this->ruleB_ProjectCannotFinish($baseline, $simulated, $simulatedCapacitiesMap));
+        $suggestions = array_merge($suggestions, $this->ruleA_OverloadedUsers($baseline, $simulated, $simulatedCapacitiesMap, $simulatedAllocations));
+        $suggestions = array_merge($suggestions, $this->ruleB_ProjectCannotFinish($baseline, $simulated, $simulatedCapacitiesMap, $simulatedAllocations, $now));
         $suggestions = array_merge($suggestions, $this->ruleC_DeadlineInPast($simulated));
-        $suggestions = array_merge($suggestions, $this->ruleD_OverEstimatedAllocation($simulated));
+        $suggestions = array_merge($suggestions, $this->ruleD_OverEstimatedAllocation($simulated, $simulatedAllocations));
         $suggestions = array_merge($suggestions, $this->ruleE_PositiveSignal($baseline, $simulated));
 
         $suggestions = $this->dedup($suggestions);
@@ -40,7 +45,12 @@ class SimulationSuggestionEngine
 
     // ── Rule A: User overloaded in simulated state ────────────────────────────
 
-    private function ruleA_OverloadedUsers(array $baseline, array $simulated, array $capacitiesMap): array
+    private function ruleA_OverloadedUsers(
+        array $baseline,
+        array $simulated,
+        array $capacitiesMap,
+        Collection $simulatedAllocations,
+    ): array
     {
         $suggestions = [];
         $baselineOverIds = collect($baseline['alerts'])->pluck('id')->flip();
@@ -54,44 +64,92 @@ class SimulationSuggestionEngine
 
             $wasAlreadyOverloaded = isset($baselineOverIds[$userId]);
             $severity = $wasAlreadyOverloaded ? 'warning' : 'critical';
+            $largestAllocation = $simulatedAllocations
+                ->filter(fn ($allocation) => (int) $allocation->user_id === $userId)
+                ->sortByDesc(fn ($allocation) => (float) ($allocation->allocated_hours ?? 0))
+                ->first();
 
-            // Primary: reduce biggest allocation
-            $suggestions[] = new SimulationSuggestion(
-                id: "A_reduce_{$userId}",
-                type: 'REDUCE_ALLOCATION',
-                severity: $severity,
-                title: "Skrátiť alokáciu pre {$alert['name']} o {$excessHours}h",
-                rationale: "{$alert['name']} je pretažen* ({$utilization}%). Zníženie alokácie odstráni preťaženie.",
-                proposedChange: [
-                    'capacity_overrides' => [],
-                    'allocation_overrides' => [],
-                    'deadline_overrides' => [],
-                    'team_changes' => [],
-                    '_hint' => "reduce_allocation_user_{$userId}_by_{$excessHours}h",
-                ],
-                affectsUserId: $userId,
-            );
+            if ($largestAllocation !== null) {
+                $hoursReduction = $this->hoursReductionForWeeklyExcess($largestAllocation, $excessHours);
+                $newHours = max(0, (int) ($largestAllocation->allocated_hours ?? 0) - $hoursReduction);
+
+                $suggestions[] = new SimulationSuggestion(
+                    id: "A_reduce_{$userId}",
+                    type: 'REDUCE_ALLOCATION',
+                    severity: $severity,
+                    title: "Skrátiť alokáciu pre {$alert['name']} o {$excessHours}h/týždeň",
+                    rationale: "{$alert['name']} je pretažen* ({$utilization}%). Zníženie najväčšej alokácie odstráni preťaženie.",
+                    proposedChange: [
+                        'capacity_overrides' => [],
+                        'allocation_overrides' => [[
+                            'project_id' => (int) $largestAllocation->project_id,
+                            'user_id' => $userId,
+                            'allocation_id' => $largestAllocation->id,
+                            'allocated_hours' => $newHours,
+                            'percentage' => $this->scaledPercentage($largestAllocation, $newHours),
+                            'start_date' => $this->toDateString($largestAllocation->start_date),
+                            'end_date' => $this->toDateString($largestAllocation->end_date),
+                        ]],
+                        'deadline_overrides' => [],
+                        'team_changes' => [],
+                    ],
+                    affectsUserId: $userId,
+                    affectsProjectId: (int) $largestAllocation->project_id,
+                );
+            }
 
             // Secondary: if free people exist, suggest reassignment
             $freePeople = collect($simulated['free_people']);
-            if ($freePeople->isNotEmpty()) {
+            if ($freePeople->isNotEmpty() && $largestAllocation !== null) {
                 $bestFree = $freePeople->first();
+                $hoursChunk = min(
+                    $this->hoursReductionForWeeklyExcess($largestAllocation, $excessHours),
+                    max(1, (int) floor(($bestFree['free_capacity_hours'] ?? 0) * $this->weeksInAllocation($largestAllocation)))
+                );
+
+                if ($hoursChunk <= 0) {
+                    continue;
+                }
+
+                $remainingHours = max(0, (int) ($largestAllocation->allocated_hours ?? 0) - $hoursChunk);
 
                 $suggestions[] = new SimulationSuggestion(
                     id: "A_reassign_{$userId}_to_{$bestFree['id']}",
                     type: 'REASSIGN_TO_FREE_USER',
                     severity: 'warning',
-                    title: "Presunúť {$excessHours}h z {$alert['name']} na {$bestFree['name']}",
+                    title: "Presunúť časť práce z {$alert['name']} na {$bestFree['name']}",
                     rationale: "{$bestFree['name']} má voľných {$bestFree['free_capacity_hours']}h/týždeň "
                         ."a môže prevziať prácu od pretaženého {$alert['name']}.",
                     proposedChange: [
                         'capacity_overrides' => [],
-                        'allocation_overrides' => [],
+                        'allocation_overrides' => [
+                            [
+                                'project_id' => (int) $largestAllocation->project_id,
+                                'user_id' => $userId,
+                                'allocation_id' => $largestAllocation->id,
+                                'allocated_hours' => $remainingHours,
+                                'percentage' => $this->scaledPercentage($largestAllocation, $remainingHours),
+                                'start_date' => $this->toDateString($largestAllocation->start_date),
+                                'end_date' => $this->toDateString($largestAllocation->end_date),
+                            ],
+                            [
+                                'project_id' => (int) $largestAllocation->project_id,
+                                'user_id' => (int) $bestFree['id'],
+                                'allocated_hours' => $hoursChunk,
+                                'percentage' => min(100, (int) round(($hoursChunk / max(1, $this->weeksInAllocation($largestAllocation))) / 40 * 100)),
+                                'start_date' => $this->toDateString($largestAllocation->start_date),
+                                'end_date' => $this->toDateString($largestAllocation->end_date),
+                            ],
+                        ],
                         'deadline_overrides' => [],
-                        'team_changes' => [],
-                        '_hint' => "reassign_{$excessHours}h_from_{$userId}_to_{$bestFree['id']}",
+                        'team_changes' => [[
+                            'project_id' => (int) $largestAllocation->project_id,
+                            'user_id' => (int) $bestFree['id'],
+                            'action' => 'add',
+                        ]],
                     ],
                     affectsUserId: $userId,
+                    affectsProjectId: (int) $largestAllocation->project_id,
                 );
             }
         }
@@ -101,7 +159,13 @@ class SimulationSuggestionEngine
 
     // ── Rule B: Project cannot finish ────────────────────────────────────────
 
-    private function ruleB_ProjectCannotFinish(array $baseline, array $simulated, array $capacitiesMap): array
+    private function ruleB_ProjectCannotFinish(
+        array $baseline,
+        array $simulated,
+        array $capacitiesMap,
+        Collection $simulatedAllocations,
+        Carbon $now,
+    ): array
     {
         $suggestions = [];
         $teamWeeklyCapacity = max(1, array_sum($capacitiesMap));
@@ -136,7 +200,7 @@ class SimulationSuggestionEngine
                     'deadline_overrides' => [
                         [
                             'project_id' => $project['id'],
-                            'new_end_date' => now()->addDays($project['days_remaining'] + $daysShort)->toDateString(),
+                            'new_end_date' => $now->copy()->addDays($project['days_remaining'] + $daysShort)->toDateString(),
                         ],
                     ],
                     'team_changes' => [],
@@ -147,6 +211,12 @@ class SimulationSuggestionEngine
             // Secondary: add a free team member if available
             $freePeople = collect($simulated['free_people'])->take(2);
             foreach ($freePeople as $freePerson) {
+                $currentProjectHours = $simulatedAllocations
+                    ->filter(fn ($allocation) => (int) $allocation->project_id === (int) $project['id'])
+                    ->sum(fn ($allocation) => (float) ($allocation->allocated_hours ?? 0));
+                $hoursShortTotal = max(1, (int) ceil(max(0, $project['remaining_hours'] - $currentProjectHours)));
+                $allocationHours = max(1, min($hoursShortTotal, (int) round(($freePerson['free_capacity_hours'] ?? 0) * min(4, max(1, (int) ceil(max(1, $project['days_remaining']) / 7))))));
+
                 $suggestions[] = new SimulationSuggestion(
                     id: "B_add_member_{$project['id']}_{$freePerson['id']}",
                     type: 'ADD_TEAM_MEMBER',
@@ -156,7 +226,14 @@ class SimulationSuggestionEngine
                         ."a mohol/a by pomôcť s dokončením projektu.",
                     proposedChange: [
                         'capacity_overrides' => [],
-                        'allocation_overrides' => [],
+                        'allocation_overrides' => [[
+                            'project_id' => $project['id'],
+                            'user_id' => $freePerson['id'],
+                            'allocated_hours' => $allocationHours,
+                            'percentage' => min(100, (int) round(($freePerson['free_capacity_hours'] / 40) * 100)),
+                            'start_date' => $now->toDateString(),
+                            'end_date' => $now->copy()->addDays(max(7, $project['days_remaining']))->toDateString(),
+                        ]],
                         'deadline_overrides' => [],
                         'team_changes' => [
                             [
@@ -200,7 +277,7 @@ class SimulationSuggestionEngine
 
     // ── Rule D: Allocation exceeds remaining task hours ───────────────────────
 
-    private function ruleD_OverEstimatedAllocation(array $simulated): array
+    private function ruleD_OverEstimatedAllocation(array $simulated, Collection $simulatedAllocations): array
     {
         $suggestions = [];
 
@@ -215,6 +292,30 @@ class SimulationSuggestionEngine
             $available = $project['available_hours_next_4_weeks'] ?? 0;
             if ($available > 0 && $available > $remaining * 2 && $available > 80) {
                 $surplus = round($available - $remaining);
+                $largestAllocation = $simulatedAllocations
+                    ->filter(fn ($allocation) => (int) $allocation->project_id === (int) $project['id'])
+                    ->sortByDesc(fn ($allocation) => (float) ($allocation->allocated_hours ?? 0))
+                    ->first();
+
+                $proposedChange = [];
+                if ($largestAllocation !== null) {
+                    $newHours = max(0, min((int) round($remaining), (int) ($largestAllocation->allocated_hours ?? 0)));
+                    $proposedChange = [
+                        'capacity_overrides' => [],
+                        'allocation_overrides' => [[
+                            'project_id' => (int) $largestAllocation->project_id,
+                            'user_id' => (int) $largestAllocation->user_id,
+                            'allocation_id' => $largestAllocation->id,
+                            'allocated_hours' => $newHours,
+                            'percentage' => $this->scaledPercentage($largestAllocation, $newHours),
+                            'start_date' => $this->toDateString($largestAllocation->start_date),
+                            'end_date' => $this->toDateString($largestAllocation->end_date),
+                        ]],
+                        'deadline_overrides' => [],
+                        'team_changes' => [],
+                    ];
+                }
+
                 $suggestions[] = new SimulationSuggestion(
                     id: "D_over_alloc_{$project['id']}",
                     type: 'REDUCE_OVERESTIMATED_ALLOCATION',
@@ -222,7 +323,7 @@ class SimulationSuggestionEngine
                     title: "Kapacita pre \"{$project['name']}\" prevyšuje potrebu o {$surplus}h",
                     rationale: "Projekt má ešte {$remaining}h práce, ale je dostupných {$available}h na 4 týždne. "
                         ."Zvážte presun nadbytočnej kapacity na iné projekty.",
-                    proposedChange: [],
+                    proposedChange: $proposedChange,
                     affectsProjectId: $project['id'],
                 );
             }
@@ -286,5 +387,43 @@ class SimulationSuggestionEngine
         ));
 
         return $suggestions;
+    }
+
+    private function hoursReductionForWeeklyExcess(object $allocation, int $weeklyExcessHours): int
+    {
+        return max(1, (int) ceil($weeklyExcessHours * $this->weeksInAllocation($allocation)));
+    }
+
+    private function weeksInAllocation(object $allocation): float
+    {
+        $start = $allocation->start_date instanceof Carbon ? $allocation->start_date->copy() : Carbon::parse($allocation->start_date);
+        $end = $allocation->end_date instanceof Carbon ? $allocation->end_date->copy() : Carbon::parse($allocation->end_date);
+
+        return max(1, ceil($start->diffInDays($end->copy()->addDay()) / 7));
+    }
+
+    private function scaledPercentage(object $allocation, int $newAllocatedHours): int
+    {
+        $originalHours = (int) ($allocation->allocated_hours ?? 0);
+        $originalPercentage = (int) ($allocation->percentage ?? 0);
+
+        if ($originalHours <= 0 || $originalPercentage <= 0) {
+            return $originalPercentage;
+        }
+
+        return max(0, min(100, (int) round(($newAllocatedHours / $originalHours) * $originalPercentage)));
+    }
+
+    private function toDateString(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if ($value instanceof Carbon) {
+            return $value->toDateString();
+        }
+
+        return Carbon::parse($value)->toDateString();
     }
 }
