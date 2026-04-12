@@ -1,0 +1,69 @@
+Project capacity_time_tracking {
+  database_type: "MySQL"
+  Note: "Capacity planning and actual worked time."
+}
+
+Table users {
+  id bigint [pk, increment]
+  name varchar
+  email varchar [unique, not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table employee_capacities {
+  id bigint [pk, increment]
+  user_id bigint [not null, unique]
+  weekly_capacity_hours int [not null, default: 40]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table projects {
+  id bigint [pk, increment]
+  name varchar [not null]
+  owner_id bigint
+  start_date date [not null]
+  end_date date [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table tasks {
+  id bigint [pk, increment]
+  project_id bigint [not null]
+  title varchar [not null]
+  estimated_hours int
+  actual_hours int [not null, default: 0]
+  due_date date
+  start_date date
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table time_entries {
+  id bigint [pk, increment]
+  project_id bigint [not null]
+  task_id bigint [not null]
+  user_id bigint [not null]
+  entry_date date [not null]
+  hours decimal(5,2) [not null]
+  description text
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (project_id, user_id, entry_date)
+    (task_id)
+  }
+}
+
+Ref: employee_capacities.user_id > users.id
+
+Ref: projects.owner_id > users.id
+
+Ref: tasks.project_id > projects.id
+
+Ref: time_entries.project_id > projects.id
+Ref: time_entries.task_id > tasks.id
+Ref: time_entries.user_id > users.id

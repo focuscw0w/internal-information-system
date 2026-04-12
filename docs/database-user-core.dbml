@@ -1,0 +1,38 @@
+Project user_core {
+  database_type: "MySQL"
+  Note: "User and core supporting entities."
+}
+
+Table users {
+  id bigint [pk, increment]
+  name varchar
+  email varchar [unique, not null]
+  email_verified_at timestamp
+  password varchar [not null]
+  remember_token varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table employee_capacities {
+  id bigint [pk, increment]
+  user_id bigint [not null, unique]
+  weekly_capacity_hours int [not null, default: 40]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table notifications {
+  id uuid [pk]
+  type varchar [not null]
+  notifiable_type varchar [not null]
+  notifiable_id bigint [not null]
+  data text [not null]
+  read_at timestamp
+  created_at timestamp
+  updated_at timestamp
+
+  Note: "Polymorphic relation, typically points to users."
+}
+
+Ref: employee_capacities.user_id > users.id
