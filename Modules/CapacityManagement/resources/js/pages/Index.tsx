@@ -2,8 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { ChevronDown } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { AlertTriangle, ChevronDown, Clock3, Users } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { UtilizationBar } from '../components/shared/utilization';
 import {
@@ -106,6 +106,11 @@ export default function Index({
 }) {
     const [capacities, setCapacities] = useState<Record<number, number>>({});
     const [expandedHistory, setExpandedHistory] = useState<Record<number, boolean>>({});
+    const [expandedRecommendations, setExpandedRecommendations] = useState<Record<string, boolean>>({
+        overloaded: true,
+        risky: false,
+        free: false,
+    });
 
     const statusClassMap: Record<Person['status'], string> = {
         green: 'bg-emerald-100 text-emerald-700',
@@ -127,21 +132,37 @@ export default function Index({
         setExpandedHistory((prev) => ({ ...prev, [userId]: !prev[userId] }));
     };
 
+    const toggleRecommendation = (key: 'overloaded' | 'risky' | 'free') => {
+        setExpandedRecommendations((prev) => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    const overloadedPeople = dashboard.people
+        .filter((person) => person.weekly_utilization > 100)
+        .sort((a, b) => b.weekly_utilization - a.weekly_utilization);
+
+    const riskyProjects = dashboard.prediction.projects
+        .filter((project) => !project.can_finish && !project.is_overdue)
+        .sort(
+            (a, b) =>
+                b.remaining_hours - b.available_hours_next_4_weeks - (a.remaining_hours - a.available_hours_next_4_weeks),
+        );
+
+    const freePeople = dashboard.free_people
+        .filter((person) => person.free_capacity_hours > 0)
+        .slice(0, 5);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Kapacitný dashboard" />
 
             <div className="space-y-6 p-6">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-semibold">Kapacitný manažment</h1>
-                    {can_manage && (
-                        <Link
-                            href="/capacity-management/simulation"
-                            className="rounded border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
-                        >
-                            Spustiť simuláciu →
-                        </Link>
-                    )}
+                    <div>
+                        <h1 className="text-2xl font-semibold">Kapacitný manažment</h1>
+                        <p className="mt-1 text-sm text-gray-500">
+                            Prehľad ukazuje, kde tím nestíha, kto je preťažený a kde je ešte priestor na zmenu.
+                        </p>
+                    </div>
                 </div>
 
                 {/* Alerts */}
@@ -157,6 +178,189 @@ export default function Index({
                         </ul>
                     </div>
                 )}
+
+                <section className="space-y-4">
+                    <div>
+                        <h2 className="text-lg font-semibold text-gray-900">Odporúčané zásahy</h2>
+                        <p className="mt-1 text-sm text-gray-500">
+                            Hlavný blok ostáva stručný a detail si rozbalíš len tam, kde chceš riešiť problém.
+                        </p>
+                    </div>
+
+                    <div className="space-y-3">
+                        <Collapsible
+                            open={expandedRecommendations.overloaded}
+                            onOpenChange={() => toggleRecommendation('overloaded')}
+                            className="rounded-lg border bg-white"
+                        >
+                            <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-3 text-left">
+                                <div className="flex items-center gap-3">
+                                    <div className="rounded-md bg-red-50 p-2 text-red-600">
+                                        <AlertTriangle className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-medium text-gray-900">Preťažení ľudia ({overloadedPeople.length})</h3>
+                                        <p className="text-xs text-gray-500">Kde hrozí preťaženie a koho odľahčiť.</p>
+                                    </div>
+                                </div>
+                                <ChevronDown
+                                    className={`h-4 w-4 text-gray-500 transition-transform ${expandedRecommendations.overloaded ? 'rotate-180' : ''}`}
+                                />
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="border-t px-4 py-4">
+                                <div className="space-y-3">
+                                    {overloadedPeople.length === 0 && (
+                                        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                                            Nikto nie je nad 100 % kapacity.
+                                        </div>
+                                    )}
+
+                                    {overloadedPeople.map((person) => {
+                                        const overloadHours = Math.max(
+                                            0,
+                                            Math.round(person.weekly_load_hours - person.weekly_capacity_hours),
+                                        );
+
+                                        return (
+                                            <div key={person.id} className="rounded-md border border-red-100 bg-red-50/60 p-3">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="font-medium text-gray-900">{person.name}</span>
+                                                    <span className="rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                                                        {person.weekly_utilization}%
+                                                    </span>
+                                                </div>
+                                                <p className="mt-2 text-sm text-gray-700">
+                                                    Je približne o <span className="font-medium">{overloadHours}h/týždeň</span> nad kapacitou.
+                                                </p>
+                                                <UtilizationBar utilization={person.weekly_utilization} />
+                                                <p className="mt-2 text-xs text-gray-500">
+                                                    Vhodný zásah: odobrať časť práce, presunúť úlohy alebo pridať ďalšieho človeka na projekt.
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </CollapsibleContent>
+                        </Collapsible>
+
+                        <Collapsible
+                            open={expandedRecommendations.risky}
+                            onOpenChange={() => toggleRecommendation('risky')}
+                            className="rounded-lg border bg-white"
+                        >
+                            <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-3 text-left">
+                                <div className="flex items-center gap-3">
+                                    <div className="rounded-md bg-orange-50 p-2 text-orange-600">
+                                        <Clock3 className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-medium text-gray-900">Rizikové projekty ({riskyProjects.length})</h3>
+                                        <p className="text-xs text-gray-500">Kde chýba kapacita do termínu.</p>
+                                    </div>
+                                </div>
+                                <ChevronDown
+                                    className={`h-4 w-4 text-gray-500 transition-transform ${expandedRecommendations.risky ? 'rotate-180' : ''}`}
+                                />
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="border-t px-4 py-4">
+                                <div className="space-y-3">
+                                    {riskyProjects.length === 0 && (
+                                        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                                            Aktuálne nevidíme projekt, ktorý by nestíhal do termínu.
+                                        </div>
+                                    )}
+
+                                    {riskyProjects.map((project) => {
+                                        const missingHours = Math.max(
+                                            0,
+                                            Math.round(project.remaining_hours - project.available_hours_next_4_weeks),
+                                        );
+                                        const coverage = Math.min(
+                                            100,
+                                            project.remaining_hours > 0
+                                                ? Math.round((project.available_hours_next_4_weeks / project.remaining_hours) * 100)
+                                                : 100,
+                                        );
+
+                                        return (
+                                            <div key={project.id} className="rounded-md border border-orange-100 bg-orange-50/60 p-3">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="font-medium text-gray-900">{project.name}</span>
+                                                    <span className="rounded bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">
+                                                        chýba {missingHours}h
+                                                    </span>
+                                                </div>
+                                                <div className="mt-3">
+                                                    <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                                                        <div
+                                                            className="h-full rounded-full bg-orange-500"
+                                                            style={{ width: `${coverage}%` }}
+                                                        />
+                                                    </div>
+                                                    <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+                                                        <span>{project.available_hours_next_4_weeks}h dostupných</span>
+                                                        <span>{project.remaining_hours}h zostáva</span>
+                                                    </div>
+                                                </div>
+                                                <p className="mt-2 text-xs text-gray-500">
+                                                    Vhodný zásah: pridať kapacitu, odľahčiť tím alebo posunúť termín projektu.
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </CollapsibleContent>
+                        </Collapsible>
+
+                        <Collapsible
+                            open={expandedRecommendations.free}
+                            onOpenChange={() => toggleRecommendation('free')}
+                            className="rounded-lg border bg-white"
+                        >
+                            <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-3 text-left">
+                                <div className="flex items-center gap-3">
+                                    <div className="rounded-md bg-emerald-50 p-2 text-emerald-600">
+                                        <Users className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-medium text-gray-900">Voľná kapacita ({freePeople.length})</h3>
+                                        <p className="text-xs text-gray-500">Koho sa oplatí zvážiť pre novú prácu.</p>
+                                    </div>
+                                </div>
+                                <ChevronDown
+                                    className={`h-4 w-4 text-gray-500 transition-transform ${expandedRecommendations.free ? 'rotate-180' : ''}`}
+                                />
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="border-t px-4 py-4">
+                                <div className="space-y-3">
+                                    {freePeople.length === 0 && (
+                                        <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+                                            Aktuálne nemá tím výraznejšiu voľnú rezervu.
+                                        </div>
+                                    )}
+
+                                    {freePeople.map((person) => (
+                                        <div key={person.id} className="rounded-md border border-emerald-100 bg-emerald-50/60 p-3">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <span className="font-medium text-gray-900">{person.name}</span>
+                                                <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                                                    +{person.free_capacity_hours}h
+                                                </span>
+                                            </div>
+                                            <p className="mt-2 text-sm text-gray-700">
+                                                Momentálne využíva {person.weekly_utilization}% týždennej kapacity.
+                                            </p>
+                                            <UtilizationBar utilization={person.weekly_utilization} />
+                                            <p className="mt-2 text-xs text-gray-500">
+                                                Vhodný zásah: priradiť novú úlohu alebo pomôcť rizikovému projektu.
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CollapsibleContent>
+                        </Collapsible>
+                    </div>
+                </section>
 
                 {/* Team overview */}
                 <section className="grid gap-4 md:grid-cols-2">
