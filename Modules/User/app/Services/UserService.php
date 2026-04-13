@@ -43,7 +43,11 @@ class UserService implements UserServiceInterface
         }
 
         $user->update($updateData);
-        $user->syncPermissions($data['permissions'] ?? []);
+
+        // Admin permissions cannot be changed via the UI
+        if (! $user->is_admin) {
+            $user->syncPermissions($data['permissions'] ?? []);
+        }
     }
 
     /**
@@ -51,6 +55,10 @@ class UserService implements UserServiceInterface
      */
     public function deleteUser(User $user): void
     {
+        if ($user->is_admin) {
+            abort(403, 'Admin nemôže byť zmazaný.');
+        }
+
         $user->delete();
     }
 }

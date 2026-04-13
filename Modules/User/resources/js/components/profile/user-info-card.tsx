@@ -5,12 +5,14 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Mail, User as UserIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Mail, Shield, User as UserIcon } from 'lucide-react';
 
 interface UserInfoCardProps {
     user: {
         name: string;
         email: string;
+        is_admin: boolean;
         created_at: string;
     };
 }
@@ -22,6 +24,12 @@ export const UserInfoCard = ({ user }: UserInfoCardProps) => {
                 <CardTitle className="flex items-center gap-2">
                     <UserIcon className="h-4 w-4" />
                     Osobné údaje
+                    {user.is_admin && (
+                        <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 text-xs">
+                            <Shield className="mr-1 h-3 w-3" />
+                            Admin
+                        </Badge>
+                    )}
                 </CardTitle>
                 <CardDescription>
                     Zmenu údajov vykonáva administrátor.

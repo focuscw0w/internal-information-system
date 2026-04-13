@@ -16,9 +16,11 @@ class UserTestSeeder extends Seeder
             [
                 'name' => 'Admin Systému',
                 'password' => Hash::make('password'),
+                'is_admin' => true,
             ]
         );
 
+        $admin->update(['is_admin' => true]);
         $admin->syncPermissions(PermissionEnum::all());
 
         $this->command->info('');

@@ -5,9 +5,10 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Column, DataTable } from '@/components/ui/data-table';
 import { router } from '@inertiajs/react';
-import { Users } from 'lucide-react';
+import { Shield, Users } from 'lucide-react';
 import { AvailablePermissions, ManagedUser } from '../types/types';
 import { DeleteUserDialog } from './dialogs/delete-user';
 import { EditUserDialog } from './dialogs/edit-user';
@@ -22,7 +23,17 @@ export const UserTable = ({ users, availablePermissions }: UserTableProps) => {
         {
             key: 'name',
             label: 'Meno',
-            render: (user) => <span className="font-medium">{user.name}</span>,
+            render: (user) => (
+                <div className="flex items-center gap-2">
+                    <span className="font-medium">{user.name}</span>
+                    {user.is_admin && (
+                        <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 text-xs">
+                            <Shield className="mr-1 h-3 w-3" />
+                            Admin
+                        </Badge>
+                    )}
+                </div>
+            ),
         },
         {
             key: 'email',
@@ -53,7 +64,7 @@ export const UserTable = ({ users, availablePermissions }: UserTableProps) => {
                         user={user}
                         availablePermissions={availablePermissions}
                     />
-                    <DeleteUserDialog user={user} />
+                    {!user.is_admin && <DeleteUserDialog user={user} />}
                 </div>
             ),
         },

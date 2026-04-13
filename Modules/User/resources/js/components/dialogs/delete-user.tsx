@@ -14,6 +14,8 @@ export const DeleteUserDialog = ({ user }: DeleteUserDialogProps) => {
     const { delete: destroy, processing } = useForm({});
 
     const handleConfirm = () => {
+        if (user.is_admin) return;
+
         destroy(`/users/${user.id}`, {
             preserveScroll: true,
             onSuccess: () => setOpen(false),

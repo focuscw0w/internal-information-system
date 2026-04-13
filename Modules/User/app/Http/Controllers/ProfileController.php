@@ -44,6 +44,7 @@ class ProfileController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'is_admin' => $user->is_admin,
                 'created_at' => $user->created_at,
             ],
             'isOwnProfile' => Auth::id() === $user->id,

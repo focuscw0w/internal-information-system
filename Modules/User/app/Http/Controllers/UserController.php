@@ -38,13 +38,14 @@ class UserController extends Controller
         return Inertia::render('User/Manage', [
             'users' => User::query()
                 ->with('permissions')
-                ->select('id', 'name', 'email', 'created_at')
+                ->select('id', 'name', 'email', 'is_admin', 'created_at')
                 ->orderBy('name')
                 ->get()
                 ->map(fn (User $user) => [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
+                    'is_admin' => $user->is_admin,
                     'permissions' => $user->getPermissionNames()->toArray(),
                     'created_at' => $user->created_at,
                 ]),
