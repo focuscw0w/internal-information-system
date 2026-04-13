@@ -6,7 +6,6 @@ enum PermissionEnum: string
 {
     // Users
     case USERS_VIEW = 'users.view';
-    case USERS_MANAGE = 'users.manage';
 
     // Projects
     case PROJECTS_CREATE = 'projects.create';
@@ -24,7 +23,6 @@ enum PermissionEnum: string
     {
         return match ($this) {
             self::USERS_VIEW => 'Zobrazenie používateľov',
-            self::USERS_MANAGE => 'Správa používateľov',
             self::PROJECTS_CREATE => 'Vytváranie projektov',
             self::PROJECTS_VIEW_ALL => 'Zobrazenie všetkých projektov',
             self::CAPACITY_MANAGE => 'Správa kapacít',
@@ -35,7 +33,6 @@ enum PermissionEnum: string
     {
         return match ($this) {
             self::USERS_VIEW => 'Používateľ vidí zoznam ostatných používateľov v systéme.',
-            self::USERS_MANAGE => 'Používateľ môže vytvárať nové kontá a spravovať existujúcich používateľov.',
             self::PROJECTS_CREATE => 'Používateľ môže zakladať nové projekty.',
             self::PROJECTS_VIEW_ALL => 'Používateľ vidí všetky projekty bez nutnosti byť členom tímu projektu.',
             self::CAPACITY_MANAGE => 'Používateľ môže upravovať týždenné kapacity zamestnancov.',
@@ -45,7 +42,7 @@ enum PermissionEnum: string
     public function group(): string
     {
         return match ($this) {
-            self::USERS_VIEW, self::USERS_MANAGE => 'Používatelia',
+            self::USERS_VIEW => 'Používatelia',
             self::PROJECTS_CREATE, self::PROJECTS_VIEW_ALL => 'Projekty',
             self::CAPACITY_MANAGE => 'Kapacity',
         };

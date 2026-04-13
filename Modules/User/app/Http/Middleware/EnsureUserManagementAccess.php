@@ -2,7 +2,6 @@
 
 namespace Modules\User\Http\Middleware;
 
-use App\Enums\PermissionEnum;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,8 +10,7 @@ class EnsureUserManagementAccess
 {
     public function handle(Request $request, Closure $next): Response
     {
-
-        if (! $request->user()?->can(PermissionEnum::USERS_MANAGE->value)) {
+        if (! $request->user()?->is_admin) {
             abort(403);
         }
 

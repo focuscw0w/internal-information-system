@@ -7,7 +7,7 @@ return [
             'title' => 'Používatelia',
             'route' => 'user.index',
             'icon' => 'Users',
-            'permission' => 'users.manage',
+            'admin_only' => true,
             'order' => 50,
         ],
     ],

@@ -23,10 +23,7 @@ class AdminUserManagementTest extends TestCase
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        $admin = User::factory()->create();
-        $admin->syncPermissions(PermissionEnum::all());
-
-        return $admin;
+        return User::factory()->create(['is_admin' => true]);
     }
 
     private function createRegularUser(): User
@@ -86,7 +83,7 @@ class AdminUserManagementTest extends TestCase
 
         $this->assertTrue($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
         $this->assertTrue($user->hasPermissionTo(PermissionEnum::USERS_VIEW->value));
-        $this->assertFalse($user->hasPermissionTo(PermissionEnum::USERS_MANAGE->value));
+        $this->assertFalse($user->is_admin);
     }
 
     public function test_admin_can_update_user(): void

@@ -28,10 +28,7 @@ class UserManagementTest extends TestCase
 
     private function createAdmin(): User
     {
-        $admin = User::factory()->create();
-        $admin->givePermissionTo(PermissionEnum::USERS_MANAGE->value);
-
-        return $admin;
+        return User::factory()->create(['is_admin' => true]);
     }
 
     private function createRegularUser(): User
@@ -110,7 +107,7 @@ class UserManagementTest extends TestCase
 
         $this->assertTrue($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
         $this->assertTrue($user->hasPermissionTo(PermissionEnum::USERS_VIEW->value));
-        $this->assertFalse($user->hasPermissionTo(PermissionEnum::USERS_MANAGE->value));
+        $this->assertFalse($user->is_admin);
     }
 
     // =========================================================================

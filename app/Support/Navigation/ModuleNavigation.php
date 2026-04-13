@@ -26,6 +26,11 @@ class ModuleNavigation
 
             foreach ($items as $item) {
                 $requiredPermission = $item['permission'] ?? null;
+                $adminOnly = $item['admin_only'] ?? false;
+
+                if ($adminOnly && (! $user || ! $user->is_admin)) {
+                    continue;
+                }
 
                 if ($requiredPermission && (! $user || ! $user->can($requiredPermission))) {
                     continue;

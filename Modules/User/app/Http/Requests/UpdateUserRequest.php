@@ -10,7 +10,6 @@ class UpdateUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        //return $this->user()->hasPermissionTo(PermissionEnum::USERS_MANAGE->value);
         return true;
     }
 
