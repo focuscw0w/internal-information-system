@@ -121,7 +121,7 @@ class ProjectResource extends JsonResource
                 $user = auth()->user();
 
                 if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
-                    return ProjectPermission::values();
+                    return ProjectPermission::allValues();
                 }
 
                 return $this->resource->userPermissions($user);

@@ -127,7 +127,7 @@ class ProjectPermissionTest extends TestCase
         $owner = User::factory()->create();
         $project = $this->createProject($owner);
 
-        $this->assertEquals(ProjectPermission::values(), $project->userPermissions($owner));
+        $this->assertEquals(ProjectPermission::allValues(), $project->userPermissions($owner));
     }
 
     // =========================================================================

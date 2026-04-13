@@ -25,6 +25,13 @@ export const PERMISSION_GROUPS = [
         ],
     },
     {
+        label: 'Sledovanie času',
+        permissions: [
+            { value: 'view_all_time_entries', label: 'Zobrazenie všetkých záznamov' },
+            { value: 'manage_time_entries', label: 'Správa záznamov času' },
+        ],
+    },
+    {
         label: 'Ostatné',
         permissions: [{ value: 'export_data', label: 'Export dát' }],
     },

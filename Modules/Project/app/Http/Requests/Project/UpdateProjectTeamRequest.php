@@ -30,7 +30,7 @@ class UpdateProjectTeamRequest extends FormRequest
             'team_settings.*.permissions.*' => [
                 'string',
                 Rule::in(
-                    ProjectPermission::values()
+                    ProjectPermission::allValues()
                 ),
             ],
         ];

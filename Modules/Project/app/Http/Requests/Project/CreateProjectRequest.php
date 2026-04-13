@@ -41,7 +41,7 @@ class CreateProjectRequest extends FormRequest
             'team_settings.*.permissions' => ['nullable', 'array'],
             'team_settings.*.permissions.*' => [
                 'string',
-                Rule::in(ProjectPermission::values()),
+                Rule::in(ProjectPermission::allValues()),
             ],
         ];
     }

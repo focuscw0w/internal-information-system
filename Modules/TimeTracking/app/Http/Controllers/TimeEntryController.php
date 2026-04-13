@@ -33,7 +33,7 @@ class TimeEntryController extends Controller
 
         $filters = [];
 
-        if (! $project->userHasPermission(auth()->user(), 'manage_team')) {
+        if (! $project->userHasPermission(auth()->user(), 'view_all_time_entries')) {
             $filters['user_id'] = auth()->id();
         }
 

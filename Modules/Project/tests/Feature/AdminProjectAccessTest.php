@@ -206,7 +206,7 @@ class AdminProjectAccessTest extends TestCase
         $projectData = $page['props']['project'];
 
         $this->assertEquals(
-            ProjectPermission::values(),
+            ProjectPermission::allValues(),
             $projectData['current_user_permissions'],
             'Admin by mal dostať všetky projektové permissions v response'
         );

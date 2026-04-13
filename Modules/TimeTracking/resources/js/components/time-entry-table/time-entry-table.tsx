@@ -27,7 +27,7 @@ const groupByDate = (entries: TimeEntry[]): Record<string, TimeEntry[]> => {
 export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
     const currentUserId = usePage<SharedData>().props.auth.user.id;
     const permissions = project.current_user_permissions ?? [];
-    const canManageTeam = permissions.includes('manage_team');
+    const canManageTimeEntries = permissions.includes('manage_time_entries');
 
     const [taskFilter, setTaskFilter] = useState<number | null>(null);
     const [userFilter, setUserFilter] = useState<number | null>(null);
@@ -58,7 +58,7 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
     const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
     const canEdit = (entry: TimeEntry) =>
-        canManageTeam || entry.user_id === currentUserId;
+        canManageTimeEntries || entry.user_id === currentUserId;
 
     return (
         <Card className="border-gray-100 bg-white shadow-sm">

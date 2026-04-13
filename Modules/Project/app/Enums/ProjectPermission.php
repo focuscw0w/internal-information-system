@@ -2,6 +2,8 @@
 
 namespace Modules\Project\Enums;
 
+use Modules\Project\Support\PermissionRegistry;
+
 enum ProjectPermission: string
 {
     // Project permissions
@@ -29,6 +31,14 @@ enum ProjectPermission: string
     public static function values(): array
     {
         return array_column(self::cases(), 'value');
+    }
+
+    /**
+     * Get all values including permissions registered by other modules
+     */
+    public static function allValues(): array
+    {
+        return array_merge(self::values(), PermissionRegistry::extra());
     }
 
     /**
@@ -87,6 +97,32 @@ enum ProjectPermission: string
             self::EXPORT_DATA
                 => 'Dáta',
         };
+    }
+
+    /**
+     * Get icon identifier for permission
+     */
+    public function icon(): string
+    {
+        return match($this) {
+            self::VIEW_PROJECT, self::EDIT_PROJECT, self::DELETE_PROJECT => 'folder',
+            self::VIEW_TASKS, self::CREATE_TASKS, self::EDIT_TASKS,
+            self::DELETE_TASKS, self::ASSIGN_TASKS => 'check-square',
+            self::VIEW_TEAM, self::MANAGE_TEAM => 'users',
+            self::EXPORT_DATA => 'download',
+        };
+    }
+
+    /**
+     * Check if permission is considered dangerous
+     */
+    public function isDangerous(): bool
+    {
+        return in_array($this, [
+            self::DELETE_PROJECT,
+            self::DELETE_TASKS,
+            self::MANAGE_TEAM,
+        ]);
     }
 
     /**

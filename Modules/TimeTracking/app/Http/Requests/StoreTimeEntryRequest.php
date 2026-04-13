@@ -37,7 +37,7 @@ class StoreTimeEntryRequest extends FormRequest
 
                     $project = Project::find($routeProjectId);
 
-                    if ($project && $project->userHasPermission(auth()->user(), 'manage_team')) {
+                    if ($project && $project->userHasPermission(auth()->user(), 'manage_time_entries')) {
                         return;
                     }
 

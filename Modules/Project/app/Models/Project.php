@@ -142,7 +142,7 @@ class Project extends Model
     public function userPermissions(User $user): array
     {
         if ($this->owner_id === $user->id) {
-            return ProjectPermission::values();
+            return ProjectPermission::allValues();
         }
 
         $teamMember = $this->team()->where('user_id', $user->id)->first();

@@ -36,7 +36,12 @@ class TimeEntryControllerTest extends TestCase
         ]);
 
         $this->project->team()->attach($this->owner->id, [
-            'permissions' => json_encode(['view_project', 'view_tasks', 'edit_tasks', 'manage_team']),
+            'permissions' => json_encode([
+                'view_project', 'view_tasks', 'edit_tasks',
+                'manage_team',
+                'view_all_time_entries',
+                'manage_time_entries',
+            ]),
         ]);
 
         $this->task = Task::factory()->create([

@@ -27,7 +27,11 @@ class StoreTimeEntryValidationTest extends TestCase
         $this->project = Project::factory()->create(['owner_id' => $this->user->id]);
 
         $this->project->team()->attach($this->user->id, [
-            'permissions' => json_encode(['view_project', 'view_tasks', 'edit_tasks', 'manage_team']),
+            'permissions' => json_encode([
+                'view_project', 'view_tasks', 'edit_tasks',
+                'manage_team',
+                'manage_time_entries',
+            ]),
         ]);
 
         $this->task = Task::factory()->create([
