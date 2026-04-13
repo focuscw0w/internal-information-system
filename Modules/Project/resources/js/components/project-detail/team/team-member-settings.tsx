@@ -1,5 +1,3 @@
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { ChevronDown, ChevronRight, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { TeamMemberSettings } from '../../../types/types';
@@ -23,28 +21,6 @@ export const TeamMemberSettingsForm = ({
 
     return (
         <div className="space-y-3">
-            {/* Allocation */}
-            <div>
-                <Label className="mb-1 text-xs text-gray-600">
-                    Alokácia (%)
-                </Label>
-                <Input
-                    type="number"
-                    min="0"
-                    max="200"
-                    value={settings.allocation}
-                    onChange={(e) =>
-                        onSettingChange(
-                            'allocation',
-                            parseInt(e.target.value) || 0,
-                        )
-                    }
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                    {settings.allocation}% kapacity
-                </p>
-            </div>
-
             {/* Permissions Toggle */}
             <button
                 type="button"
