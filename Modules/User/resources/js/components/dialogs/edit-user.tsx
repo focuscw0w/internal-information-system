@@ -11,13 +11,15 @@ import { PermissionList } from '../permission-list';
 interface EditUserDialogProps {
     user: ManagedUser;
     availablePermissions: AvailablePermissions;
+    initialOpen?: boolean;
 }
 
 export const EditUserDialog = ({
     user,
     availablePermissions,
+    initialOpen = false,
 }: EditUserDialogProps) => {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(initialOpen);
 
     const { data, setData, put, processing, errors } = useForm({
         name: user.name,

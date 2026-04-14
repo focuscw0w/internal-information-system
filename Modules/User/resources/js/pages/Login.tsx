@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 interface LoginProps {
@@ -44,7 +44,16 @@ export default function Login({ status }: LoginProps) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="password">Password</Label>
+                                    <Link
+                                        href="/forgot-password"
+                                        className="text-sm underline underline-offset-4"
+                                        tabIndex={5}
+                                    >
+                                        Zabudli ste heslo?
+                                    </Link>
+                                </div>
                                 <Input
                                     id="password"
                                     type="password"

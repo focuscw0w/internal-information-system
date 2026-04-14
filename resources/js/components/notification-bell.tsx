@@ -7,6 +7,7 @@ import {
     Bell,
     Clock,
     Flame,
+    KeyRound,
     RefreshCw,
     TrendingDown,
     UserPlus,
@@ -45,6 +46,8 @@ function getNotificationIcon(type: AppNotificationType) {
             return <Clock className="h-4 w-4 text-red-500" />;
         case 'project_status_changed':
             return <RefreshCw className="h-4 w-4 text-blue-500" />;
+        case 'password_reset_requested':
+            return <KeyRound className="h-4 w-4 text-amber-600" />;
         default:
             return <Bell className="h-4 w-4 text-gray-400" />;
     }

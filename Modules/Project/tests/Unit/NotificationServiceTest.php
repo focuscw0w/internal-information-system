@@ -13,6 +13,7 @@ use Modules\Project\Notifications\ProjectAssignedNotification;
 use Modules\Project\Notifications\ProjectCapacityAtRiskNotification;
 use Modules\Project\Notifications\ProjectHighWorkloadNotification;
 use Modules\Project\Notifications\ProjectStatusChangedNotification;
+use Modules\Project\Notifications\PasswordResetRequestedNotification;
 use Modules\Project\Notifications\TaskAssignedNotification;
 use Modules\Project\Notifications\TaskHoursExceededNotification;
 use Modules\Project\Notifications\TaskStatusChangedNotification;
@@ -437,6 +438,76 @@ class NotificationServiceTest extends TestCase
 
         Notification::assertNotSentTo($owner, ProjectStatusChangedNotification::class);
         Notification::assertSentTo($member, ProjectStatusChangedNotification::class);
+    }
+
+    // ── notifyPasswordResetRequested ─────────────────────────────────────────
+
+    #[Test]
+    public function it_notifies_all_admins_when_a_user_requests_password_reset(): void
+    {
+        Notification::fake();
+
+        $admin1 = User::factory()->create(['is_admin' => true]);
+        $admin2 = User::factory()->create(['is_admin' => true]);
+        $requestingUser = User::factory()->create(['is_admin' => false]);
+
+        $this->service->notifyPasswordResetRequested($requestingUser);
+
+        Notification::assertSentTo($admin1, PasswordResetRequestedNotification::class);
+        Notification::assertSentTo($admin2, PasswordResetRequestedNotification::class);
+    }
+
+    #[Test]
+    public function it_does_not_notify_regular_users_on_password_reset_request(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $regularUser = User::factory()->create(['is_admin' => false]);
+        $requestingUser = User::factory()->create(['is_admin' => false]);
+
+        $this->service->notifyPasswordResetRequested($requestingUser);
+
+        Notification::assertNotSentTo($regularUser, PasswordResetRequestedNotification::class);
+        Notification::assertSentTo($admin, PasswordResetRequestedNotification::class);
+    }
+
+    #[Test]
+    public function password_reset_notification_contains_correct_data(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $requestingUser = User::factory()->create(['is_admin' => false]);
+
+        $this->service->notifyPasswordResetRequested($requestingUser);
+
+        Notification::assertSentTo(
+            $admin,
+            PasswordResetRequestedNotification::class,
+            function (PasswordResetRequestedNotification $notification) use ($requestingUser) {
+                $data = $notification->toArray();
+
+                return $data['type'] === 'password_reset_requested'
+                    && $data['user_id'] === $requestingUser->id
+                    && $data['url'] === "/users?edit={$requestingUser->id}"
+                    && $data['priority'] === 'high';
+            }
+        );
+    }
+
+    #[Test]
+    public function it_notifies_admin_even_when_requesting_user_is_also_admin(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $requestingAdmin = User::factory()->create(['is_admin' => true]);
+
+        $this->service->notifyPasswordResetRequested($requestingAdmin);
+
+        Notification::assertSentTo($admin, PasswordResetRequestedNotification::class);
+        Notification::assertSentTo($requestingAdmin, PasswordResetRequestedNotification::class);
     }
 
     private function createDatabaseNotification(User $user, mixed $readAt = null): mixed

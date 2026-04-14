@@ -16,9 +16,10 @@ import { EditUserDialog } from './dialogs/edit-user';
 interface UserTableProps {
     users: ManagedUser[];
     availablePermissions: AvailablePermissions;
+    initialEditUserId?: string;
 }
 
-export const UserTable = ({ users, availablePermissions }: UserTableProps) => {
+export const UserTable = ({ users, availablePermissions, initialEditUserId }: UserTableProps) => {
     const columns: Column<ManagedUser>[] = [
         {
             key: 'name',
@@ -63,6 +64,7 @@ export const UserTable = ({ users, availablePermissions }: UserTableProps) => {
                     <EditUserDialog
                         user={user}
                         availablePermissions={availablePermissions}
+                        initialOpen={user.id === initialEditUserId}
                     />
                     {!user.is_admin && <DeleteUserDialog user={user} />}
                 </div>

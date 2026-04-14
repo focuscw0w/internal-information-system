@@ -18,6 +18,7 @@ use Modules\Project\Notifications\TaskAssignedNotification;
 use Modules\Project\Notifications\TaskHoursExceededNotification;
 use Modules\Project\Notifications\TaskStatusChangedNotification;
 use Modules\Project\Notifications\UserOverloadedNotification;
+use Modules\Project\Notifications\PasswordResetRequestedNotification;
 use Modules\User\Models\User;
 
 class NotificationService implements NotificationServiceInterface
@@ -282,6 +283,16 @@ class NotificationService implements NotificationServiceInterface
         $recipients->unique('id')
             ->reject(fn (User $u) => $u->id === $changedBy->id)
             ->each(fn (User $u) => $u->notify($notification));
+    }
+
+    /**
+     * Notify all admins that a user has requested a password reset.
+     */
+    public function notifyPasswordResetRequested(User $requestingUser): void
+    {
+        $admins = User::where('is_admin', true)->get();
+        $notification = new PasswordResetRequestedNotification($requestingUser);
+        $admins->each(fn (User $admin) => $admin->notify($notification));
     }
 
     /**

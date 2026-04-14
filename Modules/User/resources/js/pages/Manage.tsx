@@ -1,7 +1,7 @@
 import HeadingSmall from '@/components/heading-small';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { CreateUserForm } from '../components/create-user-form';
 import { UserTable } from '../components/user-table';
 import { AvailablePermissions, ManagedUser } from '../types/types';
@@ -24,6 +24,10 @@ export default function Manage({
     availablePermissions,
     status,
 }: ManageUsersPageProps) {
+    const { url } = usePage();
+    const params = new URLSearchParams(url.split('?')[1] ?? '');
+    const initialEditUserId = params.get('edit') ?? undefined;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Používatelia" />
@@ -47,6 +51,7 @@ export default function Manage({
                     <UserTable
                         users={users}
                         availablePermissions={availablePermissions}
+                        initialEditUserId={initialEditUserId}
                     />
                 </div>
             </div>

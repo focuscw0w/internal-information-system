@@ -1,8 +1,8 @@
 <?php
 
 use Modules\User\Http\Controllers\Auth\AuthenticatedSessionController;
-use Modules\User\Http\Controllers\NewPasswordController;
-use Modules\User\Http\Controllers\PasswordResetLinkController;
+use Modules\User\Http\Controllers\Auth\NewPasswordController;
+use Modules\User\Http\Controllers\Auth\PasswordResetLinkController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {

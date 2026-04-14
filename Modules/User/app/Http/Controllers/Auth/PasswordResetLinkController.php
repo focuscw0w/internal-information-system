@@ -5,12 +5,15 @@ namespace Modules\User\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Project\Contracts\NotificationServiceInterface;
+use Modules\User\Models\User;
 
 class PasswordResetLinkController extends Controller
 {
+    public function __construct(private readonly NotificationServiceInterface $notificationService) {}
+
     /**
      * Show the password reset link request page.
      */
@@ -22,9 +25,7 @@ class PasswordResetLinkController extends Controller
     }
 
     /**
-     * Handle an incoming password reset link request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Notify admins that a user has requested a password reset.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -32,10 +33,12 @@ class PasswordResetLinkController extends Controller
             'email' => 'required|email',
         ]);
 
-        Password::sendResetLink(
-            $request->only('email')
-        );
+        $user = User::where('email', $request->email)->first();
 
-        return back()->with('status', __('A reset link will be sent if the account exists.'));
+        if ($user) {
+            $this->notificationService->notifyPasswordResetRequested($user);
+        }
+
+        return back()->with('status', 'Vaša žiadosť bola odoslaná správcovi systému.');
     }
 }

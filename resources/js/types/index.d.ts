@@ -35,7 +35,8 @@ export type AppNotificationType =
     | 'project_capacity_at_risk'
     | 'project_high_workload'
     | 'task_hours_exceeded'
-    | 'project_status_changed';
+    | 'project_status_changed'
+    | 'password_reset_requested';
 
 export interface AppNotificationData {
     type: AppNotificationType;

@@ -14,7 +14,8 @@ enum NotificationType: string
     case PROJECT_CAPACITY_AT_RISK = 'project_capacity_at_risk';
     case PROJECT_HIGH_WORKLOAD    = 'project_high_workload';
     case TASK_HOURS_EXCEEDED      = 'task_hours_exceeded';
-    case PROJECT_STATUS_CHANGED   = 'project_status_changed';
+    case PROJECT_STATUS_CHANGED      = 'project_status_changed';
+    case PASSWORD_RESET_REQUESTED    = 'password_reset_requested';
 
     public function label(): string
     {
@@ -30,6 +31,7 @@ enum NotificationType: string
             self::PROJECT_HIGH_WORKLOAD   => 'Vysoká záťaž projektu',
             self::TASK_HOURS_EXCEEDED     => 'Prekročené hodiny úlohy',
             self::PROJECT_STATUS_CHANGED  => 'Zmena stavu projektu',
+            self::PASSWORD_RESET_REQUESTED => 'Žiadosť o reset hesla',
         };
     }
 
@@ -47,6 +49,7 @@ enum NotificationType: string
             self::PROJECT_HIGH_WORKLOAD   => 'flame',
             self::TASK_HOURS_EXCEEDED     => 'clock-alert',
             self::PROJECT_STATUS_CHANGED  => 'refresh-cw',
+            self::PASSWORD_RESET_REQUESTED => 'key-round',
         };
     }
 
@@ -64,6 +67,7 @@ enum NotificationType: string
             self::PROJECT_HIGH_WORKLOAD   => 'medium',
             self::TASK_HOURS_EXCEEDED     => 'high',
             self::PROJECT_STATUS_CHANGED  => 'low',
+            self::PASSWORD_RESET_REQUESTED => 'high',
         };
     }
 }

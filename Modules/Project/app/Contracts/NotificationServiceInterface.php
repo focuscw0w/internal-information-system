@@ -31,6 +31,8 @@ interface NotificationServiceInterface
 
     public function notifyProjectStatusChanged(Project $project, string $oldStatus, string $newStatus, User $changedBy): void;
 
+    public function notifyPasswordResetRequested(User $requestingUser): void;
+
     public function getUserNotifications(User $user, int $perPage = 20): LengthAwarePaginator;
 
     public function markAsRead(string $notificationId, User $user): bool;
