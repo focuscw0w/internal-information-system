@@ -81,6 +81,29 @@ class TimeEntryServiceTest extends TestCase
     }
 
     #[Test]
+    public function it_preserves_fractional_task_actual_hours_on_create(): void
+    {
+        $this->service->create([
+            'project_id' => $this->project->id,
+            'task_id' => $this->task->id,
+            'user_id' => $this->user->id,
+            'entry_date' => '2026-03-07',
+            'hours' => 1.25,
+        ]);
+
+        $this->service->create([
+            'project_id' => $this->project->id,
+            'task_id' => $this->task->id,
+            'user_id' => $this->user->id,
+            'entry_date' => '2026-03-08',
+            'hours' => 2.5,
+        ]);
+
+        $this->task->refresh();
+        $this->assertEquals(3.75, $this->task->actual_hours);
+    }
+
+    #[Test]
     public function it_syncs_task_actual_hours_on_update(): void
     {
         $entry = $this->service->create([

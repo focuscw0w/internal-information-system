@@ -54,7 +54,7 @@ class ProjectResource extends JsonResource
                         'status' => $task->status,
                         'priority' => $task->priority,
                         'estimated_hours' => (int) $task->estimated_hours,
-                        'actual_hours' => (int) $task->actual_hours,
+                        'actual_hours' => round((float) $task->actual_hours, 2),
                         'start_date' => $task->start_date?->format('Y-m-d') ?? $task->created_at->format('Y-m-d'),
                         'due_date' => $task->due_date?->format('Y-m-d'),
                         'is_at_risk' => $task->is_at_risk,

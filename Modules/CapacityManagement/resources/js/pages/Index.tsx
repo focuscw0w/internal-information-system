@@ -203,10 +203,6 @@ export default function Index({
                 (a.remaining_hours - a.available_hours_next_4_weeks),
         );
 
-    const freePeople = dashboard.free_people
-        .filter((person) => person.free_capacity_hours > 0)
-        .slice(0, 5);
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Kapacitný dashboard" />
@@ -283,7 +279,7 @@ export default function Index({
                             <CollapsibleContent className="border-t px-4 py-4">
                                 <div className="space-y-3">
                                     {overloadedPeople.length === 0 && (
-                                        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                                        <div className="rounded-md text-sm text-emerald-700">
                                             Nikto nie je nad 100 % kapacity.
                                         </div>
                                     )}
@@ -365,7 +361,7 @@ export default function Index({
                             <CollapsibleContent className="border-t px-4 py-4">
                                 <div className="space-y-3">
                                     {riskyProjects.length === 0 && (
-                                        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                                        <div className="rounded-md text-sm text-emerald-700">
                                             Aktuálne nevidíme projekt, ktorý by
                                             nestíhal do termínu.
                                         </div>
@@ -451,7 +447,8 @@ export default function Index({
                                     </div>
                                     <div>
                                         <h3 className="font-medium text-gray-900">
-                                            Voľná kapacita ({freePeople.length})
+                                            Voľná kapacita (
+                                            {dashboard.free_people.length})
                                         </h3>
                                         <p className="text-xs text-gray-500">
                                             Koho sa oplatí zvážiť pre novú
@@ -464,47 +461,17 @@ export default function Index({
                                 />
                             </CollapsibleTrigger>
                             <CollapsibleContent className="border-t px-4 py-4">
-                                <div className="space-y-3">
-                                    {freePeople.length === 0 && (
-                                        <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
-                                            Aktuálne nemá tím výraznejšiu voľnú
-                                            rezervu.
-                                        </div>
+                                <ul className="space-y-1 text-sm text-gray-700">
+                                    {dashboard.free_people.length === 0 && (
+                                        <li>Aktuálne nie je voľná kapacita.</li>
                                     )}
-
-                                    {freePeople.map((person) => (
-                                        <div
-                                            key={person.id}
-                                            className="rounded-md border border-emerald-100 bg-emerald-50/60 p-3"
-                                        >
-                                            <div className="flex items-center justify-between gap-2">
-                                                <span className="font-medium text-gray-900">
-                                                    {person.name}
-                                                </span>
-                                                <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                                                    +
-                                                    {person.free_capacity_hours}
-                                                    h
-                                                </span>
-                                            </div>
-                                            <p className="mt-2 text-sm text-gray-700">
-                                                Momentálne využíva{' '}
-                                                {person.weekly_utilization}%
-                                                týždennej kapacity.
-                                            </p>
-                                            <UtilizationBar
-                                                utilization={
-                                                    person.weekly_utilization
-                                                }
-                                            />
-                                            <p className="mt-2 text-xs text-gray-500">
-                                                Vhodný zásah: priradiť novú
-                                                úlohu alebo pomôcť rizikovému
-                                                projektu.
-                                            </p>
-                                        </div>
+                                    {dashboard.free_people.map((person) => (
+                                        <li key={person.id}>
+                                            {person.name} — voľných{' '}
+                                            {person.free_capacity_hours}h
+                                        </li>
                                     ))}
-                                </div>
+                                </ul>
                             </CollapsibleContent>
                         </Collapsible>
                     </div>
@@ -591,15 +558,17 @@ export default function Index({
                                             </span>
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-2 text-xs">
-                                        <span className="text-gray-500">
-                                            {proj.remaining_hours}h zostatok
-                                        </span>
-                                        <span
-                                            className={`rounded px-1.5 py-0.5 font-medium ${proj.can_finish ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}
-                                        >
-                                            {proj.confidence}%
-                                        </span>
+                                    <div className="flex items-center gap-4 text-xs">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-gray-500">
+                                                {proj.remaining_hours}h zostatok
+                                            </span>
+                                            <span
+                                                className={`rounded px-1.5 py-0.5 font-medium ${proj.can_finish ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}
+                                            >
+                                                {proj.confidence}%
+                                            </span>
+                                        </div>
                                         <Button variant="default">
                                             <Link
                                                 href={`/capacity-management/simulation/project/${proj.id}`}
@@ -708,24 +677,6 @@ export default function Index({
                             </div>
                         ))}
                     </div>
-                </section>
-
-                {/* Free people */}
-                <section className="rounded-lg border bg-white p-4">
-                    <h2 className="font-medium">
-                        Ľudia s voľnou kapacitou (&lt; 80%)
-                    </h2>
-                    <ul className="mt-3 space-y-1 text-sm text-gray-700">
-                        {dashboard.free_people.length === 0 && (
-                            <li>Aktuálne nie je voľná kapacita.</li>
-                        )}
-                        {dashboard.free_people.map((person) => (
-                            <li key={person.id}>
-                                {person.name} — voľných{' '}
-                                {person.free_capacity_hours}h
-                            </li>
-                        ))}
-                    </ul>
                 </section>
 
                 {/* Team history chart */}

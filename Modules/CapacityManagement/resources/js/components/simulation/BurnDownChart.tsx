@@ -86,7 +86,7 @@ export function BurnDownChart({ points, deadlineWeekLabel, loading = false }: Pr
                     <Line
                         type="monotone"
                         dataKey="forecast_remaining"
-                        stroke="#6366f1"
+                        stroke="var(--primary)"
                         strokeWidth={2}
                         dot={false}
                         activeDot={{ r: 4 }}

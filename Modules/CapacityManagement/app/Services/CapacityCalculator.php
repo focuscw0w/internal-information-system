@@ -120,7 +120,7 @@ class CapacityCalculator
 
         $perProject = $inputs->activeProjects->map(function ($project) use ($teamWeeklyCapacity, $inputs, $perProjectAvailability) {
             $remaining = (float) $project->tasks->sum(
-                fn ($task) => max(0, (int) ($task->estimated_hours ?? 0) - (int) ($task->actual_hours ?? 0))
+                fn ($task) => max(0, (float) ($task->estimated_hours ?? 0) - (float) ($task->actual_hours ?? 0))
             );
 
             $endDate = $project->end_date instanceof \Carbon\Carbon

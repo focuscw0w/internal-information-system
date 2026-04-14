@@ -34,7 +34,7 @@ class Task extends Model
         'start_date' => 'date',
         'completed_at' => 'datetime',
         'estimated_hours' => 'integer',
-        'actual_hours' => 'integer',
+        'actual_hours' => 'float',
     ];
 
     protected $appends = ['is_at_risk', 'at_risk_reason'];

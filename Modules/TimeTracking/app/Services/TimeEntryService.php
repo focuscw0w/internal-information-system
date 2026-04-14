@@ -153,7 +153,7 @@ class TimeEntryService implements TimeEntryServiceInterface
      */
     private function syncTaskHours(int $taskId): void
     {
-        $total = TimeEntry::where('task_id', $taskId)->sum('hours');
+        $total = round((float) TimeEntry::where('task_id', $taskId)->sum('hours'), 2);
 
         Task::where('id', $taskId)->update([
             'actual_hours' => $total,

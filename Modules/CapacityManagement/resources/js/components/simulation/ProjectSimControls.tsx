@@ -34,7 +34,7 @@ function SliderRow({
         <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
                 <span className="font-medium text-gray-700">{label}</span>
-                <span className="min-w-[80px] text-right font-mono text-indigo-600">{displayValue}</span>
+                <span className="min-w-[80px] text-right font-mono text-primary">{displayValue}</span>
             </div>
             <Slider
                 min={min}
@@ -119,7 +119,7 @@ export function ProjectSimControls({
             />
 
             {loading && (
-                <p className="text-center text-xs text-indigo-500">Prepočítavam…</p>
+                <p className="text-primary text-center text-xs">Prepočítavam…</p>
             )}
         </div>
     );

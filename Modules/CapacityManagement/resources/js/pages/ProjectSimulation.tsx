@@ -141,9 +141,9 @@ export default function ProjectSimulation({ project, simulation, can_manage }: P
                     </div>
                     <Link
                         href="/capacity-management"
-                        className="rounded border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                        className="px-3 py-1.5 text-sm text-gray-60"
                     >
-                        ← Dashboard
+                        ← Späť na Dashboard
                     </Link>
                 </div>
 
@@ -176,7 +176,7 @@ export default function ProjectSimulation({ project, simulation, can_manage }: P
                                         Plán (ideál)
                                     </span>
                                     <span className="flex items-center gap-1">
-                                        <span className="inline-block h-0.5 w-5 bg-indigo-500" />
+                                        <span className="inline-block h-0.5 w-5 bg-primary" />
                                         Predikcia
                                     </span>
                                     <span className="flex items-center gap-1">

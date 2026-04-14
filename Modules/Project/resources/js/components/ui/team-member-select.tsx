@@ -141,7 +141,7 @@ export const TeamMemberSelect = ({
                             <ul className="mt-2 list-inside list-disc text-xs">
                                 {selectedWarnings.map((user) => (
                                     <li key={user.id}>
-                                        {user.name}: {user.weekly_utilization ?? 0}% využitia, voľné{' '}
+                                        {user.name}: voľné{' '}
                                         {user.free_capacity_hours ?? 0}h
                                     </li>
                                 ))}
