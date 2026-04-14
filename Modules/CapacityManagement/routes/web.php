@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\CapacityManagement\Http\Controllers\CapacityManagementController;
-use Modules\CapacityManagement\Http\Controllers\SimulationController;
+use Modules\CapacityManagement\Http\Controllers\ProjectSimulationController;
 use Modules\CapacityManagement\Http\Middleware\EnsureCapacityManagementAccess;
 
 Route::middleware(['web', 'auth'])->group(function () {
@@ -12,12 +12,10 @@ Route::middleware(['web', 'auth'])->group(function () {
             ->middleware(EnsureCapacityManagementAccess::class)
             ->name('users.capacity.update');
 
-        // What-If Simulation
-        Route::get('/simulation', [SimulationController::class, 'index'])
-            ->middleware(EnsureCapacityManagementAccess::class)
-            ->name('simulation.index');
-        Route::post('/simulation/run', [SimulationController::class, 'run'])
-            ->middleware(EnsureCapacityManagementAccess::class)
-            ->name('simulation.run');
+        // Project simulation
+        Route::prefix('simulation/project')->name('simulation.project.')->middleware(EnsureCapacityManagementAccess::class)->group(function () {
+            Route::get('/{project}', [ProjectSimulationController::class, 'show'])->name('show');
+            Route::post('/{project}/run', [ProjectSimulationController::class, 'run'])->name('run');
+        });
     });
 });

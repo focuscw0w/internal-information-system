@@ -48,10 +48,6 @@ class CapacityManagementServiceProvider extends ServiceProvider
             \Modules\CapacityManagement\Services\CapacityManagementService::class,
         );
 
-        $this->app->bind(
-            \Modules\CapacityManagement\Contracts\SimulationServiceInterface::class,
-            \Modules\CapacityManagement\Services\SimulationService::class,
-        );
     }
 
     /**

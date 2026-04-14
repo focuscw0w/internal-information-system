@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { AlertTriangle, ChevronDown, Clock3, Users } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { UtilizationBar } from '../components/shared/utilization';
@@ -78,7 +78,7 @@ function HistoryChart({ data, height = 160 }: { data: WeekPoint[]; height?: numb
                 <XAxis dataKey="week_label" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                 <YAxis tick={{ fontSize: 10 }} unit="%" domain={[0, 'auto']} />
                 <Tooltip
-                    formatter={(value: number) => [`${value}%`, 'Využitie']}
+                    formatter={(value) => [`${value}%`, 'Využitie']}
                     labelFormatter={(label) => `Týždeň ${label}`}
                 />
                 <ReferenceLine y={100} stroke="#ef4444" strokeDasharray="4 2" label={{ value: '100%', fontSize: 10, fill: '#ef4444' }} />
@@ -431,6 +431,12 @@ export default function Index({
                                         >
                                             {proj.confidence}%
                                         </span>
+                                        <Link
+                                            href={`/capacity-management/simulation/project/${proj.id}`}
+                                            className="rounded border border-indigo-200 bg-indigo-50 px-1.5 py-0.5 font-medium text-indigo-700 hover:bg-indigo-100"
+                                        >
+                                            Simulovať →
+                                        </Link>
                                     </div>
                                 </div>
                             ))}
