@@ -11,12 +11,28 @@ import { BadgeLabel } from '../components/ui/badge';
 import { Header } from '../components/ui/header';
 import { Project, Task } from '../types/types';
 
+type TeamCapacitySnapshot = Record<number, {
+    weekly_capacity_hours: number;
+    weekly_load_hours: number;
+    weekly_utilization: number;
+    free_capacity_hours: number;
+    is_over_capacity: boolean;
+}>;
+
 interface TaskProps {
     task: Task;
     project: Project;
+    team_capacity: TeamCapacitySnapshot;
 }
 
-export default function TaskPage({ task, project }: TaskProps) {
+export default function TaskPage({ task, project, team_capacity }: TaskProps) {
+    const projectWithCapacity: Project = {
+        ...project,
+        team: project.team.map((member) => ({
+            ...member,
+            ...(team_capacity[member.id] ?? {}),
+        })),
+    };
     const permissions = project.current_user_permissions ?? [];
 
     const can = (permission: string) => permissions.includes(permission);
@@ -24,7 +40,7 @@ export default function TaskPage({ task, project }: TaskProps) {
     const tabCount = 1 + (can('edit_tasks') ? 1 : 0) + (can('assign_tasks') ? 1 : 0);
 
     return (
-        <ProjectLayout project={project} task={task}>
+        <ProjectLayout project={projectWithCapacity} task={task}>
             <Head title={`${task.title} - ${project.name}`} />
 
             <div className="min-h-screen space-y-6 p-6">
@@ -52,7 +68,7 @@ export default function TaskPage({ task, project }: TaskProps) {
                             <EditTaskDialog
                                 task={task}
                                 projectId={project.id}
-                                team={project.team}
+                                team={projectWithCapacity.team}
                                 text="Upraviť úlohu"
                             />
                         </Header.Actions>
@@ -97,7 +113,7 @@ export default function TaskPage({ task, project }: TaskProps) {
                     </div>
 
                     <TabsContent value="overview" className="mt-6">
-                        <TaskOverview task={task} project={project} />
+                        <TaskOverview task={task} project={projectWithCapacity} />
                     </TabsContent>
 
                     {can('edit_tasks') && (
@@ -108,7 +124,7 @@ export default function TaskPage({ task, project }: TaskProps) {
 
                     {can('assign_tasks') && (
                         <TabsContent value="assignees" className="mt-6">
-                            <Assignees task={task} project={project} />
+                            <Assignees task={task} project={projectWithCapacity} />
                         </TabsContent>
                     )}
                 </Tabs>

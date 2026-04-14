@@ -27,6 +27,27 @@ class CapacityManagementService implements CapacityManagementServiceInterface
         return $this->calculator->compute($this->buildInputs());
     }
 
+    public function getPeopleSnapshotForUsers(array $userIds): array
+    {
+        $userIds = array_values(array_unique(array_map('intval', $userIds)));
+
+        if ($userIds === []) {
+            return [];
+        }
+
+        return collect($this->buildDashboard()['people'] ?? [])
+            ->whereIn('id', $userIds)
+            ->keyBy('id')
+            ->map(fn ($person) => [
+                'weekly_capacity_hours' => (int) ($person['weekly_capacity_hours'] ?? 40),
+                'weekly_load_hours' => (float) ($person['weekly_load_hours'] ?? 0),
+                'weekly_utilization' => (float) ($person['weekly_utilization'] ?? 0),
+                'free_capacity_hours' => (float) ($person['free_capacity_hours'] ?? 0),
+                'is_over_capacity' => (bool) ($person['is_over_capacity'] ?? false),
+            ])
+            ->all();
+    }
+
     /**
      * Store weekly capacity hours for a user.
      */

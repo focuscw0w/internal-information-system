@@ -13,6 +13,11 @@ export interface TeamMember {
     email?: string;
     permissions: string[];
     allocation: number;
+    weekly_capacity_hours?: number;
+    weekly_load_hours?: number;
+    weekly_utilization?: number;
+    free_capacity_hours?: number;
+    is_over_capacity?: boolean;
 }
 
 export interface TeamMemberSettings {

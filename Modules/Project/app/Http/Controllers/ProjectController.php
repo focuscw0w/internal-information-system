@@ -5,6 +5,7 @@ namespace Modules\Project\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
 use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Http\Requests\Project\CreateProjectRequest;
 use Modules\Project\Http\Requests\Project\UpdateProjectRequest;
@@ -13,7 +14,8 @@ use Modules\Project\Transformers\ProjectResource;
 class ProjectController extends Controller
 {
     public function __construct(
-        private readonly ProjectServiceInterface $projectService
+        private readonly ProjectServiceInterface $projectService,
+        private readonly CapacityManagementServiceInterface $capacityService,
     ) {}
 
     /**
@@ -78,6 +80,9 @@ class ProjectController extends Controller
 
         return Inertia::render('Project/Show', [
             'project' => (new ProjectResource($project))->resolve(),
+            'team_capacity' => $this->capacityService->getPeopleSnapshotForUsers(
+                $project->team->pluck('id')->all()
+            ),
         ]);
     }
 

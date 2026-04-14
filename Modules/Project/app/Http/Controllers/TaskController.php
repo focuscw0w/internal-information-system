@@ -4,6 +4,7 @@ namespace Modules\Project\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
+use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
 use Modules\Project\Http\Requests\Task\AssignTaskRequest;
 use Modules\Project\Http\Requests\Task\CreateTaskRequest;
 use Modules\Project\Http\Requests\Task\LogHoursRequest;
@@ -15,7 +16,11 @@ use Modules\Project\Transformers\ProjectResource;
 
 class TaskController extends Controller
 {
-    public function __construct(private readonly TaskService $taskService, private readonly ProjectService $projectService) {}
+    public function __construct(
+        private readonly TaskService $taskService,
+        private readonly ProjectService $projectService,
+        private readonly CapacityManagementServiceInterface $capacityService,
+    ) {}
 
     /**
      * Store a newly created task-detail
@@ -51,6 +56,9 @@ class TaskController extends Controller
         return Inertia::render('Project/Task', [
             'task' => $task,
             'project' => (new ProjectResource($project))->resolve(),
+            'team_capacity' => $this->capacityService->getPeopleSnapshotForUsers(
+                $project->team->pluck('id')->all()
+            ),
         ]);
     }
 

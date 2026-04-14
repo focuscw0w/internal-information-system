@@ -12,13 +12,34 @@ import { Header } from '../components/ui/header';
 import ProjectLayout from '../layouts/project-layout';
 import { Project } from '../types/types';
 
-export default function Show({ project }: { project: Project }) {
+type TeamCapacitySnapshot = Record<number, {
+    weekly_capacity_hours: number;
+    weekly_load_hours: number;
+    weekly_utilization: number;
+    free_capacity_hours: number;
+    is_over_capacity: boolean;
+}>;
+
+export default function Show({
+    project,
+    team_capacity,
+}: {
+    project: Project;
+    team_capacity: TeamCapacitySnapshot;
+}) {
+    const projectWithCapacity: Project = {
+        ...project,
+        team: project.team.map((member) => ({
+            ...member,
+            ...(team_capacity[member.id] ?? {}),
+        })),
+    };
     const permissions = project.current_user_permissions ?? [];
 
     const can = (permission: string) => permissions.includes(permission);
 
     return (
-        <ProjectLayout project={project}>
+        <ProjectLayout project={projectWithCapacity}>
             <Head title={`Detail projektu - ${project.name}`} />
 
             <div className="min-h-screen space-y-6 p-6">
@@ -43,10 +64,7 @@ export default function Show({ project }: { project: Project }) {
                     </Header.Badges>
                     {can('edit_project') && (
                         <Header.Actions>
-                            <EditProjectDialog
-                                project={project}
-                                text="Upraviť projekt"
-                            />
+                            <EditProjectDialog project={projectWithCapacity} text="Upraviť projekt" />
                         </Header.Actions>
                     )}
                 </Header>
@@ -96,20 +114,20 @@ export default function Show({ project }: { project: Project }) {
                     </div>
 
                     <TabsContent value="overview" className="mt-6">
-                        <ProjectOverview project={project} />
+                        <ProjectOverview project={projectWithCapacity} />
                     </TabsContent>
                     <TabsContent value="kanban" className="mt-6">
-                        <Kanban project={project} />
+                        <Kanban project={projectWithCapacity} />
                     </TabsContent>
                     <TabsContent value="timeline" className="mt-6">
-                        <Timeline project={project} />
+                        <Timeline project={projectWithCapacity} />
                     </TabsContent>
                     <TabsContent value="gantt" className="mt-6">
-                        <GanttChart project={project} />
+                        <GanttChart project={projectWithCapacity} />
                     </TabsContent>
                     {can('view_team') && (
                         <TabsContent value="team" className="mt-6">
-                            <Team project={project} />
+                            <Team project={projectWithCapacity} />
                         </TabsContent>
                     )}
                 </Tabs>

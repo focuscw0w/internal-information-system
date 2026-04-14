@@ -20,6 +20,14 @@ interface CapacityManagementServiceInterface
     public function buildDashboard(): array;
 
     /**
+     * Return dashboard people snapshot indexed by user id for the given users.
+     *
+     * @param  int[]  $userIds
+     * @return array<int, array<string, mixed>>
+     */
+    public function getPeopleSnapshotForUsers(array $userIds): array;
+
+    /**
      * Set or update the weekly capacity hours for a specific user.
      */
     public function setWeeklyCapacityForUser(int $userId, int $hours): void;
