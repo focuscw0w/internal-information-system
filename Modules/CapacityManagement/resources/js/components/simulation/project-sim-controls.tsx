@@ -1,3 +1,4 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 
 type Props = {
@@ -34,7 +35,9 @@ function SliderRow({
         <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
                 <span className="font-medium text-gray-700">{label}</span>
-                <span className="min-w-[80px] text-right font-mono text-primary">{displayValue}</span>
+                <span className="min-w-[80px] text-right font-mono text-primary">
+                    {displayValue}
+                </span>
             </div>
             <Slider
                 min={min}
@@ -63,7 +66,10 @@ export function ProjectSimControls({
     onReset,
     loading,
 }: Props) {
-    const isChanged = deadlineDaysShift !== 0 || teamSize !== baselineTeamSize || remainingHours !== baselineRemainingHours;
+    const isChanged =
+        deadlineDaysShift !== 0 ||
+        teamSize !== baselineTeamSize ||
+        remainingHours !== baselineRemainingHours;
 
     const deadlineDisplay =
         deadlineDaysShift === 0
@@ -73,9 +79,11 @@ export function ProjectSimControls({
               : `${deadlineDaysShift} dní`;
 
     return (
-        <div className="space-y-6 rounded-lg border bg-white p-5">
-            <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-800">Parametre simulácie</h3>
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <CardTitle className="text-sm font-semibold text-gray-800">
+                    Parametre simulácie
+                </CardTitle>
                 {isChanged && (
                     <button
                         type="button"
@@ -86,41 +94,45 @@ export function ProjectSimControls({
                         Resetovať
                     </button>
                 )}
-            </div>
+            </CardHeader>
 
-            <SliderRow
-                label="Posun deadline"
-                value={deadlineDaysShift}
-                displayValue={deadlineDisplay}
-                min={-30}
-                max={90}
-                step={1}
-                onChange={onDeadlineChange}
-            />
+            <CardContent className="space-y-6">
+                <SliderRow
+                    label="Posun deadline"
+                    value={deadlineDaysShift}
+                    displayValue={deadlineDisplay}
+                    min={-30}
+                    max={90}
+                    step={1}
+                    onChange={onDeadlineChange}
+                />
 
-            <SliderRow
-                label="Počet ľudí na projekte"
-                value={teamSize}
-                displayValue={`${teamSize} osôb`}
-                min={0}
-                max={Math.max(baselineTeamSize * 3, 10)}
-                step={1}
-                onChange={onTeamSizeChange}
-            />
+                <SliderRow
+                    label="Počet ľudí na projekte"
+                    value={teamSize}
+                    displayValue={`${teamSize} osôb`}
+                    min={0}
+                    max={Math.max(baselineTeamSize * 3, 10)}
+                    step={1}
+                    onChange={onTeamSizeChange}
+                />
 
-            <SliderRow
-                label="Zostávajúce hodiny"
-                value={Math.round(remainingHours)}
-                displayValue={`${Math.round(remainingHours)} h`}
-                min={0}
-                max={Math.max(Math.round(baselineRemainingHours * 2), 100)}
-                step={5}
-                onChange={onRemainingHoursChange}
-            />
+                <SliderRow
+                    label="Zostávajúce hodiny"
+                    value={Math.round(remainingHours)}
+                    displayValue={`${Math.round(remainingHours)} h`}
+                    min={0}
+                    max={Math.max(Math.round(baselineRemainingHours * 2), 100)}
+                    step={5}
+                    onChange={onRemainingHoursChange}
+                />
 
-            {loading && (
-                <p className="text-primary text-center text-xs">Prepočítavam…</p>
-            )}
-        </div>
+                {loading && (
+                    <p className="text-center text-xs text-primary">
+                        Prepočítavam…
+                    </p>
+                )}
+            </CardContent>
+        </Card>
     );
 }

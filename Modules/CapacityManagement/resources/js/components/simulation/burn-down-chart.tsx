@@ -23,14 +23,23 @@ type Props = {
     loading?: boolean;
 };
 
-export function BurnDownChart({ points, deadlineWeekLabel, loading = false }: Props) {
+export function BurnDownChart({
+    points,
+    deadlineWeekLabel,
+    loading = false,
+}: Props) {
     const deadlinePoint = points.find((p) => p.is_deadline_week);
     const deadlineLabel = deadlineWeekLabel ?? deadlinePoint?.week_label;
 
     return (
-        <div className={`relative transition-opacity duration-200 ${loading ? 'opacity-40' : 'opacity-100'}`}>
+        <div
+            className={`relative transition-opacity duration-200 ${loading ? 'opacity-40' : 'opacity-100'}`}
+        >
             <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={points} margin={{ top: 8, right: 16, left: -12, bottom: 0 }}>
+                <LineChart
+                    data={points}
+                    margin={{ top: 8, right: 16, left: -12, bottom: 0 }}
+                >
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis
                         dataKey="week_label"
@@ -46,13 +55,17 @@ export function BurnDownChart({ points, deadlineWeekLabel, loading = false }: Pr
                     <Tooltip
                         formatter={(value, name) => [
                             `${value} h`,
-                            name === 'ideal_remaining' ? 'Plán (ideál)' : 'Predikcia',
+                            name === 'ideal_remaining'
+                                ? 'Plán (ideál)'
+                                : 'Predikcia',
                         ]}
                         labelFormatter={(label) => `Týždeň ${label}`}
                     />
                     <Legend
                         formatter={(value) =>
-                            value === 'ideal_remaining' ? 'Plán (ideál)' : 'Predikcia'
+                            value === 'ideal_remaining'
+                                ? 'Plán (ideál)'
+                                : 'Predikcia'
                         }
                     />
 
