@@ -260,6 +260,49 @@ class CapacityCalculatorTest extends TestCase
     }
 
     #[Test]
+    public function prediction_prorates_partial_allocation_overlap_inside_forecast_window(): void
+    {
+        $project = $this->makeProject(1, 'Alpha', '2026-04-30', [
+            $this->makeTask(100, 0),
+        ]);
+
+        $result = $this->calculator->compute($this->makeInputs([
+            'activeProjects' => collect([$project]),
+            'forecastAllocations' => collect([
+                $this->makeAllocation(
+                    id: 1,
+                    projectId: 1,
+                    userId: 1,
+                    allocatedHours: 70,
+                    startDate: '2026-03-25',
+                    endDate: '2026-04-07',
+                ),
+            ]),
+        ]));
+
+        $this->assertEquals(35.0, $result['prediction']['projects'][0]['available_hours_next_4_weeks']);
+    }
+
+    #[Test]
+    public function prediction_falls_back_to_percentage_when_allocation_has_no_allocated_hours(): void
+    {
+        $project = $this->makeProject(1, 'Alpha', '2026-04-30', [
+            $this->makeTask(20, 0),
+        ]);
+
+        $allocation = $this->makeAllocation(1, 1, 1, 0);
+        $allocation->percentage = 50;
+
+        $result = $this->calculator->compute($this->makeInputs([
+            'activeProjects' => collect([$project]),
+            'forecastAllocations' => collect([$allocation]),
+        ]));
+
+        $this->assertEquals(85.71, $result['prediction']['projects'][0]['available_hours_next_4_weeks']);
+        $this->assertTrue($result['prediction']['projects'][0]['can_finish']);
+    }
+
+    #[Test]
     public function prediction_marks_overdue_project(): void
     {
         $project = $this->makeProject(1, 'Late', '2026-03-01', [

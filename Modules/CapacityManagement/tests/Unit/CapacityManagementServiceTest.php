@@ -471,6 +471,41 @@ class CapacityManagementServiceTest extends TestCase
         $this->assertDatabaseCount('employee_capacities', 1);
     }
 
+    // ── getPeopleSnapshotForUsers ────────────────────────────
+
+    #[Test]
+    public function people_snapshot_returns_empty_array_for_empty_input(): void
+    {
+        $this->assertSame([], $this->service->getPeopleSnapshotForUsers([]));
+    }
+
+    #[Test]
+    public function people_snapshot_filters_duplicates_and_returns_expected_fields(): void
+    {
+        $included = User::factory()->create();
+        $excluded = User::factory()->create();
+
+        EmployeeCapacity::create(['user_id' => $included->id, 'weekly_capacity_hours' => 32]);
+        EmployeeCapacity::create(['user_id' => $excluded->id, 'weekly_capacity_hours' => 40]);
+
+        $this->createWeeklyEntry($included, 20);
+        $this->createWeeklyEntry($excluded, 12);
+
+        $snapshot = $this->service->getPeopleSnapshotForUsers([
+            $included->id,
+            $included->id,
+            $excluded->id + 999,
+        ]);
+
+        $this->assertCount(1, $snapshot);
+        $this->assertArrayHasKey($included->id, $snapshot);
+        $this->assertSame(32, $snapshot[$included->id]['weekly_capacity_hours']);
+        $this->assertSame(20.0, $snapshot[$included->id]['weekly_load_hours']);
+        $this->assertSame(62.5, $snapshot[$included->id]['weekly_utilization']);
+        $this->assertSame(12.0, $snapshot[$included->id]['free_capacity_hours']);
+        $this->assertFalse($snapshot[$included->id]['is_over_capacity']);
+    }
+
     // ── Helpers ──────────────────────────────────────────────
 
     private function createWeeklyEntry(User $user, float $hours): void
