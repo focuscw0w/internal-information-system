@@ -33,7 +33,7 @@ export function PeopleCapacitySection({
     return (
         <section>
             <Card>
-                <CardHeader className="pb-3">
+                <CardHeader>
                     <CardTitle className="text-base">
                         Dashboard kapacít
                     </CardTitle>

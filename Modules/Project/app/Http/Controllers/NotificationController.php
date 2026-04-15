@@ -45,4 +45,18 @@ class NotificationController extends Controller
 
         return response()->json(['marked' => $count]);
     }
+
+    public function destroy(Request $request, string $id): JsonResponse
+    {
+        $success = $this->notificationService->delete($id, $request->user());
+
+        return response()->json(['success' => $success], $success ? 200 : 404);
+    }
+
+    public function destroyAll(Request $request): JsonResponse
+    {
+        $count = $this->notificationService->deleteAll($request->user());
+
+        return response()->json(['deleted' => $count]);
+    }
 }

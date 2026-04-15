@@ -16,7 +16,7 @@ function OverviewCard({
 }) {
     return (
         <Card>
-            <CardHeader className="pb-3">
+            <CardHeader>
                 <CardTitle className="text-base">{title}</CardTitle>
             </CardHeader>
             <CardContent>

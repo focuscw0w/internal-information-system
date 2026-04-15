@@ -38,4 +38,8 @@ interface NotificationServiceInterface
     public function markAsRead(string $notificationId, User $user): bool;
 
     public function markAllAsRead(User $user): int;
+
+    public function delete(string $notificationId, User $user): bool;
+
+    public function deleteAll(User $user): int;
 }

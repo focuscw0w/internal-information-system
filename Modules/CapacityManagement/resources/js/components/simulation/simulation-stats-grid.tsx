@@ -57,8 +57,8 @@ export function SimulationStatsGrid({ simulation }: SimulationStatsGridProps) {
             : finishDiff === 0
               ? 'Presne na deadline'
               : finishDiff < 0
-                ? `${Math.abs(finishDiff)} dní pred deadlinom`
-                : `${finishDiff} dní po deadlinu`;
+                ? `${Math.abs(finishDiff)} dní po deadlinu`
+                : `${finishDiff} dní pred deadlinom`;
 
     return (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

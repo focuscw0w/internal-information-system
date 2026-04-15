@@ -331,6 +331,33 @@ class NotificationService implements NotificationServiceInterface
     }
 
     /**
+     * Delete a single notification for a user.
+     */
+    public function delete(string $notificationId, User $user): bool
+    {
+        $notification = $user->notifications()->where('id', $notificationId)->first();
+
+        if (! $notification) {
+            return false;
+        }
+
+        $notification->delete();
+
+        return true;
+    }
+
+    /**
+     * Delete all notifications for a user.
+     */
+    public function deleteAll(User $user): int
+    {
+        $count = $user->notifications()->count();
+        $user->notifications()->delete();
+
+        return $count;
+    }
+
+    /**
      * Get all task recipients for notifications.
      */
     private function getTaskRecipients(Task $task)

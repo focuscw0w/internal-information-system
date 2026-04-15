@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { Person, ProjectPrediction } from '../../types/capacity';
-import { UtilizationBar } from '../shared/utilization';
 
 type ExpandedRecommendations = Record<'overloaded' | 'risky' | 'free', boolean>;
 
@@ -48,9 +47,9 @@ function RecommendationCard({
 }: RecommendationCardProps) {
     return (
         <Collapsible open={open} onOpenChange={onToggle}>
-            <Card className="gap-0">
+            <Card className="gap-0 py-0">
                 <CollapsibleTrigger asChild>
-                    <button className="flex w-full items-center justify-between px-6 py-5 text-left">
+                    <button className="flex w-full items-center justify-between px-6 py-4 text-left">
                         <div className="flex items-center gap-3">
                             <div
                                 className={`rounded-md p-2 ${accentClassName}`}
@@ -71,7 +70,7 @@ function RecommendationCard({
                         />
                     </button>
                 </CollapsibleTrigger>
-                <CollapsibleContent className="border-t">
+                <CollapsibleContent className="border-t pb-3">
                     <CardContent className="pt-4">{children}</CardContent>
                 </CollapsibleContent>
             </Card>
@@ -92,10 +91,6 @@ export function RecommendationsSection({
                 <h2 className="text-lg font-semibold text-gray-900">
                     Odporúčané zásahy
                 </h2>
-                <p className="mt-1 text-sm text-gray-500">
-                    Hlavný blok ostáva stručný a detail si rozbalíš len tam, kde
-                    chceš riešiť problém.
-                </p>
             </div>
 
             <div className="space-y-3">
@@ -108,11 +103,9 @@ export function RecommendationsSection({
                     open={expandedRecommendations.overloaded}
                     onToggle={() => onToggleRecommendation('overloaded')}
                 >
-                    <div className="space-y-3">
+                    <ul className="space-y-1 text-sm text-gray-700">
                         {overloadedPeople.length === 0 && (
-                            <div className="rounded-md text-sm text-emerald-700">
-                                Nikto nie je nad 100 % kapacity.
-                            </div>
+                            <li>Nikto nie je nad 100 % kapacity.</li>
                         )}
 
                         {overloadedPeople.map((person) => {
@@ -125,37 +118,27 @@ export function RecommendationsSection({
                             );
 
                             return (
-                                <Card
+                                <li
                                     key={person.id}
-                                    className="gap-3 border-red-100 bg-red-50/60 p-3"
+                                    className="flex items-start justify-between gap-3 rounded-md"
                                 >
-                                    <div className="flex items-center justify-between gap-2">
+                                    <div>
                                         <span className="font-medium text-gray-900">
                                             {person.name}
                                         </span>
-                                        <span className="rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
-                                            {person.weekly_utilization}%
+                                        <span className="text-gray-600">
+                                            {' '}
+                                            — približne +{overloadHours}h/týždeň
+                                            nad kapacitou
                                         </span>
                                     </div>
-                                    <p className="text-sm text-gray-700">
-                                        Je približne o{' '}
-                                        <span className="font-medium">
-                                            {overloadHours}h/týždeň
-                                        </span>{' '}
-                                        nad kapacitou.
-                                    </p>
-                                    <UtilizationBar
-                                        utilization={person.weekly_utilization}
-                                    />
-                                    <p className="text-xs text-gray-500">
-                                        Vhodný zásah: odobrať časť práce,
-                                        presunúť úlohy alebo pridať ďalšieho
-                                        človeka na projekt.
-                                    </p>
-                                </Card>
+                                    <span className="shrink-0 rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                                        {person.weekly_utilization}%
+                                    </span>
+                                </li>
                             );
                         })}
-                    </div>
+                    </ul>
                 </RecommendationCard>
 
                 <RecommendationCard
@@ -167,12 +150,12 @@ export function RecommendationsSection({
                     open={expandedRecommendations.risky}
                     onToggle={() => onToggleRecommendation('risky')}
                 >
-                    <div className="space-y-3">
+                    <ul className="space-y-1 text-sm text-gray-700">
                         {riskyProjects.length === 0 && (
-                            <div className="rounded-md text-sm text-emerald-700">
+                            <li className="text-emerald-700">
                                 Aktuálne nevidíme projekt, ktorý by nestíhal do
                                 termínu.
-                            </div>
+                            </li>
                         )}
 
                         {riskyProjects.map((project) => {
@@ -195,48 +178,30 @@ export function RecommendationsSection({
                             );
 
                             return (
-                                <Card
+                                <li
                                     key={project.id}
-                                    className="gap-3 border-orange-100 bg-orange-50/60 p-3"
+                                    className="flex items-start justify-between gap-3 rounded-md"
                                 >
-                                    <div className="flex items-center justify-between gap-2">
+                                    <div>
                                         <span className="font-medium text-gray-900">
                                             {project.name}
                                         </span>
-                                        <span className="rounded bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">
-                                            chýba {missingHours}h
+                                        <span className="text-gray-600">
+                                            {' '}
+                                            — chýba {missingHours}h, zostáva{' '}
+                                            {project.remaining_hours}h
+                                            {project.is_overdue
+                                                ? ', po termíne'
+                                                : `, ${project.days_remaining}d do termínu`}
                                         </span>
                                     </div>
-                                    <div>
-                                        <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-                                            <div
-                                                className="h-full rounded-full bg-orange-500"
-                                                style={{
-                                                    width: `${coverage}%`,
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-                                            <span>
-                                                {
-                                                    project.available_hours_next_4_weeks
-                                                }
-                                                h dostupných
-                                            </span>
-                                            <span>
-                                                {project.remaining_hours}h
-                                                zostáva
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-gray-500">
-                                        Vhodný zásah: pridať kapacitu, odľahčiť
-                                        tím alebo posunúť termín projektu.
-                                    </p>
-                                </Card>
+                                    <span className="shrink-0 rounded bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">
+                                        {coverage}%
+                                    </span>
+                                </li>
                             );
                         })}
-                    </div>
+                    </ul>
                 </RecommendationCard>
 
                 <RecommendationCard
@@ -255,7 +220,10 @@ export function RecommendationsSection({
 
                         {freePeople.map((person) => (
                             <li key={person.id}>
-                                {person.name} — voľných{' '}
+                                <span className="font-medium text-gray-900">
+                                    {person.name}
+                                </span>{' '}
+                                — voľných{' '}
                                 {person.free_capacity_hours}h
                             </li>
                         ))}

@@ -11,6 +11,7 @@ import {
     RefreshCw,
     TrendingDown,
     UserPlus,
+    X,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -20,7 +21,7 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useMarkAllAsRead, useMarkAsRead, useNotifications } from '@/hooks/use-notifications';
+import { useDeleteAllNotifications, useDeleteNotification, useMarkAllAsRead, useMarkAsRead, useNotifications } from '@/hooks/use-notifications';
 import { type AppNotification, type AppNotificationType, type SharedData } from '@/types';
 
 function getNotificationIcon(type: AppNotificationType) {
@@ -68,7 +69,7 @@ function formatRelativeTime(dateString: string): string {
     return `pred ${diffDays} dňami`;
 }
 
-function NotificationItem({ notification, onRead }: { notification: AppNotification; onRead: () => void }) {
+function NotificationItem({ notification, onRead, onDelete }: { notification: AppNotification; onRead: () => void; onDelete: () => void }) {
     const isUnread = notification.read_at === null;
 
     const handleClick = () => {
@@ -79,20 +80,29 @@ function NotificationItem({ notification, onRead }: { notification: AppNotificat
     };
 
     return (
-        <button
-            onClick={handleClick}
-            className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 ${
+        <div
+            className={`group flex w-full items-start gap-3 px-4 py-3 transition-colors hover:bg-gray-50 ${
                 isUnread ? 'bg-blue-50/40' : ''
             }`}
         >
-            <div className="mt-0.5 shrink-0">{getNotificationIcon(notification.data.type)}</div>
-            <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-gray-900">{notification.data.title}</p>
-                <p className="mt-0.5 text-xs text-gray-500 leading-relaxed line-clamp-2">{notification.data.message}</p>
-                <p className="mt-1 text-xs text-gray-400">{formatRelativeTime(notification.created_at)}</p>
+            <button onClick={handleClick} className="flex min-w-0 flex-1 items-start gap-3 text-left">
+                <div className="mt-0.5 shrink-0">{getNotificationIcon(notification.data.type)}</div>
+                <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-gray-900">{notification.data.title}</p>
+                    <p className="mt-0.5 text-xs text-gray-500 leading-relaxed line-clamp-2">{notification.data.message}</p>
+                    <p className="mt-1 text-xs text-gray-400">{formatRelativeTime(notification.created_at)}</p>
+                </div>
+            </button>
+            <div className="mt-1 flex shrink-0 items-center gap-1">
+                {isUnread && <div className="h-2 w-2 rounded-full bg-blue-500" />}
+                <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                    className="rounded p-0.5 opacity-0 transition-opacity hover:bg-gray-200 group-hover:opacity-100"
+                >
+                    <X className="h-3 w-3 text-gray-400" />
+                </button>
             </div>
-            {isUnread && <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />}
-        </button>
+        </div>
     );
 }
 
@@ -102,6 +112,8 @@ export function NotificationBell() {
     const { data, isLoading } = useNotifications();
     const { mutate: markAsRead } = useMarkAsRead();
     const { mutate: markAllAsRead } = useMarkAllAsRead();
+    const { mutate: deleteNotification } = useDeleteNotification();
+    const { mutate: deleteAll } = useDeleteAllNotifications();
 
     const notifications = data?.data ?? [];
     const unreadCount = data?.unread_count ?? props.notifications?.unread_count ?? 0;
@@ -123,14 +135,24 @@ export function NotificationBell() {
                 {/* Header */}
                 <div className="flex items-center justify-between border-b px-4 py-3">
                     <span className="text-sm font-semibold text-gray-900">Notifikácie</span>
-                    {unreadCount > 0 && (
-                        <button
-                            onClick={() => markAllAsRead()}
-                            className="text-xs text-blue-600 hover:text-blue-800"
-                        >
-                            Označiť všetky ako prečítané
-                        </button>
-                    )}
+                    <div className="flex items-center gap-3">
+                        {unreadCount > 0 && (
+                            <button
+                                onClick={() => markAllAsRead()}
+                                className="text-xs text-blue-600 hover:text-blue-800"
+                            >
+                                Označiť všetky ako prečítané
+                            </button>
+                        )}
+                        {notifications.length > 0 && (
+                            <button
+                                onClick={() => deleteAll()}
+                                className="text-xs text-red-500 hover:text-red-700"
+                            >
+                                Odstrániť všetky
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* List */}
@@ -154,6 +176,7 @@ export function NotificationBell() {
                                         if (n.read_at === null) markAsRead(n.id);
                                         setOpen(false);
                                     }}
+                                    onDelete={() => deleteNotification(n.id)}
                                 />
                             ))}
                         </div>

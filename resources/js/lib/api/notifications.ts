@@ -28,4 +28,13 @@ export const notificationsApi = {
         const { data } = await axios.post<{ marked: number }>('/notifications/mark-all-read');
         return data;
     },
+
+    delete: async (id: string): Promise<void> => {
+        await axios.delete(`/notifications/${id}`);
+    },
+
+    deleteAll: async (): Promise<{ deleted: number }> => {
+        const { data } = await axios.delete<{ deleted: number }>('/notifications');
+        return data;
+    },
 };
