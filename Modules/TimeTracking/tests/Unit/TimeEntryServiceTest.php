@@ -8,6 +8,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\User\Models\User;
 use Modules\Project\Models\Project;
+use Modules\Project\Models\ProjectAllocation;
+use Modules\Project\Services\ProjectAllocationSyncService;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Models\TimeEntry;
 use Modules\TimeTracking\Services\TimeEntryService;
@@ -26,9 +28,13 @@ class TimeEntryServiceTest extends TestCase
         parent::setUp();
 
         $notificationService = $this->createMock(NotificationServiceInterface::class);
-        $this->service = new TimeEntryService($notificationService);
+        $this->service = new TimeEntryService($notificationService, app(ProjectAllocationSyncService::class));
         $this->user = User::factory()->create();
-        $this->project = Project::factory()->create(['owner_id' => $this->user->id]);
+        $this->project = Project::factory()->create([
+            'owner_id' => $this->user->id,
+            'start_date' => '2026-03-01',
+            'end_date' => '2026-03-31',
+        ]);
         $this->task = Task::factory()->create([
             'project_id' => $this->project->id,
             'actual_hours' => 0,
@@ -149,6 +155,70 @@ class TimeEntryServiceTest extends TestCase
 
         $this->task->refresh();
         $this->assertEquals(2.0, $this->task->actual_hours);
+    }
+
+    #[Test]
+    public function it_syncs_project_allocation_used_hours_on_create_update_and_delete(): void
+    {
+        ProjectAllocation::query()->create([
+            'project_id' => $this->project->id,
+            'user_id' => $this->user->id,
+            'allocated_hours' => 0,
+            'used_hours' => 0,
+            'percentage' => 50,
+            'start_date' => '2026-03-01',
+            'end_date' => '2026-03-31',
+            'notes' => null,
+        ]);
+
+        $entry = $this->service->create([
+            'project_id' => $this->project->id,
+            'task_id' => $this->task->id,
+            'user_id' => $this->user->id,
+            'entry_date' => '2026-03-07',
+            'hours' => 2.5,
+        ]);
+
+        $this->assertDatabaseHas('project_allocations', [
+            'project_id' => $this->project->id,
+            'user_id' => $this->user->id,
+            'used_hours' => 3,
+        ]);
+
+        $this->actingAs($this->user);
+        $this->service->update($entry->id, [
+            'task_id' => $this->task->id,
+            'entry_date' => '2026-04-02',
+            'hours' => 2.5,
+            'description' => null,
+        ]);
+
+        $this->assertDatabaseHas('project_allocations', [
+            'project_id' => $this->project->id,
+            'user_id' => $this->user->id,
+            'used_hours' => 0,
+        ]);
+
+        $this->service->update($entry->id, [
+            'task_id' => $this->task->id,
+            'entry_date' => '2026-03-09',
+            'hours' => 4.0,
+            'description' => null,
+        ]);
+
+        $this->assertDatabaseHas('project_allocations', [
+            'project_id' => $this->project->id,
+            'user_id' => $this->user->id,
+            'used_hours' => 4,
+        ]);
+
+        $this->service->delete($entry->id);
+
+        $this->assertDatabaseHas('project_allocations', [
+            'project_id' => $this->project->id,
+            'user_id' => $this->user->id,
+            'used_hours' => 0,
+        ]);
     }
 
     #[Test]

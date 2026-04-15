@@ -9,4 +9,6 @@ interface TeamServiceInterface
     public function updateProjectTeam(int $id, array $data): ?Project;
 
     public function removeMember(int $projectId, int $userId): bool;
+
+    public function syncTeamMembers(Project $project, array $userIds, array $settings): void;
 }

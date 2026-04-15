@@ -15,7 +15,8 @@ class TeamService implements TeamServiceInterface
      * Create a new team service instance.
      */
     public function __construct(
-        private readonly NotificationServiceInterface $notificationService
+        private readonly NotificationServiceInterface $notificationService,
+        private readonly ProjectAllocationSyncService $allocationSyncService,
     ) {}
 
     /**
@@ -36,8 +37,9 @@ class TeamService implements TeamServiceInterface
         try {
             DB::beginTransaction();
 
+            $oldUserIds = $project->team()->pluck('users.id')->toArray();
+
             if (is_array($data['team_members']) && ! empty($data['team_members'])) {
-                $oldUserIds = $project->team()->pluck('users.id')->toArray();
                 $this->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
 
                 $newUserIds = array_values(array_diff($data['team_members'], $oldUserIds));
@@ -51,7 +53,7 @@ class TeamService implements TeamServiceInterface
                 }
             } else {
                 Log::info('Removing all team members from project', ['project_id' => $id]);
-                $project->team()->sync([]);
+                $this->syncTeamMembers($project, [], []);
             }
 
             DB::commit();
@@ -75,7 +77,13 @@ class TeamService implements TeamServiceInterface
     {
         $project = Project::findOrFail($projectId);
 
-        return $project->team()->detach($userId) > 0;
+        $removed = $project->team()->detach($userId) > 0;
+
+        if ($removed) {
+            $this->allocationSyncService->removeAllocationsForUsers($project, [$userId]);
+        }
+
+        return $removed;
     }
 
     /**
@@ -83,6 +91,7 @@ class TeamService implements TeamServiceInterface
      */
     public function syncTeamMembers(Project $project, array $userIds, array $settings): void
     {
+        $currentUserIds = $project->team()->pluck('users.id')->toArray();
         $existing = $project->team()
             ->wherePivotIn('user_id', $userIds)
             ->get()
@@ -118,5 +127,11 @@ class TeamService implements TeamServiceInterface
         ]);
 
         $project->team()->sync($syncData);
+
+        $removedUserIds = array_values(array_diff($currentUserIds, $userIds));
+        $this->allocationSyncService->removeAllocationsForUsers($project, $removedUserIds);
+
+        $project->load('team');
+        $this->allocationSyncService->syncCurrentTeamAllocations($project);
     }
 }

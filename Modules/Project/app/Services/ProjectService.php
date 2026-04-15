@@ -20,7 +20,8 @@ class ProjectService implements ProjectServiceInterface
      */
     public function __construct(
         protected TeamServiceInterface $teamService,
-        protected NotificationServiceInterface $notificationService
+        protected NotificationServiceInterface $notificationService,
+        protected ProjectAllocationSyncService $allocationSyncService,
     ) {}
 
     /**
@@ -152,12 +153,14 @@ class ProjectService implements ProjectServiceInterface
 
             // Sync team members if provided
             if (array_key_exists('team_members', $data)) {
-                if (is_array($data['team_members']) && ! empty($data['team_members'])) {
-                    $this->teamService->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
-                } else {
-                    Log::info('Removing all team members from project', ['project_id' => $id]);
-                    $project->team()->sync([]);
-                }
+                $this->teamService->syncTeamMembers(
+                    $project,
+                    is_array($data['team_members']) ? $data['team_members'] : [],
+                    $data['team_settings'] ?? [],
+                );
+            } else {
+                $project->load('team');
+                $this->allocationSyncService->syncCurrentTeamAllocations($project);
             }
 
             DB::commit();

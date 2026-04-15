@@ -69,7 +69,7 @@ export default function Dashboard({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0">
                             <div>
-                                <CardDescription>Projekty at risk</CardDescription>
+                                <CardDescription>Rizikové projekty</CardDescription>
                                 <CardTitle className="mt-2 text-3xl">
                                     {atRiskProjects.length}
                                 </CardTitle>

@@ -34,7 +34,7 @@ export const AtRiskProjectsCard = ({ projects }: AtRiskProjectsCardProps) => {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-amber-500" />
-                    Projekty at risk
+                    Rizikové projekty
                 </CardTitle>
                 <CardDescription>
                     Aktívne projekty, ktoré meškajú alebo majú rizikové

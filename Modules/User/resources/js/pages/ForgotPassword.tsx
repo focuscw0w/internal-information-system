@@ -1,4 +1,4 @@
-import PasswordResetLinkController from '@/actions/Modules/User/Http/Controllers/PasswordResetLinkController';
+import PasswordResetLinkController from '@/actions/Modules/User/Http/Controllers/Auth/PasswordResetLinkController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

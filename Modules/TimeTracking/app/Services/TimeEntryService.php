@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
+use Modules\Project\Services\ProjectAllocationSyncService;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Models\TimeEntry;
 use Modules\TimeTracking\Transformers\TimeEntryResource;
@@ -15,7 +16,8 @@ use Modules\User\Models\User;
 class TimeEntryService implements TimeEntryServiceInterface
 {
     public function __construct(
-        private readonly NotificationServiceInterface $notificationService
+        private readonly NotificationServiceInterface $notificationService,
+        private readonly ?ProjectAllocationSyncService $allocationSyncService = null,
     ) {}
     /**
      * Get total tracked hours per user in a time period.
@@ -94,6 +96,7 @@ class TimeEntryService implements TimeEntryServiceInterface
         $entry = TimeEntry::create($data);
 
         $this->syncTaskHours($entry->task_id);
+        $this->syncAllocationHours($entry->project_id, $entry->user_id);
 
         return $entry;
     }
@@ -105,6 +108,8 @@ class TimeEntryService implements TimeEntryServiceInterface
     {
         $entry = TimeEntry::findOrFail($entryId);
         $project = Project::findOrFail($entry->project_id);
+        $oldProjectId = $entry->project_id;
+        $oldUserId = $entry->user_id;
 
         if (! $project->userHasPermission(auth()->user(), 'manage_time_entries')
             && $entry->user_id !== auth()->id()) {
@@ -116,9 +121,14 @@ class TimeEntryService implements TimeEntryServiceInterface
 
         if ($updated) {
             $this->syncTaskHours($oldTaskId);
+            $this->syncAllocationHours($oldProjectId, $oldUserId);
 
             if (isset($data['task_id']) && $data['task_id'] !== $oldTaskId) {
                 $this->syncTaskHours($data['task_id']);
+            }
+
+            if ($entry->project_id !== $oldProjectId || $entry->user_id !== $oldUserId) {
+                $this->syncAllocationHours($entry->project_id, $entry->user_id);
             }
         }
 
@@ -143,6 +153,7 @@ class TimeEntryService implements TimeEntryServiceInterface
 
         if ($deleted) {
             $this->syncTaskHours($taskId);
+            $this->syncAllocationHours($entry->project_id, $entry->user_id);
         }
 
         return $deleted;
@@ -163,6 +174,11 @@ class TimeEntryService implements TimeEntryServiceInterface
         if ($task && $task->estimated_hours > 0 && $task->actual_hours > $task->estimated_hours) {
             $this->notificationService->notifyTaskHoursExceeded($task);
         }
+    }
+
+    private function syncAllocationHours(int $projectId, int $userId): void
+    {
+        $this->allocationSyncService?->syncUsedHoursForProjectUser($projectId, $userId);
     }
 
     /**
