@@ -1,0 +1,56 @@
+// =============================================================
+// TIME TRACKING MODULE — Logged hours per user/task/day
+// Render: https://dbdiagram.io (Import → From DBML)
+// =============================================================
+
+Project time_tracking_module {
+  database_type: 'MySQL'
+  Note: 'Tracks hours logged by users on tasks. Feeds project_allocations.used_hours.'
+}
+
+// --- Stubs (real definitions in user-module / project-module) ---
+
+Table users {
+  id bigint [pk]
+  name varchar
+  Note: 'STUB — full definition in user-module.dbml'
+}
+
+Table projects {
+  id bigint [pk]
+  name varchar
+  Note: 'STUB — full definition in project-module.dbml'
+}
+
+Table tasks {
+  id bigint [pk]
+  title varchar
+  Note: 'STUB — full definition in project-module.dbml'
+}
+
+// --- Core ---
+
+Table time_entries {
+  id bigint [pk, increment]
+  project_id bigint [ref: > projects.id]
+  task_id bigint [ref: > tasks.id]
+  user_id bigint [ref: > users.id]
+  entry_date date
+  hours decimal [note: 'decimal(5,2)']
+  description text [null]
+
+  indexes {
+    (project_id, user_id, entry_date)
+    (task_id)
+  }
+}
+
+TableGroup time_tracking_module [color: #2ecc71] {
+  time_entries
+}
+
+TableGroup ref [color: #bdc3c7] {
+  users
+  projects
+  tasks
+}

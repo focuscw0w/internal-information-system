@@ -1,0 +1,40 @@
+// =============================================================
+// USER MODULE — Authentication & central user entity
+// Render: https://dbdiagram.io (Import → From DBML)
+// =============================================================
+
+Project user_module {
+  database_type: 'MySQL'
+  Note: 'Users are the central entity referenced by all domain modules.'
+}
+
+Table users {
+  id bigint [pk, increment]
+  name varchar
+  email varchar [unique]
+  password varchar
+  is_admin boolean [default: false]
+  email_verified_at timestamp [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table password_reset_tokens {
+  email varchar [pk]
+  token varchar
+  created_at timestamp [null]
+}
+
+Table sessions {
+  id varchar [pk]
+  user_id bigint [ref: > users.id, null]
+  ip_address varchar [null]
+  user_agent text [null]
+  last_activity integer
+}
+
+TableGroup user_module [color: #3498db] {
+  users
+  password_reset_tokens
+  sessions
+}
