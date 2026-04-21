@@ -7,6 +7,8 @@ use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
 use Modules\CapacityManagement\DTO\CapacityInputs;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
 use Modules\Project\Contracts\ProjectServiceInterface;
+use Modules\Project\Models\ProjectAllocation;
+use Modules\Project\Services\ProjectAllocationSyncService;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\User\Contracts\UserServiceInterface;
 
@@ -17,6 +19,7 @@ class CapacityManagementService implements CapacityManagementServiceInterface
         private readonly TimeEntryServiceInterface $timeEntryService,
         private readonly ProjectServiceInterface $projectService,
         private readonly CapacityCalculator $calculator,
+        private readonly ProjectAllocationSyncService $allocationSyncService,
     ) {}
 
     /**
@@ -57,6 +60,8 @@ class CapacityManagementService implements CapacityManagementServiceInterface
             ['user_id' => $userId],
             ['weekly_capacity_hours' => $hours],
         );
+
+        $this->allocationSyncService->syncAllocationsForUserProjects($userId);
     }
 
     /**
@@ -92,6 +97,9 @@ class CapacityManagementService implements CapacityManagementServiceInterface
             ->getHoursGroupedByWeekAndUser($twelveWeeksAgo, $now);
 
         $activeProjects = $this->projectService->getActiveProjectsWithIncompleteTasks();
+        $forecastAllocations = ProjectAllocation::query()
+            ->whereIn('project_id', $activeProjects->pluck('id'))
+            ->get();
 
         return new CapacityInputs(
             users: $users,
@@ -103,6 +111,7 @@ class CapacityManagementService implements CapacityManagementServiceInterface
             activeProjects: $activeProjects,
             historyByYwAndUser: $historyByYwAndUser,
             now: $now,
+            forecastAllocations: $forecastAllocations,
         );
     }
 

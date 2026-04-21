@@ -4,6 +4,7 @@ namespace Modules\Project\Tests\Feature;
 
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\CapacityManagement\Models\EmployeeCapacity;
 use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Models\Project;
 use Modules\User\Models\User;
@@ -26,6 +27,7 @@ class ProjectAllocationSyncTest extends TestCase
     {
         $owner = User::factory()->create();
         $member = User::factory()->create();
+        EmployeeCapacity::create(['user_id' => $member->id, 'weekly_capacity_hours' => 40]);
         $project = Project::factory()->create([
             'owner_id' => $owner->id,
             'status' => 'active',
@@ -48,7 +50,7 @@ class ProjectAllocationSyncTest extends TestCase
         $this->assertDatabaseHas('project_allocations', [
             'project_id' => $project->id,
             'user_id' => $member->id,
-            'allocated_hours' => 0,
+            'allocated_hours' => 103,
             'used_hours' => 0,
             'percentage' => 60,
             'start_date' => '2026-04-01 00:00:00',
@@ -92,6 +94,7 @@ class ProjectAllocationSyncTest extends TestCase
     {
         $owner = User::factory()->create();
         $member = User::factory()->create();
+        EmployeeCapacity::create(['user_id' => $member->id, 'weekly_capacity_hours' => 40]);
         $project = Project::factory()->create([
             'owner_id' => $owner->id,
             'name' => 'Sync test',
@@ -119,9 +122,77 @@ class ProjectAllocationSyncTest extends TestCase
         $this->assertDatabaseHas('project_allocations', [
             'project_id' => $project->id,
             'user_id' => $member->id,
+            'allocated_hours' => 89,
             'percentage' => 50,
             'start_date' => '2026-05-01 00:00:00',
             'end_date' => '2026-05-31 00:00:00',
+        ]);
+    }
+
+    #[Test]
+    public function project_creation_with_team_creates_project_allocations(): void
+    {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        EmployeeCapacity::create(['user_id' => $member->id, 'weekly_capacity_hours' => 32]);
+
+        $this->actingAs($owner)
+            ->post('/projects', [
+                'name' => 'Allocation on create',
+                'description' => 'Test project',
+                'status' => 'active',
+                'workload' => 'medium',
+                'start_date' => '2026-04-01',
+                'end_date' => '2026-04-14',
+                'team_members' => [$member->id],
+                'team_settings' => [
+                    $member->id => [
+                        'permissions' => [ProjectPermission::VIEW_PROJECT->value],
+                        'allocation' => 50,
+                    ],
+                ],
+            ])
+            ->assertRedirect(route('projects.projects'));
+
+        $project = Project::query()->where('name', 'Allocation on create')->firstOrFail();
+
+        $this->assertDatabaseHas('project_allocations', [
+            'project_id' => $project->id,
+            'user_id' => $member->id,
+            'allocated_hours' => 32,
+            'percentage' => 50,
+            'start_date' => '2026-04-01 00:00:00',
+            'end_date' => '2026-04-14 00:00:00',
+        ]);
+    }
+
+    #[Test]
+    public function syncing_project_allocations_command_recomputes_existing_records(): void
+    {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        EmployeeCapacity::create(['user_id' => $member->id, 'weekly_capacity_hours' => 40]);
+
+        $project = Project::factory()->create([
+            'owner_id' => $owner->id,
+            'status' => 'active',
+            'start_date' => '2026-04-01',
+            'end_date' => '2026-04-30',
+        ]);
+
+        $project->team()->attach($member->id, [
+            'permissions' => json_encode([ProjectPermission::VIEW_PROJECT->value]),
+            'allocation' => 50,
+        ]);
+
+        $this->artisan('project:sync-allocations')
+            ->assertExitCode(0);
+
+        $this->assertDatabaseHas('project_allocations', [
+            'project_id' => $project->id,
+            'user_id' => $member->id,
+            'allocated_hours' => 86,
+            'percentage' => 50,
         ]);
     }
 }

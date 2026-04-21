@@ -25,6 +25,7 @@ use Modules\Project\Services\NotificationService;
 use Illuminate\Console\Scheduling\Schedule;
 use Modules\Project\Console\Commands\CheckAtRiskCommand;
 use Modules\Project\Console\Commands\CheckDeadlinesCommand;
+use Modules\Project\Console\Commands\SyncProjectAllocationsCommand;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -79,6 +80,7 @@ class ProjectServiceProvider extends ServiceProvider
         $this->commands([
             CheckDeadlinesCommand::class,
             CheckAtRiskCommand::class,
+            SyncProjectAllocationsCommand::class,
         ]);
     }
 

@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
 use Modules\Project\Models\Project;
+use Modules\Project\Models\ProjectAllocation;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Models\TimeEntry;
 use Modules\User\Models\User;
@@ -385,6 +386,16 @@ class CapacityManagementServiceTest extends TestCase
             'estimated_hours' => 10,
             'actual_hours' => 0,
         ]);
+        ProjectAllocation::query()->create([
+            'project_id' => $project->id,
+            'user_id' => $user->id,
+            'allocated_hours' => 40,
+            'used_hours' => 0,
+            'percentage' => 100,
+            'start_date' => '2026-04-01',
+            'end_date' => '2026-04-28',
+            'notes' => null,
+        ]);
 
         $prediction = $this->service->buildDashboard()['prediction'];
 
@@ -406,6 +417,16 @@ class CapacityManagementServiceTest extends TestCase
             'estimated_hours' => 200,
             'actual_hours' => 0,
         ]);
+        ProjectAllocation::query()->create([
+            'project_id' => $project->id,
+            'user_id' => $user->id,
+            'allocated_hours' => 80,
+            'used_hours' => 0,
+            'percentage' => 100,
+            'start_date' => '2026-04-01',
+            'end_date' => '2026-04-28',
+            'notes' => null,
+        ]);
 
         $prediction = $this->service->buildDashboard()['prediction'];
 
@@ -425,6 +446,16 @@ class CapacityManagementServiceTest extends TestCase
             'end_date' => Carbon::now()->addDays(10),
         ]);
         Task::factory()->create(['project_id' => $futureProject->id, 'status' => 'todo', 'estimated_hours' => 5, 'actual_hours' => 0]);
+        ProjectAllocation::query()->create([
+            'project_id' => $futureProject->id,
+            'user_id' => $user->id,
+            'allocated_hours' => 20,
+            'used_hours' => 0,
+            'percentage' => 100,
+            'start_date' => '2026-04-01',
+            'end_date' => '2026-04-14',
+            'notes' => null,
+        ]);
 
         $overdueProject = Project::factory()->create([
             'owner_id' => $user->id,
@@ -432,6 +463,16 @@ class CapacityManagementServiceTest extends TestCase
             'end_date' => Carbon::now()->subDays(3),
         ]);
         Task::factory()->create(['project_id' => $overdueProject->id, 'status' => 'todo', 'estimated_hours' => 5, 'actual_hours' => 0]);
+        ProjectAllocation::query()->create([
+            'project_id' => $overdueProject->id,
+            'user_id' => $user->id,
+            'allocated_hours' => 20,
+            'used_hours' => 0,
+            'percentage' => 100,
+            'start_date' => '2026-03-01',
+            'end_date' => '2026-03-28',
+            'notes' => null,
+        ]);
 
         $projects = $this->service->buildDashboard()['prediction']['projects'];
         $future = collect($projects)->firstWhere('id', $futureProject->id);
@@ -442,6 +483,43 @@ class CapacityManagementServiceTest extends TestCase
 
         $this->assertTrue($overdue['is_overdue']);
         $this->assertEquals(0, $overdue['days_remaining']);
+    }
+
+    #[Test]
+    public function prediction_uses_persisted_project_allocations_in_dashboard_flow(): void
+    {
+        $user = User::factory()->create();
+        EmployeeCapacity::create(['user_id' => $user->id, 'weekly_capacity_hours' => 40]);
+
+        $project = Project::factory()->create([
+            'owner_id' => $user->id,
+            'status' => 'active',
+            'end_date' => Carbon::now()->addWeeks(2),
+        ]);
+
+        Task::factory()->create([
+            'project_id' => $project->id,
+            'status' => 'todo',
+            'estimated_hours' => 100,
+            'actual_hours' => 0,
+        ]);
+
+        ProjectAllocation::query()->create([
+            'project_id' => $project->id,
+            'user_id' => $user->id,
+            'allocated_hours' => 40,
+            'used_hours' => 0,
+            'percentage' => 100,
+            'start_date' => '2026-04-01',
+            'end_date' => '2026-04-28',
+            'notes' => null,
+        ]);
+
+        $projectPrediction = collect($this->service->buildDashboard()['prediction']['projects'])
+            ->firstWhere('id', $project->id);
+
+        $this->assertSame(40.0, $projectPrediction['available_hours_next_4_weeks']);
+        $this->assertFalse($projectPrediction['can_finish']);
     }
 
     // ── setWeeklyCapacityForUser ──────────────────────────────
@@ -469,6 +547,71 @@ class CapacityManagementServiceTest extends TestCase
 
         $this->assertDatabaseHas('employee_capacities', ['user_id' => $user->id, 'weekly_capacity_hours' => 45]);
         $this->assertDatabaseCount('employee_capacities', 1);
+    }
+
+    #[Test]
+    public function updating_weekly_capacity_resyncs_existing_project_allocations_for_the_user(): void
+    {
+        $user = User::factory()->create();
+        $owner = User::factory()->create();
+
+        $projectA = Project::factory()->create([
+            'owner_id' => $owner->id,
+            'status' => 'active',
+            'start_date' => '2026-04-01',
+            'end_date' => '2026-04-14',
+        ]);
+        $projectB = Project::factory()->create([
+            'owner_id' => $owner->id,
+            'status' => 'active',
+            'start_date' => '2026-04-01',
+            'end_date' => '2026-04-28',
+        ]);
+
+        $projectA->team()->attach($user->id, [
+            'permissions' => json_encode([]),
+            'allocation' => 50,
+        ]);
+        $projectB->team()->attach($user->id, [
+            'permissions' => json_encode([]),
+            'allocation' => 25,
+        ]);
+
+        ProjectAllocation::query()->create([
+            'project_id' => $projectA->id,
+            'user_id' => $user->id,
+            'allocated_hours' => 0,
+            'used_hours' => 0,
+            'percentage' => 50,
+            'start_date' => '2026-04-01',
+            'end_date' => '2026-04-14',
+            'notes' => null,
+        ]);
+        ProjectAllocation::query()->create([
+            'project_id' => $projectB->id,
+            'user_id' => $user->id,
+            'allocated_hours' => 0,
+            'used_hours' => 0,
+            'percentage' => 25,
+            'start_date' => '2026-04-01',
+            'end_date' => '2026-04-28',
+            'notes' => null,
+        ]);
+
+        $this->service->setWeeklyCapacityForUser($user->id, 28);
+
+        $this->assertDatabaseHas('project_allocations', [
+            'project_id' => $projectA->id,
+            'user_id' => $user->id,
+            'allocated_hours' => 28,
+            'percentage' => 50,
+        ]);
+        $this->assertDatabaseHas('project_allocations', [
+            'project_id' => $projectB->id,
+            'user_id' => $user->id,
+            'allocated_hours' => 28,
+            'percentage' => 25,
+        ]);
     }
 
     // ── getPeopleSnapshotForUsers ────────────────────────────

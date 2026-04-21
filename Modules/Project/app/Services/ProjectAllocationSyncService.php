@@ -2,6 +2,8 @@
 
 namespace Modules\Project\Services;
 
+use Carbon\Carbon;
+use Modules\CapacityManagement\Models\EmployeeCapacity;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\ProjectAllocation;
 use Modules\TimeTracking\Models\TimeEntry;
@@ -11,14 +13,71 @@ class ProjectAllocationSyncService
     public function syncCurrentTeamAllocations(Project $project): void
     {
         $project->loadMissing('team');
+        $teamUserIds = $project->team->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        if ($teamUserIds === []) {
+            ProjectAllocation::query()
+                ->where('project_id', $project->id)
+                ->delete();
+
+            return;
+        }
+
+        ProjectAllocation::query()
+            ->where('project_id', $project->id)
+            ->whereNotIn('user_id', $teamUserIds)
+            ->delete();
+
+        $capacities = EmployeeCapacity::query()
+            ->whereIn('user_id', $teamUserIds)
+            ->pluck('weekly_capacity_hours', 'user_id');
 
         foreach ($project->team as $member) {
             $this->syncTeamMemberAllocation(
                 $project,
                 (int) $member->id,
                 (int) ($member->pivot->allocation ?? 100),
+                $capacities->has($member->id) ? (int) $capacities[$member->id] : null,
             );
         }
+    }
+
+    public function syncAllocationsForUserProjects(int $userId): int
+    {
+        $projects = Project::query()
+            ->whereHas('team', fn ($query) => $query->where('users.id', $userId))
+            ->with('team')
+            ->get();
+
+        foreach ($projects as $project) {
+            $member = $project->team->firstWhere('id', $userId);
+
+            if ($member === null) {
+                continue;
+            }
+
+            $this->syncTeamMemberAllocation(
+                $project,
+                $userId,
+                (int) ($member->pivot->allocation ?? 100),
+                $this->resolveUserWeeklyCapacity($userId),
+            );
+        }
+
+        return $projects->count();
+    }
+
+    public function syncAllProjectAllocations(): int
+    {
+        $projects = Project::query()
+            ->with('team')
+            ->get();
+
+        foreach ($projects as $project) {
+            $this->syncCurrentTeamAllocations($project);
+        }
+
+        return $projects->count();
     }
 
     public function removeAllocationsForUsers(Project $project, array $userIds): void
@@ -59,7 +118,12 @@ class ProjectAllocationSyncService
             });
     }
 
-    private function syncTeamMemberAllocation(Project $project, int $userId, int $percentage): void
+    private function syncTeamMemberAllocation(
+        Project $project,
+        int $userId,
+        int $percentage,
+        ?int $weeklyCapacityHours = null,
+    ): void
     {
         [$startDate, $endDate] = $this->resolveProjectWindow($project);
 
@@ -78,8 +142,15 @@ class ProjectAllocationSyncService
             $allocation = $existingAllocations->first();
         }
 
+        $weeklyCapacityHours ??= $this->resolveUserWeeklyCapacity($userId);
+
         $payload = [
-            'allocated_hours' => 0,
+            'allocated_hours' => $this->calculateAllocatedHours(
+                $percentage,
+                $weeklyCapacityHours,
+                $startDate,
+                $endDate,
+            ),
             'percentage' => $percentage,
             'start_date' => $startDate,
             'end_date' => $endDate,
@@ -88,7 +159,7 @@ class ProjectAllocationSyncService
         if ($allocation) {
             $allocation->update($payload);
         } else {
-            ProjectAllocation::query()->create([
+            $allocation = ProjectAllocation::query()->create([
                 'project_id' => $project->id,
                 'user_id' => $userId,
                 'used_hours' => 0,
@@ -96,6 +167,12 @@ class ProjectAllocationSyncService
                 ...$payload,
             ]);
         }
+
+        ProjectAllocation::query()
+            ->where('project_id', $project->id)
+            ->where('user_id', $userId)
+            ->whereKeyNot($allocation->id)
+            ->delete();
 
         $this->syncUsedHoursForProjectUser($project->id, $userId);
     }
@@ -110,5 +187,27 @@ class ProjectAllocationSyncService
         }
 
         return [$startDate, $endDate];
+    }
+
+    private function resolveUserWeeklyCapacity(int $userId): int
+    {
+        $capacity = EmployeeCapacity::query()
+            ->where('user_id', $userId)
+            ->value('weekly_capacity_hours');
+
+        return $capacity !== null ? (int) $capacity : 40;
+    }
+
+    private function calculateAllocatedHours(
+        int $percentage,
+        int $weeklyCapacityHours,
+        string $startDate,
+        string $endDate,
+    ): int {
+        $start = Carbon::parse($startDate)->startOfDay();
+        $end = Carbon::parse($endDate)->startOfDay();
+        $overlapDays = max(1, $start->diffInDays($end->copy()->addDay()));
+
+        return (int) round(($percentage / 100) * $weeklyCapacityHours * ($overlapDays / 7));
     }
 }

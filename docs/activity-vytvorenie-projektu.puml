@@ -1,0 +1,47 @@
+@startuml
+title UML Activity Diagram - VYTVORENIE PROJEKTU
+
+start
+
+partition Pouzivatel {
+  :Klikne na "Novy projekt";
+  :Vyplni formular projektu;
+  :Odosle formular;
+}
+
+partition System {
+  :Prijme poziadavku POST /projects;
+  :Validuje vstupne udaje;
+
+  if (Udaje su platne?) then (ano)
+    :Zacne DB transakciu;
+    :Vytvori projekt;
+
+    if (Boli zadani clenovia timu?) then (ano)
+      :Synchronizuje clenov timu;
+      :Nastavi opravnenia a alokacie;
+      :Prepocta timove alokacie;
+    else (nie)
+    endif
+
+    if (Operacia prebehla bez chyby?) then (ano)
+      :Potvrdi transakciu;
+      :Presmeruje na prehlad projektov;
+      :Zobrazi spravu o uspesnom vytvoreni;
+      stop
+    else (nie)
+      :Vrati transakciu spat;
+      :Zapise chybu do logu;
+      :Vrati formular s chybovou hlaskou;
+    endif
+  else (nie)
+    :Vrati validacne chyby;
+  endif
+}
+
+partition Pouzivatel {
+  :Skontroluje chyby a upravi udaje;
+}
+
+stop
+@enduml
