@@ -1,0 +1,281 @@
+// =============================================================
+// Internal Information System — High-level Database Diagram
+// Format: DBML (https://dbml.dbdiagram.io)
+// Render:  Paste into https://dbdiagram.io (Import → From DBML)
+// =============================================================
+
+Project internal_information_system {
+  database_type: 'MySQL'
+  Note: '''
+  Laravel modular application (nwidart/laravel-modules).
+  Four domain modules: User, Project, TimeTracking, CapacityManagement.
+  Shared RBAC layer via Spatie Laravel Permission.
+  '''
+}
+
+// =============================================================
+// USER MODULE
+// =============================================================
+
+Table users {
+  id bigint [pk, increment]
+  name varchar
+  email varchar [unique]
+  password varchar
+  is_admin boolean [default: false]
+  email_verified_at timestamp [null]
+  created_at timestamp
+  updated_at timestamp
+  Note: 'Central entity. Referenced by all domain modules.'
+}
+
+Table password_reset_tokens {
+  email varchar [pk]
+  token varchar
+  created_at timestamp [null]
+}
+
+Table sessions {
+  id varchar [pk]
+  user_id bigint [ref: > users.id, null]
+  ip_address varchar [null]
+  user_agent text [null]
+  last_activity integer
+}
+
+TableGroup user_module [color: #3498db] {
+  users
+  password_reset_tokens
+  sessions
+}
+
+// =============================================================
+// PROJECT MODULE
+// =============================================================
+
+Table projects {
+  id bigint [pk, increment]
+  owner_id bigint [ref: > users.id]
+  name varchar
+  status varchar [note: 'planning / active / completed / ...']
+  workload varchar [note: 'low / medium / high']
+  start_date date
+  end_date date
+  progress integer [default: 0, note: '0–100 %']
+  tasks_total integer [default: 0]
+  tasks_completed integer [default: 0]
+  deleted_at timestamp [null]
+  Note: 'Aggregate root. Soft-deletes enabled. Progress & task counters are denormalized.'
+}
+
+Table tasks {
+  id bigint [pk, increment]
+  project_id bigint [ref: > projects.id]
+  assigned_to bigint [ref: > users.id, null]
+  title varchar
+  status varchar [note: 'todo / in_progress / testing / done']
+  priority varchar [note: 'low / medium / high']
+  estimated_hours decimal [null]
+  actual_hours decimal [default: 0]
+  due_date date [null]
+  deleted_at timestamp [null]
+  Note: 'Soft-deletes enabled. Direct single-assignee via assigned_to + M:M via assigned_users.'
+}
+
+Table subtasks {
+  id bigint [pk, increment]
+  task_id bigint [ref: > tasks.id]
+  title varchar
+  is_completed boolean [default: false]
+  sort_order integer [default: 0]
+}
+
+Table comments {
+  id bigint [pk, increment]
+  task_id bigint [ref: > tasks.id]
+  user_id bigint [ref: > users.id]
+  body text
+}
+
+Table project_team {
+  id bigint [pk, increment]
+  project_id bigint [ref: > projects.id]
+  user_id bigint [ref: > users.id]
+  permissions json [note: 'Project-scoped permissions (manage_team, view_all_time_entries, ...)']
+  allocation integer [note: '0–100 % allocation']
+  hourly_rate decimal [null]
+
+  indexes {
+    (project_id, user_id) [unique]
+  }
+  Note: 'Pivot with extra data: project ↔ user team membership.'
+}
+
+Table project_allocations {
+  id bigint [pk, increment]
+  project_id bigint [ref: > projects.id]
+  user_id bigint [ref: > users.id]
+  allocated_hours decimal
+  used_hours decimal [default: 0]
+  percentage integer
+  start_date date
+  end_date date
+
+  indexes {
+    (project_id, user_id, start_date, end_date) [unique]
+  }
+  Note: 'Time-boxed resource plan per user per project. used_hours fed from time_entries.'
+}
+
+Table assigned_users {
+  id bigint [pk, increment]
+  task_id bigint [ref: > tasks.id]
+  user_id bigint [ref: > users.id]
+
+  indexes {
+    (task_id, user_id) [unique]
+  }
+  Note: 'Simple M:M pivot: task ↔ users.'
+}
+
+Table activity_log {
+  id bigint [pk, increment]
+  project_id bigint [ref: > projects.id]
+  user_id bigint [ref: > users.id]
+  type varchar
+  description varchar [null]
+  subject_type varchar [null]
+  subject_id bigint [null]
+  metadata json [null]
+  Note: 'Audit trail. Polymorphic subject (subject_type/subject_id) — no hard FK.'
+}
+
+Table notifications {
+  id char(36) [pk, note: 'UUID']
+  type varchar
+  notifiable_type varchar
+  notifiable_id bigint
+  data text
+  read_at timestamp [null]
+  Note: 'Laravel notifications. Polymorphic on users (notifiable_type/id) — no hard FK.'
+}
+
+TableGroup project_module [color: #e74c3c] {
+  projects
+  tasks
+  subtasks
+  comments
+  project_team
+  project_allocations
+  assigned_users
+  activity_log
+  notifications
+}
+
+// =============================================================
+// TIME TRACKING MODULE
+// =============================================================
+
+Table time_entries {
+  id bigint [pk, increment]
+  project_id bigint [ref: > projects.id]
+  task_id bigint [ref: > tasks.id]
+  user_id bigint [ref: > users.id]
+  entry_date date
+  hours decimal [note: 'decimal(5,2)']
+  description text [null]
+
+  indexes {
+    (project_id, user_id, entry_date)
+    (task_id)
+  }
+  Note: 'Hours logged per user per task per day. Feeds project_allocations.used_hours.'
+}
+
+TableGroup time_tracking_module [color: #2ecc71] {
+  time_entries
+}
+
+// =============================================================
+// CAPACITY MANAGEMENT MODULE
+// =============================================================
+
+Table employee_capacities {
+  id bigint [pk, increment]
+  user_id bigint [ref: - users.id]
+  weekly_capacity_hours integer [default: 40]
+
+  indexes {
+    (user_id) [unique]
+  }
+  Note: 'Weekly baseline capacity per user (1:1). Utilisation = used_hours / allocated_hours.'
+}
+
+TableGroup capacity_module [color: #f39c12] {
+  employee_capacities
+}
+
+// =============================================================
+// PERMISSIONS MODULE (Spatie Laravel Permission)
+// =============================================================
+
+Table permissions {
+  id bigint [pk, increment]
+  name varchar
+  guard_name varchar
+
+  indexes {
+    (name, guard_name) [unique]
+  }
+}
+
+Table roles {
+  id bigint [pk, increment]
+  name varchar
+  guard_name varchar
+
+  indexes {
+    (name, guard_name) [unique]
+  }
+}
+
+Table model_has_permissions {
+  permission_id bigint [ref: > permissions.id]
+  model_type varchar
+  model_id bigint
+
+  indexes {
+    (permission_id, model_id, model_type) [pk]
+    (model_id, model_type)
+  }
+  Note: 'Polymorphic — typically references users.'
+}
+
+Table model_has_roles {
+  role_id bigint [ref: > roles.id]
+  model_type varchar
+  model_id bigint
+
+  indexes {
+    (role_id, model_id, model_type) [pk]
+    (model_id, model_type)
+  }
+  Note: 'Polymorphic — typically references users.'
+}
+
+Table role_has_permissions {
+  permission_id bigint [ref: > permissions.id]
+  role_id bigint [ref: > roles.id]
+
+  indexes {
+    (permission_id, role_id) [pk]
+  }
+}
+
+TableGroup permissions_module [color: #9b59b6] {
+  permissions
+  roles
+  model_has_permissions
+  model_has_roles
+  role_has_permissions
+}

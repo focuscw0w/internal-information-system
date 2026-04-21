@@ -1,0 +1,88 @@
+// =============================================================
+// PERMISSIONS MODULE — Spatie Laravel Permission (RBAC)
+// Render: https://dbdiagram.io (Import → From DBML)
+// =============================================================
+
+Project permissions_module {
+  database_type: 'MySQL'
+  Note: '''
+  Global RBAC layer. Separate from project-scoped permissions stored
+  in project_team.permissions (JSON).
+  Polymorphic model_* tables typically reference users.
+  '''
+}
+
+// --- Stub (real definition in user-module) ---
+
+Table users {
+  id bigint [pk]
+  name varchar
+  Note: 'STUB — full definition in user-module.dbml. Polymorphic target of model_has_*.'
+}
+
+// --- Core ---
+
+Table permissions {
+  id bigint [pk, increment]
+  name varchar
+  guard_name varchar
+
+  indexes {
+    (name, guard_name) [unique]
+  }
+}
+
+Table roles {
+  id bigint [pk, increment]
+  name varchar
+  guard_name varchar
+
+  indexes {
+    (name, guard_name) [unique]
+  }
+}
+
+Table model_has_permissions {
+  permission_id bigint [ref: > permissions.id]
+  model_type varchar
+  model_id bigint
+
+  indexes {
+    (permission_id, model_id, model_type) [pk]
+    (model_id, model_type)
+  }
+  Note: 'Polymorphic — typically references users (no hard FK).'
+}
+
+Table model_has_roles {
+  role_id bigint [ref: > roles.id]
+  model_type varchar
+  model_id bigint
+
+  indexes {
+    (role_id, model_id, model_type) [pk]
+    (model_id, model_type)
+  }
+  Note: 'Polymorphic — typically references users (no hard FK).'
+}
+
+Table role_has_permissions {
+  permission_id bigint [ref: > permissions.id]
+  role_id bigint [ref: > roles.id]
+
+  indexes {
+    (permission_id, role_id) [pk]
+  }
+}
+
+TableGroup permissions_module [color: #9b59b6] {
+  permissions
+  roles
+  model_has_permissions
+  model_has_roles
+  role_has_permissions
+}
+
+TableGroup ref [color: #bdc3c7] {
+  users
+}
