@@ -136,20 +136,12 @@ export function NotificationBell() {
                 <div className="flex items-center justify-between border-b px-4 py-3">
                     <span className="text-sm font-semibold text-gray-900">Notifikácie</span>
                     <div className="flex items-center gap-3">
-                        {unreadCount > 0 && (
+                        {notifications.length > 0 && (
                             <button
-                                onClick={() => markAllAsRead()}
+                                onClick={() => { markAllAsRead(); deleteAll(); }}
                                 className="text-xs text-blue-600 hover:text-blue-800"
                             >
                                 Označiť všetky ako prečítané
-                            </button>
-                        )}
-                        {notifications.length > 0 && (
-                            <button
-                                onClick={() => deleteAll()}
-                                className="text-xs text-red-500 hover:text-red-700"
-                            >
-                                Odstrániť všetky
                             </button>
                         )}
                     </div>

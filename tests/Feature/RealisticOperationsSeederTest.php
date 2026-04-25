@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
+use Modules\Project\Models\ActivityLog;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\Project\Notifications\ProjectCapacityAtRiskNotification;
@@ -71,5 +72,50 @@ class RealisticOperationsSeederTest extends TestCase
         $this->assertDatabaseHas('notifications', ['type' => ProjectCapacityAtRiskNotification::class]);
         $this->assertDatabaseHas('notifications', ['type' => ProjectOverdueNotification::class]);
         $this->assertDatabaseHas('notifications', ['type' => TaskHoursExceededNotification::class]);
+    }
+
+    #[Test]
+    public function realistic_operations_seeder_creates_only_real_project_timeline_events(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $allowedTypes = [
+            'task_created',
+            'task_updated',
+            'task_deleted',
+            'task_assigned',
+            'task_status_changed',
+        ];
+
+        $actualTypes = ActivityLog::query()
+            ->pluck('type')
+            ->unique()
+            ->values()
+            ->all();
+
+        $this->assertGreaterThanOrEqual(18, ActivityLog::count());
+        $this->assertSame([], array_values(array_diff($actualTypes, $allowedTypes)));
+
+        foreach ($allowedTypes as $type) {
+            $this->assertDatabaseHas('activity_log', ['type' => $type]);
+        }
+
+        foreach (['project_kickoff', 'task_blocked', 'release_risk', 'stakeholder_review'] as $customType) {
+            $this->assertDatabaseMissing('activity_log', ['type' => $customType]);
+        }
+
+        $this->assertTrue(
+            ActivityLog::where('type', 'task_status_changed')
+                ->get()
+                ->contains(fn (ActivityLog $activity) => ($activity->metadata['new_status'] ?? null) === 'done')
+        );
+
+        $this->assertTrue(
+            ActivityLog::where('type', 'task_deleted')
+                ->get()
+                ->contains(fn (ActivityLog $activity) => $activity->subject_type === null
+                    && $activity->subject_id === null
+                    && isset($activity->metadata['task_title']))
+        );
     }
 }

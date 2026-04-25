@@ -568,28 +568,244 @@ class RealisticOperationsSeeder extends Seeder
             ]);
         }
 
-        $activityDate = $this->seedWindowStart->addDays(3)->setTime(9, 0);
+        $activityDate = $this->seedWindowStart->addDay()->setTime(9, 0);
 
         $activities = [
-            ['project' => 'erp', 'user' => 'martina', 'type' => 'project_kickoff', 'description' => 'Spustený detailný plán ERP migrácie pre druhú vlnu dát.'],
-            ['project' => 'erp', 'user' => 'peter', 'type' => 'task_blocked', 'description' => 'API synchronizácia skladu čaká na potvrdenie timeoutov od infra tímu.'],
-            ['project' => 'mobile', 'user' => 'lukas', 'type' => 'release_risk', 'description' => 'Release candidate bol podržaný po incidente s offline synchronizáciou.'],
-            ['project' => 'reporting', 'user' => 'admin', 'type' => 'stakeholder_review', 'description' => 'Manažérske KPI boli odsúhlasené na pilotné nasadenie.'],
+            [
+                'project' => 'erp',
+                'user' => 'martina',
+                'type' => 'task_created',
+                'description' => 'Vytvoril úlohu: Navrhnúť dátový model objednávok',
+                'task' => 'erp-data-model',
+                'created_at' => $activityDate,
+            ],
+            [
+                'project' => 'erp',
+                'user' => 'martina',
+                'type' => 'task_created',
+                'description' => 'Vytvoril úlohu: ETL migrácia historických faktúr',
+                'task' => 'erp-etl',
+                'created_at' => $activityDate->addHours(2),
+            ],
+            [
+                'project' => 'erp',
+                'user' => 'martina',
+                'type' => 'task_assigned',
+                'description' => 'Zmenil priradenie úlohy: Navrhnúť dátový model objednávok',
+                'task' => 'erp-data-model',
+                'metadata' => [
+                    'old_users' => [$this->users['martina']->id],
+                    'new_users' => [$this->users['martina']->id, $this->users['peter']->id],
+                ],
+                'created_at' => $activityDate->addDay(),
+            ],
+            [
+                'project' => 'erp',
+                'user' => 'martina',
+                'type' => 'task_status_changed',
+                'description' => 'Zmenil stav úlohy: Uzavrieť integračný discovery workshop',
+                'task' => 'erp-discovery',
+                'metadata' => ['old_status' => TaskStatus::IN_PROGRESS->value, 'new_status' => TaskStatus::DONE->value],
+                'created_at' => $activityDate->addDays(3)->setTime(15, 30),
+            ],
+            [
+                'project' => 'erp',
+                'user' => 'peter',
+                'type' => 'task_updated',
+                'description' => 'Aktualizoval úlohu: Implementovať API synchronizáciu skladu',
+                'task' => 'erp-api',
+                'metadata' => [
+                    'changes' => [
+                        'priority' => ['old' => TaskPriority::HIGH->value, 'new' => TaskPriority::URGENT->value],
+                        'estimated_hours' => ['old' => 160, 'new' => 180],
+                    ],
+                ],
+                'created_at' => $activityDate->addDays(4)->setTime(11, 20),
+            ],
+            [
+                'project' => 'erp',
+                'user' => 'eva',
+                'type' => 'task_status_changed',
+                'description' => 'Zmenil stav úlohy: Dorobiť dashboard backlogu objednávok',
+                'task' => 'erp-dashboard',
+                'metadata' => ['old_status' => TaskStatus::TODO->value, 'new_status' => TaskStatus::IN_PROGRESS->value],
+                'created_at' => $activityDate->addDays(5)->setTime(10, 10),
+            ],
+            [
+                'project' => 'erp',
+                'user' => 'simon',
+                'type' => 'task_status_changed',
+                'description' => 'Zmenil stav úlohy: Integračné testy migrácie',
+                'task' => 'erp-tests',
+                'metadata' => ['old_status' => TaskStatus::TODO->value, 'new_status' => TaskStatus::TESTING->value],
+                'created_at' => $activityDate->addDays(7)->setTime(13, 45),
+            ],
+            [
+                'project' => 'erp',
+                'user' => 'martina',
+                'type' => 'task_deleted',
+                'description' => 'Odstránil úlohu: Duplikované mapovanie dodávateľov',
+                'metadata' => ['task_title' => 'Duplikované mapovanie dodávateľov'],
+                'created_at' => $activityDate->addDays(8)->setTime(16, 5),
+            ],
+            [
+                'project' => 'mobile',
+                'user' => 'lukas',
+                'type' => 'task_created',
+                'description' => 'Vytvoril úlohu: Stabilizovať offline synchronizáciu',
+                'task' => 'mobile-offline',
+                'created_at' => $activityDate->addHours(1),
+            ],
+            [
+                'project' => 'mobile',
+                'user' => 'lukas',
+                'type' => 'task_assigned',
+                'description' => 'Zmenil priradenie úlohy: Stabilizovať offline synchronizáciu',
+                'task' => 'mobile-offline',
+                'metadata' => [
+                    'old_users' => [$this->users['lukas']->id],
+                    'new_users' => [$this->users['lukas']->id, $this->users['peter']->id],
+                ],
+                'created_at' => $activityDate->addDays(2)->setTime(9, 25),
+            ],
+            [
+                'project' => 'mobile',
+                'user' => 'simon',
+                'type' => 'task_status_changed',
+                'description' => 'Zmenil stav úlohy: Dokončiť Android smoke build',
+                'task' => 'mobile-android',
+                'metadata' => ['old_status' => TaskStatus::IN_PROGRESS->value, 'new_status' => TaskStatus::TESTING->value],
+                'created_at' => $activityDate->addDays(3)->setTime(14, 10),
+            ],
+            [
+                'project' => 'mobile',
+                'user' => 'peter',
+                'type' => 'task_updated',
+                'description' => 'Aktualizoval úlohu: Stabilizovať offline synchronizáciu',
+                'task' => 'mobile-offline',
+                'metadata' => [
+                    'changes' => [
+                        'description' => [
+                            'old' => 'Opraviť konflikty pri opakovanom odosielaní zásob po reconnecte.',
+                            'new' => 'Opraviť konflikty pri opakovanom odosielaní zásob po reconnecte a doplniť merge pravidlá.',
+                        ],
+                    ],
+                ],
+                'created_at' => $activityDate->addDays(5)->setTime(15, 40),
+            ],
+            [
+                'project' => 'mobile',
+                'user' => 'lukas',
+                'type' => 'task_status_changed',
+                'description' => 'Zmenil stav úlohy: Stabilizovať release candidate',
+                'task' => 'mobile-release',
+                'metadata' => ['old_status' => TaskStatus::IN_PROGRESS->value, 'new_status' => TaskStatus::TESTING->value],
+                'created_at' => $this->today->subDay()->setTime(17, 10),
+            ],
+            [
+                'project' => 'mobile',
+                'user' => 'lukas',
+                'type' => 'task_deleted',
+                'description' => 'Odstránil úlohu: Manuálny export crash logov',
+                'metadata' => ['task_title' => 'Manuálny export crash logov'],
+                'created_at' => $activityDate->addDays(9)->setTime(12, 30),
+            ],
+            [
+                'project' => 'reporting',
+                'user' => 'admin',
+                'type' => 'task_created',
+                'description' => 'Vytvoril úlohu: Nastaviť prístupové filtre pre manažérov',
+                'task' => 'report-access',
+                'created_at' => $activityDate->addHours(3),
+            ],
+            [
+                'project' => 'reporting',
+                'user' => 'admin',
+                'type' => 'task_assigned',
+                'description' => 'Zmenil priradenie úlohy: Nastaviť prístupové filtre pre manažérov',
+                'task' => 'report-access',
+                'metadata' => [
+                    'old_users' => [$this->users['admin']->id],
+                    'new_users' => [$this->users['admin']->id, $this->users['nina']->id],
+                ],
+                'created_at' => $activityDate->addDays(2)->setTime(13, 15),
+            ],
+            [
+                'project' => 'reporting',
+                'user' => 'eva',
+                'type' => 'task_updated',
+                'description' => 'Aktualizoval úlohu: Export manažérskych KPI do Excelu',
+                'task' => 'report-export',
+                'metadata' => [
+                    'changes' => [
+                        'priority' => ['old' => TaskPriority::MEDIUM->value, 'new' => TaskPriority::HIGH->value],
+                    ],
+                ],
+                'created_at' => $activityDate->addDays(4)->setTime(10, 45),
+            ],
+            [
+                'project' => 'reporting',
+                'user' => 'martina',
+                'type' => 'task_status_changed',
+                'description' => 'Zmenil stav úlohy: Dátový základ reportingových KPI',
+                'task' => 'report-etl',
+                'metadata' => ['old_status' => TaskStatus::TESTING->value, 'new_status' => TaskStatus::DONE->value],
+                'created_at' => $this->seedWindowStart->addDays(11)->setTime(14, 0),
+            ],
+            [
+                'project' => 'reporting',
+                'user' => 'eva',
+                'type' => 'task_status_changed',
+                'description' => 'Zmenil stav úlohy: Export manažérskych KPI do Excelu',
+                'task' => 'report-export',
+                'metadata' => ['old_status' => TaskStatus::IN_PROGRESS->value, 'new_status' => TaskStatus::TESTING->value],
+                'created_at' => $this->today->subDays(2)->setTime(11, 35),
+            ],
+            [
+                'project' => 'reporting',
+                'user' => 'admin',
+                'type' => 'task_deleted',
+                'description' => 'Odstránil úlohu: Samostatný CSV export KPI',
+                'metadata' => ['task_title' => 'Samostatný CSV export KPI'],
+                'created_at' => $activityDate->addDays(8)->setTime(9, 50),
+            ],
         ];
 
-        foreach ($activities as $index => $activity) {
-            ActivityLog::create([
-                'project_id' => $this->projects[$activity['project']]->id,
-                'user_id' => $this->users[$activity['user']]->id,
-                'type' => $activity['type'],
-                'description' => $activity['description'],
-                'subject_type' => Project::class,
-                'subject_id' => $this->projects[$activity['project']]->id,
-                'metadata' => ['seeded' => true],
-                'created_at' => $activityDate->addDays($index * 2),
-                'updated_at' => $activityDate->addDays($index * 2),
-            ]);
+        foreach ($activities as $activity) {
+            $this->createActivity(
+                $activity['project'],
+                $activity['user'],
+                $activity['type'],
+                $activity['description'],
+                $activity['created_at'],
+                $activity['task'] ?? null,
+                $activity['metadata'] ?? null,
+            );
         }
+    }
+
+    private function createActivity(
+        string $projectKey,
+        string $userKey,
+        string $type,
+        string $description,
+        CarbonImmutable $createdAt,
+        ?string $taskKey = null,
+        ?array $metadata = null,
+    ): void {
+        $task = $taskKey !== null ? $this->tasks[$taskKey] : null;
+
+        ActivityLog::create([
+            'project_id' => $this->projects[$projectKey]->id,
+            'user_id' => $this->users[$userKey]->id,
+            'type' => $type,
+            'description' => $description,
+            'subject_type' => $task ? Task::class : null,
+            'subject_id' => $task?->id,
+            'metadata' => $metadata,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+        ]);
     }
 
     private function createTimeEntries(): void
@@ -656,6 +872,23 @@ class RealisticOperationsSeeder extends Seeder
             ['date' => $this->currentWeekStart->toDateString(), 'user' => 'nina', 'task' => 'mobile-release', 'hours' => 4.0, 'description' => 'Príprava release komunikácie pre pilotný sklad.'],
             ['date' => $this->currentWeekStart->toDateString(), 'user' => 'admin', 'task' => 'report-access', 'hours' => 2.0, 'description' => 'Final review prístupových filtrov.'],
             ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'martina', 'task' => 'erp-etl', 'hours' => 6.0, 'description' => 'Doplnenie chýbajúcich validačných vetiev pre dobropisy.'],
+            ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'martina', 'task' => 'erp-cleanup', 'hours' => 3.5, 'description' => 'Doplnenie legacy mapovaní partnerov a ručných korekcií pred cutoverom.'],
+            ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'martina', 'task' => 'erp-cutover', 'hours' => 2.0, 'description' => 'Kontrola release okna a závislostí pre ostrý prechod ERP.'],
+            ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'lukas', 'task' => 'erp-cutover', 'hours' => 2.5, 'description' => 'Zosúladenie rollback krokov a kontaktného stromu pre cutover checklist.'],
+            ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'lukas', 'task' => 'erp-audit', 'hours' => 2.0, 'description' => 'Príprava kontrolných bodov pre audit importných pipeline.'],
+            ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'peter', 'task' => 'erp-data-model', 'hours' => 3.0, 'description' => 'Finálna kontrola väzieb rezervácií a výdajok pred integračným testom.'],
+            ['date' => $this->currentWeekStart->addDays(2)->toDateString(), 'user' => 'martina', 'task' => 'erp-etl', 'hours' => 4.5, 'description' => 'Dohľadanie výnimiek v importoch faktúr a príprava rozhodnutí pre účtovníctvo.'],
+            ['date' => $this->currentWeekStart->addDays(2)->toDateString(), 'user' => 'martina', 'task' => 'erp-cutover', 'hours' => 3.0, 'description' => 'Spresnenie cutover checklistu po kontrole závislostí so skladom.'],
+            ['date' => $this->currentWeekStart->addDays(2)->toDateString(), 'user' => 'peter', 'task' => 'erp-api', 'hours' => 4.0, 'description' => 'Doplnenie logovania retry pokusov a spracovania duplicitných skladových pohybov.'],
+            ['date' => $this->currentWeekStart->addDays(2)->toDateString(), 'user' => 'peter', 'task' => 'erp-data-model', 'hours' => 3.5, 'description' => 'Úprava mapovania objednávkových stavov podľa posledného integračného review.'],
+            ['date' => $this->currentWeekStart->addDays(2)->toDateString(), 'user' => 'eva', 'task' => 'erp-dashboard', 'hours' => 5.0, 'description' => 'Doplnenie drilldown detailu oneskorených objednávok pre logistiku.'],
+            ['date' => $this->currentWeekStart->addDays(2)->toDateString(), 'user' => 'simon', 'task' => 'erp-tests', 'hours' => 6.0, 'description' => 'Regresné testy importu faktúr po doplnení validačných pravidiel.'],
+            ['date' => $this->currentWeekStart->addDays(3)->toDateString(), 'user' => 'martina', 'task' => 'erp-cleanup', 'hours' => 4.0, 'description' => 'Ručné zosúladenie partnerov bez jednoznačného legacy identifikátora.'],
+            ['date' => $this->currentWeekStart->addDays(3)->toDateString(), 'user' => 'lukas', 'task' => 'erp-cutover', 'hours' => 3.5, 'description' => 'Koordinácia release okna a zodpovedností počas ostrého prechodu.'],
+            ['date' => $this->currentWeekStart->addDays(3)->toDateString(), 'user' => 'lukas', 'task' => 'erp-audit', 'hours' => 3.0, 'description' => 'Kontrola prístupových obmedzení pre importné joby a audit trail.'],
+            ['date' => $this->currentWeekStart->addDays(3)->toDateString(), 'user' => 'peter', 'task' => 'erp-api', 'hours' => 5.0, 'description' => 'Testovanie idempotentných requestov pri opakovanom odoslaní skladových pohybov.'],
+            ['date' => $this->currentWeekStart->addDays(3)->toDateString(), 'user' => 'eva', 'task' => 'erp-dashboard', 'hours' => 4.0, 'description' => 'Optimalizácia filtrov backlogu objednávok pre väčší dataset.'],
+            ['date' => $this->currentWeekStart->addDays(3)->toDateString(), 'user' => 'simon', 'task' => 'erp-tests', 'hours' => 5.0, 'description' => 'Overenie storno scenárov a párovania stavov na pilotných dátach.'],
             ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'lukas', 'task' => 'mobile-release', 'hours' => 8.0, 'description' => 'Spracovanie spätnej väzby z release review.'],
             ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'lukas', 'task' => 'mobile-offline', 'hours' => 2.0, 'description' => 'Koordinácia ďalšieho fix window s pilotom.'],
             ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'peter', 'task' => 'erp-api', 'hours' => 5.0, 'description' => 'Refaktor retry workeru a auditných eventov.'],

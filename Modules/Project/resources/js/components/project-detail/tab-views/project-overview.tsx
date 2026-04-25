@@ -11,10 +11,7 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
     const permissions = project.current_user_permissions ?? [];
     const can = (permission: string) => permissions.includes(permission);
 
-    const capacityPercentage =
-        project.capacity_available > 0
-            ? (project.capacity_used / project.capacity_available) * 100
-            : 0;
+    const capacityPercentage = Math.min(project.capacity_used, 100);
 
     const atRiskTaskCount = project.tasks?.filter((t) => t.is_at_risk && t.status !== 'done').length ?? 0;
 
@@ -33,13 +30,13 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
 
                 <StatCard
                     title="Kapacita"
-                    value={`${project.capacity_used}h`}
-                    subtitle={`z ${project.capacity_available}h`}
+                    value={`${project.capacity_used}%`}
+                    subtitle={`${project.capacity_available}% voľných`}
                     icon={Clock}
                     iconColor="text-amber-600"
                     iconBgColor="bg-amber-50"
                     progress={capacityPercentage}
-                    progressLabel={`${capacityPercentage.toFixed(0)}% použité`}
+                    progressLabel={`${project.capacity_used}% použité`}
                 />
 
                 <StatCard

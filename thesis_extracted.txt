@@ -1,0 +1,2022 @@
+    SLOVENSKÁ TECHNICKÁ UNIVERZITA V BRATISLAVE
+
+                  Fakulta elektrotechniky a informatiky
+
+
+
+Evidenčné číslo: FEI-xxxx-xxxx
+
+
+
+
+           Aplikácia interného systému LATEX
+
+                                 Bakalárska práca
+
+
+
+
+2024                                                      Filip Jamrich
+       SLOVENSKÁ TECHNICKÁ UNIVERZITA V BRATISLAVE
+                       Fakulta elektrotechniky a informatiky
+
+
+
+Evidenčné číslo: FEI-xxxx-xxxx
+
+
+
+
+             Aplikácia interného systému LATEX
+
+                                  Bakalárska práca
+
+
+
+
+Študijný program:            názov študijného programu
+Študijný odbor:              názov študijného odboru
+Školiace pracovisko:         Názov školiaceho pracoviska
+Školiteľ:                    tituly Meno Priezvisko, tituly
+Konzultant:                  tituly Meno Priezvisko, tituly
+
+
+
+
+2024                                                           Filip Jamrich
+Obsah
+Úvod                                                                                      6
+
+1 Teoretické východiská                                                                    7
+  1.1   Interné informačné systémy . . . . . . . . . . . . . . . . . . . . . . . .         7
+        1.1.1   Definícia a význam . . . . . . . . . . . . . . . . . . . . . . . . .       7
+        1.1.2   Typy informačných systémov        . . . . . . . . . . . . . . . . . . .    7
+  1.2   Informačné systémy v malých a stredných podnikoch . . . . . . . . . .              8
+        1.2.1   Špecifiká malých a stredných podnikov . . . . . . . . . . . . . .          8
+        1.2.2   Kľúčové oblasti softvérovej podpory . . . . . . . . . . . . . . . .        9
+        1.2.3   Najčastejšie problémy malých a stredných podnikov . . . . . . .           10
+  1.3 Architektonické a technologické východiská návrhu informačných systémov 11
+        1.3.1   Architektonické princípy návrhu informačných systémov . . . . .           12
+        1.3.2   Bezpečnostné a prevádzkové požiadavky na informačné systémy               14
+
+2 Analýza súčasného stavu problematiky                                                    16
+  2.1   Existujúce riešenia . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     16
+        2.1.1   Projektové a kolaboračné nástroje . . . . . . . . . . . . . . . . .       16
+        2.1.2   Nástroje na sledovanie času . . . . . . . . . . . . . . . . . . . .       17
+        2.1.3   Komplexné podnikové systémy . . . . . . . . . . . . . . . . . . .         17
+        2.1.4   Zhodnotenie existujúcich riešení . . . . . . . . . . . . . . . . . .      18
+  2.2 Analýza vybraných procesov modelového podniku . . . . . . . . . . . .               19
+        2.2.1   Súčasný stav    . . . . . . . . . . . . . . . . . . . . . . . . . . . .   19
+        2.2.2   Identifikované problémy . . . . . . . . . . . . . . . . . . . . . .       19
+        2.2.3   Cieľový stav . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    20
+  2.3 Analýza technologických alternatív . . . . . . . . . . . . . . . . . . . .          20
+        2.3.1   Technológie prezentačnej vrstvy . . . . . . . . . . . . . . . . . .       20
+        2.3.2   Technológie aplikačnej vrstvy . . . . . . . . . . . . . . . . . . .       21
+        2.3.3   Technológie dátovej vrstvy . . . . . . . . . . . . . . . . . . . . .      23
+  2.4   Zhrnutie analytickej časti . . . . . . . . . . . . . . . . . . . . . . . . . .    24
+
+3 Návrh riešenia                                                                          25
+  3.1   Funkcionálne a nefunkcionálne požiadavky . . . . . . . . . . . . . . . .          25
+  3.2   Diagramy prípadov použitia . . . . . . . . . . . . . . . . . . . . . . . .        28
+        3.2.1   Modul používateľov . . . . . . . . . . . . . . . . . . . . . . . . .      29
+        3.2.2   Modul projektového manažmentu . . . . . . . . . . . . . . . . .           30
+        3.2.3   Modul evidencie času . . . . . . . . . . . . . . . . . . . . . . . .      31
+
+
+                                            2
+        3.2.4   Modul kapacitného plánovania . . . . . . . . . . . . . . . . . . .      33
+  3.3   Návrh databázy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    33
+        3.3.1   Modul evidencie času . . . . . . . . . . . . . . . . . . . . . . . .    34
+        3.3.2   Modul projektového manažmentu . . . . . . . . . . . . . . . . .         35
+        3.3.3   Modul kapacitného plánovania . . . . . . . . . . . . . . . . . . .      36
+  3.4 Architektúra systému . . . . . . . . . . . . . . . . . . . . . . . . . . . .      36
+
+4 Implementácia systému                                                                 41
+  4.1   Implementácia modulov . . . . . . . . . . . . . . . . . . . . . . . . . .       41
+        4.1.1   Modul správy používateľov . . . . . . . . . . . . . . . . . . . . .     41
+        4.1.2   Modul projektového manažmentu . . . . . . . . . . . . . . . . .         43
+        4.1.3   Modul evidencie času . . . . . . . . . . . . . . . . . . . . . . . .    48
+        4.1.4   Modul kapacitného plánovania . . . . . . . . . . . . . . . . . . .      48
+  4.2   Kontajnerizácia . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   48
+  4.3   Pridanie nového modulu . . . . . . . . . . . . . . . . . . . . . . . . . .      48
+
+Literatúra                                                                              49
+
+
+
+
+                                            3
+Zoznam obrázkov a tabuliek
+ Obrázok 1    Porovnanie monolitického a mikroservisného prístupu . . . .          12
+ Obrázok 2    Schéma vrstvenej architektúry informačného systému . . . .           13
+ Obrázok 3    Návrhový vzor Model-View-Controller . . . . . . . . . . . .          14
+ Obrázok 4    Diagram prípadov použitia pre modul používateľov . . . . .           29
+ Obrázok 5    Diagram prípadov použitia pre modul projektového manažmentu 30
+ Obrázok 6    Diagram prípadov použitia pre modul evidencie času . . . .           31
+ Obrázok 7    Diagram prípadov použitia pre modul kapacitného plánovania 33
+ Obrázok 8    Návrh databázového modelu systému . . . . . . . . . . . . .          34
+ Obrázok 9    Databázový diagram modulu evidencie času . . . . . . . . .           34
+ Obrázok 10   Databázový diagram modulu projektového manažmentu . . .              35
+ Obrázok 11   Databázový diagram modulu kapacitného plánovania . . . .             36
+ Obrázok 12   Komponentový diagram modulov a ich komunikácie cez roz-
+              hrania . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   40
+ Obrázok 13   Rozhranie správy používateľov . . . . . . . . . . . . . . . . .      42
+ Obrázok 14   Detail projektu s prehľadom úloh a členov projektového tímu          46
+ Obrázok 15   Rozhranie pre správu členov projektového tímu, ich oprávnení
+              a alokácie . . . . . . . . . . . . . . . . . . . . . . . . . . . .   46
+ Obrázok 16   Kanban pohľad projektu . . . . . . . . . . . . . . . . . . . .       47
+ Obrázok 17   Ganttov graf projektu . . . . . . . . . . . . . . . . . . . . .      47
+
+ Tabuľka 2    Kritériá pre určenie MSP podľa Európskej komisie . . . . . .          8
+ Tabuľka 3    Porovnanie monolitického a mikroservisného prístupu . . . .          13
+ Tabuľka 4    Porovnanie vybraných systémov . . . . . . . . . . . . . . . .        18
+ Tabuľka 5    Porovnanie technológií prezentačnej vrstvy . . . . . . . . . .       21
+ Tabuľka 6    Porovnanie technológií aplikačnej vrstvy . . . . . . . . . . .       22
+ Tabuľka 7    Porovnanie prístupov k prepojeniu prezentačnej a aplikačnej
+              vrstvy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   22
+ Tabuľka 8    Porovnanie technológií dátovej vrstvy . . . . . . . . . . . . .      23
+ Tabuľka 9    Use-case tabuľka pre prípad použitia Zaznamenanie času . .           32
+
+
+
+
+                                      4
+Zoznam značiek a skratiek
+ API    Application Programming Interface
+ CRM    Customer Relationship Management
+ CSR    Client-Side Rendering
+ CSRF   Cross-Site Request Forgery
+ ERP    Enterprise Resource Planning
+ EÚ     Európska únia
+ HRM    Human Resource Management
+ IT     Information Technology
+ MSP    malý a stredný podnik
+ MVC    Model-View-Controller
+ OECD   Organisation for Economic Co-operation and
+        Development
+ ORM    Object-Relational Mapping
+ PMIS   Project Management Information System
+ RBAC   Role-Based Access Control
+ REST   Representational State Transfer
+ SSR    Server-Side Rendering
+ XSS    Cross-Site Scripting
+
+
+
+
+                                     5
+Úvod
+Úvod...
+
+
+
+
+          6
+1       Teoretické východiská
+Informačné systémy sú dnes čoraz dôležitejšou súčasťou podnikových štruktúr. Zohrávajú
+kľúčovú úlohu pri optimalizácii firemných procesov, zvyšovaní efektivity, zlepšovaní
+rozhodovacích procesov a zvyšovaní prehľadnosti dát vo firmách. Pre podnik predstavujú
+nástroj, ktorý umožňuje zvýšenie konkurencieschopnosti a celkovej efektivity fungovania.
+    Napriek tomu, že informačné systémy prinášajú množstvo výhod, vysoké náklady, zlo-
+žitosť riešení alebo nedostatočné prispôsobenie potrebám podniku môžu byť prekážkou
+v dosiahnutí týchto výhod. Z tohto dôvodu vzniká dopyt po flexibilných, modulárnych
+a škálovateľných riešeniach, ktoré dokážu reagovať na meniace sa potreby podniku a
+zároveň poskytovať prehľadné a efektívne riadenie dát a procesov.
+
+1.1     Interné informačné systémy
+1.1.1    Definícia a význam
+Informačné systémy možno definovať ako súbor vzájomne prepojených prvkov, ktoré
+zabezpečujú zber, spracovanie, uchovávanie a distribúciu dát a informácií s cieľom
+podporiť dosahovanie stanovených cieľov organizácie [1]. Súčasťou informačného systému
+je aj spätná väzba, ktorá umožňuje vyhodnocovať výstupy a prispôsobovať fungovanie
+systému požiadavkám podniku.
+    Význam informačných systémov spočíva najmä v ich schopnosti zlepšiť efektivitu a
+produktivitu vykonávanej práce v podniku, zrýchliť prístup k relevantným informáciám
+a podporovať rozhodovacie procesy.
+
+1.1.2    Typy informačných systémov
+Informačné systémy je možné rozdeliť do rôznych kategórií, ktoré sa líšia svojou fun-
+kcionalitou, zameraním a účelom. Medzi základné typy informačných systémov patria
+[laudon2016, 1]:
+
+    • Transakčné systémy (TPS): zaznamenávajú a spracovávajú každodenné trans-
+      akcie, ako sú napríklad evidencia objednávok, faktúracia alebo správa zásob.
+
+    • Manažérske informačné systémy (MIS): poskytujú manažérom sumarizované
+      prehľady a reporty založené na historických dátach, ktoré podporujú rutinné
+      riadiace a kontrolné činnosti.
+
+    • Systémy na podporu rozhodovania (DSS): slúžia na podporu komplex-
+      ných rozhodovacích procesov prostredníctvom analytických nástrojov, modelov a
+      simulácií, ktoré umožňujú vyhodnocovať rôzne scenáre vývoja.
+
+                                           7
+  • Podnikové informačné systémy (ERP): spájajú procesy ako účtovníctvo,
+      sklad, nákup, výrobu a ľudské zdroje do jedného integrovaného systému.
+
+  • Systémy riadenia vzťahov so zákazníkmi (Customer Relationship Ma-
+      nagement (CRM)): zabezpečujú správu interakcií so zákazníkmi, evidenciu
+      obchodných príležitostí a podporu predajných a marketingových procesov.
+
+  • Systémy riadenia ľudských zdrojov (Human Resource Management
+      (HRM)): podporujú správu zamestnancov, evidenciu ich pracovnej činnosti,
+      plánovanie kapacít a vyhodnocovanie výkonnosti.
+
+   Okrem uvedených kategórií existujú aj ďalšie systémy zamerané na konkrétne oblasti,
+napríklad nástroje projektového manažmentu, systémy sledovania času alebo systémy
+správy dokumentov. Tieto systémy zvyčajne kombinujú vlastnosti viacerých kategórií
+informačných systémov.
+   Výber vhodného typu informačného systému závisí od konkrétnych potrieb a po-
+žiadaviek podniku, ako aj od jeho veľkosti a zložitosti riadených procesov. V praxi sa
+často využíva kombinácia viacerých typov systémov, ktoré spolupracujú a vytvárajú
+komplexné riešenie.
+
+1.2     Informačné systémy v malých a stredných podnikoch
+Malé a stredné podniky sú v rámci Európskej únie definované na základe počtu za-
+mestnancov a finančných ukazovateľov, ako sú ročný obrat a bilančná suma. Podľa
+odporúčania Európskej komisie sú podniky rozdelené na mikro, malé a stredné [2].
+
+           Tabuľka 2: Kritériá pre určenie MSP podľa Európskej komisie
+
+ Kategória podniku       Počet zamestnancov        Ročný obrat      Bilančná suma
+ Mikropodniky                     < 10             ≤ 2 mil. EUR       ≤ 2 mil. EUR
+ Malé podniky                     < 50            ≤ 10 mil. EUR      ≤ 10 mil. EUR
+ Stredné podniky                 < 250            ≤ 50 mil. EUR      ≤ 43 mil. EUR
+
+
+
+1.2.1    Špecifiká malých a stredných podnikov
+Charakteristickým znakom malých a stredných podnikov (malý a stredný podnik (MSP))
+je vyššia miera flexibility a schopnosť rýchleho prispôsobenia sa zmenám na trhu, čo
+je často spojené s menším počtom zamestnancov. Rozhodovanie je pritom spravidla
+sústredené na úzky okruh manažérov alebo vlastníka.
+
+
+
+                                          8
+   V MSP sa taktiež často stretávame s potrebou prispôsobenia systémov na mieru,
+čo môže byť náročné z hľadiska nákladov a zdrojov. Z toho vyplýva dôležitosť návrhu
+flexibilných a modulárnych systémov, ktoré je možné postupne rozširovať.
+
+1.2.2    Kľúčové oblasti softvérovej podpory
+Pre potreby interných informačných systémov v MSP je vhodné vymedziť kľúčové
+oblasti, v ktorých softvérová podpora najčastejšie prispieva k efektívnejšiemu fungovaniu
+podniku. Tieto oblasti zároveň predstavujú východisko pre následnú analýzu existujúcich
+riešení a odvodenie požiadaviek na navrhovaný systém.
+
+Projektový manažment
+Plánovanie, organizácia, riadenie a kontrola projektov pomáhajú k splneniu stanovených
+úloh v danom čase, rozpočte a rozsahu. Pri informačných systémoch to znamená najmä
+vytváranie a spravovanie úloh, sledovanie ich stavu a rozdeľovanie zodpovednosti [3].
+Dôležitý je aj jasný prehľad o priebehu celého projektu. V praxi sa projektové riadenie
+opiera najmä o tieto metodiky [4]:
+
+  • Vodopádový model – ktorý podrobne popísal Royce už v roku 1970 [5], rozdeľuje
+     projekt na jednotlivé fázy za sebou. Tento model je výhodný v situáciách, v ktorých
+     sú požiadavky pevne dané a nemenia sa [3, 4].
+
+  • Agilné metodiky – sú naopak charakteristické postupným opakovaným vývojom
+     a rýchlou reakciou na zmeny [4, 6]. V súčasnosti sa najviac rozšírili prístupy ako
+     Scrum a Kanban. Scrum rozdeľuje prácu na kratšie cykly – šprinty [7]. Kanban
+     vizualizuje úlohy na nástenke podľa aktuálneho stavu [8].
+
+Sledovanie času (time tracking)
+Sledovanie času znamená zapisovať a sledovať, koľko času človek strávi na rôznych
+úlohách, projektoch alebo iných aktivitách [9]. Tieto údaje pomáhajú lepšie pochopiť,
+ako človek využíva svoj pracovný čas, zistiť, kto je ako produktívny, a zároveň slúžia na
+fakturáciu alebo plánovanie kapacít [3, 9].
+   V praxi sa vyskytujú dva základné spôsoby, ako údaje pre sledovanie času zazname-
+nať: manuálne zaznamenanie odpracovaného času alebo zaznamenanie pomocou
+časovača, ktorý je spustený v reálnom čase. Dáta z týchto záznamov sa často rozlišujú
+na fakturovateľné a nefakturovateľné hodiny [9]. Tento rozdiel je dôležitý najmä v
+projektoch, kde firmy poskytujú služby klientom a podľa toho vystavujú faktúry.
+
+
+
+
+                                              9
+Kapacitné plánovanie
+Kapacitné plánovanie predstavuje proces efektívneho rozdeľovania dostupných zdrojov,
+najmä času a pracovnej kapacity zamestnancov, s cieľom zabezpečiť plynulé plnenie
+úloh, efektívne využitie pracovného potenciálu a predchádzanie preťaženiu jednotlivcov
+[9].
+       Dôležité je pritom sledovať vzťah medzi dostupnou kapacitou a dopytom [3].
+Nerovnováha môže viesť buď k preťaženiu zamestnancov a riziku omeškania projektov,
+alebo naopak k neefektívnemu využívaniu zdrojov a zvýšeným nákladom [3, 9].
+
+Správa používateľov
+Správa používateľov znamená vytváranie, upravovanie a spravovanie používateľských
+účtov, prideľovanie rolí, oprávnení a určovanie prístupu k rôznym častiam systému.
+Táto oblasť zahŕňa aj autentifikáciu a autorizáciu, ktorým sa ďalej venujeme v časti
+1.3.2. V praxi sa na návrh prístupových práv používajú najmä tieto dve možnosti:
+
+   • Prístup podľa rolí (Role-Based Access Control, RBAC) – každý používateľ
+         dostane rolu s vopred definovanou sadou oprávnení.
+
+   • Priame oprávnenia (permissions) – umožňujú nastaviť prístup presne na
+         úrovni jednotlivých operácií.
+
+       Výber vhodného prístupu závisí najmä od veľkosti organizácie a od potreby detailnej
+kontroly nad prístupovými právami jednotlivých používateľov.
+
+1.2.3       Najčastejšie problémy malých a stredných podnikov
+Napriek tomu, že MSP predstavujú významnú časť ekonomiky, často čelia problémom,
+ktoré súvisia s nedostatočným využívaním informačných systémov a obmedzujú ich
+efektívnosť. Aktuálne údaje zároveň ukazujú, že úroveň digitalizácie MSP stále nie
+je dostatočná. V roku 2024 dosiahlo v Európska únia (EÚ) aspoň základnú úroveň
+digitálnej intenzity iba 73 % malých a stredných podnikov, pričom 27 % podnikov malo
+veľmi nízku a 40 % len nízku úroveň digitalizácie. Tieto údaje naznačujú, že značná
+časť MSP stále zaostáva v zavádzaní digitálnych technológií a moderných informačných
+systémov [10].
+       Jedným z najvýznamnejších problémov je finančná náročnosť moderných informač-
+ných systémov. Komplexné riešenia, ako sú napríklad podnikové systémy typu Enterprise
+Resource Planning (ERP), môžu byť pre MSP nedostupné z dôvodu vysokých nákladov
+na implementáciu, údržbu a školenie zamestnancov. Podľa Organisation for Economic
+Co-operation and Development (OECD) medzi hlavné prekážky digitalizácie MSP patrí
+
+                                             10
+nedostatok kapitálu, nedostatok informácií a povedomia, ako aj obmedzené personálne
+a odborné kapacity [11].
+    Ďalším problémom je zložitosť existujúcich systémov. Mnohé informačné systémy
+sú navrhnuté pre veľké organizácie a obsahujú množstvo funkcií, ktoré malé podniky
+nepotrebujú, čo vedie k zbytočnej komplikácii a znižuje efektivitu ich využívania. S
+tým súvisí aj skutočnosť, že podniky často nemajú dostatok času ani priestoru na
+školenie zamestnancov. Podľa prieskumu OECD medzi najčastejšie uvádzané prekážky
+digitalizácie patrí nedostatok času na školenie (43 %), náklady na hardvér a údržbu
+(37 %) a nedostatok talentu a zručností (27 %) [12].
+    Významným problémom je aj nedostatočné prispôsobenie systémov potrebám MSP.
+Univerzálne riešenia často nedokážu reflektovať špecifické požiadavky a procesy malých
+a stredných podnikov, čo vedie k potrebe dodatočných úprav alebo dokonca využívaniu
+viacerých nesúvisiacich nástrojov.
+    Dôležitým aspektom je aj používateľská náročnosť systémov. Nedostatočne navr-
+hnuté používateľské rozhranie môže znižovať produktivitu práce a viesť k frustrácii
+zamestnancov voči využívaniu informačných systémov. Okrem toho sa v odbornej
+literatúre uvádza, že medzi významné bariéry digitálnej transformácie MSP patria aj
+problémy v oblasti Information Technology (IT) bezpečnosti a nedostatok odborníkov
+na trhu práce, čo môže ďalej sťažovať efektívne zavádzanie a používanie nových systémov
+[13].
+    Z uvedených problémov vyplýva potreba vývoja a implementácie jednoduchých,
+flexibilných a modulárnych informačných systémov, ktoré budú prispôsobené špecifickým
+požiadavkám malých a stredných podnikov a zároveň umožnia efektívne riadenie dát a
+procesov.
+
+1.3     Architektonické a technologické východiská návrhu
+        informačných systémov
+Pri návrhu informačných systémov je potrebné zohľadniť nielen výber konkrétnych
+technológií, ale aj vhodný architektonický prístup, bezpečnostné požiadavky a spôsob
+členenia systému na jednotlivé časti. Architektúra systému určuje, ako budú jednotlivé
+časti riešenia organizované, akým spôsobom budú medzi sebou komunikovať a aké
+vlastnosti bude systém vykazovať z hľadiska rozšíriteľnosti, udržiavateľnosti, bezpečnosti
+a prevádzky.
+    Cieľom tejto časti nie je uviesť úplný prehľad všetkých dostupných technológií a
+architektonických štýlov, ale predstaviť vybrané prístupy, ktoré sú relevantné pre návrh
+interného informačného systému pre malý a stredný podnik. Pri opise sa prihliada
+
+
+                                           11
+najmä na prehľadnosť riešenia, náročnosť implementácie, možnosti rozširovania, podporu
+modularity a vhodnosť pre potreby menšieho až stredne veľkého systému.
+
+1.3.1     Architektonické princípy návrhu informačných systémov
+Softvérová architektúra predstavuje základnú štruktúru systému, spôsob organizácie
+jeho častí a pravidlá ich vzájomnej spolupráce [14]. Vo fáze návrhu je preto dôležité
+rozlišovať medzi architektonickým prístupom na úrovni celého systému a spôsobom
+jeho vnútorného členenia. Tieto dve roviny spolu úzko súvisia, no nepredstavujú tú istú
+kategóriu rozhodnutí.
+   Na úrovni celého riešenia sa v praxi pri návrhu informačných systémov často porov-
+náva najmä monolitický a mikroservisný prístup. Monolitický prístup predstavuje
+tradičný spôsob návrhu, pri ktorom je aplikácia realizovaná ako jeden celok s jedným
+kódovým základom. Jeho výhodou je jednoduchšie počiatočné vytvorenie, testovanie
+a nasadenie, nevýhodou však môže byť horšia udržiavateľnosť a zložitejšie zavádzanie
+zmien pri raste systému [15].
+   Mikroservisný prístup rozdeľuje aplikáciu na menšie samostatné služby, ktoré je
+možné vyvíjať, nasadzovať a škálovať nezávisle od seba. Tento prístup prináša vyššiu
+flexibilitu a nezávislosť jednotlivých častí systému, no zároveň zvyšuje komplexnosť
+návrhu, integrácie, monitorovania a prevádzky [15, 16].
+
+   Monolitický prístup                               Mikroservisný prístup
+
+   Používateľské rozhranie
+
+      Aplikačná logika                    Služba A         Služba B          Služba C
+
+      Prístup k dátam
+
+
+                                            DB A             DB B             DB C
+      Jedna databáza
+
+
+             Obr. 1: Porovnanie monolitického a mikroservisného prístupu
+
+
+   Na obrázku 1 je schematicky znázornený rozdiel medzi monolitickým a mikroser-
+visným prístupom. Monolitický systém je vytvorený a nasadzovaný ako jeden celok,
+zatiaľ čo mikroservisný systém je rozdelený na viaceré samostatné služby, ktoré môžu
+byť vyvíjané a nasadzované nezávisle od seba.
+
+
+
+
+                                          12
+             Tabuľka 3: Porovnanie monolitického a mikroservisného prístupu
+
+  Kritérium                      Monolitický prístup       Mikroservisný prístup
+  Náročnosť implementácie                 nižšia                     vyššia
+  Náročnosť nasadenia                     nižšia                     vyššia
+  Prevádzková komplexnosť                 nižšia                     vyššia
+  Samostatné nasadenie častí               nie                        áno
+  Vhodnosť pre MSP                        vyššia                   skôr nižšia
+
+
+   Pri menších a stredne veľkých systémoch býva monolitický prístup spravidla jedno-
+duchší na vývoj, testovanie aj správu, zatiaľ čo mikroservisný prístup je vhodnejší najmä
+tam, kde je potrebná vyššia miera nezávislého škálovania a prevádzkovej samostatnosti
+jednotlivých častí systému.
+   Samotný monolitický prístup však neurčuje, ako má byť systém vnútorne usporiadaný.
+Na úrovni vnútorného členenia sa preto často uplatňuje vrstvená architektúra, ktorá
+rozdeľuje systém do logických vrstiev, pričom každá vrstva plní špecifickú úlohu a
+komunikuje len s určenými časťami systému [14, 17]. Typicky sa rozlišuje prezentačná
+vrstva, aplikačná vrstva a dátová vrstva. Takýto prístup podporuje prehľadnosť riešenia,
+zapuzdrenie zodpovedností a obmedzuje dopad zmien medzi jednotlivými časťami
+aplikácie.
+
+                                  Prezentačná vrstva
+
+
+                                   Aplikačná vrstva
+
+
+                                    Dátová vrstva
+
+
+              Obr. 2: Schéma vrstvenej architektúry informačného systému
+
+   S vrstvenou architektúrou úzko súvisí aj modularita systému. Modularita nie je
+samostatným architektonickým štýlom, ale návrhovým princípom, ktorý umožňuje
+rozdeliť systém na menšie funkčne ucelené časti. Takéto členenie je dôležité najmä pri
+systémoch, pri ktorých sa predpokladá postupné rozširovanie funkcionality, jednoduchšia
+údržba a potreba obmedziť dopad zmien na ostatné časti riešenia.
+   V kontexte softvérového inžinierstva predstavuje modul samostatnú, logicky ohra-
+ničenú jednotku systému, ktorá zapuzdruje súvisiacu funkcionalitu a komunikuje s
+ostatnými časťami systému prostredníctvom definovaných rozhraní [4]. Modulárne člene-
+
+
+                                           13
+nie tak prispieva k väčšej prehľadnosti riešenia a zároveň uľahčuje jeho údržbu a ďalšie
+rozširovanie.
+   Komponent je znovupoužiteľná softvérová jednotka, ktorá zapuzdruje implemen-
+tačné detaily a sprístupňuje svoju funkcionalitu výhradne prostredníctvom definovaných
+rozhraní [18]. Na rozdiel od modulu, ktorý predstavuje skôr organizačnú jednotku
+systému, komponent kladie väčší dôraz na znovupoužiteľnosť a nahraditeľnosť.
+   V rámci vrstvenej architektúry sa v aplikačnej vrstve často uplatňuje návrhový vzor
+Model-View-Controller (MVC), ktorý rozdeľuje aplikáciu na tri vzájomne prepojené
+časti: model, pohľad a kontrolér [19, 20]. Model reprezentuje dáta a aplikačnú logiku,
+pohľad zabezpečuje prezentáciu dát používateľovi a kontrolér sprostredkúva spracovanie
+vstupov a koordináciu medzi ostatnými časťami. Výhodou tohto vzoru je oddelenie
+zodpovedností, ktoré zvyšuje prehľadnosť kódu a uľahčuje jeho údržbu.
+
+
+                                          aktualizuje
+                             Controller                 Model
+
+                            vstup
+                                               poskytuje dáta
+                          používateľa
+
+
+
+                                 View
+
+
+                    Obr. 3: Návrhový vzor Model-View-Controller
+
+
+1.3.2    Bezpečnostné a prevádzkové požiadavky na informačné
+         systémy
+Okrem architektonického usporiadania je pri návrhu informačných systémov potrebné
+zohľadniť aj bezpečnostné a prevádzkové požiadavky, ktoré významne ovplyvňujú kvalitu
+výsledného riešenia. Tieto požiadavky sú dôležité najmä pri webových aplikáciách, ktoré
+pracujú s používateľskými účtami, oprávneniami a citlivými dátami.
+
+Autentifikácia a autorizácia
+Autentifikácia predstavuje proces overenia identity používateľa, teda potvrdenie, že
+používateľ je tým, za koho sa vydáva. Najčastejšie sa realizuje pomocou kombinácie
+prihlasovacieho mena a hesla, prípadne ďalších faktorov [21]. Autorizácia následne určuje,
+aké operácie a zdroje môže autentifikovaný používateľ v systéme využívať. Pri návrhu
+podnikových systémov sa často využíva model Role-Based Access Control (RBAC)
+alebo prístup založený na priamych oprávneniach.
+
+                                             14
+Session management a hashovanie hesiel
+Po úspešnej autentifikácii systém udržiava identitu používateľa počas jeho aktivity
+prostredníctvom správy relácie. Dôležité je najmä bezpečné nakladanie s identifikátorom
+relácie a ochrana prihlasovacích údajov. Heslá používateľov sa preto neukladajú v čistej
+podobe, ale vo forme kryptografického hashu. Na tento účel sa odporúčajú moderné
+algoritmy ako bcrypt alebo Argon2 [22, 23].
+
+Bezpečnostné hrozby
+Pri návrhu webových aplikácií je potrebné zohľadniť aj najčastejšie typy útokov. Refe-
+renčným rámcom pre identifikáciu kritických bezpečnostných rizík je OWASP Top 10
+[22]. Medzi relevantné hrozby patria najmä SQL injection, Cross-Site Scripting (XSS),
+Cross-Site Request Forgery (CSRF) a útoky hrubou silou na autentifikáciu. Obrana
+proti nim spočíva najmä vo validácii vstupov, použití parametrizovaných dotazov,
+správnom escapovaní výstupov, ochrane formulárov pomocou tokenov a obmedzovaní
+počtu pokusov o prihlásenie.
+
+Aplikačné rozhranie a nasadenie systému
+Dôležitým prevádzkovým aspektom je aj spôsob komunikácie medzi časťami systému.
+Jedným z najrozšírenejších štýlov komunikácie medzi klientom a serverom je Repre-
+sentational State Transfer (REST), založený na bezstavovej komunikácii a práci so
+zdrojmi prostredníctvom štandardných HTTP metód [24]. V praxi je potrebné zvážiť
+aj spôsob nasadenia systému, jeho aktualizácie a prenositeľnosť medzi prostrediami.
+Z tohto pohľadu je vhodné využitie kontajnerizácie, napríklad pomocou technológie
+Docker, ktorá umožňuje konzistentné spúšťanie aplikácie v rôznych prostrediach [25].
+
+
+
+
+                                          15
+2       Analýza súčasného stavu problematiky
+Na základe teoretických východísk možno pristúpiť k analytickej časti práce, ktorej
+cieľom je preskúmať existujúce riešenia dostupné na trhu, zhodnotiť ich výhody a nedos-
+tatky a identifikovať potreby, ktoré má pokrývať vlastný návrh interného informačného
+systému. Analýza sa zameriava na oblasti kľúčové pre malé a stredné podniky, konkrétne
+na projektový manažment, sledovanie času, kapacitné plánovanie a správu používateľov.
+
+2.1     Existujúce riešenia
+Na trhu existuje množstvo nástrojov a informačných systémov, ktoré podporujú riadenie
+podnikových procesov, projektov a zdrojov. Tieto riešenia sa líšia svojou funkcionalitou,
+zameraním a cenovou politikou, čo umožňuje podnikom vybrať si systém, ktorý najlepšie
+vyhovuje ich potrebám a rozpočtu.
+    Pre účely porovnania existujúcich riešení sme zvolili kritériá, ktoré vychádzajú z
+kľúčových oblastí softvérovej podpory MSP identifikovaných v časti 1.2.2 — konkrétne
+projektový manažment, sledovanie času, kapacitné plánovanie a správa používateľov.
+Tieto oblasti sa prekrývajú s akademicky definovanými kľúčovými funkcionalitami
+systémov projektového manažmentu (Project Management Information System (PMIS)),
+najmä s funkcionalitami Activity Planning, Resource Planning a Access Permits, ktoré
+boli identifikované v štatistickej analýze ôsmich komerčných PMIS nástrojov [26].
+Doplňujúcim kritériom je cena riešenia, ktorá je pre MSP často rozhodujúcim faktorom
+pri výbere systému.
+    Do porovnania sme zaradili reprezentatívne nástroje z troch kategórií: projektové
+a kolaboračné nástroje (ClickUp, Asana, Trello, Jira), nástroje na sledovanie času
+(Clockify) a komplexné podnikové systémy (Odoo). Napriek širokej ponuke dostupných
+systémov mnohé z nich nedokážu plne reflektovať špecifické požiadavky MSP. Niektoré
+nástroje poskytujú len čiastkové riešenia zamerané napríklad na riadenie projektov
+alebo sledovanie času, zatiaľ čo iné komplexné systémy bývajú príliš zložité a finančne
+náročné.
+
+2.1.1      Projektové a kolaboračné nástroje
+Projektové a kolaboračné nástroje predstavujú dôležitú skupinu softvérových riešení,
+ktoré slúžia na plánovanie, organizáciu a riadenie práce v tímoch.
+    ClickUp je komplexný nástroj na riadenie projektov [27], ktorý umožňuje vytváranie
+a správu úloh, sledovanie ich priebehu, nastavovanie termínov a základné sledovanie času.
+Jeho výhodou je široká funkcionalita a vysoká miera prispôsobiteľnosti. Nevýhodou
+
+
+                                           16
+je však vyššia zložitosť používateľského rozhrania a absencia pokročilého kapacitného
+plánovania.
+   Asana je nástroj zameraný na projektový manažment [28], ktorý umožňuje jedno-
+duché a prehľadné riadenie úloh a tímovej spolupráce. Umožňuje efektívne plánovanie
+projektov a sledovanie ich stavu prostredníctvom rôznych pohľadov. Výhodou je intu-
+itívne používateľské rozhranie, avšak systém neposkytuje vstavané sledovanie času ani
+pokročilé riadenie zdrojov.
+   Trello využíva vizuálny prístup založený na Kanban nástenkách [29], ktorý umožňuje
+jednoduché riadenie úloh pomocou kariet. Tento nástroj je vhodný najmä pre menšie tímy
+a jednoduchšie projekty. Nevýhodou je obmedzená funkcionalita a absencia pokročilých
+nástrojov pre riadenie projektov, ako je napríklad sledovanie času alebo kapacitné
+plánovanie.
+   Jira je nástroj zameraný primárne na vývoj softvéru a agilné riadenie projektov [30],
+ktorý je v IT odvetví jedným z najrozšírenejších riešení. Poskytuje pokročilé funkcie
+pre sprint plánovanie, sledovanie chýb (bug tracking) a správu úloh v rámci Scrumu
+a Kanbanu. Nevýhodou je však vyššia zložitosť používateľského rozhrania a absencia
+vstavaného kapacitného plánovania na úrovni celého tímu.
+   Z uvedených nástrojov vyplýva, že hoci poskytujú užitočné funkcie pre riadenie
+projektov, úloh a tímovej spolupráce, často im chýbajú pokročilé funkcie, ako je integrácia
+sledovania času alebo kapacitné plánovanie.
+
+2.1.2     Nástroje na sledovanie času
+Nástroje na sledovanie času predstavujú samostatnú kategóriu softvérových riešení,
+ktoré umožňujú evidenciu času stráveného na jednotlivých úlohách alebo projektoch.
+   Clockify je jednoduchý nástroj na sledovanie času [31], ktorý umožňuje zazname-
+návať pracovný čas, vytvárať prehľady a analyzovať využitie času v rámci projektov.
+Výhodou systému je jeho jednoduchosť, dostupnosť a prehľadné používateľské rozhranie.
+Nevýhodou je však úzka funkcionalita, keďže nástroj neposkytuje možnosti ako riadenie
+projektov, správu používateľov ani kapacitné plánovanie. Z tohto dôvodu je potrebné
+jeho kombinovanie s ďalšími systémami, čo môže viesť k zníženej efektivite práce s
+dátami.
+
+2.1.3     Komplexné podnikové systémy
+Komplexné podnikové systémy, najmä systémy typu ERP, predstavujú riešenia, ktoré
+integrujú viaceré podnikové procesy do jedného systému. Tieto systémy poskytujú
+širokú škálu funkcionalít.
+
+
+                                            17
+   Odoo je modulárny podnikový systém [32], ktorý ponúka riadenie projektov, sledo-
+vanie času, správu používateľov a ďalšie podnikové procesy. Veľkou výhodou systému je
+jeho komplexnosť a možnosť rozšírenia o rôzne moduly podľa potrieb podniku. Nevýho-
+dou je však jeho zložitosť a náročnosť na implementáciu, ako aj potreba technických
+znalostí. Pre malé a stredné podniky môže byť takýto systém finančne alebo organizačne
+náročný.
+
+2.1.4       Zhodnotenie existujúcich riešení
+
+                         Tabuľka 4: Porovnanie vybraných systémov
+
+ Systém     Projektový     Sledovanie   Kapacitné      Správa               Cena
+            manažment         času      plánovanie   používateľov       (mes./použ.)
+ ClickUp        áno           áno        čiastočne       áno         zadarmo / od 7 USD
+ Asana          áno            nie          nie          áno        zadarmo / od 10,99 USD
+ Trello       základné         nie          nie        základné      zadarmo / od 5 USD
+ Jira           áno            nie          nie          áno        zadarmo / od 7,53 USD
+ Clockify       nie           áno           nie        základné     zadarmo / od 3,99 USD
+ Odoo           áno           áno          áno           áno        zadarmo / od 14,90 EUR
+
+
+   Ceny uvedené v tabuľke 4 sú platné k dátumu 7. apríla 2026 a vychádzajú z
+oficiálnych cenníkov jednotlivých poskytovateľov [27–32].
+   Z porovnania vyplýva, že jednotlivé systémy poskytujú prevažne len čiastkové
+riešenia. Projektové nástroje (ClickUp, Asana, Trello, Jira) síce podporujú riadenie
+úloh a tímovej spolupráce, avšak často im chýbajú pokročilé funkcie ako sledovanie
+času alebo kapacitné plánovanie. Nástroje s nízkou cenou a jednoduchou obsluhou
+(Trello, Clockify) sú pre MSP vhodné len v obmedzenej miere, keďže pokrývajú iba úzku
+oblasť podnikových procesov. Naopak, komplexné systémy typu ERP (Odoo) poskytujú
+širokú škálu funkcionalít, avšak ich zložitosť a náročnosť na implementáciu znižujú ich
+vhodnosť pre MSP.
+   Gap analýza. Žiadne z analyzovaných riešení súčasne nespĺňa všetky štyri kľúčové
+oblasti identifikované v časti 1.2.2 (projektový manažment, sledovanie času, kapacitné
+plánovanie a správa používateľov) za cenu primeranú rozpočtu typického MSP. Iba Odoo
+integruje všetky štyri oblasti, ale jeho komplexnosť, náročnosť na implementáciu a vyššia
+cena prekračujú potreby malých a stredných podnikov. Ostatné nástroje pokrývajú
+maximálne dve zo štyroch kľúčových oblastí a vyžadujú kombináciu s ďalšími systémami,
+čo vedie k duplicite dát, neaktuálnym informáciám a rozptýlenej komunikácii. Tento
+rozpor je v súlade so zisteniami štúdie Micale a kol. [26], podľa ktorej žiadne z bežne
+dostupných PMIS riešení neposkytuje všetky identifikované funkcionality v rovnovážnej
+
+                                              18
+forme prispôsobenej konkrétnemu typu organizácie. Identifikovaný rozpor vytvára
+priestor pre návrh vlastného riešenia, ktoré integruje zvolené oblasti v zjednodušenej
+forme zodpovedajúcej potrebám MSP.
+
+2.2     Analýza vybraných procesov modelového podniku
+Pre účely tejto práce je definovaný modelový podnik reprezentujúci typického zástupcu
+malého podniku v oblasti IT služieb. Ide o spoločnosť s 10 až 30 zamestnancami, ktorá
+poskytuje projektovo orientované služby klientom, napríklad vývoj softvéru na zákazku
+alebo digitálny marketing. Podnik disponuje základnou IT infraštruktúrou, avšak nemá
+zavedený centralizovaný systém na riadenie projektov, evidenciu pracovného času ani
+správu kapacít.
+
+2.2.1    Súčasný stav
+V súčasnosti podnik využíva kombináciu vzájomne neprepojených nástrojov. Projektové
+úlohy a plány sú evidované v tabuľkových procesoroch (napr. Microsoft Excel alebo
+Google Sheets), pričom každý člen tímu si ich udržiava samostatne. Komunikácia a
+koordinácia práce prebieha prostredníctvom e-mailov a chatových nástrojov (napr. Slack
+alebo Microsoft Teams). Záznamy o odpracovanom čase sú uchovávané manuálne alebo
+v izolovaných nástrojoch, ktoré nie sú prepojené s projektovým riadením.
+
+2.2.2    Identifikované problémy
+Z tohto stavu vyplývajú konkrétne problémy, ktoré znižujú efektivitu práce v podniku:
+
+  • Duplicita dát: rovnaké informácie sú uchovávané na viacerých miestach v rôznych
+      formátoch, čo vedie k nekonzistencii a zvyšuje riziko chýb.
+
+  • Neaktuálne informácie: bez centralizovaného systému je obtiažne udržiavať
+      aktuálny stav projektov, úloh a kapacít v reálnom čase, čo sťažuje riadenie a
+      rozhodovanie.
+
+  • Slabá kontrola kapacít: manažér nemá prehľad o aktuálnom vyťažení zamest-
+      nancov, čo sťažuje efektívne prideľovanie úloh a plánovanie zdrojov.
+
+  • Rozptýlená komunikácia: dôležité rozhodnutia a informácie sú roztrúsené v
+      e-mailových vláknach alebo chatových konverzáciách, čo sťažuje ich dohľadanie a
+      znižuje transparentnosť.
+
+
+
+
+                                          19
+2.2.3    Cieľový stav
+Cieľom navrhovaného systému je nahradiť túto roztrieštenú infraštruktúru centralizova-
+nou platformou, ktorá:
+
+  • zjednotí správu projektov, úloh a záznamov o čase na jednom mieste,
+
+  • poskytne prehľady a štatistiky v reálnom čase pre manažérov aj zamestnancov,
+
+  • umožní riadenie prístupu prostredníctvom oprávnení (permissions), ktoré určujú,
+      aké operácie môže používateľ vykonávať,
+
+  • zjednoduší kapacitné plánovanie a poskytne prehľad o vyťaženosti tímu.
+
+2.3     Analýza technologických alternatív
+2.3.1    Technológie prezentačnej vrstvy
+Prezentačná vrstva zabezpečuje komunikáciu medzi používateľom a systémom. Obsahuje
+používateľské rozhranie, zobrazovanie dát a spracovanie vstupov. Pri návrhu webového
+informačného systému je preto potrebné zvoliť technológiu, ktorá umožní vytvoriť
+prehľadné, interaktívne a rozšíriteľné používateľské rozhranie, pričom zároveň nebude
+predstavovať neprimeranú implementačnú záťaž.
+   Medzi najpoužívanejšie technológie prezentačnej vrstvy patria React, Vue.js a
+Angular. Ide o reprezentatívnych zástupcov moderných frontendových riešení, ktoré
+sa líšia najmä mierou flexibility, komplexnosťou architektúry, veľkosťou ekosystému a
+náročnosťou osvojenia.
+   React je komponentovo orientovaná knižnica pre tvorbu používateľských rozhraní s
+rozsiahlym ekosystémom nástrojov a vysokou flexibilitou [33]. Jeho hlavnou výhodou
+je možnosť vytvárať znovupoužiteľné komponenty a postupne budovať používateľské
+rozhranie aj vo väčších aplikáciách. Nevýhodou Reactu je, že ide skôr o knižnicu než
+komplexný rámec, a preto je pri návrhu potrebné samostatne zvoliť ďalšie nástroje pre
+routing, správu stavu alebo formuláre.
+   Vue.js je progresívny rámec orientovaný na jednoduchosť a rýchly vývoj [34]. Jeho
+výhodou je nižšia vstupná náročnosť a prehľadná štruktúra, vďaka čomu je vhodný
+najmä pre menšie a stredne veľké projekty alebo tímy, ktoré potrebujú rýchlo vytvoriť
+funkčné rozhranie. V porovnaní s Reactom však ponúka menší ekosystém a menšiu
+mieru rozšírenia v podnikových projektoch.
+   Angular predstavuje komplexný rámec vhodný najmä pre rozsiahle aplikácie, avšak
+za cenu vyššej zložitosti [35]. Výhodou Angularu je robustná architektúra, vstavané
+mechanizmy a konzistentný spôsob organizácie projektu. Pre menší alebo stredne
+
+                                         20
+veľký interný systém však môže byť zbytočne komplexný, pretože zvyšuje nároky na
+implementáciu, osvojenie aj údržbu.
+
+                Tabuľka 5: Porovnanie technológií prezentačnej vrstvy
+
+        Kritérium                                React     Vue.js    Angular
+        Komponentový prístup                       áno       áno         áno
+        Ekosystém a komunita                      veľký    stredný      veľký
+        Krivka učenia                            stredná    nízka      vysoká
+        Architektonická voľnosť                  vysoká    stredná      nižšia
+        Vhodnosť pre menší až stredný systém     vysoká    vysoká    skôr nižšia
+
+   Z porovnania vyplýva, že všetky tri technológie umožňujú vytvárať moderné kom-
+ponentovo orientované používateľské rozhrania, avšak líšia sa vhodnosťou pre jednotlivé
+typy projektov. Vue.js je výhodný z pohľadu jednoduchosti a rýchleho osvojenia, Angular
+zasa ponúka robustné riešenie pre rozsiahle podnikové aplikácie. React predstavuje
+kompromis medzi modularitou, interaktivitou, rozšíriteľnosťou a primeranou implemen-
+tačnou náročnosťou.
+   Pre štýlovanie používateľského rozhrania možno využiť CSS rámce ako Tailwind CSS
+a Bootstrap. Tailwind CSS je utility-first rámec umožňujúci vysokú mieru prispôsobenia
+vzhľadu aplikácie [36], zatiaľ čo Bootstrap poskytuje predpripravené komponenty vhodné
+najmä na rýchle prototypovanie [37]. Tailwind CSS lepšie podporuje tvorbu vlastných
+komponentov a flexibilnejší dizajn, zatiaľ čo Bootstrap je orientovaný skôr na rýchle
+zostavenie všeobecného používateľského rozhrania.
+
+2.3.2     Technológie aplikačnej vrstvy
+Aplikačná vrstva zabezpečuje spracovanie logiky systému a komunikáciu medzi prezen-
+tačnou a dátovou vrstvou. Pri návrhu informačného systému je preto potrebné zvoliť
+technológie, ktoré podporujú rýchly vývoj, prácu s databázou, bezpečnosť, testovateľnosť
+a prehľadnú implementáciu aplikačnej logiky.
+   Medzi najpoužívanejšie backendové rámce patria Laravel, Django, Spring Boot
+a Express.js. Tieto technológie predstavujú rozdielne prístupy k návrhu serverovej
+časti aplikácie a líšia sa najmä rozsahom vstavaných funkcionalít, mierou abstrakcie,
+produktivitou vývoja a náročnosťou implementácie.
+   Laravel poskytuje komplexné riešenie s podporou autentifikácie, Object-Relational
+Mapping (ORM) a migrácií databázy [38]. Jeho výhodou je vysoká produktivita vývoja,
+dobrá organizácia projektu a množstvo vstavaných mechanizmov, ktoré znižujú potrebu
+implementovať bežné funkcionality od začiatku.
+
+                                          21
+   Django ponúka robustný bezpečnostný model a vstavaný ORM systém [39]. Ide
+o stabilný a produktívny rámec, ktorý je vhodný najmä tam, kde je dôležitá rýchla
+implementácia a dôraz na bezpečnosť.
+   Spring Boot je vhodný pre rozsiahle a výkonovo náročné aplikácie [40]. Jeho silnou
+stránkou je robustnosť, škálovateľnosť a široké uplatnenie v enterprise prostredí.
+   Express.js predstavuje minimalistický rámec, ktorý vyžaduje integráciu externých
+knižníc [41]. Jeho výhodou je jednoduchosť a vysoká flexibilita, nevýhodou však menšia
+miera vstavaných funkcionalít.
+
+                 Tabuľka 6: Porovnanie technológií aplikačnej vrstvy
+
+ Kritérium                             Laravel     Django      Spring Boot      Express.js
+ Vstavané funkcionality                 vysoké      vysoké        vysoké           nízke
+ Produktivita vývoja                    vysoká      vysoká        stredná        stredná
+ Krivka učenia                          stredná    stredná        vysoká          nízka
+ Vhodnosť pre menší až stredný IS       vysoká      vysoká        stredná        stredná
+
+
+   Z porovnania vyplýva, že Laravel a Django sú vhodné najmä tam, kde je cieľom
+rýchlo vytvoriť funkčné a bezpečné webové riešenie s využitím vstavaných mechanizmov.
+Spring Boot je vhodnejší pre rozsiahle enterprise aplikácie a Express.js skôr pre riešenia,
+v ktorých je prioritou minimalistický základ a vysoká voľnosť architektúry.
+   Pri návrhu webových aplikácií je potrebné riešiť aj spôsob prepojenia prezentačnej
+a aplikačnej vrstvy. V praxi sa využíva serverové vykresľovanie (Server-Side Rendering
+(SSR)), klientské vykresľovanie (Client-Side Rendering (CSR)) a hybridný prístup.
+   SSR generuje rozhranie na serveri, čo zjednodušuje architektúru, ale obmedzuje
+mieru interaktivity. CSR umožňuje vysokú interaktivitu, avšak spravidla vyžaduje
+samostatné Application Programming Interface (API), čím rastie zložitosť systému aj
+riziko duplicity validačnej a autorizačnej logiky. Hybridný prístup kombinuje výhody
+oboch riešení, pretože umožňuje vytvárať interaktívne rozhranie pri zachovaní užšieho
+prepojenia klienta a servera.
+
+   Tabuľka 7: Porovnanie prístupov k prepojeniu prezentačnej a aplikačnej vrstvy
+
+         Kritérium                       SSR      CSR        Hybridný prístup
+         Interaktivita                  nižšia    vysoká          vysoká
+         Potreba samostatného API         nie      áno        nie / obmedzene
+         Implementačná náročnosť        nízka     vysoká          stredná
+         Riziko duplicity logiky         nízke    vyššie           nižšie
+
+
+                                            22
+   Hybridný prístup predstavuje zaujímavú alternatívu najmä pri systémoch, pri
+ktorých nie je prioritou úplné oddelenie frontendovej a backendovej aplikácie, ale
+skôr vytvorenie prehľadného a udržiavateľného riešenia s primeranou interaktivitou.
+Jedným z predstaviteľov tohto prístupu je Inertia.js, ktorá umožňuje vytvárať moderné
+jednostránkové aplikácie bez potreby implementácie samostatného REST API [42].
+
+2.3.3    Technológie dátovej vrstvy
+Dátová vrstva zabezpečuje ukladanie, správu a konzistentné spracovanie dát. Pri návrhu
+interného informačného systému je výber databázovej technológie dôležitý najmä z
+pohľadu integrity dát, podpory vzťahov medzi entitami, transakčného spracovania a
+dlhodobej spoľahlivosti.
+   Medzi najčastejšie používané databázové riešenia patria relačné databázy Postgre-
+SQL a MySQL a dokumentová databáza MongoDB.
+   PostgreSQL poskytuje vysokú úroveň integrity dát a plnú podporu ACID transakcií
+[43]. Je vhodná najmä pre aplikácie, ktoré pracujú so štruktúrovanými dátami, vyžadujú
+konzistentné väzby medzi entitami a spoľahlivé spracovanie transakcií.
+   MySQL je relačný databázový systém, ktorý je rozšírený v mnohých webových
+aplikáciách. Jeho výhodou je jednoduchšie nasadenie a široká dostupnosť v bežnom
+hostingovom prostredí.
+   MongoDB je dokumentová databáza vhodná najmä pre menej štruktúrované
+alebo dynamicky sa meniace dáta. Výhodou je flexibilita dátového modelu, nevýhodou
+nižšia vhodnosť pre systémy s pevne definovanými vzťahmi medzi entitami a vyššími
+požiadavkami na transakčnú konzistenciu.
+
+                   Tabuľka 8: Porovnanie technológií dátovej vrstvy
+
+    Kritérium                           PostgreSQL      MySQL         MongoDB
+    Typ databázy                           relačná       relačná      dokumentová
+    Podpora ACID transakcií                   áno          áno         čiastočne
+    Podpora vzťahov medzi entitami         vysoká        vysoká          nižšia
+    Vhodnosť pre štruktúrované dáta        vysoká        vysoká          stredná
+
+   Z porovnania vyplýva, že relačné databázy sú vhodnejšie pre systémy, v ktorých sú
+dôležité pevne definované vzťahy medzi entitami, integrita dát a spoľahlivé transakčné
+spracovanie, zatiaľ čo dokumentové databázy ponúkajú väčšiu flexibilitu pri menej
+štruktúrovaných dátach.
+
+
+
+
+                                         23
+2.4     Zhrnutie analytickej časti
+Na základe analýzy existujúcich riešení, modelového podniku a technologických alter-
+natív možno konštatovať, že malé a stredné podniky potrebujú interný informačný
+systém, ktorý bude integrovať kľúčové oblasti projektového manažmentu, evidencie
+času, kapacitného plánovania a správy používateľov v jednej platforme. Zároveň musí
+ísť o riešenie, ktoré bude prehľadné, primerane jednoduché na používanie, organizačne
+zvládnuteľné a finančne dostupné pre podmienky MSP.
+   Zistenia z analytickej časti preto predstavujú priamy podklad pre definovanie funkč-
+ných a nefunkčných požiadaviek na navrhovaný systém, ktorým sa venuje nasledujúca
+kapitola.
+
+
+
+
+                                         24
+3      Návrh riešenia
+V tejto kapitole predstavíme návrh interného informačného systému, ktorý vychádza z
+analýzy existujúcich riešení, odhalených nedostatkov a požiadaviek modelového podniku.
+Hlavným cieľom je vytvoriť modulárne a efektívne riešenie, ktoré pomôže s riadením
+projektov, evidenciou času a plánovaním kapacít.
+    Najskôr sa pozrieme na funkcionálne a nefunkcionálne požiadavky systému. Potom
+rozoberieme architektúru a zameriame sa na dostupné technológie a navrhnutý dátový
+model. Výsledkom je celkový koncept riešenia, ktorý poslúži ako odrazový bod pre
+samotnú implementáciu systému.
+
+3.1     Funkcionálne a nefunkcionálne požiadavky
+Na základe analýzy potrieb používateľov a cieľov navrhovaného riešenia boli stanovené
+funkcionálne a nefunkcionálne požiadavky systému. Funkcionálne požiadavky určujú,
+aké služby a operácie má systém poskytovať, zatiaľ čo nefunkcionálne požiadavky
+definujú kvalitatívne vlastnosti navrhovaného riešenia.
+
+
+    Funkcionálne požiadavky:
+
+    1. Autentifikácia a správa používateľov
+
+        • Systém musí umožniť prihlásenie a odhlásenie používateľa.
+        • Systém musí umožniť používateľovi odoslať žiadosť o obnovu prístupu do
+          systému.
+        • Systém musí informovať administrátora o požiadavke na obnovu prístupu.
+        • Systém musí umožniť administrátorovi vytvárať, upravovať a odstraňovať
+          používateľské účty.
+        • Systém musí umožniť administrátorovi spravovať údaje používateľa a pride-
+          ľovať mu systémové oprávnenia.
+
+    2. Správa projektov
+
+        • Prihlásený používateľ musí vedieť vytvoriť projekt.
+        • Systém musí umožniť zobrazenie zoznamu projektov, ku ktorým má používa-
+          teľ prístup.
+        • Systém musí umožniť zobrazenie detailu projektu.
+
+
+
+                                          25
+    • Systém musí umožniť úpravu a odstránenie projektu podľa oprávnení použí-
+      vateľa.
+    • Pri vytvorení projektu musí byť automaticky určený vlastník projektu.
+    • Systém musí umožniť pridávať a odoberať členov tímu projektu.
+    • Systém musí umožniť nastavovať projektové oprávnenia členov tímu.
+    • Systém musí umožniť nastavovať alokáciu členov tímu v projekte.
+    • Systém musí umožniť evidovať stav projektu a úroveň jeho vyťaženosti.
+    • Systém musí umožniť filtrovanie a vyhľadávanie projektov podľa vybraných
+      kritérií.
+
+3. Správa úloh v projekte
+
+    • Systém musí umožniť vytvárať, zobraziť, upravovať a odstraňovať úlohy v
+      projekte podľa oprávnení používateľa.
+    • Systém musí umožniť meniť stav úloh.
+    • Systém musí umožniť priraďovať úlohy členom tímu.
+    • Systém musí umožniť evidovať podúlohy a komentáre k úlohám.
+    • Systém musí umožniť zaznamenávať odpracované hodiny k úlohám.
+
+4. Evidencia času
+
+    • Používateľ musí vedieť evidovať odpracovaný čas v rámci projektu a úlohy.
+    • Časový záznam musí obsahovať minimálne dátum, počet hodín, popis práce,
+      projekt a úlohu.
+    • Systém musí umožniť úpravu a odstránenie časového záznamu jeho autorovi
+      alebo oprávnenému používateľovi.
+    • Systém musí po zmene časového záznamu aktualizovať údaje o skutočne
+      odpracovanom čase na úlohe.
+
+5. Kapacitné plánovanie
+
+    • Systém musí poskytovať prehľad kapacít na týždennej aj mesačnej úrovni.
+    • Oprávnený používateľ musí mať možnosť upravovať dostupnú kapacitu členov
+      tímu.
+    • Systém musí porovnávať dostupnú kapacitu používateľov s evidovaným
+      odpracovaným časom.
+
+                                    26
+    • Systém musí identifikovať preťažených používateľov, používateľov s voľnou
+       kapacitou a projekty ohrozené nedostatkom kapacity.
+    • Systém musí umožniť simuláciu vývoja projektu pri zmene veľkosti tímu,
+       termínu alebo rozsahu zostávajúcej práce.
+
+6. Notifikácie
+
+    • Systém musí umožniť zobrazenie notifikácií používateľa.
+    • Systém musí umožniť označenie jednej notifikácie alebo všetkých notifikácií
+       ako prečítaných.
+    • Systém musí generovať notifikácie pri vybraných udalostiach, napríklad pri
+       priradení projektu alebo úlohy, zmene stavu úlohy alebo projektu, prekročení
+       odhadovaného času, preťažení používateľa alebo kapacitnom riziku projektu.
+
+
+
+Nefunkcionálne požiadavky:
+
+1. Bezpečnosť
+
+    • Prístup k systému musí byť dostupný iba overeným používateľom.
+    • Systém musí zabezpečiť riadenie prístupu na základe používateľských opráv-
+       není.
+    • Systém musí rozlišovať medzi globálnymi oprávneniami používateľa a opráv-
+       neniami viazanými na konkrétny projekt.
+    • Citlivé údaje používateľov, najmä prihlasovacie údaje, musia byť uchovávané
+       bezpečným spôsobom.
+
+2. Použiteľnosť
+
+    • Systém musí byť dostupný prostredníctvom webového používateľského roz-
+       hrania.
+    • Používateľské rozhranie musí byť konzistentné naprieč jednotlivými modulmi
+       systému.
+    • Systém musí poskytovať používateľovi zrozumiteľnú spätnú väzbu pri vyko-
+       návaní operácií, pri chybových stavoch a pri validačných chybách.
+    • Systém musí podporovať jednoduchú orientáciu v dátach prostredníctvom
+       vyhľadávania a filtrovania.
+
+
+                                      27
+  3. Udržiavateľnosť a rozšíriteľnosť
+
+       • Systém musí byť navrhnutý modulárne, aby bolo možné jednotlivé časti
+          samostatne rozvíjať a upravovať.
+       • Aplikačná logika musí byť oddelená od prezentačnej vrstvy a dátovej vrstvy.
+       • Návrh systému musí umožňovať dopĺňanie nových funkcionalít bez potreby
+          zásadných zmien existujúcich častí riešenia.
+
+  4. Testovateľnosť
+
+       • Návrh systému musí umožňovať overovanie správnosti správania jednotlivých
+          častí systému pomocou automatizovaného testovania.
+
+  5. Výkonnosť
+
+       • Systém musí poskytovať odozvu primeranú charakteru internej webovej
+          aplikácie a očakávanému počtu používateľov.
+
+   Na základe uvedených funkcionálnych a nefunkcionálnych požiadaviek je navrhnutý
+systém pozostávajúci zo štyroch hlavných modulov: správa používateľov, správa projek-
+tov, evidencia času a kapacitné plánovanie.
+
+3.2     Diagramy prípadov použitia
+Diagramy prípadov použitia popisujú správania narvhovaného systému z pohľadu
+používateľov. Každý diagram dáva informáciu o tom, kto (aktor) a čo (prípad použitia)
+môže vykonať v našom systéme. Úlohou diagramu je identifikovať "všetky"prípady
+použitia a priradiť ich k jednotlivým používateľom.
+   V rámci tejto práce sú diagramy prípadov použitia spracované samostatne pre
+jednotlivé hlavné moduly systému. Takýto prístup umožňuje prehľadnejšie zobrazenie
+funkcionality a zároveň uľahčuje identifikáciu zodpovedností jednotlivých častí navrho-
+vaného riešenia. Diagramy tak predstavujú prechod medzi definovanými požiadavkami
+systému a jeho architektonickým návrhom.
+
+
+
+
+                                          28
+3.2.1     Modul používateľov
+
+
+                           Modul používateľov
+
+
+
+
+                                     Prihlásenie sa
+
+
+
+
+                                   Resetovanie hesla
+
+
+
+
+         Používateľ                  Odhlásenie sa
+
+
+
+
+                                      Zobrazenie
+                                 používateľského profilu
+
+                                                           Vytvorenie, zobrazenie,
+                                                            editovanie a mazanie
+                                                                 používateľa
+
+                                  Správa používateľov
+
+
+        Administrátor
+
+
+
+
+                 Obr. 4: Diagram prípadov použitia pre modul používateľov
+
+
+Diagram na obrázku 4 znázorňuje hlavné prípady použitia modulu používateľov. Tento
+modul zabezpečuje prístup používateľov do systému, správu ich účtov a základné
+operácie súvisiace s identitou používateľa. Z pohľadu bežného používateľa zahŕňa
+najmä prihlásenie, odhlásenie, obnovenie prístupu a zobrazenie používateľského profilu.
+Administrátorovi zároveň umožňuje správu používateľských účtov, čím vytvára základ
+pre riadenie prístupu do ostatných modulov navrhovaného systému.
+
+
+
+
+                                                      29
+3.2.2      Modul projektového manažmentu
+
+
+
+                      Modul projektového manažmentu
+
+
+
+
+                                Zobrazenie
+                              harmonogramu
+
+
+
+
+                                                                      Pridávanie používateľa do
+                              Správa tímu
+                                                                        projektu a úprava jeho
+                                                                      oprávnení v rámci projektu
+
+
+
+
+                             Správa projektu
+                                                                       Vytvorenie, zobrazenie,
+                                                                        editovanie, mazanie a
+         Používateľ
+                                                                             úprava stavu
+
+
+                              Správa úloh
+                                                        <<extend>>
+
+
+                                               <<extend>>
+                                                                                  Pridávanie podúloh
+
+
+                          Pridávanie komentárov
+
+
+                                                            Prideľovanie členov
+
+
+
+
+        Obr. 5: Diagram prípadov použitia pre modul projektového manažmentu
+
+
+Diagram na obrázku 5 znázorňuje hlavné prípady použitia modulu projektového ma-
+nažmentu. Tento modul predstavuje centrálnu časť navrhovaného systému, pretože
+zabezpečuje evidenciu projektov, správu projektových tímov, organizáciu úloh a podporu
+plánovania práce. Používateľ prostredníctvom tohto modulu vykonáva najmä operácie
+súvisiace so správou projektov, správou tímu, správou úloh a zobrazením harmonogramu.
+Modul zároveň vytvára základné väzby na ďalšie časti systému, keďže údaje o projektoch
+a úlohách sú následne využívané aj v module evidencie času a v module kapacitného
+plánovania.
+
+
+
+
+                                                   30
+3.2.3    Modul evidencie času
+
+
+
+                        Modul evidencie času
+
+
+
+
+                               Zastavenie časovaču
+
+
+
+
+                                Spustenie časovaču
+
+
+
+
+                                                     Manuálne zaznamenanie
+
+
+                                Zaznamenanie času
+
+
+        Používateľ                                   Zaznamenanie pomocou
+                                                           časovaču
+
+                               Vymazanie časového
+                                   záznamu
+
+
+
+
+                               Upravenie časového
+                                    záznamu
+
+
+
+
+             Obr. 6: Diagram prípadov použitia pre modul evidencie času
+
+
+Diagram na obrázku 6 znázorňuje hlavné prípady použitia modulu evidencie času. Modul
+slúži na zaznamenávanie a správu odpracovaného času používateľov v rámci projektov
+a úloh. Evidované údaje sú následne využívané aj pri vyhodnocovaní vyťaženosti
+používateľov a tímov.
+   Na podrobnejšie rozpracovanie sme vybrali prípad použitia „Zaznamenanie času“.
+Tento konkrétny prípad použitia slúži ako východisko pre ďalšie funkcie, ako manuálne
+zaznamenanie, zaznamenanie cez časovač, uloženie záznamu alebo odoslanie notifikácie.
+Vybrali sme ho ako ideálny scenár na detailnejšie rozpísanie pomocou use-case tabuľky,
+pretože zahŕňa množstvo súvisiacich funkcionalít.
+
+
+
+                                             31
+                           ZAZNAMENANIE ČASU
+Číslo prípadu použitia: UC-TT-01
+Opis: Používateľ zaznamená odpracovaný čas k úlohe v rámci projektu, manuálne
+alebo pomocou časovača.
+Aktéri: Používateľ
+Vstupné podmienky: Používateľ je prihlásený. Projekt a úloha existujú. Používateľ
+má prístup k projektu a evidencii času. Ak nemá oprávnenie spravovať všetky časové
+záznamy, musí byť priradený k danej úlohe.
+Inicializácia: Používateľ zvolí možnosť zaznamenať čas alebo zastaví bežiaci
+časovač.
+Hlavný scenár:
+1. Používateľ vyvolá funkciu zaznamenania času.
+2. Systém zobrazí formulár časového záznamu.
+3. Používateľ zadá úlohu, dátum, počet hodín a voliteľný popis.
+4. Pri použití časovača systém predvyplní údaje z merania.
+5. Používateľ potvrdí uloženie záznamu.
+6. Systém overí správnosť údajov a oprávnenie používateľa.
+7. Systém uloží časový záznam.
+8. Systém prepočíta skutočne odpracovaný čas na úlohe.
+9. Systém zobrazí potvrdenie o úspešnom uložení.
+Výstupné podmienky: Časový záznam je uložený. Skutočne odpracovaný čas na
+úlohe je aktualizovaný. Systém zobrazí potvrdenie o uložení.
+Alternatívne scenáre:
+A1. Používateľ zadá neplatné údaje. Systém záznam neuloží a zobrazí validačné
+chyby.
+A2. Používateľ nie je priradený k úlohe a nemá príslušné oprávnenie. Systém záznam
+neuloží a oznámi chybu.
+A3. Používateľ po zastavení časovača záznam zahodí. Systém záznam neuloží a
+časovač vynuluje.
+A4. Po uložení záznamu systém zistí prekročenie odhadovaného času a odošle
+notifikáciu.
+
+         Tabuľka 9: Use-case tabuľka pre prípad použitia Zaznamenanie času
+
+
+
+
+                                        32
+3.2.4     Modul kapacitného plánovania
+
+
+
+                     Modul kapacitného manažmentu
+
+
+
+
+                            Zobrazenie vyťaženosti
+                                    tímu
+
+
+
+
+                             Zobrazenie predikcie
+                              kapacity projektov
+
+
+
+
+                            Zobrazenie upozornení
+                                na preťazenie
+
+
+        Používateľ
+
+
+                              Upravenie kapacity
+                                 používateľa
+
+
+
+
+                             Simulácia kapacitných      Zmena tímu, časového
+                                   scenárov             rozsahu projektu alebo
+                                                          termínu dokončenia
+
+
+
+
+        Obr. 7: Diagram prípadov použitia pre modul kapacitného plánovania
+
+
+Diagram na obrázku 7 znázorňuje hlavné prípady použitia modulu kapacitného plá-
+novania. Modul poskytuje prehľad o vyťaženosti tímu, umožňuje upravovať kapacitu
+používateľov a podporuje simuláciu kapacitných scenárov. Výstupy tohto modulu slúžia
+na včasnú identifikáciu preťaženia používateľov a rizikových projektov.
+
+3.3     Návrh databázy
+Dátový model navrhovaného systému predstavuje návrh štrukturý dát a vzťahov medzi
+jednotlivými entitami, s ktorými bude systém pracovať. V tejto podsekcii si znázorníme
+navrhnutý databázový diagram, ktorý nám pomôže lepšie pochopiť štrutkúru databázy
+a vzťahy medzi entitami.
+
+
+
+
+                                                   33
+   Vzhľadom na komplexnosť dátového modelu si najskôr zadefinujeme tri kľúčové
+entity, ktoré budeme používať pri zobrazení dátového modelu z pohľadu jednotlivých
+modulov.
+
+
+                 Users                                    Projects                                       Tasks
+
+    PK   id                                     PK   id                                    PK    id
+
+         name                                        name                                   FK   project_id
+
+         email                                       status                                 FK   assigned_to
+
+         password                                    workload                                    name
+
+         is_admin                                    start_date                                  email
+
+         created_at                                  end_date                                    password
+
+         updated_at                                  progress                                    is_admin
+
+                                                     task_total                                  created_at
+
+                                                     tasks_completed                             updated_at
+
+                                                     deleted_at
+
+
+
+
+                            Obr. 8: Návrh databázového modelu systému
+
+
+   Na obrázku 8 sú zobrazené tri kľúčové entity dátového modelu, ktoré tvoria základ
+navrhovaného systému. Ide o entity používateľ (Users), projekt (Projects) a úloha
+(Tasks). V nasledujúcich diagramoch ich budeme uvádzať v skrátenej forme z dôvodu
+prehľadnosti.
+
+3.3.1      Modul evidencie času
+
+
+                                     Projects                                    Time_Entries
+
+                           PK   id                                     PK   id
+
+                                                                       FK   project_id
+
+                                      Tasks                            FK   task_id
+
+                           PK   id                                     FK   user_id
+
+                                                                            entry_date
+
+                                      Users                                 hours
+
+                           PK   id                                          description
+
+
+
+
+                         Obr. 9: Databázový diagram modulu evidencie času
+
+
+
+
+                                                              34
+Na obrázku 9 je zobrazený databázový diagram modulu evidencie času. Jadrom modulu
+je entita časový záznam (TimeEntries), ktorá uchováva informácie o odpracovanom
+čase, dátume, popise práce a väzbách na používateľa, projekt a úlohu. Diagram tak zná-
+zorňuje, ako modul nadväzuje na kľúčové entity systému a ako zabezpečuje konzistentnú
+evidenciu reálne vykonanej práce v rámci projektov.
+
+3.3.2        Modul projektového manažmentu
+
+
+                                                                                 Subtasks
+
+                                                                    PK   id
+                                             Tasks
+                                                                    FK   task_id
+                                PK   id
+                                                                         title
+
+                                                                         is_completed
+                  Comments
+                                      Assigned_Users                     sort_order
+        PK   id
+                                PK   id
+        FK   task_id
+                                FK   task_id                                  Project_Team
+        FK   user_id
+                                FK   user_id                        PK   id
+             body
+                                                                    FK   project_id
+
+                                                                    FK   user_id
+                                             Users
+                                                                         permissions
+                                PK   id
+                                                                         allocation
+
+                                                                         hourly_rate
+                                          Activity_Log
+
+                                PK   id
+                                                                                 Projects
+                                FK   project_id
+                                                                    PK   id
+                                FK   user_id
+
+                                     type
+                                                               Project_Allocations
+                                     description
+                                                          PK   id
+
+                                                          FK   project_id
+
+                                                          PK   user_id
+
+                                                               allocated_hours
+
+                                                               used_hours
+
+                                                               percentage
+
+                                                               start_date
+
+                                                               end_date
+
+
+
+
+             Obr. 10: Databázový diagram modulu projektového manažmentu
+
+
+Na obrázku 10 je zobrazený databázový diagram modulu projektového manažmentu.
+Diagram zachytáva hlavné entity tohto modulu, najmä projekt, úlohu, podúlohu,
+projektový tím a projektovú alokáciu, ako aj ich väzby na kľúčové entity systému.
+
+
+                                                     35
+Zobrazené vzťahy vyjadrujú, ako sú v návrhu prepojené projekty, členovia tímu a jed-
+notlivé pracovné položky, ktoré tvoria základ evidencie a riadenia práce v navrhovanom
+systéme.
+
+3.3.3      Modul kapacitného plánovania
+
+
+                                                       Employee_Capacities
+
+                       Users                      PK    id
+
+             PK   id                              FK    user_id
+
+                                                        weekly_capacity_hours
+
+
+
+            Obr. 11: Databázový diagram modulu kapacitného plánovania
+
+
+Na obrázku 11 je zobrazený databázový diagram modulu kapacitného plánovania.
+Diagram zachytáva entity súvisiace s evidenciou dostupnej kapacity používateľov, jej
+plánovaním a väzbami na projekty a používateľov. Vďaka týmto väzbám je možné
+vyhodnocovať vyťaženosť tímu, porovnávať plánovanú kapacitu s reálne evidovaným
+časom a identifikovať kapacitné riziká v rámci jednotlivých projektov.
+
+3.4     Architektúra systému
+Na základe definovaných funkcionálnych a nefunkcionálnych požiadaviek, prípadov
+použitia a návrhu databázy možno pristúpiť k návrhu architektúry systému. Táto
+podsekcia opisuje navrhovanú štruktúru riešenia, jeho rozdelenie na jednotlivé moduly
+a spôsob spolupráce medzi nimi.
+   Navrhovaný systém je koncipovaný ako modulárna aplikácia. Takéto riešenie umož-
+ňuje rozdeliť systém na samostatné časti podľa ich zodpovedností, čím sa zvyšuje
+prehľadnosť návrhu, zjednodušuje údržba a zároveň sa vytvára priestor na budúce
+rozširovanie o ďalšie funkcionality. Základným princípom návrhu je, aby jednotlivé
+moduly neboli navzájom viazané na konkrétnu implementáciu iných modulov, ale spo-
+lupracovali prostredníctvom jasne definovaných rozhraní služieb a aplikačnej servisnej
+vrstvy. Takýto prístup znižuje previazanosť jednotlivých častí systému a uľahčuje ich
+ďalší rozvoj bez potreby zásadných zásahov do celého riešenia.
+   Architektúru systému možno rozdeliť do troch základných vrstiev:
+
+  • Prezentačná vrstva zabezpečuje používateľské rozhranie a interakciu používateľa
+      so systémom.
+
+
+                                         36
+  • Aplikačná vrstva obsahuje aplikačnú logiku, spracovanie požiadaviek, kontrolu
+       oprávnení a koordináciu komunikácie medzi modulmi.
+
+  • Dátová vrstva slúži na ukladanie a spracovanie perzistentných údajov systému.
+
+Použité technológie
+Na základe porovnania technológií v sekcii 1.3 bol pre navrhovaný systém zvolený
+nasledujúci technologický stack:
+
+  • Prezentačná vrstva: React – pre jeho vysokú flexibilitu, rozsiahly ekosystém
+       a jednoduchú integráciu s Inertia.js (porovnanie v tabuľke 5). Na štýlovanie bol
+       zvolený Tailwind CSS pre jeho vysokú mieru prispôsobiteľnosti.
+
+  • Aplikačná vrstva: Laravel – pre množstvo vstavaných funkcionalít, podporu
+       rýchleho vývoja a kvalitnú dokumentáciu (porovnanie v tabuľke 6).
+
+  • Prepojenie vrstiev: Inertia.js – hybridný prístup, ktorý umožňuje vytvoriť inte-
+       raktívne rozhranie bez potreby samostatného REST API (porovnanie v tabuľke 7).
+
+  • Dátová vrstva: PostgreSQL – pre vysokú úroveň integrity dát a vhodnosť pre
+       štruktúrované dáta (porovnanie v tabuľke 8).
+
+   Zvolená kombinácia technológií vytvára vhodný základ pre návrh modulárneho infor-
+mačného systému s dôrazom na rozšíriteľnosť, prehľadnosť a konzistentné spracovanie
+dát.
+
+Modul používateľov
+Modul používateľov zabezpečuje správu používateľských účtov a údajov o používateľoch.
+V rámci návrhu zastrešuje evidenciu základných identifikačných údajov, prihlasovanie
+do systému a správu globálnych prístupových oprávnení.
+   Súčasťou modulu je aj autentifikácia a autorizácia používateľa. Autentifikácia slúži
+na overenie identity používateľa pri vstupe do systému, zatiaľ čo autorizácia určuje, ku
+ktorým častiam systému a ku ktorým operáciám má používateľ prístup. V navrhovanom
+riešení sú globálne oprávnenia prideľované priamo na úrovni jednotlivých práv (permis-
+sions), nie iba prostredníctvom všeobecných rolí. Takéto riešenie umožňuje jemnejšie a
+presnejšie nastavenie prístupu k jednotlivým funkcionalitám systému.
+   Správa používateľských účtov je v kompetencii administrátora, ktorý môže vytvárať
+nové účty, upravovať existujúce účty, prideľovať alebo odoberať oprávnenia a prípadne
+účty deaktivovať. Bežný používateľ sa do systému neregistruje samostatne, ale účet mu
+vytvára administrátor.
+
+                                           37
+   Z pohľadu spolupráce s ostatnými časťami systému poskytuje modul používateľov
+najmä údaje o identite používateľa, jeho globálnych oprávneniach a zoznamoch pou-
+žívateľov, ktoré sú potrebné napríklad pri zostavovaní projektových tímov alebo pri
+kapacitnom plánovaní.
+
+Modul projektového manažmentu
+Modul projektového manažmentu predstavuje centrálnu časť navrhovaného systému.
+Jeho úlohou je zabezpečiť evidenciu projektov, správu ich základných údajov a podporu
+činností súvisiacich s plánovaním a organizáciou práce. V rámci modulu sa spravujú
+projekty, úlohy, podúlohy, členovia tímov a väzby medzi používateľmi a projektmi.
+   Každý projekt obsahuje základné údaje, ako sú názov, popis, stav, termíny realizácie
+a zodpovedný používateľ. Súčasťou návrhu je aj správa tímu projektu, v rámci ktorej
+možno priraďovať používateľov do tímu a určovať ich oprávnenia v rámci konkrétneho
+projektu. Tieto oprávnenia sa odlišujú od globálnych oprávnení používateľa a vzťahujú
+sa výlučne na daný projekt. Takýto prístup umožňuje presne určiť, kto môže projekt
+iba zobraziť, kto môže upravovať úlohy, kto ich môže priraďovať a kto môže spravovať
+členov tímu.
+   Modul projektového manažmentu zároveň vytvára základné väzby na ďalšie časti
+systému. Modul evidencie času z neho získava informácie o projektoch, úlohách a
+priradení používateľov k úlohám. Modul kapacitného plánovania z neho čerpá údaje o
+aktívnych projektoch, plánovaných termínoch, projektových tímoch a odhadovanom
+rozsahu práce na úlohách.
+
+Modul evidencie času
+Modul evidencie času slúži na zaznamenávanie skutočne odpracovaného času používate-
+ľov na jednotlivých úlohách alebo projektoch. Každý časový záznam obsahuje väzbu na
+konkrétny projekt, úlohu, používateľa, dátum a počet odpracovaných hodín.
+   Keďže časové záznamy sú viazané na existujúce projekty a úlohy, modul priamo
+nadväzuje na projektový modul. Návrh predpokladá, že používateľ môže evidovať čas
+predovšetkým k tým úlohám, ku ktorým je priradený, prípadne k tým činnostiam, na
+ktoré má príslušné oprávnenie. Takéto riešenie zabezpečuje konzistentnosť údajov a
+zároveň zabraňuje evidencii času k nesúvisiacim alebo neprístupným úlohám.
+   Údaje o skutočne odpracovanom čase sa následne využívajú aj v ďalších častiach
+systému. Projektový modul ich môže použiť pri sledovaní priebehu riešenia úloh a modul
+kapacitného plánovania pri výpočte vyťaženosti používateľov a tímov.
+
+
+
+
+                                          38
+Modul kapacitného plánovania
+Modul kapacitného plánovania zabezpečuje vyhodnocovanie dostupných kapacít pou-
+žívateľov a tímov v čase. Jeho cieľom je poskytovať prehľad o dostupnej kapacite, jej
+aktuálnom využití a o tom, či plánovaný rozsah práce zodpovedá možnostiam tímu.
+   Pri svojom fungovaní pracuje s údajmi z viacerých častí systému. Z modulu používa-
+teľov získava zoznam používateľov, z projektového modulu údaje o aktívnych projektoch,
+členoch tímu, termínoch a plánovanom rozsahu práce a z modulu evidencie času údaje
+o skutočne odpracovaných hodinách. Kombinácia týchto vstupov umožňuje vypočítať
+aktuálnu vyťaženosť jednotlivých používateľov, určiť voľnú kapacitu a identifikovať
+rizikové situácie.
+   Kapacitné plánovanie preto nevychádza iba z teoreticky nastavenej kapacity použí-
+vateľa, ale aj z reálne evidovaných časových údajov a zo zostávajúcej práce na úlohách.
+Modul poskytuje týždenný a mesačný pohľad na vyťaženosť, prehľad voľných kapacít a
+upozornenia na možné preťaženie používateľov alebo ohrozené projekty.
+   Súčasťou návrhu je aj simulačný mechanizmus, ktorý umožňuje modelovať rôzne
+scenáre vývoja projektu. Môže ísť napríklad o zmenu veľkosti tímu, zmenu rozsahu
+práce alebo posun termínu dokončenia projektu. Cieľom takejto simulácie je odhadnúť,
+či bude možné projekt dokončiť v plánovanom čase pri aktuálnych alebo upravených
+kapacitných podmienkach.
+
+Riadenie prístupu a vznik notifikácií
+Riadenie prístupu je v navrhovanom systéme rozdelené do dvoch úrovní. Prvú úroveň
+tvoria globálne oprávnenia spravované modulom používateľov. Druhú úroveň predstavujú
+projektové oprávnenia viazané na konkrétny projekt. Takýto prístup umožňuje rozlíšiť,
+či má používateľ prístup k určitej funkcionalite systému všeobecne, a zároveň určiť, aké
+operácie môže vykonávať v rámci konkrétneho projektu.
+   Notifikácie sú navrhnuté ako samostatná podporná služba využívaná viacerými
+modulmi systému. Vznikajú pri udalostiach, ktoré si vyžadujú pozornosť používateľa.
+Ide napríklad o priradenie používateľa na projekt alebo úlohu, zmenu stavu projektu
+alebo úlohy, blížiaci sa termín splnenia, prekročenie odhadovaného času alebo zistenie
+rizika, že projekt nebude možné dokončiť včas vzhľadom na dostupné kapacity. Modul
+kapacitného plánovania je pritom jedným zo zdrojov notifikácií, pretože práve on dokáže
+identifikovať preťaženie používateľov a kapacitne ohrozené projekty.
+
+
+
+
+                                          39
+                                     «component»
+                                   Modul používateľov
+
+
+
+
+     «component»
+                                                                      «component»
+   Modul projektového
+                                                                   Modul evidencie času
+     manažmentu
+                                    IUserService
+
+
+                 IProjectService                        ITimeEntryService
+
+
+
+
+                                     «component»
+                                   Modul kapacitného
+                                      plánovania
+
+
+
+
+     Obr. 12: Komponentový diagram modulov a ich komunikácie cez rozhrania
+
+
+   Komponentový diagram na obrázku 12 zobrazuje navrhované vzťahy medzi hlavnými
+modulmi systému. Modul používateľov poskytuje údaje o používateľoch a ich globál-
+nych oprávneniach. Modul projektového manažmentu tieto údaje využíva pri správe
+projektov a tímov a zároveň sprístupňuje projektové a úlohové dáta modulu evidencie
+času aj modulu kapacitného plánovania. Modul evidencie času dodáva údaje o reálne
+odpracovanom čase, ktoré sú dôležité pre vyhodnotenie priebehu prác aj pre kapacitné
+výpočty. Modul kapacitného plánovania tieto vstupy agreguje a na ich základe vytvára
+prehľady vyťaženosti, upozornenia na preťaženie a odhady dokončenia projektov.
+   Diagram tak nepredstavuje iba všeobecný prehľad modulov, ale zachytáva aj ich
+hlavné zodpovednosti a základné dátové toky medzi nimi. Práve tieto väzby tvoria
+základ navrhovanej architektúry systému.
+
+
+
+
+                                           40
+4        Implementácia systému
+4.1      Implementácia modulov
+4.1.1     Modul správy používateľov
+Kľúčovou entitou modulu je používateľ. Táto entita obsahuje základné údaje dôležité na
+identifikáciu a autentifikáciu, ako sú meno, e-mailová adresa a heslo. Dôležitou súčasťou
+entity je atribút is_admin, pomocou ktorého v systéme odlišujeme administrátorský
+účet od bežného používateľa.
+
+class User extends Authenticatable
+{
+    use HasFactory, Notifiable;
+
+
+    protected $fillable = [
+         ’name’,
+         ’email’,
+         ’password’,
+         ’is_admin’,
+    ];
+
+
+    protected $hidden = [
+         ’password’,
+         ’remember_token’,
+    ];
+
+
+    protected function casts(): array
+    {
+         return [
+              ’password’ => ’hashed’,
+              ’is_admin’ => ’boolean’,
+         ];
+    }
+}
+
+                Výpis kódu 1: Ukážka implementácie entity používateľa
+
+    Na implementáciu entity používateľa využívame model User, ktorý rozširuje triedu
+Authenticatable. Tým sa zabezpečí priame spojenie entity na autentifikačné mecha-
+nizmy Laravel frameworku. V modeli zároveň definujeme priraditeľné atribúty, skryté
+
+
+                                           41
+údaje a typové konverzie. Dôležité je nastavenie atribútu password s automatickým
+hashovaním hesla a atribútu is_admin ako hodnoty typu boolean, čo nám v systéme
+pomáha počas identifikácie používateľa aj s rozhodovaním o jeho prístupových právach.
+    Tento prístup prispieva k jednoduchému rozlíšeniu používateľov a ich oprávnení k
+správe účtov, pričom oprávnenia administrátora sú oddelené od bežných globálnych
+oprávnení.
+    Samotný administrátor v systéme zabezpečuje vytváranie nových používateľských
+účtov, úpravu existujúcich účtov, prideľovanie globálnych oprávnení a odstraňovanie
+bežných používateľov. Administrátor má taktiež prístup k profilom ostatných použí-
+vateľov a v prípade potreby môže meniť heslá ich účtov. Na obrázku 13 je zobrazené
+rozhranie správy používateľov, ktoré umožňuje administrátorovi vykonávať spomínané
+vytváranie nových účtov, úpravu existujúcich účtov a správu oprávnení.
+
+
+
+
+                       Obr. 13: Rozhranie správy používateľov
+
+
+    Prístup k administračným častiam modulu je viazaný na spomínaný atribút is_admin,
+zatiaľ čo bežný používateľ má prístup najmä k vlastnému profilu a k funkcionalitám,
+ktoré mu boli v systéme povolená. Tento princíp je znázornený aj v ukážke kódu 2.
+
+
+class EnsureUserManagementAccess
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (! $request->user()?->is_admin) {
+             abort(403);
+
+                                         42
+        }
+
+
+        return $next($request);
+    }
+}
+
+             Výpis kódu 2: Ukážka kontroly prístupu do správy používateľov
+
+    Ako môžeme z úkažky vidieť, kontrola prístupu do správy používateľov je reali-
+zovaná pomocou middleware triedy EnsureUserManagementAccess. Táto trieda pri
+každej požiadavke overuje hodnotu atribútu is_admin. Ak prihlásený používateľ nemá
+administrátorské oprávnenie, systém požiadavku zamietne.
+    V prípade zabudnutého hesla nemá používateľ možnosť obnoviť si heslo sám. Na-
+miesto toho odošle administrátorovi systému notifikáciu o požiadavke na obnovu prí-
+stupu, ktorú administrátor spracuje a následne nastaví nové heslo pre daný účet.
+    Globálne oprávnenia reprezentujeme v systéme pomocou enumerácie PermissionEnum,
+ktorá definuje jednotlivé oprávnenia dostupné v systéme. Takéto riešenie zabezpečuje,
+že oprávnenia sú jednotne pomenované, ľahko rozšíriteľné a zároveň je ich možné
+jednoducho použiť počas kontroly prístupu v jednotlivých moduloch.
+
+
+enum PermissionEnum: string
+{
+    case PROJECTS_CREATE = ’projects.create’;
+    case PROJECTS_VIEW_ALL = ’projects.view_all’;
+    case CAPACITY_MANAGE = ’capacity.manage’;
+}
+
+                  Výpis kódu 3: Ukážka definície globálnych oprávnení
+
+    Oprávnenie projects.create povoľuje vytváranie nových projektov, projects.view_all
+sprístupňuje všetky projekty bez ohľadu na členstvo v tíme a capacity.manage umož-
+ňuje správu kapacít používateľov.
+
+4.1.2       Modul projektového manažmentu
+Dátový model modulu
+Dátový model modulu vychádza z entít, ktoré sú navrhnuté v podsekcii 3.3.2. Jeho
+základ tvorí entita projekt, na ktorú sú naviazané úlohy, projektový tím a projektové
+alokácie.
+
+
+                                          43
+    Entita úloha predstavuje konkrétnu pracovnú položku v rámci projektu. Obsahuje
+údaje potrebné na jej riadenie, ako sú názov, stav, priorita, termín dokončenia a
+odhadovaný rozsah práce. Na úlohu sú naviazané podúlohy, komentáre a záznamy o
+odpracovanom čase.
+    Vzťah medzi projektom a používateľmi je riešený pomocou entity projektový tím.
+Tá umožňuje evidovať členov projektu a ich projektové oprávnenia. Na určenie miery
+zapojeniač člena tímu do projektu slúži entita projektová alokácia, ktorá zároveň
+prepája projektový manažment s kapacitným plánovaním.
+
+Riadenie prístupu v projekte
+Riadene prístupu v projekte implementujeme pomocou oprávnení, ktoré sú uvedené v
+ukážke 4. Každé oprávnenie určuje, aké operácie môže člen projektového tímu vykonávať
+v rámci daného projektu.
+
+
+enum ProjectPermission: string
+{
+    case VIEW_PROJECT = ’view_project’;
+    case EDIT_PROJECT = ’edit_project’;
+    case DELETE_PROJECT = ’delete_project’;
+
+
+    case VIEW_TASKS = ’view_tasks’;
+    case CREATE_TASKS = ’create_tasks’;
+    case EDIT_TASKS = ’edit_tasks’;
+    case DELETE_TASKS = ’delete_tasks’;
+    case ASSIGN_TASKS = ’assign_tasks’;
+
+
+    case VIEW_TEAM = ’view_team’;
+    case MANAGE_TEAM = ’manage_team’;
+}
+
+               Výpis kódu 4: Ukážka definície projektových oprávnení
+
+    Prístup k projektu sa kontroluje pomocou oprávnení v ukážke 4. Používateľ, ktorý
+vytvoril daný projekt, má automaticky všetky projektové oprávnenia. Pri ostatných
+členoch tímu sa pred vykonaním akcie overuje, či majú pridelené príslušné projektové
+oprávnenie.
+
+public function userHasPermission(User $user, string $permission): bool
+{
+
+
+                                         44
+    if ($this->owner_id === $user->id) {
+        return true;
+    }
+
+
+    $teamMember = $this->team()->where(’user_id’, $user->id)->first();
+
+
+    if (! $teamMember) {
+        return false;
+    }
+
+
+    $permissions = $teamMember->pivot->permissions;
+
+
+    if (is_string($permissions)) {
+        $permissions = json_decode($permissions, true) ?? [];
+    }
+
+
+    return in_array($permission, (array) $permissions, strict: true);
+}
+
+               Výpis kódu 5: Ukážka kontroly projektového oprávnenia
+
+    Ukážka 5 zobrazuje spôsob aký využívame počas kontroly oprávnení v rámci projektu.
+Ak je používateľ vlastníkom projektu, systém mu automaticky povolí vykonanie danej
+operácie. V opačnom prípade sa overuje, či je používateľ členom projektového tímu a či
+má pridelené požadované oprávnenie v rámci daného projektu.
+
+Pohľady a podporné funkcionality
+Na podporu prehľadného riadenia projektu ponúka modul viacero pohľadov a doplnko-
+vých funkcionalít, ktoré umožňujú sledovať stav projektu, organizovať úlohy, spravovať
+členov tímu a kontrolovať priebeh realizácie. Hlavným rozhraním modulu je detail pro-
+jektu, ktorý poskytuje súhrnné informácie o projekte, jeho stave, členoch projektového
+tímu a priradených úlohách. Jeho znázornenie je možné vidieť na obrázku 14.
+
+
+
+
+                                         45
+       Obr. 14: Detail projektu s prehľadom úloh a členov projektového tímu
+
+
+
+
+  Obr. 15: Rozhranie pre správu členov projektového tímu, ich oprávnení a alokácie
+
+
+   Správa projektového tímu, ktorá je znázornená na obrázku 15, umožňuje pridávať
+používateľov do projektu, upravovať ich projektové oprávnenia a nastavovať mieru
+ich alokácie. Týmto spôsobom je možné presne určiť, aké operácie môže používateľ
+vykonávať v rámci konkrétneho projektu a v akom rozsahu sa podieľa na jeho realizácii.
+   Pre vizuálnu organizáciu práce je implementovaný Kanban pohľad, v ktorom sú
+úlohy rozdelené podľa aktuálneho stavu. Na sledovanie harmonogramu projektu slúži
+Ganttov graf, ktorý zobrazuje úlohy v časovej osi podľa ich plánovaného trvania.
+
+                                         46
+                         Obr. 16: Kanban pohľad projektu
+
+
+
+
+                          Obr. 17: Ganttov graf projektu
+
+
+   Modul navyše obsahuje evidenciu aktivít, do ktorej sa zaznamenávajú dôležité
+zmeny vykonané v projekte alebo úlohách, a notifikačný mechanizmus, ktorý in-
+formuje členov tímu o udalostiach, ako je priradenie úlohy, zmena stavu úlohu alebo
+zmena stavu projektu.
+
+
+
+
+                                        47
+Praktická logika modulu
+4.1.3   Modul evidencie času
+4.1.4   Modul kapacitného plánovania
+4.2     Kontajnerizácia
+4.3     Pridanie nového modulu
+
+
+
+
+                               48
+Literatúra
+ 1. STAIR, R.; REYNOLDS, G. Principles of Information Systems. 9. vyd. Cengage
+    Learning, 2010.
+ 2. EUROPEAN COMMISSION. Commission Recommendation 2003/361/EC con-
+    cerning the definition of micro, small and medium-sized enterprises. 2003. Official
+    Journal of the European Union, effective from 1 January 2005.
+ 3. PROJECT MANAGEMENT INSTITUTE. A Guide to the Project Management
+    Body of Knowledge (PMBOK Guide). 7. vyd. Newtown Square, PA: Project
+    Management Institute, 2021.
+ 4. SOMMERVILLE, I. Software Engineering. 10. vyd. Pearson, 2015.
+ 5. ROYCE, W. W. Managing the Development of Large Software Systems. In:
+    Proceedings of IEEE WESCON. 1970, s. 1–9.
+ 6. BECK, K. et al. Manifesto for Agile Software Development [online]. 2001. [cit.
+    2026-04-18]. Dostupné z: https://agilemanifesto.org/.
+ 7. SCHWABER, K.; SUTHERLAND, J. The Scrum Guide: The Definitive Guide
+    to Scrum – The Rules of the Game [online]. 2020. [cit. 2026-04-18]. Dostupné z:
+    https://scrumguides.org/.
+ 8. ANDERSON, D. J. Kanban: Successful Evolutionary Change for Your Technology
+    Business. Blue Hole Press, 2010. isbn 978-0984521401.
+ 9. KERZNER, H. Project Management: A Systems Approach to Planning, Scheduling,
+    and Controlling. 12. vyd. John Wiley & Sons, 2017.
+10. EUROSTAT. Digitalisation in Europe – 2025 edition. 2025. Dostupné tiež z:
+    https://ec.europa.eu/eurostat/web/interactive-publications/digitali
+    sation-2025. [cit. 2026-04-19].
+11. OECD. The Digital Transformation of SMEs. 2021. Dostupné tiež z: https://ww
+    w.oecd.org/en/publications/the-digital-transformation-of-smes_bdb9
+    256a-en.html. [cit. 2026-04-19].
+12. OECD. SME digitalisation in 2024: Managing shocks and transitions. 2024. Do-
+    stupné tiež z: https://www.oecd.org/content/dam/oecd/en/networks/oecd-
+    digital-for-smes-global-initiative/FINAL-D4SME-2024-Survey-Policy-
+    Highlights.pdf. [cit. 2026-04-19].
+
+
+
+
+                                         49
+13. RUPEIKA-APOGA, R.; PETROVSKA, K. Barriers to Sustainable Digital Trans-
+    formation in Micro-, Small-, and Medium-Sized Enterprises. Sustainability. 2022,
+    14(20), 13558. Dostupné z doi: 10.3390/su142013558.
+14. RICHARDS, M.; FORD, N. Fundamentals of Software Architecture. O’Reilly
+    Media, 2020.
+15. AMAZON WEB SERVICES. Monolithic vs Microservices. 2026. Dostupné tiež z:
+    https://aws.amazon.com/compare/the-difference-between-monolithic-a
+    nd-microservices-architecture/. [cit. 2026-04-18].
+16. GOOGLE CLOUD. What Is Microservices Architecture? 2026. Dostupné tiež z:
+    https://cloud.google.com/learn/what-is-microservices-architecture.
+    [cit. 2026-04-18].
+17. MICROSOFT. Common Web Application Architectures. 2023. Dostupné tiež z:
+    https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-a
+    pps-azure/common-web-application-architectures. [cit. 2026-04-18].
+18. SZYPERSKI, C. Component Software: Beyond Object-Oriented Programming.
+    2. vyd. Addison-Wesley, 2002.
+19. GAMMA, E.; HELM, R.; JOHNSON, R.; VLISSIDES, J. Design Patterns: Ele-
+    ments of Reusable Object-Oriented Software. Boston: Addison-Wesley, 1994.
+20. BUSCHMANN, F.; MEUNIER, R.; ROHNERT, H.; SOMMERLAD, P.; STAL, M.
+    Pattern-Oriented Software Architecture, Volume 1. Wiley, 1996.
+21. STALLINGS, W. Cryptography and Network Security: Principles and Practice.
+    7. vyd. Pearson, 2017. isbn 978-0134444284.
+22. OWASP FOUNDATION. OWASP Top 10: The Ten Most Critical Web Application
+    Security Risks [online]. 2021. [cit. 2026-04-18]. Dostupné z: https://owasp.org
+    /www-project-top-ten/.
+23. BIRYUKOV, A.; DINU, D.; KHOVRATOVICH, D. Argon2: New Generation of
+    Memory-Hard Functions for Password Hashing and Other Applications. In: 2016
+    IEEE European Symposium on Security and Privacy (EuroS&P). 2016, s. 292–302.
+    Dostupné z doi: 10.1109/EuroSP.2016.7.
+24. FIELDING, R. T. Architectural Styles and the Design of Network-based Software
+    Architectures. 2000. Diz. pr. University of California, Irvine. Doctoral dissertation.
+25. MERKEL, D. Docker: Lightweight Linux Containers for Consistent Development
+    and Deployment. Linux Journal. 2014, 2014(239).
+
+
+
+                                          50
+26. MICALE, R.; LA FATA, C. M.; LOMBARDO, A.; LA SCALIA, G. Project
+    Management Information Systems (PMISs): A Statistical-Based Analysis for the
+    Evaluation of Software Packages Features. Applied Sciences. 2021, 11(23), 11233.
+    Dostupné z doi: 10.3390/app112311233.
+27. CLICKUP. ClickUp — One app to replace them all [https://clickup.com]. 2026.
+    [cit. 2026-04-07].
+28. ASANA. Asana — Manage your team’s work, projects, & tasks online [https:
+    //asana.com]. 2026. [cit. 2026-04-07].
+29. TRELLO. Trello — Manage Your Team’s Projects From Anywhere [https://tre
+    llo.com]. 2026. [cit. 2026-04-07].
+30. ATLASSIAN. Jira Software — Project Management Tool for Agile Teams [https:
+    //www.atlassian.com/software/jira]. 2026. [cit. 2026-04-07].
+31. CLOCKIFY. Clockify — Free Time Tracking Software [https://clockify.me].
+    2026. [cit. 2026-04-07].
+32. ODOO. Odoo — Open Source Business Apps [https://www.odoo.com]. 2026. [cit.
+    2026-04-07].
+33. META PLATFORMS, INC. React - A JavaScript library for building user interfa-
+    ces. 2024. Dostupné tiež z: https://react.dev/. Accessed: 2026-04-04.
+34. VUE.JS TEAM. Vue.js Documentation. 2024. Dostupné tiež z: https://vuejs.o
+    rg/. Accessed: 2026-04-04.
+35. GOOGLE LLC. Angular Documentation. 2024. Dostupné tiež z: https://angula
+    r.io/. Accessed: 2026-04-04.
+36. TAILWIND LABS, INC. Tailwind CSS Documentation. 2024. Dostupné tiež z:
+    https://tailwindcss.com/docs. Accessed: 2026-04-04.
+37. THE BOOTSTRAP AUTHORS. Bootstrap Documentation. 2024. Dostupné tiež
+    z: https://getbootstrap.com/docs/. Accessed: 2026-04-04.
+38. TAYLOR OTWELL. Laravel Documentation. 2024. Dostupné tiež z: https://la
+    ravel.com/docs. Accessed: 2026-04-04.
+39. DJANGO SOFTWARE FOUNDATION. Django Documentation. 2024. Dostupné
+    tiež z: https://docs.djangoproject.com/. Accessed: 2026-04-04.
+40. VMWARE, INC. Spring Boot Documentation. 2024. Dostupné tiež z: https://sp
+    ring.io/projects/spring-boot. Accessed: 2026-04-04.
+41. OPENJS FOUNDATION. Express.js Documentation. 2024. Dostupné tiež z: http
+    s://expressjs.com/. Accessed: 2026-04-04.
+
+                                         51
+42. INERTIA.JS TEAM. Inertia.js Documentation. 2024. Dostupné tiež z: https://i
+    nertiajs.com/. Accessed: 2026-04-04.
+43. POSTGRESQL GLOBAL DEVELOPMENT GROUP. PostgreSQL Documen-
+    tation. 2024. Dostupné tiež z: https://www.postgresql.org/docs/. Accessed:
+    2026-04-04.
+
+
+
+
+                                      52
+

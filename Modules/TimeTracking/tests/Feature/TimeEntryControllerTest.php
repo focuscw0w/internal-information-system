@@ -2,22 +2,26 @@
 
 namespace Modules\TimeTracking\Tests\Feature;
 
+use App\Enums\PermissionEnum;
 use Database\Seeders\PermissionSeeder;
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
-use Modules\User\Models\User;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Models\TimeEntry;
+use Modules\User\Models\User;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class TimeEntryControllerTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $owner;
+
     private User $member;
+
     private Project $project;
+
     private Task $task;
 
     protected function setUp(): void
@@ -73,8 +77,7 @@ class TimeEntryControllerTest extends TestCase
             ->get("/projects/{$this->project->id}/time-entries");
 
         $response->assertOk();
-        $response->assertInertia(fn ($page) =>
-        $page->component('TimeTracking/TimeEntry', false)
+        $response->assertInertia(fn ($page) => $page->component('TimeTracking/TimeEntry', false)
             ->has('entries', 2)
         );
     }
@@ -98,9 +101,35 @@ class TimeEntryControllerTest extends TestCase
             ->get("/projects/{$this->project->id}/time-entries");
 
         $response->assertOk();
-        $response->assertInertia(fn ($page) =>
-        $page->component('TimeTracking/TimeEntry', false)
+        $response->assertInertia(fn ($page) => $page->component('TimeTracking/TimeEntry', false)
             ->has('entries', 1)
+        );
+    }
+
+    #[Test]
+    public function global_project_viewer_can_see_all_project_time_entries(): void
+    {
+        $admin = User::factory()->create();
+        $admin->givePermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value);
+
+        TimeEntry::factory()->create([
+            'project_id' => $this->project->id,
+            'task_id' => $this->task->id,
+            'user_id' => $this->owner->id,
+        ]);
+
+        TimeEntry::factory()->create([
+            'project_id' => $this->project->id,
+            'task_id' => $this->task->id,
+            'user_id' => $this->member->id,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->get("/projects/{$this->project->id}/time-entries");
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page->component('TimeTracking/TimeEntry', false)
+            ->has('entries', 2)
         );
     }
 
@@ -383,8 +412,7 @@ class TimeEntryControllerTest extends TestCase
             ->get('/time-tracking');
 
         $response->assertOk();
-        $response->assertInertia(fn ($page) =>
-        $page->component('TimeTracking/Index', false)
+        $response->assertInertia(fn ($page) => $page->component('TimeTracking/Index', false)
             ->has('projects')
             ->has('entries')
         );
@@ -408,8 +436,7 @@ class TimeEntryControllerTest extends TestCase
         $response = $this->actingAs($this->member)
             ->get('/time-tracking');
 
-        $response->assertInertia(fn ($page) =>
-        $page->has('entries', 1)
+        $response->assertInertia(fn ($page) => $page->has('entries', 1)
         );
     }
 }

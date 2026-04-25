@@ -35,7 +35,6 @@ export default function Manage({
             <div className="space-y-6 p-4 md:p-6">
                 <HeadingSmall
                     title="Správa používateľov"
-                    description="Admin tu vytvára nové kontá. Používateľ sa potom prihlási klasicky emailom a heslom."
                 />
 
                 {status && (

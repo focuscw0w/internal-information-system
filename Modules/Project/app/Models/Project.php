@@ -2,6 +2,8 @@
 
 namespace Modules\Project\Models;
 
+use App\Enums\PermissionEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Project\Database\Factories\ProjectFactory;
 use Modules\Project\Enums\ProjectPermission;
 use Modules\User\Models\User;
-use Illuminate\Database\Eloquent\Builder;
 
 class Project extends Model
 {
@@ -145,6 +146,10 @@ class Project extends Model
             return ProjectPermission::allValues();
         }
 
+        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
+            return ProjectPermission::allValues();
+        }
+
         $teamMember = $this->team()->where('user_id', $user->id)->first();
 
         if (! $teamMember) {
@@ -163,6 +168,10 @@ class Project extends Model
     public function userHasPermission(User $user, string $permission): bool
     {
         if ($this->owner_id === $user->id) {
+            return true;
+        }
+
+        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
             return true;
         }
 

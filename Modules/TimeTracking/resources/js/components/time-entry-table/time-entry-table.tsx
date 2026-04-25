@@ -31,11 +31,20 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
 
     const [taskFilter, setTaskFilter] = useState<number | null>(null);
     const [userFilter, setUserFilter] = useState<number | null>(null);
+    const [dateFromFilter, setDateFromFilter] = useState('');
+    const [dateToFilter, setDateToFilter] = useState('');
 
-    const hasActiveFilters = !!(taskFilter || userFilter);
+    const hasActiveFilters = !!(
+        taskFilter ||
+        userFilter ||
+        dateFromFilter ||
+        dateToFilter
+    );
     const clearFilters = () => {
         setTaskFilter(null);
         setUserFilter(null);
+        setDateFromFilter('');
+        setDateToFilter('');
     };
 
     const tasks = project.tasks ?? [];
@@ -45,8 +54,12 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
         .filter((u, i, arr) => arr.findIndex((a) => a.id === u.id) === i);
 
     const filteredEntries = entries.filter((entry) => {
+        const entryDate = entry.entry_date.substring(0, 10);
+
         if (taskFilter && entry.task_id !== taskFilter) return false;
         if (userFilter && entry.user_id !== userFilter) return false;
+        if (dateFromFilter && entryDate < dateFromFilter) return false;
+        if (dateToFilter && entryDate > dateToFilter) return false;
         return true;
     });
 
@@ -62,17 +75,18 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
 
     return (
         <Card className="border-gray-100 bg-white shadow-sm">
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">
-                        Záznamy času
+            <CardHeader className="space-y-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <CardTitle className="text-lg">Záznamy času</CardTitle>
                         {entries.length > 0 && (
-                            <span className="ml-2 text-sm font-normal text-gray-500">
-                                ({filteredEntries.length} záznamov ·{' '}
-                                {totalHours.toFixed(1)}h)
-                            </span>
+                            <p className="mt-1 text-sm text-gray-500">
+                                {filteredEntries.length} záznamov ·{' '}
+                                {totalHours.toFixed(1)}h zobrazených
+                            </p>
                         )}
-                    </CardTitle>
+                    </div>
+
                     <CreateTimeEntryDialog project={project} tasks={tasks} />
                 </div>
 
@@ -80,6 +94,8 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
                     <TimeEntryFilters
                         taskFilter={taskFilter}
                         userFilter={userFilter}
+                        dateFromFilter={dateFromFilter}
+                        dateToFilter={dateToFilter}
                         project={project}
                         tasks={tasks}
                         users={users}
@@ -87,6 +103,8 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
                         totalCount={entries.length}
                         onTaskChange={setTaskFilter}
                         onUserChange={setUserFilter}
+                        onDateFromChange={setDateFromFilter}
+                        onDateToChange={setDateToFilter}
                         onClear={clearFilters}
                     />
                 )}
