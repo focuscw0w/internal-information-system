@@ -38,7 +38,7 @@ function StatCard({
                       : undefined
             }
         >
-            <CardContent className="space-y-1 pt-6">
+            <CardContent className="space-y-1 px-5">
                 <p className="text-xs text-gray-500">{label}</p>
                 <div className="text-lg font-semibold text-gray-900">
                     {value}
