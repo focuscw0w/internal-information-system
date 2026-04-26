@@ -1,6 +1,5 @@
 import {
     CartesianGrid,
-    Legend,
     Line,
     LineChart,
     ReferenceLine,
@@ -38,34 +37,44 @@ export function BurnDownChart({
             <ResponsiveContainer width="100%" height={300}>
                 <LineChart
                     data={points}
-                    margin={{ top: 8, right: 16, left: -12, bottom: 0 }}
+                    margin={{ top: 12, right: 16, left: 12, bottom: 30 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis
                         dataKey="week_label"
                         tick={{ fontSize: 10 }}
                         interval="preserveStartEnd"
+                        label={{
+                            value: 'Týždne od dnes',
+                            position: 'insideBottom',
+                            offset: -18,
+                            fontSize: 11,
+                            fill: '#6b7280',
+                        }}
                     />
                     <YAxis
                         tick={{ fontSize: 10 }}
                         unit=" h"
                         domain={[0, 'auto']}
-                        width={60}
+                        width={72}
+                        label={{
+                            value: 'Zostávajúce hodiny',
+                            angle: -90,
+                            position: 'insideLeft',
+                            fontSize: 11,
+                            fill: '#6b7280',
+                            style: { textAnchor: 'middle' },
+                        }}
                     />
                     <Tooltip
                         formatter={(value, name) => [
                             `${value} h`,
                             name === 'ideal_remaining'
-                                ? 'Plán (ideál)'
-                                : 'Predikcia',
+                                ? 'Ideálny plán - zostávajúce hodiny'
+                                : 'Simulovaná predikcia - zostávajúce hodiny',
                         ]}
-                        labelFormatter={(label) => `Týždeň ${label}`}
-                    />
-                    <Legend
-                        formatter={(value) =>
-                            value === 'ideal_remaining'
-                                ? 'Plán (ideál)'
-                                : 'Predikcia'
+                        labelFormatter={(label) =>
+                            `Týždeň od dnes: ${label}`
                         }
                     />
 
@@ -75,12 +84,6 @@ export function BurnDownChart({
                             x={deadlineLabel}
                             stroke="#ef4444"
                             strokeDasharray="4 4"
-                            label={{
-                                value: 'Deadline',
-                                position: 'insideTopRight',
-                                fontSize: 10,
-                                fill: '#ef4444',
-                            }}
                         />
                     )}
 

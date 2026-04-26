@@ -63,7 +63,7 @@ export function SimulationStatsGrid({ simulation }: SimulationStatsGridProps) {
     return (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
-                label="Stihnutie deadline"
+                label="Simulované stihnutie deadline"
                 value={
                     simulation.finish_diff_days === null ? (
                         <span className="flex items-center gap-1 text-gray-500">
@@ -79,39 +79,39 @@ export function SimulationStatsGrid({ simulation }: SimulationStatsGridProps) {
                         </span>
                     )
                 }
-                sub={finishDiffLabel}
+                sub={`${finishDiffLabel} pri aktuálnych parametroch`}
                 highlight={simulation.will_meet_deadline}
             />
 
             <StatCard
-                label="Predpokladané dokončenie"
+                label="Simulované dokončenie"
                 value={
                     simulation.forecast_finish_date
                         ? formatDate(simulation.forecast_finish_date)
                         : '—'
                 }
-                sub={`Deadline: ${formatDate(simulation.simulated_deadline)}`}
+                sub={`Simulovaný deadline: ${formatDate(simulation.simulated_deadline)}`}
             />
 
             <StatCard
-                label="Kapacita tímu / týždeň"
+                label="Simulovaná kapacita / týždeň"
                 value={`${simulation.simulated_weekly_capacity} h`}
                 sub={
                     simulation.simulated_weekly_capacity !==
                     simulation.baseline_weekly_capacity
                         ? `Pôvodne: ${simulation.baseline_weekly_capacity} h`
-                        : 'Nezmenená'
+                        : 'Nezmenená oproti projektu'
                 }
             />
 
             <StatCard
-                label="Zostávajúce hodiny"
+                label="Zostávajúce hodiny projektu"
                 value={`${simulation.simulated_remaining_hours} h`}
                 sub={
                     simulation.simulated_remaining_hours !==
                     simulation.baseline_remaining_hours
                         ? `Pôvodne: ${simulation.baseline_remaining_hours} h`
-                        : 'Nezmenené'
+                        : 'Nezmenené oproti úlohám'
                 }
             />
         </div>

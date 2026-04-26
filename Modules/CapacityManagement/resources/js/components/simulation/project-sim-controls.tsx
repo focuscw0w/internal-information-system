@@ -16,25 +16,34 @@ type Props = {
 
 function SliderRow({
     label,
+    description,
     value,
     displayValue,
+    baselineValue,
     min,
     max,
     step,
     onChange,
 }: {
     label: string;
+    description: string;
     value: number;
     displayValue: string;
+    baselineValue: string;
     min: number;
     max: number;
     step: number;
     onChange: (v: number) => void;
 }) {
     return (
-        <div className="space-y-2">
+        <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-gray-700">{label}</span>
+                <div className="pr-4">
+                    <p className="font-medium text-gray-700">{label}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-gray-500">
+                        {description}
+                    </p>
+                </div>
                 <span className="min-w-[80px] text-right font-mono text-primary">
                     {displayValue}
                 </span>
@@ -50,6 +59,7 @@ function SliderRow({
                 <span>{min}</span>
                 <span>{max}</span>
             </div>
+            <p className="text-xs text-gray-500">Pôvodne: {baselineValue}</p>
         </div>
     );
 }
@@ -99,8 +109,10 @@ export function ProjectSimControls({
             <CardContent className="space-y-6">
                 <SliderRow
                     label="Posun deadline"
+                    description="Posúva termín dokončenia iba v tejto simulácii. Projektové dáta sa neukladajú."
                     value={deadlineDaysShift}
                     displayValue={deadlineDisplay}
+                    baselineValue="pôvodný deadline projektu"
                     min={-30}
                     max={90}
                     step={1}
@@ -109,8 +121,10 @@ export function ProjectSimControls({
 
                 <SliderRow
                     label="Počet ľudí na projekte"
+                    description="Simuluje veľkosť tímu a podľa nej prepočíta týždennú kapacitu dostupnú pre projekt."
                     value={teamSize}
                     displayValue={`${teamSize} osôb`}
+                    baselineValue={`${baselineTeamSize} osôb`}
                     min={0}
                     max={Math.max(baselineTeamSize * 3, 10)}
                     step={1}
@@ -118,9 +132,11 @@ export function ProjectSimControls({
                 />
 
                 <SliderRow
-                    label="Zostávajúce hodiny"
+                    label="Zostávajúce hodiny projektu"
+                    description="Celková zostávajúca práca na projekte: odhadované hodiny nedokončených úloh mínus už odpracované hodiny."
                     value={Math.round(remainingHours)}
                     displayValue={`${Math.round(remainingHours)} h`}
+                    baselineValue={`${Math.round(baselineRemainingHours)} h`}
                     min={0}
                     max={Math.max(Math.round(baselineRemainingHours * 2), 100)}
                     step={5}
