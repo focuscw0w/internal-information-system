@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { Fragment, ReactNode } from 'react';
 
 export interface Column<T> {
     key: string;
@@ -17,18 +17,20 @@ interface DataTableProps<T> {
     emptyTitle?: string;
     emptyDescription?: string;
     emptyAction?: ReactNode;
+    renderExpandedRow?: (item: T) => ReactNode;
 }
 
 export function DataTable<T>({
-                                 columns,
-                                 data,
-                                 keyExtractor,
-                                 onRowClick,
-                                 emptyIcon,
-                                 emptyTitle = 'Žiadne dáta.',
-                                 emptyDescription,
-                                 emptyAction,
-                             }: DataTableProps<T>) {
+    columns,
+    data,
+    keyExtractor,
+    onRowClick,
+    emptyIcon,
+    emptyTitle = 'Žiadne dáta.',
+    emptyDescription,
+    emptyAction,
+    renderExpandedRow,
+}: DataTableProps<T>) {
     if (data.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-12">
@@ -47,48 +49,52 @@ export function DataTable<T>({
     return (
         <table className="w-full">
             <thead>
-            <tr className="border-b border-gray-100 text-left text-xs uppercase text-gray-500">
-                {columns.map((col) => (
-                    <th
-                        key={col.key}
-                        className={`pb-3 font-medium ${col.width ?? ''} ${
-                            col.align === 'center'
-                                ? 'text-center'
-                                : col.align === 'right'
-                                    ? 'text-right'
-                                    : 'text-left'
-                        }`}
-                    >
-                        {col.label}
-                    </th>
-                ))}
-            </tr>
-            </thead>
-            <tbody>
-            {data.map((item) => (
-                <tr
-                    key={keyExtractor(item)}
-                    onClick={onRowClick ? () => onRowClick(item) : undefined}
-                    className={`border-b border-gray-50 transition-colors hover:bg-gray-50/50 ${
-                        onRowClick ? 'cursor-pointer' : ''
-                    }`}
-                >
+                <tr className="border-b border-gray-100 text-left text-xs uppercase text-gray-500">
                     {columns.map((col) => (
-                        <td
+                        <th
                             key={col.key}
-                            className={`py-3 ${
+                            className={`pb-3 font-medium ${col.width ?? ''} ${
                                 col.align === 'center'
                                     ? 'text-center'
                                     : col.align === 'right'
-                                        ? 'text-right'
-                                        : ''
+                                      ? 'text-right'
+                                      : 'text-left'
                             }`}
                         >
-                            {col.render(item)}
-                        </td>
+                            {col.label}
+                        </th>
                     ))}
                 </tr>
-            ))}
+            </thead>
+            <tbody>
+                {data.map((item) => (
+                    <Fragment key={keyExtractor(item)}>
+                        <tr
+                            onClick={
+                                onRowClick ? () => onRowClick(item) : undefined
+                            }
+                            className={`border-b border-gray-50 transition-colors hover:bg-gray-50/50 ${
+                                onRowClick ? 'cursor-pointer' : ''
+                            }`}
+                        >
+                            {columns.map((col) => (
+                                <td
+                                    key={col.key}
+                                    className={`py-3 ${
+                                        col.align === 'center'
+                                            ? 'text-center'
+                                            : col.align === 'right'
+                                              ? 'text-right'
+                                              : ''
+                                    }`}
+                                >
+                                    {col.render(item)}
+                                </td>
+                            ))}
+                        </tr>
+                        {renderExpandedRow?.(item)}
+                    </Fragment>
+                ))}
             </tbody>
         </table>
     );
