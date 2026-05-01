@@ -12,4 +12,5 @@ export const workloadOptions: { value: WorkloadLevel; label: string }[] = [
     { value: 'low', label: 'Nízke' },
     { value: 'medium', label: 'Stredné' },
     { value: 'high', label: 'Vysoké' },
+    { value: 'overloaded', label: 'Preťažené' },
 ];

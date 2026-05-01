@@ -46,6 +46,7 @@ export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
         { value: 'low', label: 'Nízka' },
         { value: 'medium', label: 'Stredná' },
         { value: 'high', label: 'Vysoká' },
+        { value: 'urgent', label: 'Urgentná' },
     ];
 
     return (

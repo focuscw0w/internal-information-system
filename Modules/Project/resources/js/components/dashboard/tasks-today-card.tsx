@@ -9,13 +9,15 @@ import {
 } from '@/components/ui/card';
 import { Link } from '@inertiajs/react';
 import { CalendarCheck, CheckCircle2 } from 'lucide-react';
+import { TaskPriority } from '../../types/types';
+import { getText } from '../../utils/badge';
 
 export interface DashboardTask {
     id: number;
     project_id: number;
     title: string;
     status: string;
-    priority: string;
+    priority: TaskPriority;
     due_date: string | null;
     is_overdue: boolean;
     project: {
@@ -41,7 +43,7 @@ export const TasksTodayCard = ({ tasks }: TasksTodayCardProps) => {
         <Card className="xl:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between gap-3">
                 <div>
-                    <CardTitle className="flex items-center gap-2 mb-1">
+                    <CardTitle className="mb-1 flex items-center gap-2">
                         <CalendarCheck className="h-4 w-4 text-blue-500" />
                         Moje úlohy dnes
                     </CardTitle>
@@ -91,7 +93,7 @@ export const TasksTodayCard = ({ tasks }: TasksTodayCardProps) => {
                                         {formatDate(task.due_date)}
                                     </Badge>
                                     <Badge variant="outline">
-                                        {task.priority}
+                                        {getText('priority', task.priority)}
                                     </Badge>
                                 </div>
                             </Link>

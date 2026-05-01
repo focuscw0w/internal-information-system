@@ -7,7 +7,20 @@ import { Project, Task, TaskPriority, TaskStatus } from '../../../types/types';
 const DAY_WIDTH = 28;
 const LEFT_PANEL_WIDTH = 224; // w-56
 
-const MONTHS_SK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+const MONTHS_SK = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'Máj',
+    'Jún',
+    'Júl',
+    'Aug',
+    'Sep',
+    'Okt',
+    'Nov',
+    'Dec',
+];
 
 const STATUS_BG: Record<TaskStatus, string> = {
     todo: 'bg-gray-400',
@@ -26,13 +39,15 @@ const STATUS_LABEL: Record<TaskStatus, string> = {
 const PRIORITY_DOT: Record<TaskPriority, string> = {
     low: 'bg-gray-300',
     medium: 'bg-yellow-400',
-    high: 'bg-red-500',
+    high: 'bg-orange-500',
+    urgent: 'bg-red-500',
 };
 
 const PRIORITY_LABEL: Record<TaskPriority, string> = {
     low: 'Nízka',
     medium: 'Stredná',
     high: 'Vysoká',
+    urgent: 'Urgentná',
 };
 
 function initials(name: string): string {
@@ -50,7 +65,9 @@ interface GanttChartProps {
 
 export function GanttChart({ project }: GanttChartProps) {
     const [statusFilter, setStatusFilter] = useState<TaskStatus | null>(null);
-    const [priorityFilter, setPriorityFilter] = useState<TaskPriority | null>(null);
+    const [priorityFilter, setPriorityFilter] = useState<TaskPriority | null>(
+        null,
+    );
     const [assigneeFilter, setAssigneeFilter] = useState<number | null>(null);
 
     const projectStart = dayjs(project.start_date);
@@ -63,12 +80,18 @@ export function GanttChart({ project }: GanttChartProps) {
     const months = useMemo(() => {
         const start = dayjs(project.start_date);
         const end = dayjs(project.end_date);
-        const result: { label: string; startOffset: number; widthPx: number }[] = [];
+        const result: {
+            label: string;
+            startOffset: number;
+            widthPx: number;
+        }[] = [];
         let current = start.startOf('month');
 
         while (!current.isAfter(end)) {
             const monthStart = current.isBefore(start) ? start : current;
-            const monthEnd = current.endOf('month').isAfter(end) ? end : current.endOf('month');
+            const monthEnd = current.endOf('month').isAfter(end)
+                ? end
+                : current.endOf('month');
             result.push({
                 label: `${MONTHS_SK[current.month()]} ${current.year()}`,
                 startOffset: monthStart.diff(start, 'day'),
@@ -97,20 +120,29 @@ export function GanttChart({ project }: GanttChartProps) {
 
     const assignees = useMemo(() => {
         const map = new Map<number, string>();
-        project.tasks.forEach((t) => t.assigned_users?.forEach((u) => map.set(u.id, u.name)));
+        project.tasks.forEach((t) =>
+            t.assigned_users?.forEach((u) => map.set(u.id, u.name)),
+        );
         return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
     }, [project.tasks]);
 
     const filteredTasks = useMemo(() => {
         return project.tasks.filter((task) => {
             if (statusFilter && task.status !== statusFilter) return false;
-            if (priorityFilter && task.priority !== priorityFilter) return false;
-            if (assigneeFilter && !task.assigned_users?.some((u) => u.id === assigneeFilter)) return false;
+            if (priorityFilter && task.priority !== priorityFilter)
+                return false;
+            if (
+                assigneeFilter &&
+                !task.assigned_users?.some((u) => u.id === assigneeFilter)
+            )
+                return false;
             return true;
         });
     }, [project.tasks, statusFilter, priorityFilter, assigneeFilter]);
 
-    const hasFilters = Boolean(statusFilter || priorityFilter || assigneeFilter);
+    const hasFilters = Boolean(
+        statusFilter || priorityFilter || assigneeFilter,
+    );
 
     function getBar(task: Task): { leftPx: number; widthPx: number } {
         const start = dayjs(task.start_date ?? project.start_date);
@@ -118,7 +150,10 @@ export function GanttChart({ project }: GanttChartProps) {
         const startDay = Math.max(0, start.diff(projectStart, 'day'));
         const endDay = Math.min(totalDays - 1, end.diff(projectStart, 'day'));
         const durationDays = Math.max(1, endDay - startDay + 1);
-        return { leftPx: startDay * DAY_WIDTH, widthPx: durationDays * DAY_WIDTH };
+        return {
+            leftPx: startDay * DAY_WIDTH,
+            widthPx: durationDays * DAY_WIDTH,
+        };
     }
 
     return (
@@ -129,7 +164,9 @@ export function GanttChart({ project }: GanttChartProps) {
 
                 <select
                     value={statusFilter ?? ''}
-                    onChange={(e) => setStatusFilter((e.target.value as TaskStatus) || null)}
+                    onChange={(e) =>
+                        setStatusFilter((e.target.value as TaskStatus) || null)
+                    }
                     className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
                 >
                     <option value="">Všetky stavy</option>
@@ -141,10 +178,15 @@ export function GanttChart({ project }: GanttChartProps) {
 
                 <select
                     value={priorityFilter ?? ''}
-                    onChange={(e) => setPriorityFilter((e.target.value as TaskPriority) || null)}
+                    onChange={(e) =>
+                        setPriorityFilter(
+                            (e.target.value as TaskPriority) || null,
+                        )
+                    }
                     className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
                 >
                     <option value="">Všetky priority</option>
+                    <option value="urgent">Urgentná</option>
                     <option value="high">Vysoká</option>
                     <option value="medium">Stredná</option>
                     <option value="low">Nízka</option>
@@ -153,7 +195,11 @@ export function GanttChart({ project }: GanttChartProps) {
                 {assignees.length > 0 && (
                     <select
                         value={assigneeFilter ?? ''}
-                        onChange={(e) => setAssigneeFilter(e.target.value ? Number(e.target.value) : null)}
+                        onChange={(e) =>
+                            setAssigneeFilter(
+                                e.target.value ? Number(e.target.value) : null,
+                            )
+                        }
                         className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
                     >
                         <option value="">Všetci členovia</option>
@@ -190,26 +236,43 @@ export function GanttChart({ project }: GanttChartProps) {
                 {filteredTasks.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-3 py-16">
                         <CircleDashed className="h-12 w-12 text-gray-300" />
-                        <p className="text-sm text-gray-400">Žiadne úlohy na zobrazenie</p>
+                        <p className="text-sm text-gray-400">
+                            Žiadne úlohy na zobrazenie
+                        </p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         {/* Month header */}
                         <div
                             className="flex border-b border-gray-200 bg-gray-50"
-                            style={{ minWidth: `${LEFT_PANEL_WIDTH + timelineWidth}px` }}
+                            style={{
+                                minWidth: `${LEFT_PANEL_WIDTH + timelineWidth}px`,
+                            }}
                         >
                             <div className="sticky left-0 z-20 flex w-56 flex-shrink-0 items-center border-r border-gray-200 bg-gray-50 px-4 py-2">
-                                <span className="text-xs font-semibold text-gray-500">Úloha</span>
+                                <span className="text-xs font-semibold text-gray-500">
+                                    Úloha
+                                </span>
                             </div>
-                            <div className="relative flex-1" style={{ width: `${timelineWidth}px`, height: '32px' }}>
+                            <div
+                                className="relative flex-1"
+                                style={{
+                                    width: `${timelineWidth}px`,
+                                    height: '32px',
+                                }}
+                            >
                                 {months.map((m, i) => (
                                     <div
                                         key={i}
                                         className="absolute top-0 flex h-full items-center overflow-hidden border-l border-gray-200 px-2"
-                                        style={{ left: `${m.startOffset * DAY_WIDTH}px`, width: `${m.widthPx}px` }}
+                                        style={{
+                                            left: `${m.startOffset * DAY_WIDTH}px`,
+                                            width: `${m.widthPx}px`,
+                                        }}
                                     >
-                                        <span className="truncate text-xs font-medium text-gray-600">{m.label}</span>
+                                        <span className="truncate text-xs font-medium text-gray-600">
+                                            {m.label}
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -218,23 +281,41 @@ export function GanttChart({ project }: GanttChartProps) {
                         {/* Week sub-header */}
                         <div
                             className="flex border-b border-gray-200 bg-gray-50"
-                            style={{ minWidth: `${LEFT_PANEL_WIDTH + timelineWidth}px` }}
+                            style={{
+                                minWidth: `${LEFT_PANEL_WIDTH + timelineWidth}px`,
+                            }}
                         >
-                            <div className="sticky left-0 z-20 w-56 flex-shrink-0 border-r border-gray-200 bg-gray-50" style={{ height: '24px' }} />
-                            <div className="relative flex-1" style={{ width: `${timelineWidth}px`, height: '24px' }}>
+                            <div
+                                className="sticky left-0 z-20 w-56 flex-shrink-0 border-r border-gray-200 bg-gray-50"
+                                style={{ height: '24px' }}
+                            />
+                            <div
+                                className="relative flex-1"
+                                style={{
+                                    width: `${timelineWidth}px`,
+                                    height: '24px',
+                                }}
+                            >
                                 {weeks.map((w, i) => (
                                     <div
                                         key={i}
                                         className="absolute top-0 flex h-full items-center overflow-hidden border-l border-gray-100 pl-1"
-                                        style={{ left: `${w.offsetPx}px`, width: `${7 * DAY_WIDTH}px` }}
+                                        style={{
+                                            left: `${w.offsetPx}px`,
+                                            width: `${7 * DAY_WIDTH}px`,
+                                        }}
                                     >
-                                        <span className="text-[10px] text-gray-400">{w.label}</span>
+                                        <span className="text-[10px] text-gray-400">
+                                            {w.label}
+                                        </span>
                                     </div>
                                 ))}
                                 {todayVisible && (
                                     <div
                                         className="absolute top-0 bottom-0 z-10 w-0.5 bg-red-400"
-                                        style={{ left: `${(todayOffset + 0.5) * DAY_WIDTH}px` }}
+                                        style={{
+                                            left: `${(todayOffset + 0.5) * DAY_WIDTH}px`,
+                                        }}
                                     />
                                 )}
                             </div>
@@ -248,16 +329,26 @@ export function GanttChart({ project }: GanttChartProps) {
                             return (
                                 <div
                                     key={task.id}
-                                    onClick={() => router.visit(`/projects/${project.id}/tasks/${task.id}`)}
+                                    onClick={() =>
+                                        router.visit(
+                                            `/projects/${project.id}/tasks/${task.id}`,
+                                        )
+                                    }
                                     className="flex cursor-pointer border-b border-gray-100 transition-colors last:border-0 hover:bg-blue-50"
-                                    style={{ minWidth: `${LEFT_PANEL_WIDTH + timelineWidth}px`, height: '44px', background: rowBg }}
+                                    style={{
+                                        minWidth: `${LEFT_PANEL_WIDTH + timelineWidth}px`,
+                                        height: '44px',
+                                        background: rowBg,
+                                    }}
                                 >
                                     {/* Left: task name + status dot + assignee avatars */}
                                     <div
                                         className="sticky left-0 z-10 flex w-56 flex-shrink-0 items-center gap-2 border-r border-gray-100 px-3"
                                         style={{ background: rowBg }}
                                     >
-                                        <span className={`h-2 w-2 flex-shrink-0 rounded-full ${STATUS_BG[task.status]}`} />
+                                        <span
+                                            className={`h-2 w-2 flex-shrink-0 rounded-full ${STATUS_BG[task.status]}`}
+                                        />
                                         <span
                                             className="min-w-0 flex-1 truncate text-xs font-medium text-gray-700"
                                             title={task.title}
@@ -265,19 +356,26 @@ export function GanttChart({ project }: GanttChartProps) {
                                             {task.title}
                                         </span>
                                         <div className="flex flex-shrink-0 -space-x-1">
-                                            {task.assigned_users?.slice(0, 2).map((u) => (
-                                                <div
-                                                    key={u.id}
-                                                    className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 ring-1 ring-white"
-                                                    title={u.name}
-                                                >
-                                                    <span className="text-[9px] font-bold text-white">{initials(u.name)}</span>
-                                                </div>
-                                            ))}
-                                            {(task.assigned_users?.length ?? 0) > 2 && (
+                                            {task.assigned_users
+                                                ?.slice(0, 2)
+                                                .map((u) => (
+                                                    <div
+                                                        key={u.id}
+                                                        className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 ring-1 ring-white"
+                                                        title={u.name}
+                                                    >
+                                                        <span className="text-[9px] font-bold text-white">
+                                                            {initials(u.name)}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            {(task.assigned_users?.length ??
+                                                0) > 2 && (
                                                 <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-300 ring-1 ring-white">
                                                     <span className="text-[9px] font-bold text-gray-600">
-                                                        +{task.assigned_users!.length - 2}
+                                                        +
+                                                        {task.assigned_users!
+                                                            .length - 2}
                                                     </span>
                                                 </div>
                                             )}
@@ -285,13 +383,21 @@ export function GanttChart({ project }: GanttChartProps) {
                                     </div>
 
                                     {/* Right: timeline with task bar */}
-                                    <div className="relative flex-1" style={{ width: `${timelineWidth}px`, height: '44px' }}>
+                                    <div
+                                        className="relative flex-1"
+                                        style={{
+                                            width: `${timelineWidth}px`,
+                                            height: '44px',
+                                        }}
+                                    >
                                         {/* Week grid lines */}
                                         {weeks.map((w, wi) => (
                                             <div
                                                 key={wi}
                                                 className="pointer-events-none absolute top-0 bottom-0 border-l border-gray-100"
-                                                style={{ left: `${w.offsetPx}px` }}
+                                                style={{
+                                                    left: `${w.offsetPx}px`,
+                                                }}
                                             />
                                         ))}
 
@@ -299,14 +405,20 @@ export function GanttChart({ project }: GanttChartProps) {
                                         {todayVisible && (
                                             <div
                                                 className="pointer-events-none absolute top-0 bottom-0 z-10 w-0.5 bg-red-200"
-                                                style={{ left: `${(todayOffset + 0.5) * DAY_WIDTH}px` }}
+                                                style={{
+                                                    left: `${(todayOffset + 0.5) * DAY_WIDTH}px`,
+                                                }}
                                             />
                                         )}
 
                                         {/* Task bar */}
                                         <div
                                             className={`absolute top-1/2 flex -translate-y-1/2 items-center overflow-hidden rounded px-1.5 ${STATUS_BG[task.status]}`}
-                                            style={{ left: `${bar.leftPx}px`, width: `${bar.widthPx}px`, height: '24px' }}
+                                            style={{
+                                                left: `${bar.leftPx}px`,
+                                                width: `${bar.widthPx}px`,
+                                                height: '24px',
+                                            }}
                                             title={`${task.title} · ${STATUS_LABEL[task.status]} · Priorita: ${PRIORITY_LABEL[task.priority]}`}
                                         >
                                             <span

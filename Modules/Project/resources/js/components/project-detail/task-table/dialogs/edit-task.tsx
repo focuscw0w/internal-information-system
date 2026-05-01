@@ -17,7 +17,7 @@ export const EditTaskDialog = ({
     task,
     projectId,
     team,
-    text
+    text,
 }: EditTaskDialogProps) => {
     const [open, setOpen] = useState(false);
 
@@ -44,7 +44,7 @@ export const EditTaskDialog = ({
                 estimated_hours: task.estimated_hours?.toString() || '',
                 start_date: task.start_date || '',
                 due_date: task.due_date || '',
-                assigned_users: initialMembers
+                assigned_users: initialMembers,
             });
         }
         setOpen(newOpen);
@@ -68,6 +68,7 @@ export const EditTaskDialog = ({
         { value: 'low', label: 'Nízka' },
         { value: 'medium', label: 'Stredná' },
         { value: 'high', label: 'Vysoká' },
+        { value: 'urgent', label: 'Urgentná' },
     ];
 
     return (
@@ -77,7 +78,7 @@ export const EditTaskDialog = ({
             trigger={
                 <button
                     onClick={(e) => e.stopPropagation()}
-                    className="cursor-pointer flex items-center justify-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    className="flex cursor-pointer items-center justify-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
                     title="Upraviť úlohu"
                 >
                     <Edit size={18} />

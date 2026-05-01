@@ -1,9 +1,14 @@
 import { User } from '@/types';
 
-export type ProjectStatus = 'active' | 'planning' | 'completed' | 'on_hold' | 'cancelled';
+export type ProjectStatus =
+    | 'active'
+    | 'planning'
+    | 'completed'
+    | 'on_hold'
+    | 'cancelled';
 export type AtRiskReason = 'overdue' | 'stale' | 'no_progress';
 export type WorkloadLevel = 'low' | 'medium' | 'high' | 'overloaded';
-export type TaskPriority = 'low' | 'medium' | 'high';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TaskStatus = 'todo' | 'in_progress' | 'testing' | 'done';
 export type ViewMode = 'grid' | 'list';
 
@@ -76,7 +81,7 @@ export interface Task {
     title: string;
     description: string | null;
     status: 'todo' | 'in_progress' | 'testing' | 'done';
-    priority: 'low' | 'medium' | 'high';
+    priority: TaskPriority;
     estimated_hours: number;
     actual_hours: number;
     start_date: string | null;

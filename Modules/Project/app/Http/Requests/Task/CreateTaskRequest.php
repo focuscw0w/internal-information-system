@@ -46,7 +46,7 @@ class CreateTaskRequest extends FormRequest
             'status.required' => 'Stav úlohy je povinný.',
             'status.in' => 'Neplatný stav úlohy.',
             'priority.required' => 'Priorita je povinná.',
-            'priority.in' => 'Priorita musí byť low, medium alebo high.',
+            'priority.in' => 'Priorita musí byť low, medium, high alebo urgent.',
             'estimated_hours.required' => 'Odhadovaný čas je povinný.',
             'estimated_hours.numeric' => 'Odhadovaný čas musí byť číslo.',
             'estimated_hours.min' => 'Odhadovaný čas nemôže byť záporný.',
@@ -63,6 +63,7 @@ class CreateTaskRequest extends FormRequest
     public function getStatusEnum(): TaskStatus
     {
         $status = $this->validated()['status'] ?? null;
+
         return $status ? TaskStatus::from($status) : TaskStatus::TODO;
     }
 
@@ -72,6 +73,7 @@ class CreateTaskRequest extends FormRequest
     public function getPriorityEnum(): TaskPriority
     {
         $priority = $this->validated()['priority'] ?? null;
+
         return $priority ? TaskPriority::from($priority) : TaskPriority::MEDIUM;
     }
 }

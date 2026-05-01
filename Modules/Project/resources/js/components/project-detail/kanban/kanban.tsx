@@ -100,6 +100,26 @@ export function Kanban({ project }: KanbanProps) {
         );
     };
 
+    const renderPriorityFlag = (task: Task) => {
+        if (task.priority === 'urgent') {
+            return (
+                <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">
+                    Urgentná
+                </span>
+            );
+        }
+
+        if (task.priority === 'high') {
+            return (
+                <span className="rounded bg-orange-100 px-2 py-0.5 text-xs text-orange-700">
+                    Vysoká
+                </span>
+            );
+        }
+
+        return null;
+    };
+
     return (
         <DndContext
             sensors={sensors}
@@ -157,11 +177,8 @@ export function Kanban({ project }: KanbanProps) {
                                                                 }
                                                                 h
                                                             </span>
-                                                            {task.priority ===
-                                                                'high' && (
-                                                                <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">
-                                                                    Vysoká
-                                                                </span>
+                                                            {renderPriorityFlag(
+                                                                task,
                                                             )}
                                                         </div>
                                                     </CardContent>
@@ -189,11 +206,8 @@ export function Kanban({ project }: KanbanProps) {
                                                             }
                                                             h
                                                         </span>
-                                                        {task.priority ===
-                                                            'high' && (
-                                                            <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">
-                                                                Vysoká
-                                                            </span>
+                                                        {renderPriorityFlag(
+                                                            task,
                                                         )}
                                                     </div>
                                                 </CardContent>
@@ -225,11 +239,7 @@ export function Kanban({ project }: KanbanProps) {
                                     {activeTask.actual_hours}h /{' '}
                                     {activeTask.estimated_hours}h
                                 </span>
-                                {activeTask.priority === 'high' && (
-                                    <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">
-                                        Vysoká
-                                    </span>
-                                )}
+                                {renderPriorityFlag(activeTask)}
                             </div>
                         </CardContent>
                     </Card>

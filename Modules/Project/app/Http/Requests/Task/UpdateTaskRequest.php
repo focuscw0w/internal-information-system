@@ -32,19 +32,19 @@ class UpdateTaskRequest extends FormRequest
      */
     public function messages()
     {
-       return [
-           'title.required' => 'Názov úlohy je povinný.',
-           'title.max' => 'Názov úlohy môže mať maximálne 255 znakov.',
-           'status.in' => 'Neplatný stav úlohy.',
-           'priority.in' => 'Priorita musí byť low, medium alebo high.',
-           'estimated_hours.required' => 'Odhadovaný čas je povinný.',
-           'estimated_hours.numeric' => 'Odhadovaný čas musí byť číslo.',
-           'estimated_hours.min' => 'Odhadovaný čas nemôže byť záporný.',
-           'due_date.required' => 'Termín dokončenia je povinný.',
-           'due_date.date' => 'Termín dokončenia musí byť platný dátum.',
-           'assigned_users.array' => 'Priradení používatelia musia byť pole.',
-           'assigned_users.*.exists' => 'Vybraný používateľ neexistuje.',
-       ];
+        return [
+            'title.required' => 'Názov úlohy je povinný.',
+            'title.max' => 'Názov úlohy môže mať maximálne 255 znakov.',
+            'status.in' => 'Neplatný stav úlohy.',
+            'priority.in' => 'Priorita musí byť low, medium, high alebo urgent.',
+            'estimated_hours.required' => 'Odhadovaný čas je povinný.',
+            'estimated_hours.numeric' => 'Odhadovaný čas musí byť číslo.',
+            'estimated_hours.min' => 'Odhadovaný čas nemôže byť záporný.',
+            'due_date.required' => 'Termín dokončenia je povinný.',
+            'due_date.date' => 'Termín dokončenia musí byť platný dátum.',
+            'assigned_users.array' => 'Priradení používatelia musia byť pole.',
+            'assigned_users.*.exists' => 'Vybraný používateľ neexistuje.',
+        ];
     }
 
     /**
@@ -61,6 +61,7 @@ class UpdateTaskRequest extends FormRequest
     public function getStatusEnum(): TaskStatus
     {
         $status = $this->validated()['status'] ?? null;
+
         return $status ? TaskStatus::from($status) : TaskStatus::TODO;
     }
 
@@ -70,6 +71,7 @@ class UpdateTaskRequest extends FormRequest
     public function getPriorityEnum(): TaskPriority
     {
         $priority = $this->validated()['priority'] ?? null;
+
         return $priority ? TaskPriority::from($priority) : TaskPriority::MEDIUM;
     }
 }
