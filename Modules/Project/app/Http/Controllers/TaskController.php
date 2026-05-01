@@ -44,7 +44,15 @@ class TaskController extends Controller
             return redirect()->route('projects.project-detail', $projectId);
         }
 
-        $task->load(['subtasks', 'assignedUsers', 'comments.user']);
+        $task->load([
+            'subtasks',
+            'assignedUsers',
+            'comments.user',
+            'comments.attachments',
+            'comments.mentionedUsers',
+            'predecessors:id,title,status',
+            'successors:id,title,status',
+        ]);
 
         $project = $this->projectService->getProjectById($projectId);
         if (! $project) {
@@ -101,7 +109,22 @@ class TaskController extends Controller
      */
     public function updateStatus(UpdateTaskStatusRequest $request, int $projectId, int $taskId)
     {
-        $this->taskService->updateTaskStatus($taskId, $request->validated('status'));
+        $force = $request->boolean('force') || (bool) $request->query('force');
+
+        $result = $this->taskService->updateTaskStatus(
+            $taskId,
+            $request->validated('status'),
+            $force
+        );
+
+        if (isset($result['blocked_by'])) {
+            return back()->with('warning', [
+                'type' => 'blocked_by',
+                'message' => 'Úloha má nedokončené predchádzajúce úlohy.',
+                'blocked_by' => $result['blocked_by'],
+                'attempted_status' => $request->validated('status'),
+            ]);
+        }
 
         return back()->with('success', 'Status was successfully updated.');
     }

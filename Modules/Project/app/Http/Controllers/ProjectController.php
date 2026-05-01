@@ -70,6 +70,8 @@ class ProjectController extends Controller
 
         $project->load([
             'tasks.assignedUsers',
+            'tasks.predecessors:id,title,status',
+            'tasks.successors:id,title,status',
             'allocations.user',
             'activities.user',
             'owner',

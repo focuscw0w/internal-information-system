@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { CircleDashed, Filter, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Project, Task, TaskPriority, TaskStatus } from '../../../types/types';
+import { GanttArrows } from './gantt-arrows';
 
 const DAY_WIDTH = 28;
 const LEFT_PANEL_WIDTH = 224; // w-56
@@ -69,6 +70,9 @@ export function GanttChart({ project }: GanttChartProps) {
         null,
     );
     const [assigneeFilter, setAssigneeFilter] = useState<number | null>(null);
+    const [showDependencies, setShowDependencies] = useState<boolean>(
+        () => (project.tasks?.length ?? 0) <= 50,
+    );
 
     const projectStart = dayjs(project.start_date);
     const projectEnd = dayjs(project.end_date);
@@ -229,6 +233,16 @@ export function GanttChart({ project }: GanttChartProps) {
                         </span>
                     </>
                 )}
+
+                <label className="ml-auto flex cursor-pointer items-center gap-1.5 text-xs text-gray-600">
+                    <input
+                        type="checkbox"
+                        checked={showDependencies}
+                        onChange={(e) => setShowDependencies(e.target.checked)}
+                        className="h-3.5 w-3.5"
+                    />
+                    Zobraziť závislosti
+                </label>
             </div>
 
             {/* Gantt grid */}
@@ -241,7 +255,7 @@ export function GanttChart({ project }: GanttChartProps) {
                         </p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <div className="relative overflow-x-auto">
                         {/* Month header */}
                         <div
                             className="flex border-b border-gray-200 bg-gray-50"
@@ -434,6 +448,16 @@ export function GanttChart({ project }: GanttChartProps) {
                                 </div>
                             );
                         })}
+                        {showDependencies && (
+                            <GanttArrows
+                                tasks={filteredTasks}
+                                timelineWidth={timelineWidth}
+                                rowHeight={44}
+                                headerHeight={56}
+                                leftPanelWidth={LEFT_PANEL_WIDTH}
+                                getBar={getBar}
+                            />
+                        )}
                     </div>
                 )}
             </div>

@@ -100,6 +100,41 @@ class Task extends Model
         return $this->hasMany(TimeEntry::class);
     }
 
+    public function predecessors(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Task::class,
+            'task_dependencies',
+            'task_id',
+            'depends_on_task_id'
+        )->withPivot('type')->withTimestamps();
+    }
+
+    public function successors(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Task::class,
+            'task_dependencies',
+            'depends_on_task_id',
+            'task_id'
+        )->withPivot('type')->withTimestamps();
+    }
+
+    public function canStart(): bool
+    {
+        return $this->blockingPredecessors()->isEmpty();
+    }
+
+    public function blockingPredecessors(): \Illuminate\Support\Collection
+    {
+        $this->loadMissing('predecessors');
+
+        return $this->predecessors
+            ->reject(fn (Task $t) => $t->trashed())
+            ->reject(fn (Task $t) => $t->status === 'done')
+            ->values();
+    }
+
     // Scopes
     public function scopeTodo($query)
     {
@@ -149,7 +184,7 @@ class Task extends Model
         }
 
         if (in_array($this->status, ['in_progress', 'testing'])
-            && $this->updated_at->lt(now()->subDays(7))) {
+            && $this->updated_at?->lt(now()->subDays(7))) {
             return true;
         }
 
@@ -174,7 +209,7 @@ class Task extends Model
         }
 
         if (in_array($this->status, ['in_progress', 'testing'])
-            && $this->updated_at->lt(now()->subDays(7))) {
+            && $this->updated_at?->lt(now()->subDays(7))) {
             return 'stale';
         }
 

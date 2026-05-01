@@ -47,6 +47,13 @@ class ProjectResource extends JsonResource
 
             'tasks' => $this->whenLoaded('tasks', function () {
                 return $this->tasks->map(function ($task) {
+                    $predecessors = $task->relationLoaded('predecessors')
+                        ? $task->predecessors
+                        : collect();
+                    $successors = $task->relationLoaded('successors')
+                        ? $task->successors
+                        : collect();
+
                     return [
                         'id' => $task->id,
                         'title' => $task->title,
@@ -66,6 +73,11 @@ class ProjectResource extends JsonResource
                                 'email' => $user->email,
                             ];
                         }),
+                        'predecessor_ids' => $predecessors->pluck('id')->values(),
+                        'successor_ids' => $successors->pluck('id')->values(),
+                        'blocking_predecessors_count' => $predecessors
+                            ->reject(fn ($p) => $p->status === 'done')
+                            ->count(),
                     ];
                 });
             }),

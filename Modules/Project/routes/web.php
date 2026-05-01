@@ -7,6 +7,7 @@ use Modules\Project\Http\Controllers\TaskController;
 use Modules\Project\Http\Controllers\SubtaskController;
 use Modules\Project\Http\Controllers\TeamController;
 use Modules\Project\Http\Controllers\CommentController;
+use Modules\Project\Http\Controllers\TaskDependencyController;
 
 
 Route::middleware(['web', 'auth'])
@@ -28,6 +29,11 @@ Route::middleware(['web', 'auth'])
         Route::middleware('check.project.permission:delete_project')->group(function () {
             Route::delete('/{id}', [ProjectController::class, 'destroy'])->name('destroy');
         });
+
+        // Comments — project-scoped helpers
+        Route::get('/{id}/comments/mention-lookup', [CommentController::class, 'mentionLookup'])
+            ->name('comments.mention-lookup')
+            ->middleware('check.project.permission:view_tasks');
 
         // Tasks
         Route::prefix('{id}/tasks')->name('tasks.')->group(function () {
@@ -60,6 +66,17 @@ Route::middleware(['web', 'auth'])
             Route::post('/{task}/comments', [CommentController::class, 'store'])
                 ->name('comments.store')
                 ->middleware('check.project.permission:view_tasks');
+
+            Route::get('/{task}/comments/attachments/{attachment}/download', [CommentController::class, 'downloadAttachment'])
+                ->name('comments.attachments.download')
+                ->middleware('check.project.permission:view_tasks');
+
+            // Task dependencies
+            Route::middleware('check.project.permission:edit_tasks')->group(function () {
+                Route::post('/{task}/dependencies', [TaskDependencyController::class, 'store'])->name('dependencies.store');
+                Route::put('/{task}/dependencies', [TaskDependencyController::class, 'sync'])->name('dependencies.sync');
+                Route::delete('/{task}/dependencies/{predecessor}', [TaskDependencyController::class, 'destroy'])->name('dependencies.destroy');
+            });
 
             // Subtasks
             Route::prefix('{task}/subtasks')->name('subtasks.')

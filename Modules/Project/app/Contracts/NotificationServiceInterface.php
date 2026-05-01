@@ -3,6 +3,8 @@
 namespace Modules\Project\Contracts;
 
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Modules\Project\Models\Comment;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\User\Models\User;
@@ -32,6 +34,8 @@ interface NotificationServiceInterface
     public function notifyProjectStatusChanged(Project $project, string $oldStatus, string $newStatus, User $changedBy): void;
 
     public function notifyPasswordResetRequested(User $requestingUser): void;
+
+    public function notifyCommentMentioned(Comment $comment, Collection $mentionedUsers): void;
 
     public function getUserNotifications(User $user, int $perPage = 20): LengthAwarePaginator;
 

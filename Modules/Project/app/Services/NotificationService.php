@@ -3,11 +3,14 @@
 namespace Modules\Project\Services;
 
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Modules\Project\Contracts\NotificationServiceInterface;
+use Modules\Project\Models\Comment;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\Project\Notifications\AtRiskNotification;
+use Modules\Project\Notifications\CommentMentionedNotification;
 use Modules\Project\Notifications\DeadlineApproachingNotification;
 use Modules\Project\Notifications\ProjectCapacityAtRiskNotification;
 use Modules\Project\Notifications\ProjectHighWorkloadNotification;
@@ -282,6 +285,29 @@ class NotificationService implements NotificationServiceInterface
 
         $recipients->unique('id')
             ->reject(fn (User $u) => $u->id === $changedBy->id)
+            ->each(fn (User $u) => $u->notify($notification));
+    }
+
+    /**
+     * Notify mentioned users about a comment that tagged them.
+     */
+    public function notifyCommentMentioned(Comment $comment, Collection $mentionedUsers): void
+    {
+        if ($mentionedUsers->isEmpty()) {
+            return;
+        }
+
+        $comment->loadMissing(['task.project', 'user']);
+
+        $author = $comment->user;
+        if (! $author) {
+            return;
+        }
+
+        $notification = new CommentMentionedNotification($comment, $author);
+
+        $mentionedUsers
+            ->reject(fn (User $u) => $u->id === $author->id)
             ->each(fn (User $u) => $u->notify($notification));
     }
 

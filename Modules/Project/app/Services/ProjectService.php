@@ -11,7 +11,6 @@ use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Models\Project;
 use Modules\Project\Transformers\ProjectSummaryResource;
 use Modules\User\Models\User;
-use App\Enums\PermissionEnum;
 
 class ProjectService implements ProjectServiceInterface
 {
@@ -30,16 +29,7 @@ class ProjectService implements ProjectServiceInterface
     public function getAllProjects(array $filters = []): Collection
     {
         $user = auth()->user();
-        $query = Project::with(['owner', 'team']);
-
-        if (! $user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
-            $query->where(function ($q) use ($user) {
-                $q->where('owner_id', $user->id)
-                    ->orWhereHas('team', function ($q) use ($user) {
-                        $q->where('user_id', $user->id);
-                    });
-            });
-        }
+        $query = Project::with(['owner', 'team'])->visibleTo($user);
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);

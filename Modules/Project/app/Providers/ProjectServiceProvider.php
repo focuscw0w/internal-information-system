@@ -21,6 +21,8 @@ use Modules\Project\Services\CommentService;
 use Modules\Project\Contracts\CommentServiceInterface;
 use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Services\NotificationService;
+use Modules\Project\Contracts\TaskDependencyServiceInterface;
+use Modules\Project\Services\TaskDependencyService;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Modules\Project\Console\Commands\CheckAtRiskCommand;
@@ -70,6 +72,7 @@ class ProjectServiceProvider extends ServiceProvider
         $this->app->bind(SubtaskServiceInterface::class, SubtaskService::class);
         $this->app->bind(CommentServiceInterface::class, CommentService::class);
         $this->app->bind(NotificationServiceInterface::class, NotificationService::class);
+        $this->app->bind(TaskDependencyServiceInterface::class, TaskDependencyService::class);
     }
 
     /**

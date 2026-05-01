@@ -19,7 +19,7 @@ interface TaskServiceInterface
 
     public function assignTask(int $taskId, array $userIds): Task;
 
-    public function updateTaskStatus(int $taskId, string $status): Task;
+    public function updateTaskStatus(int $taskId, string $status, bool $force = false): array;
 
     public function getTasksByUser(int $userId): Collection;
 

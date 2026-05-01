@@ -191,13 +191,31 @@ class TaskService implements TaskServiceInterface
 
     /**
      * Update the status of a task.
+     *
+     * @return array{task: Task, blocked_by?: array<int, array{id:int, title:string, status:string}>}
      */
-    public function updateTaskStatus(int $taskId, string $status): Task
+    public function updateTaskStatus(int $taskId, string $status, bool $force = false): array
     {
-        $task = Task::findOrFail($taskId);
+        $task = Task::with('predecessors')->findOrFail($taskId);
         $oldStatus = $task->status;
 
-        Log::info('Updating task status', ['task_id' => $taskId, 'old_status' => $oldStatus, 'new_status' => $status]);
+        Log::info('Updating task status', ['task_id' => $taskId, 'old_status' => $oldStatus, 'new_status' => $status, 'force' => $force]);
+
+        $blockingPredecessors = collect();
+        if ($status !== 'todo' && $oldStatus === 'todo') {
+            $blockingPredecessors = $task->blockingPredecessors();
+
+            if ($blockingPredecessors->isNotEmpty() && ! $force) {
+                return [
+                    'task' => $task,
+                    'blocked_by' => $blockingPredecessors->map(fn (Task $p) => [
+                        'id' => $p->id,
+                        'title' => $p->title,
+                        'status' => $p->status,
+                    ])->all(),
+                ];
+            }
+        }
 
         $task->update(['status' => $status]);
 
@@ -206,12 +224,16 @@ class TaskService implements TaskServiceInterface
             'task_status_changed',
             "Zmenil stav úlohy: {$task->title}",
             $task,
-            ['old_status' => $oldStatus, 'new_status' => $status]
+            [
+                'old_status' => $oldStatus,
+                'new_status' => $status,
+                'forced' => $force && $blockingPredecessors->isNotEmpty(),
+            ]
         );
 
         $this->notificationService->notifyTaskStatusChanged($task, $oldStatus, $status);
 
-        return $task->fresh();
+        return ['task' => $task->fresh()];
     }
 
     /**

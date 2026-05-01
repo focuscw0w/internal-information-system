@@ -75,6 +75,12 @@ export interface ProjectAllocation {
     };
 }
 
+export interface TaskDependencyRef {
+    id: number;
+    title: string;
+    status: TaskStatus;
+}
+
 export interface Task {
     id: number;
     project_id: number;
@@ -97,6 +103,11 @@ export interface Task {
     updated_at: string;
     subtasks?: Subtask[];
     comments?: Comment[];
+    predecessors?: TaskDependencyRef[];
+    successors?: TaskDependencyRef[];
+    predecessor_ids?: number[];
+    successor_ids?: number[];
+    blocking_predecessors_count?: number;
 }
 
 export interface Subtask {
@@ -108,6 +119,15 @@ export interface Subtask {
     updated_at: string;
 }
 
+export interface CommentAttachment {
+    id: number;
+    original_name: string;
+    mime_type: string;
+    size_bytes: number;
+    is_image: boolean;
+    download_url: string | null;
+}
+
 export interface Comment {
     id: number;
     body: string;
@@ -116,6 +136,11 @@ export interface Comment {
         name: string;
     };
     created_at: string;
+    attachments?: CommentAttachment[];
+    mentioned_users?: {
+        id: number;
+        name: string;
+    }[];
 }
 
 export interface Activity {

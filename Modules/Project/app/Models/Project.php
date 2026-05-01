@@ -226,6 +226,18 @@ class Project extends Model
             ->orWhereHas('team', fn (Builder $q) => $q->where('user_id', $userId));
     }
 
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($user) {
+            $q->where('owner_id', $user->id)
+                ->orWhereHas('team', fn (Builder $tq) => $tq->where('user_id', $user->id));
+        });
+    }
+
     // Factory
     protected static function newFactory(): ProjectFactory
     {

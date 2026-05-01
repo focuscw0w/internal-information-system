@@ -69,12 +69,28 @@ export interface AppNotification {
     updated_at: string;
 }
 
+export interface FlashWarningBlocked {
+    type: 'blocked_by';
+    message: string;
+    blocked_by: { id: number; title: string; status: string }[];
+    attempted_status: string;
+}
+
+export type FlashWarning = FlashWarningBlocked | string | null;
+
+export interface FlashData {
+    success?: string | null;
+    error?: string | null;
+    warning?: FlashWarning;
+}
+
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
     notifications: { unread_count: number };
+    flash?: FlashData;
     [key: string]: unknown;
 }
 
