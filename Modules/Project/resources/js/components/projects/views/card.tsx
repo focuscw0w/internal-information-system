@@ -1,3 +1,4 @@
+import { Calendar } from 'lucide-react';
 import { Project } from '../../../types/types';
 import { ProgressBar } from '../progressbar';
 import { ProjectActions } from './project-actions';
@@ -11,6 +12,13 @@ interface CardProps {
 export const Card = ({ project, onClick }: CardProps) => {
     const visibleTeam = project.team?.slice(0, 4) ?? [];
     const extraTeam = Math.max(0, (project.team?.length ?? 0) - visibleTeam.length);
+    const avatarColors = [
+        'bg-[var(--accent-blue)]',
+        'bg-[#c0447c]',
+        'bg-[#5b65d8]',
+        'bg-[#009b72]',
+        'bg-[#b36b00]',
+    ];
 
     return (
         <div
@@ -24,15 +32,16 @@ export const Card = ({ project, onClick }: CardProps) => {
                 <ProjectActions project={project} />
             </div>
 
-            <div className="p-4">
+            <div className="px-5 pt-4 pb-3">
                 <CardHeader
+                    eyebrow={project.owner?.name ?? 'Internal'}
                     name={project.name}
                     status={project.status}
                     workload={project.workload}
                     isAtRisk={project.is_at_risk}
                 />
 
-                <div className="mb-4">
+                <div>
                     <ProgressBar
                         label="Pokrok"
                         value={project.progress}
@@ -41,12 +50,12 @@ export const Card = ({ project, onClick }: CardProps) => {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 border-t border-border bg-muted/50 px-4 py-3 text-xs text-muted-foreground">
-                <div className="flex min-w-0 items-center">
-                    {visibleTeam.map((member) => (
+            <div className="flex items-center justify-between gap-3 border-t border-border bg-muted/50 px-5 py-3 text-xs text-muted-foreground">
+                <div className="avatars min-w-0">
+                    {visibleTeam.map((member, index) => (
                         <span
                             key={member.id}
-                            className="-ml-1 first:ml-0 inline-grid size-5 place-items-center rounded-full border border-card bg-[var(--accent-blue)] text-[9px] font-semibold text-white"
+                            className={`avatar avatar--sm ${avatarColors[index % avatarColors.length]}`}
                             title={member.name}
                         >
                             {member.name
@@ -58,21 +67,22 @@ export const Card = ({ project, onClick }: CardProps) => {
                         </span>
                     ))}
                     {extraTeam > 0 && (
-                        <span className="-ml-1 inline-grid size-5 place-items-center rounded-full border border-card bg-muted text-[9px] font-semibold text-muted-foreground">
+                        <span className="avatar avatar--sm bg-muted text-muted-foreground">
                             +{extraTeam}
                         </span>
                     )}
                 </div>
-                <div className="flex items-center gap-5">
+                <div className="flex shrink-0 items-center gap-5">
                     <span>
                         {project.tasks_completed}/{project.tasks_total}{' '}
                         úloh
                     </span>
-                    <span>
+                    <span className="inline-flex items-center gap-1">
+                        <Calendar className="h-3.5 w-3.5" />
                         {new Date(project.end_date).toLocaleDateString(
                             'sk-SK',
                         )}
-                            </span>
+                    </span>
                 </div>
             </div>
         </div>

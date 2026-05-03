@@ -3,7 +3,7 @@ import { FormField } from '@/components/dialogs/form-field';
 import { Button } from '@/components/ui/button';
 import { useUsers } from '@/hooks/use-users';
 import { useForm, usePage } from '@inertiajs/react';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { statusOptions, workloadOptions } from '../utils';
 import { ProjectStatus, WorkloadLevel } from '../../../types/types';
@@ -57,7 +57,8 @@ export const CreateProjectDialog = () => {
             open={open}
             onOpenChange={setOpen}
             trigger={
-                <Button variant="default" size="lg">
+                <Button variant="default" size="sm">
+                    <Plus className="h-4 w-4" />
                     Nový projekt
                 </Button>
             }

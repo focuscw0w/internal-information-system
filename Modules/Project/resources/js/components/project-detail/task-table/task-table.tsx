@@ -69,13 +69,13 @@ export const TaskTable = ({ project }: TaskTableProps) => {
     ];
 
     return (
-        <Card className="border-gray-100 bg-white shadow-sm">
-            <CardHeader>
+        <Card className="card">
+            <CardHeader className="border-b border-border px-4 py-3">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">
-                        Úlohy
+                    <CardTitle className="card__title">
+                        Aktívne úlohy
                         {allTasks.length > 0 && (
-                            <span className="ml-2 text-sm font-normal text-gray-500">
+                            <span className="ml-2 text-xs font-normal text-muted-foreground">
                                 ({project.tasks_completed}/{project.tasks_total}
                                 )
                             </span>
@@ -104,7 +104,7 @@ export const TaskTable = ({ project }: TaskTableProps) => {
                     />
                 )}
             </CardHeader>
-            <CardContent>
+            <CardContent className="card__body card__body--flush">
                 <DataTable<Task>
                     columns={allColumns}
                     data={tasks}

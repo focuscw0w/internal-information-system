@@ -1,16 +1,7 @@
-import { ViewMode } from '../../types/types';
+import { Download } from 'lucide-react';
 import { CreateProjectDialog } from './dialogs/create-project';
-import { ViewModeToggle } from './viewmode-toggle';
 
-interface ProjectsHeaderProps {
-    viewMode: ViewMode;
-    onViewModeChange: (mode: ViewMode) => void;
-}
-
-export const ProjectsHeader = ({
-    viewMode,
-    onViewModeChange,
-}: ProjectsHeaderProps) => {
+export const ProjectsHeader = () => {
     return (
         <div className="page-head mb-6">
             <div>
@@ -22,13 +13,10 @@ export const ProjectsHeader = ({
             </div>
             <div className="page-head__actions">
                 <button type="button" className="btn">
+                    <Download className="h-4 w-4" />
                     Export
                 </button>
                 <CreateProjectDialog />
-                <ViewModeToggle
-                    viewMode={viewMode}
-                    onViewModeChange={onViewModeChange}
-                />
             </div>
         </div>
     );

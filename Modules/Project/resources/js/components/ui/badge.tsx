@@ -58,7 +58,7 @@ export const BadgeLabel = ({
             variant={variant}
             className={
                 getColor(type, value) +
-                ' flex items-center justify-center gap-1.5 px-3.5 py-2.5' +
+                ' flex items-center justify-center gap-1.5 px-2 py-0.5 text-xs leading-5 ' +
                 (className ?? '')
             }
         >

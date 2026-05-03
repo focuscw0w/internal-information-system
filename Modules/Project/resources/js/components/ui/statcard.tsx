@@ -16,33 +16,21 @@ export const StatCard = ({
     title,
     value,
     subtitle,
-    icon: Icon,
-    iconColor,
-    iconBgColor,
+    icon: _Icon,
+    iconColor: _iconColor,
+    iconBgColor: _iconBgColor,
     progress,
     progressLabel,
 }: StatCardProps) => {
     return (
         <div className="kpi">
-            {/* Header s ikonou */}
-            <div className="mb-2 flex items-center text-xs font-medium text-muted-foreground">
-                <div
-                    className={`${iconBgColor} mr-2 flex-shrink-0 rounded-md p-1.5`}
-                >
-                    <Icon className={`${iconColor} h-4 w-4`} />
-                </div>
-                {title}
-            </div>
+            <span className="kpi__label">{title}</span>
+            <p className="kpi__value">{value}</p>
 
-            {/* Hodnota */}
-            <p className="text-3xl font-semibold tracking-tight text-foreground">{value}</p>
-
-            {/* Subtitle (napr. "z 100€") */}
             {subtitle && (
                 <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
             )}
 
-            {/* Progress bar (optional) */}
             {progress !== undefined && (
                 <>
                     <Progress

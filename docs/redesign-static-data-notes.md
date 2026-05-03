@@ -23,6 +23,13 @@ Tieto prvky su v redizajne docasne staticke alebo neaktivne, pretoze aktualna da
 
 - Spodny popis pouzivatela v sidebare zobrazuje docasne `Project Lead`, kym nebude doplnena realna rola/profilova pozicia.
 
+## Projekty
+
+- Klient alebo organizacia projektu z Claude karticiek nie je samostatne pole v aktualnom projektovom modeli; UI docasne pouziva vlastnika projektu alebo `Internal`.
+- Rola clena timu v pravom paneli detailu projektu je docasne `Clen timu`, kym nebude doplnena projektova rola alebo pozicia.
+- KPI texty ako medzimesacna zmena aktivnych projektov a pocet timov su docasne vizualne doplnky, kym nebude doplneny realny analyticky zdroj.
+- Akcia `Spravovat tim` v hlavicke detailu projektu je zatial vizualna, realna sprava clenov zostava v existujucich projektovych dialogoch.
+
 ## Buduce backend ulohy
 
 - Navrhnut profilove polia alebo samostatny profilovy model.

@@ -1,6 +1,5 @@
-import { AlertTriangle, Calendar, Clock, TrendingUp } from 'lucide-react';
 import { Project } from '../../../types/types';
-import { StatCard } from '../../ui/statcard';
+import { BadgeLabel } from '../../ui/badge';
 import { TaskTable } from '../task-table/task-table';
 
 interface ProjectOverviewProps {
@@ -11,55 +10,104 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
     const permissions = project.current_user_permissions ?? [];
     const can = (permission: string) => permissions.includes(permission);
 
-    const capacityPercentage = Math.min(project.capacity_used, 100);
-
-    const atRiskTaskCount = project.tasks?.filter((t) => t.is_at_risk && t.status !== 'done').length ?? 0;
-
     return (
-        <div className="space-y-6">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <StatCard
-                    title="Obdobie projektu"
-                    value={new Date(project.start_date).toLocaleDateString('sk-SK')}
-                    subtitle={`až ${new Date(project.end_date).toLocaleDateString('sk-SK')}`}
-                    icon={Calendar}
-                    iconColor="text-blue-600"
-                    iconBgColor="bg-blue-50"
-                />
-
-                <StatCard
-                    title="Kapacita"
-                    value={`${project.capacity_used}%`}
-                    subtitle={`${project.capacity_available}% voľných`}
-                    icon={Clock}
-                    iconColor="text-amber-600"
-                    iconBgColor="bg-amber-50"
-                    progress={capacityPercentage}
-                    progressLabel={`${project.capacity_used}% použité`}
-                />
-
-                <StatCard
-                    title="Progres"
-                    value={`${project.progress}%`}
-                    subtitle={`${project.tasks_completed} z ${project.tasks_total} úloh`}
-                    icon={TrendingUp}
-                    iconColor="text-purple-600"
-                    iconBgColor="bg-purple-50"
-                    progress={project.progress}
-                />
-
-                <StatCard
-                    title="Ohrozené úlohy"
-                    value={String(atRiskTaskCount)}
-                    subtitle={atRiskTaskCount > 0 ? 'úlohy vyžadujú pozornosť' : 'žiadne problémy'}
-                    icon={AlertTriangle}
-                    iconColor={atRiskTaskCount > 0 ? 'text-red-600' : 'text-gray-400'}
-                    iconBgColor={atRiskTaskCount > 0 ? 'bg-red-50' : 'bg-gray-50'}
-                />
+        <div className="grid-main-side">
+            <div className="col gap-4">
+                {can('view_tasks') && <TaskTable project={project} />}
             </div>
 
-            {can('view_tasks') && <TaskTable project={project} />}
+            <aside className="col gap-4">
+                <section className="card">
+                    <div className="card__head">
+                        <h3 className="card__title">Detaily</h3>
+                    </div>
+                    <div className="card__body space-y-3">
+                        <DetailRow
+                            label="Klient"
+                            value={project.owner?.name ?? 'Internal'}
+                        />
+                        <DetailRow
+                            label="Vedúci"
+                            value={project.owner?.name ?? 'Nepriradený'}
+                        />
+                        <DetailRow
+                            label="Začiatok"
+                            value={new Date(
+                                project.start_date,
+                            ).toLocaleDateString('sk-SK')}
+                        />
+                        <DetailRow
+                            label="Deadline"
+                            value={new Date(project.end_date).toLocaleDateString(
+                                'sk-SK',
+                            )}
+                        />
+                        <DetailRow
+                            label="Veľkosť tímu"
+                            value={`${project.team_size} ľudí`}
+                        />
+                        <div className="flex items-center justify-between gap-3 text-sm">
+                            <span className="text-muted-foreground">Stav</span>
+                            <BadgeLabel type="status" value={project.status} />
+                        </div>
+                    </div>
+                </section>
+
+                <section className="card">
+                    <div className="card__head">
+                        <h3 className="card__title">Tím</h3>
+                    </div>
+                    <div className="card__body space-y-3">
+                        {project.team.slice(0, 6).map((member) => (
+                            <div
+                                key={member.id}
+                                className="flex items-center gap-3"
+                            >
+                                <span className="avatar avatar--sm">
+                                    {member.name
+                                        .split(' ')
+                                        .map((part) => part[0])
+                                        .join('')
+                                        .slice(0, 2)
+                                        .toUpperCase()}
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-medium text-foreground">
+                                        {member.name}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Člen tímu
+                                    </p>
+                                </div>
+                                {member.weekly_load_hours !== undefined &&
+                                    member.weekly_capacity_hours !== undefined && (
+                                        <span className="mono text-xs text-muted-foreground">
+                                            {member.weekly_load_hours}h/
+                                            {member.weekly_capacity_hours}h
+                                        </span>
+                                    )}
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            </aside>
+        </div>
+    );
+}
+
+function DetailRow({
+    label,
+    value,
+}: {
+    label: string;
+    value: string;
+}) {
+    return (
+        <div className="flex items-center justify-between gap-3 text-sm">
+            <span className="text-muted-foreground">{label}</span>
+            <span className="text-right font-medium text-foreground">
+                {value}
+            </span>
         </div>
     );
 }

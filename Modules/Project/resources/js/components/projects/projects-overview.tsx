@@ -1,13 +1,5 @@
 import { router } from '@inertiajs/react';
-import {
-    CheckCircle2,
-    Clock,
-    Filter,
-    Search,
-    TrendingUp,
-    Users,
-    X,
-} from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
     Project,
@@ -15,8 +7,8 @@ import {
     ViewMode,
     WorkloadLevel,
 } from '../../types/types';
-import { StatCard } from '../ui/statcard';
 import { ProjectsHeader } from './projects-header';
+import { ViewModeToggle } from './viewmode-toggle';
 import { Card } from './views/card';
 import { Row } from './views/row';
 
@@ -38,10 +30,10 @@ const WORKLOAD_OPTIONS: { value: WorkloadLevel; label: string }[] = [
 ];
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-    { value: 'name', label: 'Názov (A–Z)' },
-    { value: 'end_date', label: 'Najbližší deadline' },
+    { value: 'end_date', label: 'Zoradiť: Najbližší deadline' },
     { value: 'progress_desc', label: 'Najvyšší pokrok' },
     { value: 'status', label: 'Stav' },
+    { value: 'name', label: 'Názov (A-Z)' },
 ];
 
 interface ProjectsOverviewProps {
@@ -57,7 +49,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
     const [workloadFilter, setWorkloadFilter] = useState<WorkloadLevel | null>(
         null,
     );
-    const [sortBy, setSortBy] = useState<SortOption>('name');
+    const [sortBy, setSortBy] = useState<SortOption>('end_date');
 
     const handleProjectClick = (projectId: number) => {
         router.visit(`/projects/${projectId}`);
@@ -115,51 +107,57 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
 
     return (
         <div>
-            {/* Header */}
-            <ProjectsHeader
-                viewMode={viewMode}
-                onViewModeChange={setViewMode}
-            />
+            <ProjectsHeader />
 
-            {/* Súhrnné štatistiky */}
             <div className="kpi-grid mb-6">
-                <StatCard
-                    title="Aktívne projekty"
-                    value={activeProjects}
-                    icon={TrendingUp}
-                    iconColor="text-blue-600"
-                    iconBgColor="bg-blue-100"
-                />
-                <StatCard
-                    title="Celkový tím"
-                    value={totalTeam}
-                    icon={Users}
-                    iconColor="text-green-600"
-                    iconBgColor="bg-green-100"
-                />
-                <StatCard
-                    title="Priemerné vyťaženie"
-                    value={`${avgCapacity}%`}
-                    icon={Clock}
-                    iconColor="text-yellow-600"
-                    iconBgColor="bg-yellow-100"
-                />
-                <StatCard
-                    title="Dokončené úlohy"
-                    value={`${tasksCompleted}/${tasksTotal}`}
-                    icon={CheckCircle2}
-                    iconColor="text-purple-600"
-                    iconBgColor="bg-purple-100"
-                />
+                <div className="kpi">
+                    <span className="kpi__label">Aktívne projekty</span>
+                    <span className="kpi__value">
+                        {activeProjects}
+                        <sub>/ {projects.length}</sub>
+                    </span>
+                    <span className="kpi__delta kpi__delta--up">
+                        ↗ +1 oproti minulému mesiacu
+                    </span>
+                </div>
+                <div className="kpi">
+                    <span className="kpi__label">Ľudia v projektoch</span>
+                    <span className="kpi__value">{totalTeam}</span>
+                    <span className="kpi__delta">naprieč 4 tímami</span>
+                </div>
+                <div className="kpi">
+                    <span className="kpi__label">Priemerné vyťaženie</span>
+                    <span className="kpi__value">
+                        {avgCapacity}
+                        <sub>%</sub>
+                    </span>
+                    <span className="kpi__delta kpi__delta--down">
+                        ↑ 8% — pozri kapacity
+                    </span>
+                </div>
+                <div className="kpi">
+                    <span className="kpi__label">Dokončené úlohy</span>
+                    <span className="kpi__value">
+                        {tasksCompleted}
+                        <sub>/ {tasksTotal}</sub>
+                    </span>
+                    <div className="progress mt-3">
+                        <div
+                            className="progress__fill"
+                            style={{
+                                width: `${tasksTotal ? Math.round((tasksCompleted / tasksTotal) * 100) : 0}%`,
+                            }}
+                        />
+                    </div>
+                </div>
             </div>
 
-            {/* Filter bar */}
             <div className="command-bar mb-4">
                 <div className="field-wrap command-bar__search">
-                    <Search className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <Search className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <input
                         type="text"
-                        placeholder="Hľadať projekt..."
+                        placeholder="Hľadať projekt podľa názvu alebo klienta..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="input input--with-icon w-full"
@@ -167,8 +165,6 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                 </div>
 
                 <div className="command-bar__filters">
-                    <Filter className="h-4 w-4 flex-shrink-0 text-gray-400" />
-
                     <select
                         value={statusFilter ?? ''}
                         onChange={(e) =>
@@ -218,8 +214,17 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                     </select>
                 </div>
 
+                <div className="command-bar__spacer" />
+                <span className="text-xs text-muted-foreground">
+                    {filtered.length} z {projects.length}
+                </span>
+                <ViewModeToggle
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
+                />
+
                 {hasFilters && (
-                    <>
+                    <div className="command-bar__actions">
                         <button
                             onClick={clearFilters}
                             className="btn btn--ghost btn--sm"
@@ -227,14 +232,10 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                             <X className="h-3 w-3" />
                             Zrušiť filtre
                         </button>
-                        <span className="text-xs text-muted-foreground">
-                            {filtered.length} z {projects.length}
-                        </span>
-                    </>
+                    </div>
                 )}
             </div>
 
-            {/* Grid alebo List view */}
             {filtered.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-2 py-16 text-gray-400">
                     <Search className="h-10 w-10 text-gray-300" />
@@ -259,7 +260,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                     ))}
                 </div>
             ) : (
-                <div>
+                <div className="space-y-3">
                     {filtered.map((project) => (
                         <Row
                             key={project.id}

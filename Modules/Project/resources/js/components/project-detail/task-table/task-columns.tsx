@@ -31,7 +31,7 @@ export const TaskColumns: Column<Task>[] = [
                 {getStatusIcon(task.status)}
                 <div>
                     <div className="flex items-center gap-1.5">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-foreground">
                             {task.title}
                         </p>
                         {task.is_at_risk && (
@@ -47,8 +47,7 @@ export const TaskColumns: Column<Task>[] = [
                         )}
                     </div>
                     {task.assigned_users && task.assigned_users.length > 0 && (
-                        <p className="mt-0.5 text-xs text-gray-400">
-                            👤{' '}
+                        <p className="mt-0.5 text-xs text-muted-foreground">
                             {task.assigned_users.map((u) => u.name).join(', ')}
                         </p>
                     )}
@@ -61,7 +60,7 @@ export const TaskColumns: Column<Task>[] = [
         label: 'Stav',
         width: 'w-32',
         render: (task) => (
-            <BadgeLabel type="status" value={task.status} className="py-3" />
+            <BadgeLabel type="task-status" value={task.status} />
         ),
     },
     {
@@ -72,7 +71,6 @@ export const TaskColumns: Column<Task>[] = [
             <BadgeLabel
                 type="priority"
                 value={task.priority}
-                className="py-3"
             />
         ),
     },

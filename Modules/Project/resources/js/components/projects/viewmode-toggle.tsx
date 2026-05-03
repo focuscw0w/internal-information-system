@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Grid3x3, List } from 'lucide-react';
 import { ViewMode } from '../../types/types';
 
@@ -12,29 +11,23 @@ export const ViewModeToggle = ({
     onViewModeChange,
 }: ViewModeToggleProps) => {
     return (
-        <div className="flex items-center gap-2 rounded-lg bg-white p-1 shadow">
-            <Button
+        <div className="seg" aria-label="Prepnúť zobrazenie projektov">
+            <button
+                type="button"
                 onClick={() => onViewModeChange('grid')}
-                className={`flex items-center gap-2 rounded-md px-4 py-2 transition-colors ${
-                    viewMode === 'grid'
-                        ? 'bg-primary text-white'
-                        : 'bg-secondary text-black hover:bg-gray-100'
-                }`}
+                className={`seg__btn ${viewMode === 'grid' ? 'is-active' : ''}`}
             >
-                <Grid3x3 size={18} />
-                <span className="font-medium">Grid</span>
-            </Button>
-            <Button
+                <Grid3x3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Grid</span>
+            </button>
+            <button
+                type="button"
                 onClick={() => onViewModeChange('list')}
-                className={`flex items-center gap-2 rounded-md px-4 py-2 transition-colors ${
-                    viewMode === 'list'
-                        ? 'bg-primary text-white'
-                        : 'bg-secondary text-black hover:bg-gray-100'
-                }`}
+                className={`seg__btn ${viewMode === 'list' ? 'is-active' : ''}`}
             >
-                <List size={18} />
-                <span className="font-medium">Zoznam</span>
-            </Button>
+                <List className="h-4 w-4" />
+                <span className="hidden sm:inline">Zoznam</span>
+            </button>
         </div>
     );
 };

@@ -47,26 +47,26 @@ export const TaskFilters = ({
         searchQuery || statusFilter || priorityFilter || assigneeFilter;
 
     return (
-        <div className="flex flex-wrap items-center gap-6 pt-2">
-            <div className="relative">
-                <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+        <div className="command-bar mt-3 w-full">
+            <div className="field-wrap command-bar__search">
+                <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <input
                     type="text"
                     placeholder="Hľadať úlohu..."
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    className="w-44 rounded-md border border-gray-200 bg-white py-1.5 pr-3 pl-7 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
+                    className="input input--with-icon w-full"
                 />
             </div>
-            <div className="flex items-center gap-2.5">
-                <Filter className="h-4 w-4 text-gray-400" />
+            <div className="command-bar__filters">
+                <Filter className="h-4 w-4 text-muted-foreground" />
 
                 <select
                     value={statusFilter ?? ''}
                     onChange={(e) =>
                         onStatusChange((e.target.value as TaskStatus) || null)
                     }
-                    className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="select text-xs"
                 >
                     <option value="">Všetky stavy</option>
                     {statusFilterOptions.map((opt) => (
@@ -83,7 +83,7 @@ export const TaskFilters = ({
                             (e.target.value as TaskPriority) || null,
                         )
                     }
-                    className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="select text-xs"
                 >
                     <option value="">Všetky priority</option>
                     {priorityFilterOptions.map((opt) => (
@@ -102,7 +102,7 @@ export const TaskFilters = ({
                             e.target.value ? Number(e.target.value) : null,
                         )
                     }
-                    className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="select text-xs"
                 >
                     <option value="">Všetci členovia</option>
                     {assignees.map((user) => (
@@ -117,12 +117,12 @@ export const TaskFilters = ({
                 <>
                     <button
                         onClick={onClear}
-                        className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                        className="btn btn--ghost btn--sm"
                     >
                         <X className="h-3 w-3" />
                         Zrušiť filtre
                     </button>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-muted-foreground">
                         {filteredCount} z {totalCount}
                     </span>
                 </>

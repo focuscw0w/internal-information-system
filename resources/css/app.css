@@ -171,7 +171,7 @@
 
 @layer components {
     .page {
-        @apply space-y-6 p-6;
+        @apply space-y-6 px-6 py-7;
     }
 
     .page-enter {
@@ -184,6 +184,7 @@
 
     .page-head__title {
         @apply text-2xl font-semibold tracking-tight text-foreground;
+        font-family: var(--font-sans);
     }
 
     .page-head__subtitle {
@@ -199,7 +200,9 @@
     }
 
     .kpi {
-        @apply rounded-lg border border-border bg-card p-4 shadow-xs;
+        @apply rounded-lg border border-border bg-card shadow-xs;
+        min-height: 100px;
+        padding: 18px;
     }
 
     .kpi__label {
@@ -208,6 +211,7 @@
 
     .kpi__value {
         @apply mt-2 flex items-baseline gap-1 text-3xl font-semibold leading-none tracking-tight text-foreground;
+        font-variant-numeric: tabular-nums;
     }
 
     .kpi__value sub {
@@ -227,7 +231,8 @@
     }
 
     .command-bar {
-        @apply flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3 shadow-xs;
+        @apply flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card shadow-xs;
+        padding: 10px 12px;
     }
 
     .command-bar__search {
@@ -245,6 +250,7 @@
 
     .btn {
         @apply inline-flex h-8 items-center justify-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground shadow-xs transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50;
+        font-size: 13px;
     }
 
     .btn--primary {
@@ -260,7 +266,7 @@
     }
 
     .icon-btn {
-        @apply inline-flex size-8 items-center justify-center rounded-md border border-transparent bg-transparent text-muted-foreground transition-colors hover:bg-muted hover:text-foreground;
+        @apply inline-flex size-8 items-center justify-center rounded-md border border-transparent bg-transparent text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground;
     }
 
     .field-wrap {
@@ -279,7 +285,7 @@
 
     .input,
     .select {
-        @apply h-9 px-3;
+        @apply h-8 px-3;
     }
 
     .input--with-icon {
@@ -310,8 +316,13 @@
         @apply p-4;
     }
 
+    .card__body--flush {
+        @apply p-0;
+    }
+
     .badge {
-        @apply inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium leading-5;
+        @apply inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium;
+        line-height: 18px;
     }
 
     .badge__dot {
@@ -359,7 +370,8 @@
     }
 
     .table {
-        @apply w-full border-collapse text-sm;
+        @apply w-full border-collapse;
+        font-size: 13px;
     }
 
     .table thead tr {
@@ -402,8 +414,13 @@
         @apply flex flex-wrap items-center gap-1 border-b border-border;
     }
 
+    .tabs {
+        @apply flex flex-wrap items-center gap-1 border-b border-border;
+    }
+
     .tab {
         @apply inline-flex h-10 items-center gap-2 border-b-2 border-transparent px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground;
+        background: transparent;
     }
 
     .tab.is-active {
@@ -428,6 +445,69 @@
 
     .profile-hero__main {
         @apply min-w-0 flex-1;
+    }
+
+    .seg {
+        @apply inline-flex items-center rounded-md border border-border bg-muted p-0.5;
+    }
+
+    .seg__btn {
+        @apply inline-flex h-7 items-center gap-1.5 rounded px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground;
+    }
+
+    .seg__btn.is-active {
+        @apply border border-border bg-card text-foreground shadow-xs;
+    }
+
+    .avatars {
+        @apply flex items-center;
+    }
+
+    .avatars .avatar {
+        @apply -ml-1 border border-card first:ml-0;
+    }
+
+    .mono {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .dot {
+        @apply inline-block size-1.5 shrink-0 rounded-full bg-muted-foreground;
+    }
+
+    .dot--warning {
+        background: var(--warning);
+    }
+
+    .dot--danger {
+        background: var(--danger);
+    }
+
+    .grid-main-side {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+        gap: 18px;
+        align-items: start;
+    }
+
+    .col {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .page-head__back {
+        @apply inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground;
+    }
+
+    .page-head__back svg {
+        @apply h-4 w-4;
+    }
+}
+
+@media (max-width: 1024px) {
+    .grid-main-side {
+        grid-template-columns: 1fr;
     }
 }
 

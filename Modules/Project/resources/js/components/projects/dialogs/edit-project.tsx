@@ -82,11 +82,17 @@ export const EditProjectDialog = ({
             trigger={
                 <button
                     onClick={(e) => e.stopPropagation()}
-                    className="cursor-pointer flex items-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    className={
+                        text === 'Upraviť projekt'
+                            ? 'btn'
+                            : text
+                              ? 'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-muted'
+                              : 'icon-btn'
+                    }
                     title="Upraviť projekt"
                 >
-                    <Edit size={20} />
-                    <span className="text-sm">{text}</span>
+                    <Edit className="h-4 w-4" />
+                    {text && <span>{text}</span>}
                 </button>
             }
             title="Upraviť projekt"

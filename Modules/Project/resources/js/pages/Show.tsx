@@ -1,14 +1,15 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Head } from '@inertiajs/react';
-import { Calendar, FileText, GanttChartSquare, KanbanIcon, Users } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import { ArrowLeft, Calendar, FileText, GanttChartSquare, KanbanIcon, Users } from 'lucide-react';
 import { GanttChart } from '../components/project-detail/tab-views/gantt';
 import { Kanban } from '../components/project-detail/kanban/kanban';
 import { ProjectOverview } from '../components/project-detail/tab-views/project-overview';
 import { Team } from '../components/project-detail/tab-views/team';
 import { Timeline } from '../components/project-detail/tab-views/timeline';
+import { CreateTaskDialog } from '../components/project-detail/task-table/dialogs/create-task';
+import { TaskTable } from '../components/project-detail/task-table/task-table';
 import { EditProjectDialog } from '../components/projects/dialogs/edit-project';
 import { BadgeLabel } from '../components/ui/badge';
-import { Header } from '../components/ui/header';
 import ProjectLayout from '../layouts/project-layout';
 import { Project } from '../types/types';
 
@@ -37,66 +38,166 @@ export default function Show({
     const permissions = project.current_user_permissions ?? [];
 
     const can = (permission: string) => permissions.includes(permission);
+    const atRiskTaskCount =
+        project.tasks?.filter((task) => task.is_at_risk && task.status !== 'done')
+            .length ?? 0;
 
     return (
         <ProjectLayout project={projectWithCapacity}>
             <Head title={`Detail projektu - ${project.name}`} />
 
-            <div className="min-h-screen space-y-6 p-6">
-                {/* Header */}
-                <Header
-                    title={project.name}
-                    description={project.description}
-                    backHref="/projects"
-                    backLabel="Späť na projekty"
-                >
-                    <Header.Badges>
-                        <BadgeLabel
-                            type="status"
-                            value={project.status}
-                            showLabel
-                        />
-                        <BadgeLabel
-                            type="workload"
-                            value={project.workload}
-                            showLabel
-                        />
-                    </Header.Badges>
-                    {can('edit_project') && (
-                        <Header.Actions>
-                            <EditProjectDialog project={projectWithCapacity} text="Upraviť projekt" />
-                        </Header.Actions>
-                    )}
-                </Header>
+            <div className="page min-h-screen">
+                <Link href="/projects" className="page-head__back">
+                    <ArrowLeft />
+                    Späť na projekty
+                </Link>
 
-                {/* Tabs */}
+                <div className="page-head">
+                    <div>
+                        <div className="mb-2 flex flex-wrap items-center gap-2">
+                            <span className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+                                {project.owner?.name ?? 'Internal'}
+                            </span>
+                            <BadgeLabel type="status" value={project.status} />
+                            <BadgeLabel type="workload" value={project.workload} />
+                        </div>
+                        <h1 className="page-head__title">{project.name}</h1>
+                        <p className="page-head__subtitle">
+                            Vedúci projektu:{' '}
+                            <strong className="font-semibold text-foreground">
+                                {project.owner?.name ?? 'Nepriradený'}
+                            </strong>{' '}
+                            ·{' '}
+                            {new Date(project.start_date).toLocaleDateString(
+                                'sk-SK',
+                            )}{' '}
+                            –{' '}
+                            {new Date(project.end_date).toLocaleDateString(
+                                'sk-SK',
+                            )}
+                        </p>
+                    </div>
+
+                    <div className="page-head__actions">
+                        {can('view_team') && (
+                            <button type="button" className="btn">
+                                <Users className="h-4 w-4" />
+                                Spravovať tím
+                            </button>
+                        )}
+                        {can('edit_project') && (
+                            <EditProjectDialog
+                                project={projectWithCapacity}
+                                text="Upraviť projekt"
+                            />
+                        )}
+                        {can('edit_tasks') && (
+                            <CreateTaskDialog
+                                projectId={project.id}
+                                team={project.team}
+                            />
+                        )}
+                    </div>
+                </div>
+
+                <div className="kpi-grid">
+                    <div className="kpi">
+                        <span className="kpi__label">Pokrok</span>
+                        <span className="kpi__value">
+                            {project.progress}
+                            <sub>%</sub>
+                        </span>
+                        <div className="progress mt-3">
+                            <div
+                                className="progress__fill"
+                                style={{ width: `${project.progress}%` }}
+                            />
+                        </div>
+                    </div>
+                    <div className="kpi">
+                        <span className="kpi__label">Vyťaženie tímu</span>
+                        <span
+                            className="kpi__value"
+                            style={{
+                                color:
+                                    project.capacity_used > 100
+                                        ? 'var(--danger-text)'
+                                        : undefined,
+                            }}
+                        >
+                            {project.capacity_used}
+                            <sub>%</sub>
+                        </span>
+                        <div className="progress mt-3">
+                            <div
+                                className={`progress__fill ${
+                                    project.capacity_used > 100
+                                        ? 'progress__fill--danger'
+                                        : project.capacity_used > 85
+                                          ? 'progress__fill--warning'
+                                          : ''
+                                }`}
+                                style={{
+                                    width: `${Math.min(project.capacity_used, 100)}%`,
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <div className="kpi">
+                        <span className="kpi__label">Úlohy</span>
+                        <span className="kpi__value">
+                            {project.tasks_completed}
+                            <sub>/ {project.tasks_total}</sub>
+                        </span>
+                        <span className="kpi__delta">
+                            {project.tasks_total - project.tasks_completed}{' '}
+                            ostáva
+                        </span>
+                    </div>
+                    <div className="kpi">
+                        <span className="kpi__label">Do deadline</span>
+                        <span className="kpi__value">
+                            {Math.abs(project.days_remaining)}
+                            <sub>
+                                {project.days_remaining >= 0 ? 'dní' : 'dní po'}
+                            </sub>
+                        </span>
+                        <span className="kpi__delta kpi__delta--down">
+                            {atRiskTaskCount} ohrozené úlohy
+                        </span>
+                    </div>
+                </div>
+
                 <Tabs defaultValue="overview" className="mb-12 w-full">
                     <div className="flex items-center justify-between">
-                        <TabsList className="grid w-full max-w-2xl grid-cols-5 gap-3 bg-white">
+                        <TabsList variant="line" className="tabbar w-full justify-start">
                             <TabsTrigger
                                 value="overview"
-                                className="flex cursor-pointer items-center gap-2 py-2.5"
                             >
                                 <FileText className="h-4 w-4" />
                                 Prehľad
                             </TabsTrigger>
+                            <TabsTrigger value="tasks">
+                                <FileText className="h-4 w-4" />
+                                Úlohy
+                                <span className="tab__count">
+                                    {project.tasks?.length ?? 0}
+                                </span>
+                            </TabsTrigger>
                             <TabsTrigger
                                 value="kanban"
-                                className="flex cursor-pointer items-center gap-2 py-2.5"
                             >
                                 <KanbanIcon className="h-4 w-4" />
                                 Kanban
                             </TabsTrigger>
                             <TabsTrigger
                                 value="timeline"
-                                className="flex cursor-pointer items-center gap-2 py-2.5"
                             >
                                 <Calendar className="h-4 w-4" />
                                 Časová os
                             </TabsTrigger>
                             <TabsTrigger
                                 value="gantt"
-                                className="flex cursor-pointer items-center gap-2 py-2.5"
                             >
                                 <GanttChartSquare className="h-4 w-4" />
                                 Gantt
@@ -104,7 +205,6 @@ export default function Show({
                             {can('view_team') && (
                                 <TabsTrigger
                                     value="team"
-                                    className="flex cursor-pointer items-center gap-2 py-2.5"
                                 >
                                     <Users className="h-4 w-4" />
                                     Tím
@@ -115,6 +215,9 @@ export default function Show({
 
                     <TabsContent value="overview" className="mt-6">
                         <ProjectOverview project={projectWithCapacity} />
+                    </TabsContent>
+                    <TabsContent value="tasks" className="mt-6">
+                        <TaskTable project={projectWithCapacity} />
                     </TabsContent>
                     <TabsContent value="kanban" className="mt-6">
                         <Kanban project={projectWithCapacity} />

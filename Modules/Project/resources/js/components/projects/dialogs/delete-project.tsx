@@ -6,9 +6,10 @@ import { Project } from '../../../types/types';
 
 interface DeleteProjectDialogProps {
     project: Project;
+    text?: string;
 }
 
-export const DeleteProjectDialog = ({ project }: DeleteProjectDialogProps) => {
+export const DeleteProjectDialog = ({ project, text }: DeleteProjectDialogProps) => {
     const [open, setOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -30,10 +31,15 @@ export const DeleteProjectDialog = ({ project }: DeleteProjectDialogProps) => {
             trigger={
                 <button
                     onClick={(e) => e.stopPropagation()}
-                    className="cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600"
+                    className={
+                        text
+                            ? 'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-[var(--danger-text)] transition-colors hover:bg-[var(--danger-soft)]'
+                            : 'icon-btn hover:text-[var(--danger-text)]'
+                    }
                     title="Zmazať projekt"
                 >
-                    <Trash2 size={20} />
+                    <Trash2 className="h-4 w-4" />
+                    {text && <span>{text}</span>}
                 </button>
             }
             title="Zmazať projekt?"

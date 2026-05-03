@@ -32,30 +32,29 @@ export function AppSidebarHeader({
 
     return (
         <>
-            <header className="grid h-13 shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-sidebar-border bg-card px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:grid-cols-[minmax(0,1fr)_minmax(18rem,28rem)_minmax(0,1fr)] md:px-5">
+            <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-sidebar-border bg-card px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-5">
                 <div className="flex min-w-0 items-center gap-2">
                     <SidebarTrigger className="-ml-1 md:hidden" />
                     <Breadcrumbs breadcrumbs={breadcrumbs} />
                 </div>
 
-                <button
-                    type="button"
-                    onClick={() => setSearchOpen(true)}
-                    className="hidden h-8 w-full items-center justify-between rounded-md border border-input bg-card px-3 text-sm text-muted-foreground shadow-xs transition-[border-color,color,box-shadow] hover:border-ring hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20 focus-visible:outline-none md:flex"
-                    title="Hľadať (Ctrl/Cmd + K)"
-                >
-                    <span className="flex min-w-0 items-center gap-2">
-                        <Search className="h-4 w-4 shrink-0" />
-                        <span className="truncate">
-                            Hľadať projekty, úlohy, ľudí...
+                <div className="ml-auto flex items-center justify-end gap-3">
+                    <button
+                        type="button"
+                        onClick={() => setSearchOpen(true)}
+                        className="hidden h-8 w-[min(30rem,42vw)] items-center justify-between rounded-md border border-input bg-card px-3 text-sm text-muted-foreground shadow-xs transition-[border-color,color,box-shadow] hover:border-ring hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20 focus-visible:outline-none md:flex"
+                        title="Hľadať (Ctrl/Cmd + K)"
+                    >
+                        <span className="flex min-w-0 items-center gap-2">
+                            <Search className="h-4 w-4 shrink-0" />
+                            <span className="truncate">
+                                Hľadať projekty, úlohy, ľudí...
+                            </span>
                         </span>
-                    </span>
-                    <kbd className="ml-3 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                        ⌘K
-                    </kbd>
-                </button>
-
-                <div className="flex items-center justify-end gap-2">
+                        <kbd className="ml-3 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                            ⌘K
+                        </kbd>
+                    </button>
                     <Button
                         variant="ghost"
                         size="icon"
