@@ -50,6 +50,7 @@ class TaskController extends Controller
             'comments.user',
             'comments.attachments',
             'comments.mentionedUsers',
+            'timeEntries.user',
             'predecessors:id,title,status',
             'successors:id,title,status',
         ]);

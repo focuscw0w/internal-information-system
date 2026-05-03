@@ -1,12 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { router } from '@inertiajs/react';
-import { Filter, ListChecks } from 'lucide-react';
-import { useState } from 'react';
-import { Subtask, Task } from '../../../types/types';
+import { MoreHorizontal } from 'lucide-react';
+import { Task } from '../../../types/types';
 import { CreateSubtaskDialog } from '../dialogs/subtask/create-subtask';
-import { DataTable } from '@/components/ui/data-table';
-import { getSubtaskColumns } from './subtask-columns';
-import { CompletionFilter, SubtaskFilters } from './subtask-filters';
 
 interface SubtaskTableProps {
     task: Task;
@@ -14,17 +9,8 @@ interface SubtaskTableProps {
 }
 
 export const SubtaskTable = ({ task, projectId }: SubtaskTableProps) => {
-    const [completionFilter, setCompletionFilter] =
-        useState<CompletionFilter>('all');
-
-    const allSubtasks = task.subtasks ?? [];
-    const completed = allSubtasks.filter((s) => s.is_completed).length;
-
-    const subtasks = allSubtasks.filter((s) => {
-        if (completionFilter === 'completed') return s.is_completed;
-        if (completionFilter === 'incomplete') return !s.is_completed;
-        return true;
-    });
+    const subtasks = task.subtasks ?? [];
+    const completed = subtasks.filter((subtask) => subtask.is_completed).length;
 
     const handleToggle = (subtaskId: number) => {
         router.patch(
@@ -34,75 +20,52 @@ export const SubtaskTable = ({ task, projectId }: SubtaskTableProps) => {
         );
     };
 
-    const columns = getSubtaskColumns({
-        projectId,
-        taskId: task.id,
-        onToggle: handleToggle,
-    });
-
     return (
-        <div className="space-y-6">
-            <Card className="border-gray-100 shadow-sm">
-                <CardHeader className="flex-row items-center justify-between">
-                    <div>
-                        <CardTitle className="text-lg">
-                            Podúlohy
-                            {allSubtasks.length > 0 && (
-                                <span className="ml-2 text-sm font-normal text-gray-500">
-                                    ({completed}/{allSubtasks.length})
-                                </span>
-                            )}
-                        </CardTitle>
-
-                        {allSubtasks.length > 0 && (
-                            <SubtaskFilters
-                                completionFilter={completionFilter}
-                                filteredCount={subtasks.length}
-                                totalCount={allSubtasks.length}
-                                onChange={setCompletionFilter}
-                            />
-                        )}
+        <section className="card">
+            <div className="card__head">
+                <div>
+                    <h3 className="card__title">Podúlohy</h3>
+                    <div className="card__sub">
+                        {completed} z {subtasks.length} dokončených
                     </div>
-                    <CreateSubtaskDialog
-                        projectId={projectId}
-                        taskId={task.id}
-                    />
-                </CardHeader>
-                <CardContent>
-                    <DataTable<Subtask>
-                        columns={columns}
-                        data={subtasks}
-                        keyExtractor={(s) => s.id}
-                        emptyIcon={
-                            completionFilter !== 'all' ? (
-                                <Filter className="h-10 w-10 text-gray-300" />
-                            ) : (
-                                <ListChecks className="h-10 w-10 text-gray-300" />
-                            )
-                        }
-                        emptyTitle={
-                            completionFilter !== 'all'
-                                ? 'Žiadne podúlohy nezodpovedajú filtru.'
-                                : 'Zatiaľ žiadne podúlohy.'
-                        }
-                        emptyDescription={
-                            completionFilter === 'all'
-                                ? 'Rozdeľte úlohu na menšie časti pre lepšie sledovanie.'
-                                : undefined
-                        }
-                        emptyAction={
-                            completionFilter !== 'all' ? (
-                                <button
-                                    onClick={() => setCompletionFilter('all')}
-                                    className="text-sm text-blue-500 hover:underline"
+                </div>
+                <CreateSubtaskDialog projectId={projectId} taskId={task.id} />
+            </div>
+            <div className="card__body">
+                {subtasks.length === 0 ? (
+                    <p className="py-8 text-center text-sm text-muted-foreground">
+                        Zatiaľ žiadne podúlohy.
+                    </p>
+                ) : (
+                    <div className="divide-y divide-border">
+                        {subtasks.map((subtask) => (
+                            <div
+                                key={subtask.id}
+                                className="flex min-h-10 items-center gap-3 py-2"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={subtask.is_completed}
+                                    onChange={() => handleToggle(subtask.id)}
+                                    className="size-4 rounded border-input text-[var(--accent-blue)]"
+                                />
+                                <span
+                                    className={`flex-1 text-sm ${
+                                        subtask.is_completed
+                                            ? 'text-muted-foreground line-through'
+                                            : 'text-foreground'
+                                    }`}
                                 >
-                                    Zrušiť filter
+                                    {subtask.title}
+                                </span>
+                                <button type="button" className="icon-btn">
+                                    <MoreHorizontal className="h-4 w-4" />
                                 </button>
-                            ) : undefined
-                        }
-                    />
-                </CardContent>
-            </Card>
-        </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </section>
     );
 };

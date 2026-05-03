@@ -2,7 +2,7 @@ import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
 import { useForm } from '@inertiajs/react';
 import { Edit } from 'lucide-react';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { Task, TeamMember } from '../../../../types/types';
 import { TeamMemberSelect } from '../../../ui/team-member-select';
 
@@ -11,6 +11,8 @@ interface EditTaskDialogProps {
     projectId: number;
     team: TeamMember[];
     text?: string;
+    icon?: ReactNode;
+    triggerClassName?: string;
 }
 
 export const EditTaskDialog = ({
@@ -18,6 +20,8 @@ export const EditTaskDialog = ({
     projectId,
     team,
     text,
+    icon,
+    triggerClassName,
 }: EditTaskDialogProps) => {
     const [open, setOpen] = useState(false);
 
@@ -78,10 +82,13 @@ export const EditTaskDialog = ({
             trigger={
                 <button
                     onClick={(e) => e.stopPropagation()}
-                    className="flex cursor-pointer items-center justify-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    className={
+                        triggerClassName ??
+                        'flex cursor-pointer items-center justify-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600'
+                    }
                     title="Upraviť úlohu"
                 >
-                    <Edit size={18} />
+                    {icon ?? <Edit size={18} />}
                     {text && <span className="text-sm">{text}</span>}
                 </button>
             }

@@ -1,6 +1,5 @@
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
-import { Button } from '@/components/ui/button';
 import { useForm } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -10,7 +9,10 @@ interface CreateSubtaskDialogProps {
     taskId: number;
 }
 
-export const CreateSubtaskDialog = ({ projectId, taskId }: CreateSubtaskDialogProps) => {
+export const CreateSubtaskDialog = ({
+    projectId,
+    taskId,
+}: CreateSubtaskDialogProps) => {
     const [open, setOpen] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -33,10 +35,10 @@ export const CreateSubtaskDialog = ({ projectId, taskId }: CreateSubtaskDialogPr
             open={open}
             onOpenChange={setOpen}
             trigger={
-                <Button variant="default" size="lg">
-                    <Plus className="mr-1 h-4 w-4" />
-                    Pridať podúlohu
-                </Button>
+                <button type="button" className="btn btn--sm">
+                    <Plus className="h-3.5 w-3.5" />
+                    Pridať
+                </button>
             }
             title="Nová podúloha"
             description="Pridajte podúlohu k tejto úlohe."

@@ -103,11 +103,26 @@ export interface Task {
     updated_at: string;
     subtasks?: Subtask[];
     comments?: Comment[];
+    time_entries?: TimeEntry[];
     predecessors?: TaskDependencyRef[];
     successors?: TaskDependencyRef[];
     predecessor_ids?: number[];
     successor_ids?: number[];
     blocking_predecessors_count?: number;
+}
+
+export interface TimeEntry {
+    id: number;
+    project_id: number;
+    task_id: number;
+    user_id: number;
+    entry_date: string;
+    hours: number | string;
+    description: string | null;
+    user?: {
+        id: number;
+        name: string;
+    };
 }
 
 export interface Subtask {
@@ -148,6 +163,8 @@ export interface Activity {
     project_id: number;
     type: string;
     description: string;
+    subject_type?: string | null;
+    subject_id?: number | null;
     metadata?: Record<string, unknown>;
     user: {
         id: number;

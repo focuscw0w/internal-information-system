@@ -1,8 +1,4 @@
-import {
-    Dialog,
-    DialogContent,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { FileText } from 'lucide-react';
 import { Fragment, useState } from 'react';
 import { Comment, CommentAttachment } from '../../../types/types';
@@ -46,57 +42,42 @@ export function CommentItem({ comment, isOwn }: CommentItemProps) {
             .toUpperCase() ?? '?';
 
     return (
-        <div className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}>
-            <div
-                className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${
-                    isOwn
-                        ? 'bg-gradient-to-br from-green-500 to-green-600'
-                        : 'bg-gradient-to-br from-blue-500 to-blue-600'
-                }`}
-            >
+        <div className="flex gap-3">
+            <div className={`avatar ${isOwn ? 'bg-[var(--success)]' : ''}`}>
                 {initials}
             </div>
 
-            <div className={`flex-1 ${isOwn ? 'text-right' : ''}`}>
-                <div
-                    className={`flex items-center gap-2 ${
-                        isOwn ? 'justify-end' : ''
-                    }`}
-                >
-                    <span className="text-sm font-medium text-gray-900">
+            <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-foreground">
                         {comment.user?.name}
                     </span>
-                    <span className="text-xs text-gray-400">
-                        {new Date(comment.created_at).toLocaleDateString('sk-SK', {
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                        })}
+                    <span className="text-xs text-muted-foreground">
+                        {new Date(comment.created_at).toLocaleDateString(
+                            'sk-SK',
+                            {
+                                day: 'numeric',
+                                month: 'short',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            },
+                        )}
                     </span>
                 </div>
 
-                <div
-                    className={`mt-1 inline-block max-w-full whitespace-pre-wrap break-words rounded-lg px-3 py-2 text-sm ${
-                        isOwn ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'
-                    }`}
-                >
+                <div className="mt-1 max-w-full text-sm leading-6 break-words whitespace-pre-wrap text-foreground">
                     {renderMentions(comment.body)}
                 </div>
 
                 {attachments.length > 0 && (
-                    <div
-                        className={`mt-2 flex flex-wrap gap-2 ${
-                            isOwn ? 'justify-end' : ''
-                        }`}
-                    >
+                    <div className="mt-2 flex flex-wrap gap-2">
                         {attachments.map((att) =>
                             att.is_image && att.download_url ? (
                                 <button
                                     type="button"
                                     key={att.id}
                                     onClick={() => setLightbox(att)}
-                                    className="overflow-hidden rounded border border-gray-200 hover:border-blue-400"
+                                    className="overflow-hidden rounded-md border border-border hover:border-ring"
                                 >
                                     <img
                                         src={att.download_url}
@@ -108,13 +89,13 @@ export function CommentItem({ comment, isOwn }: CommentItemProps) {
                                 <a
                                     key={att.id}
                                     href={att.download_url ?? '#'}
-                                    className="flex items-center gap-2 rounded border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 hover:border-blue-400 hover:text-blue-700"
+                                    className="flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1.5 text-xs text-foreground hover:border-ring"
                                 >
-                                    <FileText className="h-4 w-4 text-gray-400" />
+                                    <FileText className="h-4 w-4 text-muted-foreground" />
                                     <span className="max-w-[12rem] truncate">
                                         {att.original_name}
                                     </span>
-                                    <span className="text-gray-400">
+                                    <span className="text-muted-foreground">
                                         {formatSize(att.size_bytes)}
                                     </span>
                                 </a>
@@ -124,7 +105,10 @@ export function CommentItem({ comment, isOwn }: CommentItemProps) {
                 )}
             </div>
 
-            <Dialog open={lightbox !== null} onOpenChange={(open) => !open && setLightbox(null)}>
+            <Dialog
+                open={lightbox !== null}
+                onOpenChange={(open) => !open && setLightbox(null)}
+            >
                 <DialogContent className="max-w-3xl p-2">
                     <DialogTitle className="sr-only">
                         {lightbox?.original_name ?? 'Príloha'}

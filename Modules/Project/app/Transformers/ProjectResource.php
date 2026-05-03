@@ -107,6 +107,8 @@ class ProjectResource extends JsonResource
                         'id' => $activity->id,
                         'type' => $activity->type,
                         'description' => $activity->description,
+                        'subject_type' => $activity->subject_type,
+                        'subject_id' => $activity->subject_id,
                         'metadata' => $activity->metadata,
                         'user' => [
                             'id' => $activity->user->id,

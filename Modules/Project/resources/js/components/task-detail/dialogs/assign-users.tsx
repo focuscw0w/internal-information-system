@@ -1,18 +1,27 @@
 import { FormDialog } from '@/components/dialogs/form-dialog';
+import { Button } from '@/components/ui/button';
 import { useUsers } from '@/hooks/use-users';
 import { useForm } from '@inertiajs/react';
 import { AlertCircle, Loader2, Users } from 'lucide-react';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { TeamMemberSelect } from '../../ui/team-member-select';
+import { ReactNode, useState } from 'react';
 import { Project, Task } from '../../../types/types';
+import { TeamMemberSelect } from '../../ui/team-member-select';
 
 interface AssignTaskDialogProps {
     task: Task;
     project: Project;
+    triggerLabel?: string;
+    triggerClassName?: string;
+    triggerIcon?: ReactNode;
 }
 
-export const AssignTaskDialog = ({ task, project }: AssignTaskDialogProps) => {
+export const AssignTaskDialog = ({
+    task,
+    project,
+    triggerLabel = 'Priradiť ľudí',
+    triggerClassName,
+    triggerIcon,
+}: AssignTaskDialogProps) => {
     const [open, setOpen] = useState(false);
 
     const { isLoading, isError } = useUsers();
@@ -43,10 +52,17 @@ export const AssignTaskDialog = ({ task, project }: AssignTaskDialogProps) => {
             open={open}
             onOpenChange={handleOpen}
             trigger={
-                <Button size="lg" variant="default">
-                    <Users size={18} />
-                    Priradiť ľudí
-                </Button>
+                triggerClassName ? (
+                    <button type="button" className={triggerClassName}>
+                        {triggerIcon ?? <Users size={18} />}
+                        {triggerLabel}
+                    </button>
+                ) : (
+                    <Button size="lg" variant="default">
+                        {triggerIcon ?? <Users size={18} />}
+                        {triggerLabel}
+                    </Button>
+                )
             }
             title="Priradiť členov"
             description="Vyberte členov tímu pre túto úlohu."

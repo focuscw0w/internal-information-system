@@ -1,7 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { MessageSquare } from 'lucide-react';
 import { Task } from '../../types/types';
 import { CommentForm } from './comments/comment-form';
 import { CommentItem } from './comments/comment-item';
@@ -15,27 +13,22 @@ export const Comments = ({ task }: TaskCommentsProps) => {
     const currentUser = usePage<SharedData>().props.auth.user;
 
     return (
-        <Card className="border-gray-100 shadow-sm">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                    <MessageSquare className="h-5 w-5" />
-                    Komentáre
-                    {comments.length > 0 && (
-                        <span className="text-sm font-normal text-gray-500">
-                            ({comments.length})
-                        </span>
-                    )}
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <CommentForm projectId={task.project_id} taskId={task.id} />
-
+        <section className="card">
+            <div className="card__head">
+                <h3 className="card__title">Komentáre</h3>
+                {comments.length > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                        {comments.length} komentárov
+                    </span>
+                )}
+            </div>
+            <div className="card__body space-y-5">
                 {comments.length === 0 ? (
-                    <p className="py-6 text-center text-sm text-gray-400">
+                    <p className="py-4 text-sm text-muted-foreground">
                         Zatiaľ žiadne komentáre.
                     </p>
                 ) : (
-                    <div className="space-y-5">
+                    <div className="space-y-4">
                         {comments.map((comment) => (
                             <CommentItem
                                 key={comment.id}
@@ -45,7 +38,8 @@ export const Comments = ({ task }: TaskCommentsProps) => {
                         ))}
                     </div>
                 )}
-            </CardContent>
-        </Card>
+                <CommentForm projectId={task.project_id} taskId={task.id} />
+            </div>
+        </section>
     );
 };

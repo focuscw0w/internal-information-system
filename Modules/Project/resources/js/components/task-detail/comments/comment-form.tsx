@@ -92,8 +92,7 @@ export function CommentForm({ projectId, taskId }: CommentFormProps) {
 
     const insertMention = (user: MentionUser) => {
         if (mentionStart === null || !textareaRef.current) return;
-        const cursor =
-            textareaRef.current.selectionStart ?? data.body.length;
+        const cursor = textareaRef.current.selectionStart ?? data.body.length;
         const before = data.body.slice(0, mentionStart);
         const after = data.body.slice(cursor);
         const handle = user.handle ?? '';
@@ -159,7 +158,10 @@ export function CommentForm({ projectId, taskId }: CommentFormProps) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-2">
+        <form
+            onSubmit={handleSubmit}
+            className="space-y-2 border-t border-border pt-4"
+        >
             <div className="relative">
                 <textarea
                     ref={textareaRef}
@@ -168,11 +170,11 @@ export function CommentForm({ projectId, taskId }: CommentFormProps) {
                     onKeyDown={handleKeyDown}
                     placeholder="Napíšte komentár... (použite @ na označenie kolegu)"
                     rows={3}
-                    className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="textarea w-full resize-none"
                 />
 
                 {mentionQuery !== null && mentionUsers.length > 0 && (
-                    <div className="absolute z-30 mt-1 max-h-56 w-72 overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg">
+                    <div className="absolute z-30 mt-1 max-h-56 w-72 overflow-y-auto rounded-md border border-border bg-card shadow-lg">
                         {mentionUsers.map((u, idx) => (
                             <button
                                 type="button"
@@ -181,12 +183,12 @@ export function CommentForm({ projectId, taskId }: CommentFormProps) {
                                 onClick={() => insertMention(u)}
                                 className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm ${
                                     idx === mentionIndex
-                                        ? 'bg-blue-50 text-blue-700'
-                                        : 'text-gray-700 hover:bg-gray-50'
+                                        ? 'bg-accent text-accent-foreground'
+                                        : 'text-foreground hover:bg-muted'
                                 }`}
                             >
                                 <span className="font-medium">{u.name}</span>
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-muted-foreground">
                                     @{u.handle}
                                 </span>
                             </button>
@@ -200,18 +202,18 @@ export function CommentForm({ projectId, taskId }: CommentFormProps) {
                     {data.attachments.map((file, idx) => (
                         <li
                             key={`${file.name}-${idx}`}
-                            className="flex items-center justify-between rounded-md bg-gray-50 px-2 py-1 text-xs text-gray-600"
+                            className="flex items-center justify-between rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground"
                         >
                             <span className="truncate">
                                 {file.name}{' '}
-                                <span className="text-gray-400">
+                                <span className="text-muted-foreground">
                                     ({Math.round(file.size / 1024)} KB)
                                 </span>
                             </span>
                             <button
                                 type="button"
                                 onClick={() => removeFile(idx)}
-                                className="ml-2 text-gray-400 hover:text-red-500"
+                                className="ml-2 text-muted-foreground hover:text-[var(--danger-text)]"
                             >
                                 <X className="h-3.5 w-3.5" />
                             </button>
@@ -236,7 +238,9 @@ export function CommentForm({ projectId, taskId }: CommentFormProps) {
                     disabled={data.attachments.length >= 5}
                 >
                     <Paperclip className="mr-1 h-4 w-4" />
-                    Príloha {data.attachments.length > 0 && `(${data.attachments.length}/5)`}
+                    Príloha{' '}
+                    {data.attachments.length > 0 &&
+                        `(${data.attachments.length}/5)`}
                 </Button>
 
                 <Button
