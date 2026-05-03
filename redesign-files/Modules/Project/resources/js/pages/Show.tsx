@@ -1,0 +1,137 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Head } from '@inertiajs/react';
+import { Calendar, FileText, GanttChartSquare, KanbanIcon, Users } from 'lucide-react';
+import { GanttChart } from '../components/project-detail/tab-views/gantt';
+import { Kanban } from '../components/project-detail/kanban/kanban';
+import { ProjectOverview } from '../components/project-detail/tab-views/project-overview';
+import { Team } from '../components/project-detail/tab-views/team';
+import { Timeline } from '../components/project-detail/tab-views/timeline';
+import { EditProjectDialog } from '../components/projects/dialogs/edit-project';
+import { BadgeLabel } from '../components/ui/badge';
+import { Header } from '../components/ui/header';
+import ProjectLayout from '../layouts/project-layout';
+import { Project } from '../types/types';
+
+type TeamCapacitySnapshot = Record<number, {
+    weekly_capacity_hours: number;
+    weekly_load_hours: number;
+    weekly_utilization: number;
+    free_capacity_hours: number;
+    is_over_capacity: boolean;
+}>;
+
+export default function Show({
+    project,
+    team_capacity,
+}: {
+    project: Project;
+    team_capacity: TeamCapacitySnapshot;
+}) {
+    const projectWithCapacity: Project = {
+        ...project,
+        team: project.team.map((member) => ({
+            ...member,
+            ...(team_capacity[member.id] ?? {}),
+        })),
+    };
+    const permissions = project.current_user_permissions ?? [];
+
+    const can = (permission: string) => permissions.includes(permission);
+
+    return (
+        <ProjectLayout project={projectWithCapacity}>
+            <Head title={`Detail projektu - ${project.name}`} />
+
+            <div className="min-h-screen space-y-6 p-6">
+                {/* Header */}
+                <Header
+                    title={project.name}
+                    description={project.description}
+                    backHref="/projects"
+                    backLabel="Späť na projekty"
+                >
+                    <Header.Badges>
+                        <BadgeLabel
+                            type="status"
+                            value={project.status}
+                            showLabel
+                        />
+                        <BadgeLabel
+                            type="workload"
+                            value={project.workload}
+                            showLabel
+                        />
+                    </Header.Badges>
+                    {can('edit_project') && (
+                        <Header.Actions>
+                            <EditProjectDialog project={projectWithCapacity} text="Upraviť projekt" />
+                        </Header.Actions>
+                    )}
+                </Header>
+
+                {/* Tabs */}
+                <Tabs defaultValue="overview" className="mb-12 w-full">
+                    <div className="flex items-center justify-between">
+                        <TabsList className="grid w-full max-w-2xl grid-cols-5 gap-3 bg-white">
+                            <TabsTrigger
+                                value="overview"
+                                className="flex cursor-pointer items-center gap-2 py-2.5"
+                            >
+                                <FileText className="h-4 w-4" />
+                                Prehľad
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="kanban"
+                                className="flex cursor-pointer items-center gap-2 py-2.5"
+                            >
+                                <KanbanIcon className="h-4 w-4" />
+                                Kanban
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="timeline"
+                                className="flex cursor-pointer items-center gap-2 py-2.5"
+                            >
+                                <Calendar className="h-4 w-4" />
+                                Časová os
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="gantt"
+                                className="flex cursor-pointer items-center gap-2 py-2.5"
+                            >
+                                <GanttChartSquare className="h-4 w-4" />
+                                Gantt
+                            </TabsTrigger>
+                            {can('view_team') && (
+                                <TabsTrigger
+                                    value="team"
+                                    className="flex cursor-pointer items-center gap-2 py-2.5"
+                                >
+                                    <Users className="h-4 w-4" />
+                                    Tím
+                                </TabsTrigger>
+                            )}
+                        </TabsList>
+                    </div>
+
+                    <TabsContent value="overview" className="mt-6">
+                        <ProjectOverview project={projectWithCapacity} />
+                    </TabsContent>
+                    <TabsContent value="kanban" className="mt-6">
+                        <Kanban project={projectWithCapacity} />
+                    </TabsContent>
+                    <TabsContent value="timeline" className="mt-6">
+                        <Timeline project={projectWithCapacity} />
+                    </TabsContent>
+                    <TabsContent value="gantt" className="mt-6">
+                        <GanttChart project={projectWithCapacity} />
+                    </TabsContent>
+                    {can('view_team') && (
+                        <TabsContent value="team" className="mt-6">
+                            <Team project={projectWithCapacity} />
+                        </TabsContent>
+                    )}
+                </Tabs>
+            </div>
+        </ProjectLayout>
+    );
+}
