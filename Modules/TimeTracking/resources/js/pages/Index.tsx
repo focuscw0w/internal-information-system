@@ -3,7 +3,6 @@ import AppLayout from '@/layouts/app-layout';
 import {
     Check,
     Download,
-    MoreHorizontal,
     Pause,
     Play,
     Plus,
@@ -12,12 +11,38 @@ import {
 import { Project } from 'Modules/Project/resources/js/types/types';
 import { TimeEntry } from '../types/types';
 import { BreadcrumbItem } from '@/types';
-import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useTimer } from '../context/timer-context';
+import { StopTimerDialog } from '../components/time-entry-table/dialogs/stop-timer';
+import { ManualEntryDialog } from '../components/index/manual-entry-dialog';
+import { EntryRowActions } from '../components/index/entry-row-actions';
+import { QuickAddCard } from '../components/index/quick-add-card';
+
+interface WeekDay {
+    date: string;
+    label: string;
+    short_date: string;
+    hours: number;
+}
+
+interface TimeTrackingSummary {
+    scope: 'all' | 'mine';
+    week_start: string;
+    week_end: string;
+    week_range_label: string;
+    week_total: number;
+    prev_week_total: number;
+    month_total: number;
+    week_target: number;
+    month_target: number;
+    week_daily_hours: WeekDay[];
+    week_project_hours: Record<number, number>;
+}
 
 interface IndexProps {
     projects: Project[];
     entries: TimeEntry[];
+    summary: TimeTrackingSummary;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -44,22 +69,20 @@ const formatTimer = (seconds: number) => {
 
 const dateKey = (value: string) => value.substring(0, 10);
 
-export default function Index({ projects, entries }: IndexProps) {
+export default function Index({ projects, entries, summary }: IndexProps) {
     const [view, setView] = useState<'week' | 'month'>('week');
-    const [running, setRunning] = useState(false);
-    const [elapsed, setElapsed] = useState(2734);
+    const { timer, startTimer } = useTimer();
+    const running = timer.isRunning;
+    const elapsed = timer.elapsed;
+
     const [selectedProjectId, setSelectedProjectId] = useState<number | ''>(
         projects[0]?.id ?? '',
     );
-
-    useEffect(() => {
-        if (!running) return;
-        const timer = window.setInterval(
-            () => setElapsed((current) => current + 1),
-            1000,
-        );
-        return () => window.clearInterval(timer);
-    }, [running]);
+    const [selectedTaskId, setSelectedTaskId] = useState<number | ''>('');
+    const [timerNote, setTimerNote] = useState('');
+    const [entryProjectFilter, setEntryProjectFilter] = useState<number | 'all'>('all');
+    const [stopOpen, setStopOpen] = useState(false);
+    const [manualOpen, setManualOpen] = useState(false);
 
     const projectById = useMemo(
         () => new Map(projects.map((project, index) => [project.id, {
@@ -69,15 +92,24 @@ export default function Index({ projects, entries }: IndexProps) {
         [projects],
     );
 
-    const totalHours = entries.reduce(
+    const weekTotal = Number(summary.week_total);
+    const monthTotal = Number(summary.month_total);
+    const prevWeekTotal = Number(summary.prev_week_total);
+    const weekDelta = weekTotal - prevWeekTotal;
+    const weekTarget = Number(summary.week_target) || 40;
+    const monthTarget = Number(summary.month_target) || 168;
+    const isTeamScope = summary.scope === 'all';
+
+    const filteredEntries = entryProjectFilter === 'all'
+        ? entries
+        : entries.filter((entry) => entry.project_id === entryProjectFilter);
+
+    const totalEntriesHours = filteredEntries.reduce(
         (sum, entry) => sum + Number(entry.hours),
         0,
     );
-    const billableHours = Math.round(totalHours * 0.9);
-    const weekTarget = 40;
-    const monthTarget = 168;
 
-    const entriesByDate = entries.reduce<Record<string, TimeEntry[]>>(
+    const entriesByDate = filteredEntries.reduce<Record<string, TimeEntry[]>>(
         (groups, entry) => {
             const key = dateKey(entry.entry_date);
             groups[key] = groups[key] ?? [];
@@ -91,27 +123,49 @@ export default function Index({ projects, entries }: IndexProps) {
         b.localeCompare(a),
     );
 
-    const weekDays = buildWeekDays(entries);
+    const weekDays = summary.week_daily_hours;
     const maxDayHours = Math.max(10, ...weekDays.map((day) => day.hours));
+    const daysWithHours = weekDays.filter((day) => day.hours > 0).length;
+    const dailyAverage = daysWithHours
+        ? weekTotal / daysWithHours
+        : 0;
 
     const breakdown = projects
-        .map((project, index) => {
-            const hours = entries
-                .filter((entry) => entry.project_id === project.id)
-                .reduce((sum, entry) => sum + Number(entry.hours), 0);
-            return {
-                project,
-                hours,
-                color: projectColors[index % projectColors.length],
-            };
-        })
+        .map((project, index) => ({
+            project,
+            hours: Number(summary.week_project_hours[project.id] ?? 0),
+            color: projectColors[index % projectColors.length],
+        }))
         .filter((item) => item.hours > 0);
 
     const selectedProject =
         selectedProjectId === ''
             ? projects[0]
             : projects.find((project) => project.id === selectedProjectId);
-    const selectedTask = selectedProject?.tasks?.[0];
+
+    const taskOptions = selectedProject?.tasks ?? [];
+    const effectiveTaskId: number | null =
+        selectedTaskId !== '' && taskOptions.some((t) => t.id === selectedTaskId)
+            ? (selectedTaskId as number)
+            : taskOptions[0]?.id ?? null;
+
+    const handleTimerToggle = () => {
+        if (running) {
+            setStopOpen(true);
+            return;
+        }
+
+        if (!selectedProject || effectiveTaskId === null) return;
+        const task = taskOptions.find((t) => t.id === effectiveTaskId);
+        if (!task) return;
+
+        startTimer(
+            { id: selectedProject.id, name: selectedProject.name },
+            { id: task.id, title: task.title },
+        );
+    };
+
+    const canStartTimer = !!selectedProject && effectiveTaskId !== null;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -122,9 +176,12 @@ export default function Index({ projects, entries }: IndexProps) {
                     <div>
                         <h1 className="page-head__title">Evidencia času</h1>
                         <p className="page-head__subtitle">
-                            Sleduj hodiny strávené na projektoch. Týždeň{' '}
+                            {isTeamScope
+                                ? 'Prehľad odpracovaných hodín celého tímu. '
+                                : 'Sleduj hodiny strávené na projektoch. '}
+                            Týždeň{' '}
                             <strong className="font-semibold text-foreground">
-                                27. apr - 3. máj 2026
+                                {summary.week_range_label}
                             </strong>
                         </p>
                     </div>
@@ -149,8 +206,9 @@ export default function Index({ projects, entries }: IndexProps) {
                     >
                         <button
                             type="button"
-                            onClick={() => setRunning((current) => !current)}
-                            className="inline-flex size-12 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition-colors"
+                            onClick={handleTimerToggle}
+                            disabled={!running && !canStartTimer}
+                            className="inline-flex size-12 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                             style={{
                                 background: running
                                     ? 'var(--danger)'
@@ -159,6 +217,13 @@ export default function Index({ projects, entries }: IndexProps) {
                                     ? '0 0 0 4px var(--danger-soft)'
                                     : '0 0 0 4px var(--accent-blue-soft)',
                             }}
+                            title={
+                                running
+                                    ? 'Zastaviť časovač'
+                                    : canStartTimer
+                                      ? 'Spustiť časovač'
+                                      : 'Vyber projekt a úlohu'
+                            }
                         >
                             {running ? (
                                 <Pause className="h-5 w-5" />
@@ -170,14 +235,20 @@ export default function Index({ projects, entries }: IndexProps) {
                         <div className="grid flex-1 gap-3 lg:grid-cols-[minmax(180px,1.2fr)_minmax(180px,1.2fr)_minmax(180px,1.8fr)]">
                             <select
                                 className="select w-full"
-                                value={selectedProjectId}
-                                onChange={(event) =>
+                                value={
+                                    running && timer.projectId
+                                        ? timer.projectId
+                                        : selectedProjectId
+                                }
+                                disabled={running}
+                                onChange={(event) => {
                                     setSelectedProjectId(
                                         event.target.value
                                             ? Number(event.target.value)
                                             : '',
-                                    )
-                                }
+                                    );
+                                    setSelectedTaskId('');
+                                }}
                             >
                                 {projects.map((project) => (
                                     <option key={project.id} value={project.id}>
@@ -185,22 +256,38 @@ export default function Index({ projects, entries }: IndexProps) {
                                     </option>
                                 ))}
                             </select>
-                            <select className="select w-full" disabled={!selectedProject}>
-                                {selectedProject?.tasks?.length ? (
-                                    selectedProject.tasks.map((task) => (
+                            <select
+                                className="select w-full"
+                                value={
+                                    running && timer.taskId
+                                        ? timer.taskId
+                                        : effectiveTaskId ?? ''
+                                }
+                                disabled={running || !taskOptions.length}
+                                onChange={(event) =>
+                                    setSelectedTaskId(
+                                        event.target.value
+                                            ? Number(event.target.value)
+                                            : '',
+                                    )
+                                }
+                            >
+                                {taskOptions.length ? (
+                                    taskOptions.map((task) => (
                                         <option key={task.id} value={task.id}>
                                             {task.title}
                                         </option>
                                     ))
                                 ) : (
-                                    <option>
-                                        {selectedTask?.title ?? 'Bez úlohy'}
-                                    </option>
+                                    <option value="">Bez úlohy</option>
                                 )}
                             </select>
                             <input
                                 className="input w-full"
                                 placeholder="Krátka poznámka (voliteľné)..."
+                                value={timerNote}
+                                onChange={(event) => setTimerNote(event.target.value)}
+                                disabled={running}
                             />
                         </div>
 
@@ -221,36 +308,49 @@ export default function Index({ projects, entries }: IndexProps) {
                     </div>
                 </section>
 
+                <StopTimerDialog open={stopOpen} onOpenChange={setStopOpen} />
+                <ManualEntryDialog
+                    open={manualOpen}
+                    onOpenChange={setManualOpen}
+                    projects={projects}
+                    initialProjectId={
+                        selectedProjectId === '' ? null : selectedProjectId
+                    }
+                />
+
                 <div className="kpi-grid">
                     <KpiProgress
                         label="Tento týždeň"
-                        value={formatHours(totalHours)}
-                        suffix="/ 40h"
-                        progress={(totalHours / weekTarget) * 100}
+                        value={formatHours(weekTotal)}
+                        suffix={`/ ${weekTarget}h`}
+                        progress={(weekTotal / weekTarget) * 100}
                     />
                     <div className="kpi">
-                        <span className="kpi__label">Účtovateľné</span>
+                        <span className="kpi__label">Minulý týždeň</span>
                         <span className="kpi__value">
-                            {billableHours}
-                            <sub>h ({totalHours ? Math.round((billableHours / totalHours) * 100) : 0}%)</sub>
+                            {formatHours(prevWeekTotal).replace('h', '')}
+                            <sub>h</sub>
                         </span>
-                        <span className="kpi__delta kpi__delta--up">
-                            +4h vs minulý týždeň
+                        <span
+                            className={`kpi__delta ${weekDelta > 0 ? 'kpi__delta--up' : weekDelta < 0 ? 'kpi__delta--down' : ''}`}
+                        >
+                            {weekDelta > 0 ? '+' : ''}
+                            {formatHours(weekDelta)} vs minulý týždeň
                         </span>
                     </div>
                     <div className="kpi">
                         <span className="kpi__label">Priemer / deň</span>
                         <span className="kpi__value">
-                            {(totalHours / Math.max(1, sortedDates.length)).toFixed(1)}
+                            {dailyAverage.toFixed(1)}
                             <sub>h</sub>
                         </span>
                         <span className="kpi__delta">Cieľ: 8h / deň</span>
                     </div>
                     <KpiProgress
                         label="Tento mesiac"
-                        value={formatHours(Math.round(totalHours * 4.6))}
-                        suffix="/ 168h"
-                        progress={((totalHours * 4.6) / monthTarget) * 100}
+                        value={formatHours(monthTotal)}
+                        suffix={`/ ${monthTarget}h`}
+                        progress={(monthTotal / monthTarget) * 100}
                     />
                 </div>
 
@@ -290,7 +390,7 @@ export default function Index({ projects, entries }: IndexProps) {
                                             (day.hours / maxDayHours) * 100;
                                         return (
                                             <div
-                                                key={day.key}
+                                                key={day.date}
                                                 className="flex h-full flex-1 flex-col items-center gap-2"
                                             >
                                                 <div className="flex w-full flex-1 flex-col items-center justify-end">
@@ -317,7 +417,7 @@ export default function Index({ projects, entries }: IndexProps) {
                                                         {day.label}
                                                     </div>
                                                     <div className="text-[11px] text-muted-foreground">
-                                                        {day.shortDate}
+                                                        {day.short_date}
                                                     </div>
                                                 </div>
                                             </div>
@@ -332,20 +432,34 @@ export default function Index({ projects, entries }: IndexProps) {
                                 <div>
                                     <h3 className="card__title">Záznamy</h3>
                                     <div className="card__sub">
-                                        {entries.length} záznamov, celkom{' '}
-                                        {formatHours(totalHours)}
+                                        {filteredEntries.length} záznamov, celkom{' '}
+                                        {formatHours(totalEntriesHours)}
                                     </div>
                                 </div>
                                 <div className="command-bar__filters">
-                                    <select className="select text-xs">
-                                        <option>Všetky projekty</option>
+                                    <select
+                                        className="select text-xs"
+                                        value={entryProjectFilter}
+                                        onChange={(event) =>
+                                            setEntryProjectFilter(
+                                                event.target.value === 'all'
+                                                    ? 'all'
+                                                    : Number(event.target.value),
+                                            )
+                                        }
+                                    >
+                                        <option value="all">Všetky projekty</option>
                                         {projects.map((project) => (
-                                            <option key={project.id}>
+                                            <option key={project.id} value={project.id}>
                                                 {project.name}
                                             </option>
                                         ))}
                                     </select>
-                                    <button type="button" className="btn btn--primary btn--sm">
+                                    <button
+                                        type="button"
+                                        className="btn btn--primary btn--sm"
+                                        onClick={() => setManualOpen(true)}
+                                    >
                                         <Plus className="h-4 w-4" />
                                         Manuálny záznam
                                     </button>
@@ -363,6 +477,7 @@ export default function Index({ projects, entries }: IndexProps) {
                                             date={date}
                                             entries={entriesByDate[date]}
                                             projectById={projectById}
+                                            showUser={isTeamScope}
                                         />
                                     ))
                                 )}
@@ -374,7 +489,7 @@ export default function Index({ projects, entries }: IndexProps) {
                         <QuickAddCard projects={projects} />
                         <ProjectBreakdownCard
                             breakdown={breakdown}
-                            totalHours={totalHours}
+                            totalHours={weekTotal}
                         />
                         <RecentCard
                             entries={entries.slice(0, 3)}
@@ -415,38 +530,16 @@ function KpiProgress({
     );
 }
 
-function buildWeekDays(entries: TimeEntry[]) {
-    const days = [
-        ['Po', '27.4.'],
-        ['Ut', '28.4.'],
-        ['St', '29.4.'],
-        ['Št', '30.4.'],
-        ['Pi', '1.5.'],
-        ['So', '2.5.'],
-        ['Ne', '3.5.'],
-    ] as const;
-
-    return days.map(([label, shortDate], index) => {
-        const dayHours = entries
-            .filter((entry) => new Date(entry.entry_date).getDay() === ((index + 1) % 7))
-            .reduce((sum, entry) => sum + Number(entry.hours), 0);
-        return {
-            key: `${label}-${shortDate}`,
-            label,
-            shortDate,
-            hours: dayHours,
-        };
-    });
-}
-
 function DayGroup({
     date,
     entries,
     projectById,
+    showUser = false,
 }: {
     date: string;
     entries: TimeEntry[];
     projectById: Map<number, { project: Project; color: string }>;
+    showUser?: boolean;
 }) {
     const total = entries.reduce((sum, entry) => sum + Number(entry.hours), 0);
     const dateObject = new Date(date);
@@ -472,7 +565,7 @@ function DayGroup({
                 return (
                     <div
                         key={entry.id}
-                        className="grid grid-cols-[4px_minmax(0,1fr)_auto_auto_auto] items-center gap-4 border-b border-border px-5 py-3"
+                        className="grid grid-cols-[4px_minmax(0,1fr)_auto_auto] items-center gap-4 border-b border-border px-5 py-3"
                     >
                         <span
                             className="h-8 rounded-sm"
@@ -484,6 +577,11 @@ function DayGroup({
                         <div className="min-w-0">
                             <div className="truncate text-sm font-medium text-foreground">
                                 {entry.task?.title ?? 'Bez úlohy'}
+                                {showUser && entry.user?.name ? (
+                                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                                        · {entry.user.name}
+                                    </span>
+                                ) : null}
                             </div>
                             <div className="truncate text-xs text-muted-foreground">
                                 {projectMeta?.project.name ?? 'Projekt'}{' '}
@@ -492,9 +590,6 @@ function DayGroup({
                                     : ''}
                             </div>
                         </div>
-                        <span className="badge badge--neutral">
-                            Účtovateľné
-                        </span>
                         <span className="badge badge--success">
                             <Check className="h-3 w-3" />
                             Schválené
@@ -503,91 +598,15 @@ function DayGroup({
                             <span className="mono text-sm font-semibold">
                                 {formatHours(Number(entry.hours))}
                             </span>
-                            <button type="button" className="icon-btn">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </button>
+                            <EntryRowActions
+                                entry={entry}
+                                project={projectMeta?.project}
+                            />
                         </div>
                     </div>
                 );
             })}
         </div>
-    );
-}
-
-function QuickAddCard({ projects }: { projects: Project[] }) {
-    const firstProject = projects[0];
-    return (
-        <section className="card">
-            <div className="card__head">
-                <h3 className="card__title">Pridať záznam</h3>
-            </div>
-            <div className="card__body space-y-3">
-                <FormField label="Projekt">
-                    <select className="select w-full" defaultValue={firstProject?.id}>
-                        {projects.map((project) => (
-                            <option key={project.id} value={project.id}>
-                                {project.name}
-                            </option>
-                        ))}
-                    </select>
-                </FormField>
-                <FormField label="Úloha">
-                    <select className="select w-full">
-                        {firstProject?.tasks?.length ? (
-                            firstProject.tasks.map((task) => (
-                                <option key={task.id}>{task.title}</option>
-                            ))
-                        ) : (
-                            <option>Bez úlohy</option>
-                        )}
-                    </select>
-                </FormField>
-                <div className="grid grid-cols-2 gap-2">
-                    <FormField label="Dátum">
-                        <input type="date" className="input w-full" />
-                    </FormField>
-                    <FormField label="Hodiny">
-                        <input
-                            type="number"
-                            className="input w-full"
-                            defaultValue={2}
-                            step={0.25}
-                        />
-                    </FormField>
-                </div>
-                <FormField label="Poznámka">
-                    <textarea
-                        className="textarea min-h-16 w-full"
-                        placeholder="Čo si robil..."
-                    />
-                </FormField>
-                <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <input type="checkbox" defaultChecked />
-                    Účtovateľná položka
-                </label>
-                <button type="button" className="btn btn--primary w-full">
-                    <Plus className="h-4 w-4" />
-                    Uložiť záznam
-                </button>
-            </div>
-        </section>
-    );
-}
-
-function FormField({
-    label,
-    children,
-}: {
-    label: string;
-    children: ReactNode;
-}) {
-    return (
-        <label className="block">
-            <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
-                {label}
-            </span>
-            {children}
-        </label>
     );
 }
 
@@ -657,6 +676,8 @@ function RecentCard({
     entries: TimeEntry[];
     projectById: Map<number, { project: Project; color: string }>;
 }) {
+    const { startTimer } = useTimer();
+
     return (
         <section className="card">
             <div className="card__head">
@@ -665,11 +686,33 @@ function RecentCard({
             <div className="card__body space-y-1.5">
                 {entries.map((entry) => {
                     const meta = projectById.get(entry.project_id);
+                    const taskTitle = entry.task?.title ?? 'Bez úlohy';
+                    const canStart = !!meta && !!entry.task;
+
                     return (
                         <button
                             key={entry.id}
                             type="button"
                             className="btn btn--ghost w-full justify-between px-2"
+                            disabled={!canStart}
+                            onClick={() => {
+                                if (!meta || !entry.task) return;
+                                startTimer(
+                                    {
+                                        id: meta.project.id,
+                                        name: meta.project.name,
+                                    },
+                                    {
+                                        id: entry.task.id,
+                                        title: entry.task.title,
+                                    },
+                                );
+                            }}
+                            title={
+                                canStart
+                                    ? `Spustiť časovač pre: ${taskTitle}`
+                                    : undefined
+                            }
                         >
                             <span className="flex min-w-0 items-center gap-2">
                                 <span
@@ -681,7 +724,7 @@ function RecentCard({
                                 />
                                 <span className="min-w-0 text-left">
                                     <span className="block truncate text-xs font-medium">
-                                        {entry.task?.title ?? 'Bez úlohy'}
+                                        {taskTitle}
                                     </span>
                                     <span className="block truncate text-[11px] text-muted-foreground">
                                         {meta?.project.name ?? 'Projekt'}

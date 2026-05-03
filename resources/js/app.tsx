@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
+import { TimerProvider } from '../../Modules/TimeTracking/resources/js/context/timer-context';
+import { TimerWidget } from '../../Modules/TimeTracking/resources/js/components/time-entry-table/timer-widget';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -59,7 +61,10 @@ createInertiaApp({
 
         root.render(
             <QueryClientProvider client={queryClient}>
-                <App {...props} />
+                <TimerProvider>
+                    <App {...props} />
+                    <TimerWidget />
+                </TimerProvider>
             </QueryClientProvider>,
         );
     },

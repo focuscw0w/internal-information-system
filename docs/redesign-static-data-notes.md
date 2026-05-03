@@ -39,11 +39,13 @@ Tieto prvky su v redizajne docasne staticke alebo neaktivne, pretoze aktualna da
 
 ## Evidencia casu
 
-- Aktivny timer na indexe evidencie casu je lokalny UI preview a nespusta ani neuklada backendovy timer.
-- Rychle pridanie zaznamu v pravom paneli je vizualny formular; existujuce realne time-entry akcie zostavaju na projektovych time-entry obrazovkach.
+- Aktivny timer pouziva zdielany TimerProvider (`Modules/TimeTracking/resources/js/context/timer-context.tsx`) s persistenciou v localStorage. Stop tlacidlo otvori StopTimerDialog ktory zaokruhli cas na 0.25h a POSTuje na `/projects/{projectId}/time-entries`. Play tlacidlo v karte "Naposledy pouzite" automaticky spusti timer pre dany projekt a ulohu.
+- Manualny zaznam, rychly formular v pravom paneli aj edit/delete v zozname zaznamov volaju existujuce projektove endpointy (`POST/PUT/DELETE /projects/{id}/time-entries`).
 - Export CSV a odoslanie na schvalenie su zatial vizualne akcie.
 - Uctovatelnost a schvalenie v zozname pouzivaju diskrétne staticke hodnoty, lebo aktualny time-entry model tieto polia neposkytuje.
-- Tyzdnove KPI, mesacny odhad a datumovy rozsah v hlavicke su docasne vypocitane alebo staticke UI hodnoty podla Claude screenshotu.
+- KPI Uctovatelne bolo nahradene KPI Minuly tyzden, lebo aktualny time-entry model neposkytuje pole pre uctovatelnost.
+- Admin (is_admin) vidi vsetky zaznamy vsetkych pouzivatelov a KPI/graf agreguju za cely tim; tyzdny ciel sa pocita zo suctu weekly_capacity_hours v tabulke employee_capacities. Beznym pouzivatelom zostava osobny pohlad s cielom 40h/tyzden.
+- Toggle Tyzden/Mesiac v karte "Prehlad tyzdna" zatial neprepina vizualizaciu - chyba mesacny agregat v summary.
 
 ## Buduce backend ulohy
 
