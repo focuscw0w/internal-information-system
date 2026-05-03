@@ -12,18 +12,23 @@ export const ProjectsHeader = ({
     onViewModeChange,
 }: ProjectsHeaderProps) => {
     return (
-        <div className="mb-8">
-            <div className="items-center justify-between gap-4 md:flex lg:gap-0">
-                <p className="mb-2 text-gray-600 md:mb-0">
-                    Prehľad projektov, zdrojov a vyťaženia tímu
+        <div className="page-head mb-6">
+            <div>
+                <h1 className="page-head__title">Projekty</h1>
+                <p className="page-head__subtitle">
+                    Prehľad všetkých interných a klientskych projektov, ich
+                    stav, vyťaženie tímov a deadlineov.
                 </p>
-                <div className="flex items-center gap-6">
-                    <CreateProjectDialog />
-                    <ViewModeToggle
-                        viewMode={viewMode}
-                        onViewModeChange={onViewModeChange}
-                    />
-                </div>
+            </div>
+            <div className="page-head__actions">
+                <button type="button" className="btn">
+                    Export
+                </button>
+                <CreateProjectDialog />
+                <ViewModeToggle
+                    viewMode={viewMode}
+                    onViewModeChange={onViewModeChange}
+                />
             </div>
         </div>
     );

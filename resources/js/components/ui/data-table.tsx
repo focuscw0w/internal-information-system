@@ -47,13 +47,13 @@ export function DataTable<T>({
     }
 
     return (
-        <table className="w-full">
+        <table className="table">
             <thead>
-                <tr className="border-b border-gray-100 text-left text-xs uppercase text-gray-500">
+                <tr>
                     {columns.map((col) => (
                         <th
                             key={col.key}
-                            className={`pb-3 font-medium ${col.width ?? ''} ${
+                            className={`${col.width ?? ''} ${
                                 col.align === 'center'
                                     ? 'text-center'
                                     : col.align === 'right'
@@ -73,14 +73,14 @@ export function DataTable<T>({
                             onClick={
                                 onRowClick ? () => onRowClick(item) : undefined
                             }
-                            className={`border-b border-gray-50 transition-colors hover:bg-gray-50/50 ${
+                            className={`${
                                 onRowClick ? 'cursor-pointer' : ''
                             }`}
                         >
                             {columns.map((col) => (
                                 <td
                                     key={col.key}
-                                    className={`py-3 ${
+                                    className={`${
                                         col.align === 'center'
                                             ? 'text-center'
                                             : col.align === 'right'

@@ -17,17 +17,17 @@ export const ProgressBar = ({
 
     return (
         <div>
-            <div className="mb-2 flex justify-between text-sm text-gray-600">
+            <div className="mb-2 flex justify-between text-xs text-muted-foreground">
                 <span>{label}</span>
                 {showPercentage && (
-                    <span className="font-medium">
+                    <span className="font-medium text-foreground">
                         {Math.round(percentage)}%
                     </span>
                 )}
             </div>
-            <div className="h-2 w-full rounded-full bg-gray-200">
+            <div className="progress">
                 <div
-                    className={`${color} h-2 rounded-full transition-all`}
+                    className={`${color} h-full rounded-full transition-all`}
                     style={{ width: `${percentage}%` }}
                 />
             </div>

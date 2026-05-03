@@ -12,7 +12,6 @@ import {
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Project, Task } from '../../../types/types';
-import { BlockedTaskDialog } from '../blocked-task-dialog';
 import { Draggable } from './draggable';
 import { Droppable } from './droppable';
 
@@ -22,7 +21,6 @@ interface KanbanProps {
 
 export function Kanban({ project }: KanbanProps) {
     const [activeTask, setActiveTask] = useState<Task | null>(null);
-    const [pendingTaskId, setPendingTaskId] = useState<number | null>(null);
 
     const permissions = project.current_user_permissions ?? [];
     const can = (permission: string) => permissions.includes(permission);
@@ -71,14 +69,13 @@ export function Kanban({ project }: KanbanProps) {
         if (!task) return;
         if (task.status === newStatus) return;
 
-        setPendingTaskId(Number(taskId));
         router.patch(
             `/projects/${project.id}/tasks/${taskId}/status`,
             { status: newStatus },
             {
                 preserveScroll: true,
                 preserveState: true,
-                only: ['project', 'flash'],
+                only: ['project'],
             },
         );
     };
@@ -101,35 +98,6 @@ export function Kanban({ project }: KanbanProps) {
                 👤 {task.assigned_users.map((u) => u.name).join(', ')}
             </p>
         );
-    };
-
-    const renderBlockedBadge = (task: Task) => {
-        if ((task.blocking_predecessors_count ?? 0) === 0) return null;
-        return (
-            <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
-                Blokovaná ({task.blocking_predecessors_count})
-            </span>
-        );
-    };
-
-    const renderPriorityFlag = (task: Task) => {
-        if (task.priority === 'urgent') {
-            return (
-                <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">
-                    Urgentná
-                </span>
-            );
-        }
-
-        if (task.priority === 'high') {
-            return (
-                <span className="rounded bg-orange-100 px-2 py-0.5 text-xs text-orange-700">
-                    Vysoká
-                </span>
-            );
-        }
-
-        return null;
     };
 
     return (
@@ -175,7 +143,6 @@ export function Kanban({ project }: KanbanProps) {
                                                         <h4 className="mb-2 text-sm font-medium text-gray-900">
                                                             {task.title}
                                                         </h4>
-                                                        {renderBlockedBadge(task)}
                                                         {renderAssignedUsers(
                                                             task,
                                                         )}
@@ -190,8 +157,11 @@ export function Kanban({ project }: KanbanProps) {
                                                                 }
                                                                 h
                                                             </span>
-                                                            {renderPriorityFlag(
-                                                                task,
+                                                            {task.priority ===
+                                                                'high' && (
+                                                                <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">
+                                                                    Vysoká
+                                                                </span>
                                                             )}
                                                         </div>
                                                     </CardContent>
@@ -209,7 +179,6 @@ export function Kanban({ project }: KanbanProps) {
                                                     <h4 className="mb-2 text-sm font-medium text-gray-900">
                                                         {task.title}
                                                     </h4>
-                                                    {renderBlockedBadge(task)}
                                                     {renderAssignedUsers(task)}
                                                     <div className="mt-2 flex items-center justify-between">
                                                         <span className="text-xs text-gray-500">
@@ -220,8 +189,11 @@ export function Kanban({ project }: KanbanProps) {
                                                             }
                                                             h
                                                         </span>
-                                                        {renderPriorityFlag(
-                                                            task,
+                                                        {task.priority ===
+                                                            'high' && (
+                                                            <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">
+                                                                Vysoká
+                                                            </span>
                                                         )}
                                                     </div>
                                                 </CardContent>
@@ -240,11 +212,6 @@ export function Kanban({ project }: KanbanProps) {
                 })}
             </div>
 
-            <BlockedTaskDialog
-                projectId={project.id}
-                taskId={pendingTaskId}
-            />
-
             <DragOverlay>
                 {activeTask ? (
                     <Card className="cursor-grabbing shadow-lg">
@@ -258,7 +225,11 @@ export function Kanban({ project }: KanbanProps) {
                                     {activeTask.actual_hours}h /{' '}
                                     {activeTask.estimated_hours}h
                                 </span>
-                                {renderPriorityFlag(activeTask)}
+                                {activeTask.priority === 'high' && (
+                                    <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">
+                                        Vysoká
+                                    </span>
+                                )}
                             </div>
                         </CardContent>
                     </Card>

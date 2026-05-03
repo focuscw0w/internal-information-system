@@ -74,13 +74,13 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
         canManageTimeEntries || entry.user_id === currentUserId;
 
     return (
-        <Card className="border-gray-100 bg-white shadow-sm">
+        <Card>
             <CardHeader className="space-y-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                        <CardTitle className="text-lg">Záznamy času</CardTitle>
+                        <CardTitle className="text-base">Záznamy</CardTitle>
                         {entries.length > 0 && (
-                            <p className="mt-1 text-sm text-gray-500">
+                            <p className="mt-1 text-sm text-muted-foreground">
                                 {filteredEntries.length} záznamov ·{' '}
                                 {totalHours.toFixed(1)}h zobrazených
                             </p>

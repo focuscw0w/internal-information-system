@@ -56,8 +56,6 @@ export const WeeklyChart = ({ entries }: WeeklyChartProps) => {
     const weekDates = getWeekDates(currentMonday);
     const isCurrentWeek = weekOffset === 0;
 
-    console.log(entries);
-
     // Aggregate hours per day
     const dailyHours = weekDates.map((date) =>
         entries
@@ -69,29 +67,29 @@ export const WeeklyChart = ({ entries }: WeeklyChartProps) => {
     const maxHours = Math.max(...dailyHours, 1);
 
     return (
-        <Card className="border-gray-100 bg-white shadow-sm">
+        <Card>
             <CardHeader>
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">
-                        Týždenný prehľad
-                        <span className="ml-2 text-sm font-normal text-gray-500">
+                    <CardTitle className="text-base">
+                        Prehľad týždňa
+                        <span className="ml-2 text-sm font-normal text-muted-foreground">
                             ({totalHours.toFixed(1)}h)
                         </span>
                     </CardTitle>
                     <div className="flex items-center gap-1">
                         <button
                             onClick={() => setWeekOffset((o) => o - 1)}
-                            className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                            className="icon-btn size-7"
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </button>
-                        <span className="min-w-[180px] text-center text-sm text-gray-600">
+                        <span className="min-w-[180px] text-center text-sm text-muted-foreground">
                             {formatWeekRange(currentMonday)}
                         </span>
                         <button
                             onClick={() => setWeekOffset((o) => o + 1)}
                             disabled={isCurrentWeek}
-                            className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="icon-btn size-7 disabled:cursor-not-allowed disabled:opacity-30"
                         >
                             <ChevronRight className="h-4 w-4" />
                         </button>
@@ -120,11 +118,9 @@ export const WeeklyChart = ({ entries }: WeeklyChartProps) => {
                                     <div className="flex w-full max-w-10 items-end">
                                         <div
                                             className={`w-full rounded-t transition-all ${
-                                                isToday
-                                                    ? 'bg-blue-500'
-                                                    : hours > 0
-                                                        ? 'bg-blue-200'
-                                                        : 'bg-gray-100'
+                                                isToday || hours > 0
+                                                    ? 'bg-[var(--accent-blue)]'
+                                                    : 'bg-muted'
                                             }`}
                                             style={{
                                                 height: `${Math.max(heightPercent, hours > 0 ? 4 : 2)}%`,
@@ -136,7 +132,7 @@ export const WeeklyChart = ({ entries }: WeeklyChartProps) => {
                                 {/* Day label */}
                                 <span
                                     className={`text-xs font-medium ${
-                                        isToday ? 'text-blue-600' : 'text-gray-500'
+                                        isToday ? 'text-[var(--accent-blue-text)]' : 'text-muted-foreground'
                                     }`}
                                 >
                                     {DAY_LABELS[i]}

@@ -14,7 +14,6 @@ export default function Index({
         <ProjectLayout>
             <Head title={title} />
             <div className="p-6">
-                <h1 className="text-2xl font-semibold">{title}</h1>
                 <ProjectsOverview projects={projects} />
             </div>
         </ProjectLayout>

@@ -9,7 +9,6 @@ const statusFilterOptions: { value: TaskStatus; label: string }[] = [
 ];
 
 const priorityFilterOptions: { value: TaskPriority; label: string }[] = [
-    { value: 'urgent', label: 'Urgentná' },
     { value: 'high', label: 'Vysoká' },
     { value: 'medium', label: 'Stredná' },
     { value: 'low', label: 'Nízka' },

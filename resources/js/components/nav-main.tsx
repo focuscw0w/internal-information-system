@@ -19,8 +19,10 @@ export function NavMain({
     return (
         <>
             {moduleNavItems.map((moduleGroup, index) => (
-                <SidebarGroup className="px-2 py-0" key={index}>
-                    <SidebarGroupLabel>{moduleGroup.title}</SidebarGroupLabel>
+                <SidebarGroup className="px-0 py-0" key={index}>
+                    <SidebarGroupLabel className="h-6 px-2 text-[10px] uppercase tracking-widest text-muted-foreground">
+                        {moduleGroup.title}
+                    </SidebarGroupLabel>
 
                     <SidebarMenu>
                         {moduleGroup.items.map((item) => {
@@ -38,9 +40,20 @@ export function NavMain({
                                         asChild
                                         isActive={isActive}
                                         tooltip={{ children: item.title }}
+                                        className={cn(
+                                            'h-8 rounded-md text-[13px] text-sidebar-foreground/90',
+                                            isActive &&
+                                                'border border-border bg-card text-sidebar-foreground shadow-xs',
+                                        )}
                                     >
                                         <Link href={item.href} prefetch>
-                                            <Icon className={cn('h-4 w-4', isActive && 'text-sidebar-primary')} />
+                                            <Icon
+                                                className={cn(
+                                                    'h-4 w-4',
+                                                    isActive &&
+                                                        'text-[var(--accent-blue)]',
+                                                )}
+                                            />
                                             <span>{item.title}</span>
                                         </Link>
                                     </SidebarMenuButton>

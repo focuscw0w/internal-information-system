@@ -19,14 +19,22 @@ export default function TimeEntryPage({ project, entries }: TimeEntryProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Sledovanie času – ${project.name}`} />
-            <div className=" space-y-6 p-6">
-                <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">
-                        Sledovanie času
-                    </h1>
-                    <p className="mt-1 text-sm text-gray-500">
-                        {project.name}
-                    </p>
+            <div className="page page-enter">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-head__title">Evidencia času</h1>
+                        <p className="page-head__subtitle">
+                            {project.name}
+                        </p>
+                    </div>
+                    <div className="page-head__actions">
+                        <button type="button" className="btn" disabled>
+                            Export CSV
+                        </button>
+                        <button type="button" className="btn" disabled>
+                            Odoslať na schválenie
+                        </button>
+                    </div>
                 </div>
 
                 <TimeEntryTable

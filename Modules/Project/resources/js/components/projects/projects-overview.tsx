@@ -114,7 +114,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
     const tasksTotal = projects.reduce((sum, p) => sum + p.tasks_total, 0);
 
     return (
-        <div className="min-h-screen">
+        <div>
             {/* Header */}
             <ProjectsHeader
                 viewMode={viewMode}
@@ -122,7 +122,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
             />
 
             {/* Súhrnné štatistiky */}
-            <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="kpi-grid mb-6">
                 <StatCard
                     title="Aktívne projekty"
                     value={activeProjects}
@@ -154,19 +154,19 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
             </div>
 
             {/* Filter bar */}
-            <div className="mb-5 flex flex-wrap items-center gap-6">
-                <div className="relative w-125">
+            <div className="command-bar mb-4">
+                <div className="field-wrap command-bar__search">
                     <Search className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
                         placeholder="Hľadať projekt..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full rounded-md border border-gray-200 bg-white py-1.5 pr-3 pl-8 text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
+                        className="input input--with-icon w-full"
                     />
                 </div>
 
-                <div className="flex items-center gap-2.5">
+                <div className="command-bar__filters">
                     <Filter className="h-4 w-4 flex-shrink-0 text-gray-400" />
 
                     <select
@@ -176,7 +176,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                                 (e.target.value as ProjectStatus) || null,
                             )
                         }
-                        className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
+                        className="select text-xs"
                     >
                         <option value="">Všetky stavy</option>
                         {STATUS_OPTIONS.map((o) => (
@@ -193,7 +193,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                                 (e.target.value as WorkloadLevel) || null,
                             )
                         }
-                        className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
+                        className="select text-xs"
                     >
                         <option value="">Všetky zaťaženia</option>
                         {WORKLOAD_OPTIONS.map((o) => (
@@ -208,7 +208,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                         onChange={(e) =>
                             setSortBy(e.target.value as SortOption)
                         }
-                        className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
+                        className="select text-xs"
                     >
                         {SORT_OPTIONS.map((o) => (
                             <option key={o.value} value={o.value}>
@@ -222,12 +222,12 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                     <>
                         <button
                             onClick={clearFilters}
-                            className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                            className="btn btn--ghost btn--sm"
                         >
                             <X className="h-3 w-3" />
                             Zrušiť filtre
                         </button>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-muted-foreground">
                             {filtered.length} z {projects.length}
                         </span>
                     </>
@@ -249,7 +249,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                     </button>
                 </div>
             ) : viewMode === 'grid' ? (
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
                     {filtered.map((project) => (
                         <Card
                             key={project.id}

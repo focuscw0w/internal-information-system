@@ -20,10 +20,23 @@ export default function Index({ projects, entries }: IndexProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Sledovanie času" />
-            <div className=" space-y-6 p-6">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                    Sledovanie času
-                </h1>
+            <div className="page page-enter">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-head__title">Evidencia času</h1>
+                        <p className="page-head__subtitle">
+                            Sleduj hodiny strávené na projektoch a úlohách.
+                        </p>
+                    </div>
+                    <div className="page-head__actions">
+                        <button type="button" className="btn" disabled>
+                            Export CSV
+                        </button>
+                        <button type="button" className="btn" disabled>
+                            Odoslať na schválenie
+                        </button>
+                    </div>
+                </div>
 
                 <WeeklyChart entries={entries} />
 
@@ -35,14 +48,14 @@ export default function Index({ projects, entries }: IndexProps) {
                                 onClick={() =>
                                     router.visit(`/projects/${project.id}/time-entries`)
                                 }
-                                className="cursor-pointer rounded-lg border border-gray-100 bg-white p-4 shadow-sm transition-colors hover:bg-gray-50"
+                                className="cursor-pointer rounded-lg border border-border bg-card p-4 shadow-xs transition-colors hover:bg-muted/50"
                             >
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <h3 className="font-medium text-gray-900">
+                                        <h3 className="font-medium text-foreground">
                                             {project.name}
                                         </h3>
-                                        <p className="mt-1 text-sm text-gray-500">
+                                        <p className="mt-1 text-sm text-muted-foreground">
                                             {project.tasks_total} úloh
                                         </p>
                                     </div>

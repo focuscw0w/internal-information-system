@@ -15,7 +15,7 @@ export function UserInfo({
         <>
             <Avatar className="h-8 w-8 overflow-hidden rounded-full">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                <AvatarFallback className="rounded-full bg-pink-600 text-xs font-semibold text-white dark:bg-pink-600 dark:text-white">
                     {getInitials(user.name)}
                 </AvatarFallback>
             </Avatar>
@@ -24,6 +24,11 @@ export function UserInfo({
                 {showEmail && (
                     <span className="truncate text-xs text-muted-foreground">
                         {user.email}
+                    </span>
+                )}
+                {!showEmail && (
+                    <span className="truncate text-[11px] text-muted-foreground">
+                        Project Lead
                     </span>
                 )}
             </div>

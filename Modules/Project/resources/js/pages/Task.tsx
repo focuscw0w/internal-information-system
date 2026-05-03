@@ -1,10 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Head } from '@inertiajs/react';
 import { FileText, ListChecks, Users } from 'lucide-react';
-import { BlockedTaskDialog } from '../components/project-detail/blocked-task-dialog';
 import { EditTaskDialog } from '../components/project-detail/task-table/dialogs/edit-task';
 import { Comments } from '../components/task-detail/comments';
-import { Dependencies } from '../components/task-detail/dependencies';
 import { Assignees } from '../components/task-detail/tab-views/assignees';
 import { Subtasks } from '../components/task-detail/tab-views/subtasks';
 import { TaskOverview } from '../components/task-detail/tab-views/task-overview';
@@ -131,17 +129,8 @@ export default function TaskPage({ task, project, team_capacity }: TaskProps) {
                     )}
                 </Tabs>
 
-                {/* Dependencies */}
-                <Dependencies
-                    task={task}
-                    project={projectWithCapacity}
-                    canEdit={can('edit_tasks')}
-                />
-
                 {/* Comments */}
                 <Comments task={task} />
-
-                <BlockedTaskDialog projectId={project.id} taskId={task.id} />
             </div>
         </ProjectLayout>
     );

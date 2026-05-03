@@ -172,10 +172,10 @@ export function Timeline({ project }: TimelineProps) {
                                 </div>
 
                                 {activity.type === 'task_status_changed' &&
-                                    activity.metadata?.old_status && (
+                                    Boolean(activity.metadata?.old_status) && (
                                         <p className="mt-1 text-xs text-gray-400">
-                                            {String(activity.metadata.old_status)} →{' '}
-                                            {String(activity.metadata.new_status)}
+                                            {String(activity.metadata?.old_status)} →{' '}
+                                            {String(activity.metadata?.new_status)}
                                         </p>
                                     )}
                             </div>

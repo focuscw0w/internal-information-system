@@ -11,11 +11,14 @@ interface CardHeaderProps {
 
 export const CardHeader = ({ name, status, workload, isAtRisk }: CardHeaderProps) => {
     return (
-        <div className="mb-3">
+        <div className="mb-4 pr-8">
+            <div className="mb-1 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+                Internal
+            </div>
             <div className="mb-2 flex items-center gap-2">
-                <h3 className="text-xl font-semibold text-gray-900">{name}</h3>
+                <h3 className="text-base font-semibold text-foreground">{name}</h3>
                 {isAtRisk && (
-                    <span title="Projekt je ohrozený" className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                    <span title="Projekt je ohrozený" className="badge badge--danger">
                         <AlertTriangle className="h-3 w-3" />
                         Ohrozený
                     </span>
