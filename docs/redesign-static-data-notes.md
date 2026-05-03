@@ -30,6 +30,21 @@ Tieto prvky su v redizajne docasne staticke alebo neaktivne, pretoze aktualna da
 - KPI texty ako medzimesacna zmena aktivnych projektov a pocet timov su docasne vizualne doplnky, kym nebude doplneny realny analyticky zdroj.
 - Akcia `Spravovat tim` v hlavicke detailu projektu je zatial vizualna, realna sprava clenov zostava v existujucich projektovych dialogoch.
 
+## Kapacitne planovanie
+
+- Aktualny tyzden v hlavicke je docasne staticky text podla Claude screenshotu.
+- Akcie `Sync s projektmi`, `Export`, `Pozriet odporucania`, `Aplikovat` a rychle filtre odporucani su zatial vizualne alebo lokalne UI akcie.
+- Simulator v pravom paneli pouziva prvy dostupny projekt z predikcie a ovladace su preview; detailna simulacia zostava cez existujucu simulation route.
+- Role/osobne pozicie v tabulke kapacit nie su v aktualnom modeli, preto sa v tabulke pouziva email ako druhy riadok.
+
+## Evidencia casu
+
+- Aktivny timer na indexe evidencie casu je lokalny UI preview a nespusta ani neuklada backendovy timer.
+- Rychle pridanie zaznamu v pravom paneli je vizualny formular; existujuce realne time-entry akcie zostavaju na projektovych time-entry obrazovkach.
+- Export CSV a odoslanie na schvalenie su zatial vizualne akcie.
+- Uctovatelnost a schvalenie v zozname pouzivaju diskrétne staticke hodnoty, lebo aktualny time-entry model tieto polia neposkytuje.
+- Tyzdnove KPI, mesacny odhad a datumovy rozsah v hlavicke su docasne vypocitane alebo staticke UI hodnoty podla Claude screenshotu.
+
 ## Buduce backend ulohy
 
 - Navrhnut profilove polia alebo samostatny profilovy model.
