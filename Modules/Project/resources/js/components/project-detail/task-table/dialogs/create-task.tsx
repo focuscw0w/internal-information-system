@@ -3,21 +3,29 @@ import { FormField } from '@/components/dialogs/form-field';
 import { Button } from '@/components/ui/button';
 import { useForm } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { TeamMember } from '../../../../types/types';
+import { TaskStatus, TeamMember } from '../../../../types/types';
 import { TeamMemberSelect } from '../../../ui/team-member-select';
 interface CreateTaskDialogProps {
     projectId: number;
     team: TeamMember[];
+    initialStatus?: TaskStatus;
+    trigger?: ReactNode;
 }
 
-export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
+export function CreateTaskDialog({
+    projectId,
+    team,
+    initialStatus = 'todo',
+    trigger,
+}: CreateTaskDialogProps) {
     const [open, setOpen] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         description: '',
-        status: 'todo',
+        status: initialStatus,
         priority: 'medium',
         estimated_hours: '',
         start_date: '',
@@ -54,13 +62,15 @@ export function CreateTaskDialog({ projectId, team }: CreateTaskDialogProps) {
             open={open}
             onOpenChange={setOpen}
             trigger={
-                <Button
-                    size="default"
-                    className="bg-primary hover:bg-primary/90"
-                >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Pridať úlohu
-                </Button>
+                trigger ?? (
+                    <Button
+                        size="default"
+                        className="bg-primary hover:bg-primary/90"
+                    >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Pridať úlohu
+                    </Button>
+                )
             }
             title="Vytvoriť novú úlohu"
             description="Pridajte detaily novej úlohy pre projekt"
