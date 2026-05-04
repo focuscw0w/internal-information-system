@@ -23,6 +23,18 @@ const formatDateHeader = (dateStr: string): string => {
     return `${formatted} · ${DAY_NAMES[date.getDay()]}`;
 };
 
+const statusBadge = (status: TimeEntry['status']) => {
+    if (status === 'pending') {
+        return { className: 'badge badge--warning', label: 'Pending' };
+    }
+
+    if (status === 'rejected') {
+        return { className: 'badge badge--danger', label: 'Rejected' };
+    }
+
+    return { className: 'badge badge--success', label: 'Schválené' };
+};
+
 export const TimeEntryDayGroup = ({
     date,
     entries,
@@ -65,6 +77,10 @@ export const TimeEntryDayGroup = ({
 
                     <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
                         {Number(entry.hours).toFixed(1)}h
+                    </span>
+
+                    <span className={statusBadge(entry.status).className}>
+                        {statusBadge(entry.status).label}
                     </span>
 
                     <div className="flex w-16 justify-end">

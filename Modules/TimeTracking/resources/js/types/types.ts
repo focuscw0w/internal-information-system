@@ -6,6 +6,10 @@ export interface TimeEntry {
     entry_date: string;
     hours: number;
     description: string | null;
+    status: 'pending' | 'approved' | 'rejected';
+    approved_by?: number | null;
+    approved_at?: string | null;
+    rejection_reason?: string | null;
     task?: {
         id: number;
         title: string;

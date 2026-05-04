@@ -119,6 +119,10 @@ export interface TimeEntry {
     entry_date: string;
     hours: number | string;
     description: string | null;
+    status?: 'pending' | 'approved' | 'rejected';
+    approved_by?: number | null;
+    approved_at?: string | null;
+    rejection_reason?: string | null;
     user?: {
         id: number;
         name: string;

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Database\Factories\TimeEntryFactory;
+use Modules\TimeTracking\Enums\TimeEntryStatusEnum;
 use Modules\User\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -25,6 +26,10 @@ class TimeEntry extends Model
         'entry_date',
         'hours',
         'description',
+        'status',
+        'approved_by',
+        'approved_at',
+        'rejection_reason',
     ];
 
     /**
@@ -35,6 +40,7 @@ class TimeEntry extends Model
         return [
             'entry_date' => 'date',
             'hours' => 'decimal:2',
+            'approved_at' => 'datetime',
         ];
     }
 
@@ -62,6 +68,11 @@ class TimeEntry extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
     public function scopeForUser(Builder $query, int $userId): Builder
     {
         return $query->where('user_id', $userId);
@@ -81,6 +92,21 @@ class TimeEntry extends Model
             now()->startOfMonth(),
             now()->endOfMonth(),
         ]);
+    }
+
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('status', TimeEntryStatusEnum::Pending->value);
+    }
+
+    public function scopeApproved(Builder $query): Builder
+    {
+        return $query->where('status', TimeEntryStatusEnum::Approved->value);
+    }
+
+    public function scopeRejected(Builder $query): Builder
+    {
+        return $query->where('status', TimeEntryStatusEnum::Rejected->value);
     }
 
     protected static function newFactory()

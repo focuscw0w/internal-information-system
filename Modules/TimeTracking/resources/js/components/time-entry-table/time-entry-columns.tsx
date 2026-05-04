@@ -1,6 +1,18 @@
 import { Column } from '@/components/ui/data-table';
 import { TimeEntry } from '../../types/types';
 
+const statusMeta = (status: TimeEntry['status']) => {
+    if (status === 'pending') {
+        return { className: 'bg-amber-50 text-amber-700', label: 'Pending' };
+    }
+
+    if (status === 'rejected') {
+        return { className: 'bg-red-50 text-red-700', label: 'Rejected' };
+    }
+
+    return { className: 'bg-emerald-50 text-emerald-700', label: 'Schválené' };
+};
+
 export const timeEntryColumns: Column<TimeEntry>[] = [
     {
         key: 'entry_date',
@@ -41,6 +53,20 @@ export const timeEntryColumns: Column<TimeEntry>[] = [
                 {entry.hours}h
             </span>
         ),
+    },
+    {
+        key: 'status',
+        label: 'Status',
+        width: 'w-32',
+        render: (entry) => {
+            const meta = statusMeta(entry.status);
+
+            return (
+                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${meta.className}`}>
+                    {meta.label}
+                </span>
+            );
+        },
     },
     {
         key: 'description',

@@ -95,6 +95,30 @@ class Project extends Model
         return $query->where('status', 'active');
     }
 
+    public function scopeManagedBy(Builder $query, User $user): Builder
+    {
+        return $query->where(function (Builder $q) use ($user) {
+            $q->where('owner_id', $user->id)
+                ->orWhereHas('team', function (Builder $teamQuery) use ($user) {
+                    $teamQuery
+                        ->where('user_id', $user->id)
+                        ->whereJsonContains('permissions', 'manage_team');
+                });
+        });
+    }
+
+    public function scopeWhereUserCanManageTimeEntries(Builder $query, User $user): Builder
+    {
+        return $query->where(function (Builder $q) use ($user) {
+            $q->where('owner_id', $user->id)
+                ->orWhereHas('team', function (Builder $teamQuery) use ($user) {
+                    $teamQuery
+                        ->where('user_id', $user->id)
+                        ->whereJsonContains('permissions', 'manage_time_entries');
+                });
+        });
+    }
+
     // Methods
     public function updateProgress(): void
     {

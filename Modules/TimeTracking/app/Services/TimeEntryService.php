@@ -22,11 +22,16 @@ class TimeEntryService implements TimeEntryServiceInterface
     /**
      * Get total tracked hours per user in a time period.
      */
-    public function getTotalHoursPerUserInPeriod(Carbon $from, Carbon $to): Collection
+    public function getTotalHoursPerUserInPeriod(
+        Carbon $from,
+        Carbon $to,
+        ?array $userIds = null,
+        ?array $projectIds = null,
+        string $status = 'all',
+    ): Collection
     {
-        return TimeEntry::query()
+        return $this->filteredPeriodQuery($from, $to, $userIds, $projectIds, $status)
             ->selectRaw('user_id, COALESCE(SUM(hours), 0) as total')
-            ->whereBetween('entry_date', [$from, $to])
             ->groupBy('user_id')
             ->pluck('total', 'user_id');
     }
@@ -34,11 +39,15 @@ class TimeEntryService implements TimeEntryServiceInterface
     /**
      * Get tracked hours grouped by week and user.
      */
-    public function getHoursGroupedByWeekAndUser(Carbon $from, Carbon $to): array
+    public function getHoursGroupedByWeekAndUser(
+        Carbon $from,
+        Carbon $to,
+        ?array $userIds = null,
+        ?array $projectIds = null,
+        string $status = 'all',
+    ): array
     {
-        return TimeEntry::query()
-            ->where('entry_date', '>=', $from)
-            ->where('entry_date', '<=', $to)
+        return $this->filteredPeriodQuery($from, $to, $userIds, $projectIds, $status)
             ->get(['user_id', 'entry_date', 'hours'])
             ->groupBy(fn ($e) => $e->entry_date->format('o-W'))
             ->map(fn ($week) =>
@@ -47,6 +56,19 @@ class TimeEntryService implements TimeEntryServiceInterface
                     ->all()
             )
             ->all();
+    }
+
+    public function getTotalHoursPerProjectInPeriod(
+        Carbon $from,
+        Carbon $to,
+        ?array $userIds = null,
+        ?array $projectIds = null,
+        string $status = 'approved',
+    ): Collection {
+        return $this->filteredPeriodQuery($from, $to, $userIds, $projectIds, $status)
+            ->selectRaw('project_id, COALESCE(SUM(hours), 0) as total')
+            ->groupBy('project_id')
+            ->pluck('total', 'project_id');
     }
 
     /**
@@ -179,6 +201,32 @@ class TimeEntryService implements TimeEntryServiceInterface
     private function syncAllocationHours(int $projectId, int $userId): void
     {
         $this->allocationSyncService?->syncUsedHoursForProjectUser($projectId, $userId);
+    }
+
+    private function filteredPeriodQuery(
+        Carbon $from,
+        Carbon $to,
+        ?array $userIds = null,
+        ?array $projectIds = null,
+        string $status = 'all',
+    ): \Illuminate\Database\Eloquent\Builder {
+        $query = TimeEntry::query()
+            ->whereDate('entry_date', '>=', $from)
+            ->whereDate('entry_date', '<=', $to);
+
+        if ($userIds !== null) {
+            $query->whereIn('user_id', array_map('intval', $userIds));
+        }
+
+        if ($projectIds !== null) {
+            $query->whereIn('project_id', array_map('intval', $projectIds));
+        }
+
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        return $query;
     }
 
     /**

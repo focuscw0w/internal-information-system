@@ -16,6 +16,7 @@ class TimeEntryResource extends JsonResource
             'hours' => $this->hours,
             'entry_date' => $this->entry_date,
             'description' => $this->description,
+            'status' => $this->status,
         ];
     }
 }

@@ -1,16 +1,17 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import {
+    BarChart3,
     Check,
+    CheckCheck,
     Download,
     Pause,
     Play,
     Plus,
-    Send,
 } from 'lucide-react';
 import { Project } from 'Modules/Project/resources/js/types/types';
 import { TimeEntry } from '../types/types';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, SharedData } from '@/types';
 import { useMemo, useState } from 'react';
 import { useTimer } from '../context/timer-context';
 import { StopTimerDialog } from '../components/time-entry-table/dialogs/stop-timer';
@@ -69,7 +70,29 @@ const formatTimer = (seconds: number) => {
 
 const dateKey = (value: string) => value.substring(0, 10);
 
+const statusBadge = (status: TimeEntry['status']) => {
+    if (status === 'pending') {
+        return { className: 'badge badge--warning', label: 'Pending' };
+    }
+
+    if (status === 'rejected') {
+        return { className: 'badge badge--danger', label: 'Rejected' };
+    }
+
+    return { className: 'badge badge--success', label: 'Schválené' };
+};
+
+const hasPermission = (permissions: string[], permission: string, isAdmin: boolean) =>
+    isAdmin || permissions.includes(permission);
+
 export default function Index({ projects, entries, summary }: IndexProps) {
+    const { props } = usePage<SharedData>();
+    const permissions = (props.current_user_permissions as string[] | undefined) ?? [];
+    const isAdmin = Boolean(props.auth.user?.is_admin);
+    const canUseReports =
+        hasPermission(permissions, 'view_all_time_entries', isAdmin) ||
+        hasPermission(permissions, 'manage_time_entries', isAdmin);
+    const canUseApprovals = hasPermission(permissions, 'manage_time_entries', isAdmin);
     const [view, setView] = useState<'week' | 'month'>('week');
     const { timer, startTimer } = useTimer();
     const running = timer.isRunning;
@@ -186,14 +209,28 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                         </p>
                     </div>
                     <div className="page-head__actions">
-                        <button type="button" className="btn">
-                            <Download className="h-4 w-4" />
-                            Export CSV
-                        </button>
-                        <button type="button" className="btn">
-                            <Send className="h-4 w-4" />
-                            Odoslať na schválenie
-                        </button>
+                        {canUseReports ? (
+                            <Link href="/manager/time/reports" className="btn">
+                                <BarChart3 className="h-4 w-4" />
+                                Reporty
+                            </Link>
+                        ) : (
+                            <button type="button" className="btn" disabled>
+                                <Download className="h-4 w-4" />
+                                Export CSV
+                            </button>
+                        )}
+                        {canUseApprovals ? (
+                            <Link href="/manager/time/approvals" className="btn">
+                                <CheckCheck className="h-4 w-4" />
+                                Schvaľovanie
+                            </Link>
+                        ) : (
+                            <button type="button" className="btn" disabled>
+                                <CheckCheck className="h-4 w-4" />
+                                Čaká na schválenie automaticky
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -590,9 +627,9 @@ function DayGroup({
                                     : ''}
                             </div>
                         </div>
-                        <span className="badge badge--success">
+                        <span className={statusBadge(entry.status).className}>
                             <Check className="h-3 w-3" />
-                            Schválené
+                            {statusBadge(entry.status).label}
                         </span>
                         <div className="flex items-center gap-2">
                             <span className="mono text-sm font-semibold">

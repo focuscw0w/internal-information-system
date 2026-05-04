@@ -1,10 +1,28 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\EnsureCanAccessManagerArea;
 use Modules\TimeTracking\Http\Controllers\TimeTrackingController;
 use Modules\TimeTracking\Http\Controllers\TimeEntryController;
+use Modules\TimeTracking\Http\Controllers\TimeEntryApprovalController;
+use Modules\TimeTracking\Http\Controllers\TimeReportController;
 
 Route::middleware(['web', 'auth'])->group(function () {
+    Route::prefix('manager/time')->name('manager.time.')->middleware(EnsureCanAccessManagerArea::class)->group(function () {
+        Route::get('/approvals', [TimeEntryApprovalController::class, 'index'])
+            ->name('approvals.index');
+        Route::post('/approvals/bulk', [TimeEntryApprovalController::class, 'bulkApprove'])
+            ->name('approvals.bulk');
+        Route::post('/approvals/{id}/approve', [TimeEntryApprovalController::class, 'approve'])
+            ->name('approvals.approve');
+        Route::post('/approvals/{id}/reject', [TimeEntryApprovalController::class, 'reject'])
+            ->name('approvals.reject');
+
+        Route::get('/reports', [TimeReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/data', [TimeReportController::class, 'data'])->name('reports.data');
+        Route::get('/reports/export', [TimeReportController::class, 'export'])->name('reports.export');
+    });
+
     // TimeTracking dashboard
     Route::prefix('time-tracking')
         ->name('time-tracking.')

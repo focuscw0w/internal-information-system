@@ -5,6 +5,9 @@ namespace App\Http\Middleware;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Modules\Project\Enums\ProjectPermission;
+use Modules\Project\Models\Project;
+use Modules\User\Models\User;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -45,6 +48,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'current_user_permissions' => fn () => $this->currentUserPermissions($request->user()),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'notifications' => [
                 'unread_count' => fn () => $request->user()?->unreadNotifications()->count() ?? 0,
@@ -55,5 +59,26 @@ class HandleInertiaRequests extends Middleware
                 'warning' => fn () => $request->session()->get('warning'),
             ],
         ];
+    }
+
+    private function currentUserPermissions(?User $user): array
+    {
+        if (! $user) {
+            return [];
+        }
+
+        $permissions = $user->getAllPermissions()->pluck('name')->all();
+
+        $projectPermissions = Project::query()
+            ->whereHas('team', fn ($query) => $query->where('user_id', $user->id))
+            ->get()
+            ->flatMap(fn (Project $project) => $project->userPermissions($user))
+            ->all();
+
+        if (Project::query()->where('owner_id', $user->id)->exists()) {
+            $projectPermissions = array_merge($projectPermissions, ProjectPermission::allValues());
+        }
+
+        return array_values(array_unique(array_merge($permissions, $projectPermissions)));
     }
 }

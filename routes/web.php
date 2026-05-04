@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\GlobalSearchController;
+use App\Http\Controllers\ManagerController;
+use App\Http\Middleware\EnsureCanAccessManagerArea;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Modules\Project\Models\Project;
@@ -14,6 +16,13 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware('auth')->group(function () {
+    Route::prefix('manager')
+        ->name('manager.')
+        ->middleware(EnsureCanAccessManagerArea::class)
+        ->group(function () {
+            Route::get('/', [ManagerController::class, 'dashboard'])->name('dashboard');
+        });
+
     Route::get('dashboard', function () {
         $user = auth()->user();
         $today = now()->toDateString();

@@ -4,6 +4,13 @@ return [
     'group' => 'Kapacitný manažment',
     'items' => [
         [
+            'title' => 'Tímové riadenie',
+            'route' => 'manager.dashboard',
+            'icon' => 'Gauge',
+            'order' => 30,
+            'manager_area' => true,
+        ],
+        [
             'title' => 'Sledovanie času',
             'route' => 'time-tracking.index',
             'icon' => 'Clock',

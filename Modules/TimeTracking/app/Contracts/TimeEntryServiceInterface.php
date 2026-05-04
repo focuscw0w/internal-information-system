@@ -14,7 +14,13 @@ interface TimeEntryServiceInterface
      *
      * @return Collection<int, float>  keyed by user_id
      */
-    public function getTotalHoursPerUserInPeriod(Carbon $from, Carbon $to): Collection;
+    public function getTotalHoursPerUserInPeriod(
+        Carbon $from,
+        Carbon $to,
+        ?array $userIds = null,
+        ?array $projectIds = null,
+        string $status = 'all',
+    ): Collection;
 
     /**
      * Get hours indexed as ['isoYearWeek' => [userId => hours]] for the given date range.
@@ -22,7 +28,21 @@ interface TimeEntryServiceInterface
      *
      * @return array<string, array<int, float>>
      */
-    public function getHoursGroupedByWeekAndUser(Carbon $from, Carbon $to): array;
+    public function getHoursGroupedByWeekAndUser(
+        Carbon $from,
+        Carbon $to,
+        ?array $userIds = null,
+        ?array $projectIds = null,
+        string $status = 'all',
+    ): array;
+
+    public function getTotalHoursPerProjectInPeriod(
+        Carbon $from,
+        Carbon $to,
+        ?array $userIds = null,
+        ?array $projectIds = null,
+        string $status = 'approved',
+    ): Collection;
 
     /**
      * Get all time entries for a project.
