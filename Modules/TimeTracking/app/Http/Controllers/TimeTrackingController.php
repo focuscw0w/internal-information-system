@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\Project\Contracts\ProjectServiceInterface;
+use Modules\Project\Transformers\ProjectResource;
 use Modules\TimeTracking\Models\TimeEntry;
 
 class TimeTrackingController extends Controller
@@ -21,6 +22,7 @@ class TimeTrackingController extends Controller
     public function index()
     {
         $projects = $this->projectService->getAllProjects();
+        $projects->load('tasks.assignedUsers');
 
         $user = auth()->user();
         $viewAll = (bool) $user?->is_admin;
@@ -92,7 +94,7 @@ class TimeTrackingController extends Controller
         );
 
         return Inertia::render('TimeTracking/Index', [
-            'projects' => $projects,
+            'projects' => $projects->map(fn ($project) => (new ProjectResource($project))->resolve())->values(),
             'entries' => $entries,
             'summary' => [
                 'scope' => $viewAll ? 'all' : 'mine',

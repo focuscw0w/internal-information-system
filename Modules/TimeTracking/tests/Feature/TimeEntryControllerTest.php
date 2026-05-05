@@ -241,21 +241,19 @@ class TimeEntryControllerTest extends TestCase
     }
 
     #[Test]
-    public function manager_can_log_time_on_any_task(): void
+    public function manager_cannot_log_time_on_unassigned_task(): void
     {
         $unassignedTask = Task::factory()->create([
             'project_id' => $this->project->id,
         ]);
 
-        $response = $this->actingAs($this->owner)
+        $this->actingAs($this->owner)
             ->post("/projects/{$this->project->id}/time-entries", [
                 'task_id' => $unassignedTask->id,
                 'entry_date' => '2026-03-07',
                 'hours' => 2.0,
-            ]);
-
-        $response->assertRedirect();
-        $response->assertSessionHas('success');
+            ])
+            ->assertSessionHasErrors('task_id');
     }
 
     // ── UPDATE ──────────────────────────────────────────────

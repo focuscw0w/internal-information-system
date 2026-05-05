@@ -24,17 +24,12 @@ export function QuickAddCard({ projects }: QuickAddCardProps) {
         [projects, data.project_id],
     );
 
-    const canManage = selectedProject?.current_user_permissions?.includes(
-        'manage_time_entries',
-    );
-
     const availableTasks = useMemo(() => {
         if (!selectedProject?.tasks) return [];
-        if (canManage) return selectedProject.tasks;
         return selectedProject.tasks.filter((task) =>
             task.assigned_users?.some((u) => u.id === currentUserId),
         );
-    }, [selectedProject, canManage, currentUserId]);
+    }, [selectedProject, currentUserId]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

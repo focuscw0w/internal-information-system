@@ -19,14 +19,10 @@ export const CreateTimeEntryDialog = ({
                                       }: CreateTimeEntryDialogProps) => {
     const [open, setOpen] = useState(false);
     const currentUserId = usePage<SharedData>().props.auth.user.id;
-    const permissions = project.current_user_permissions ?? [];
-    const canManageTimeEntries = permissions.includes('manage_time_entries');
 
-    const availableTasks = canManageTimeEntries
-        ? tasks
-        : tasks.filter((task) =>
-            task.assigned_users?.some((u) => u.id === currentUserId),
-        );
+    const availableTasks = tasks.filter((task) =>
+        task.assigned_users?.some((u) => u.id === currentUserId),
+    );
 
     const { data, setData, post, processing, errors, reset } = useForm({
         task_id: '',

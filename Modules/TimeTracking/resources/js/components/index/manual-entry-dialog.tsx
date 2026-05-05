@@ -37,17 +37,12 @@ export function ManualEntryDialog({
         [projects, data.project_id],
     );
 
-    const canManageOnSelected = selectedProject?.current_user_permissions?.includes(
-        'manage_time_entries',
-    );
-
     const availableTasks = useMemo(() => {
         if (!selectedProject?.tasks) return [];
-        if (canManageOnSelected) return selectedProject.tasks;
         return selectedProject.tasks.filter((task) =>
             task.assigned_users?.some((u) => u.id === currentUserId),
         );
-    }, [selectedProject, canManageOnSelected, currentUserId]);
+    }, [selectedProject, currentUserId]);
 
     const handleOpen = (next: boolean) => {
         if (next) {

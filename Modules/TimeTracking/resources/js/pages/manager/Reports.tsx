@@ -102,7 +102,16 @@ export default function Reports({ filters, data, filterOptions }: Props) {
         return { hours, entries };
     }, [reportData.byUser]);
 
+    const activeTabRows = useMemo(() => {
+        if (activeTab === 'projects') return reportData.byProject.length;
+        if (activeTab === 'timeline') return reportData.timeline.length;
+        return reportData.byUser.length;
+    }, [activeTab, reportData]);
+
+    const isExportDisabled = activeTabRows === 0;
+
     const exportCsv = () => {
+        if (isExportDisabled) return;
         window.location.href = `/manager/time/reports/export?${buildParams(filterState, activeTab).toString()}`;
     };
 
@@ -123,7 +132,13 @@ export default function Reports({ filters, data, filterOptions }: Props) {
                         </p>
                     </div>
                     <div className="page-head__actions">
-                        <button type="button" className="btn btn--primary" onClick={exportCsv}>
+                        <button
+                            type="button"
+                            className="btn btn--primary"
+                            onClick={exportCsv}
+                            disabled={isExportDisabled}
+                            title={isExportDisabled ? 'Nie sú žiadne dáta na export' : undefined}
+                        >
                             <Download className="h-4 w-4" />
                             CSV
                         </button>
