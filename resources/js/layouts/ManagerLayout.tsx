@@ -20,11 +20,7 @@ export default function ManagerLayout({
     const permissions = (props.current_user_permissions as string[] | undefined) ?? [];
     const isAdmin = Boolean(props.auth.user?.is_admin);
     const canApprovals = hasAny(permissions, ['manage_time_entries'], isAdmin);
-    const canReports = hasAny(
-        permissions,
-        ['view_all_time_entries', 'manage_time_entries'],
-        isAdmin,
-    );
+    const canReports = hasAny(permissions, ['manage_time_entries'], isAdmin);
 
     const links = [
         {

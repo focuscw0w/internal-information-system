@@ -67,12 +67,7 @@ class ModuleNavigation
         return $user->is_admin
             || self::hasGlobalPermission($user, PermissionEnum::CAPACITY_MANAGE->value)
             || Project::managedBy($user)->exists()
-            || Project::whereUserCanManageTimeEntries($user)->exists()
-            || Project::query()->whereHas('team', function ($query) use ($user) {
-                $query
-                    ->where('user_id', $user->id)
-                    ->whereJsonContains('permissions', 'view_all_time_entries');
-            })->exists();
+            || Project::whereUserCanManageTimeEntries($user)->exists();
     }
 
     private static function hasGlobalPermission($user, string $permission): bool

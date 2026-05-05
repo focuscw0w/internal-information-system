@@ -496,4 +496,36 @@ class TimeEntryControllerTest extends TestCase
         $response->assertInertia(fn ($page) => $page->has('entries', 1)
         );
     }
+
+    #[Test]
+    public function admin_time_tracking_dashboard_still_shows_only_own_entries(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $adminTask = Task::factory()->create([
+            'project_id' => $this->project->id,
+        ]);
+        $adminTask->assignedUsers()->attach($admin->id);
+
+        TimeEntry::factory()->create([
+            'project_id' => $this->project->id,
+            'task_id' => $adminTask->id,
+            'user_id' => $admin->id,
+        ]);
+
+        TimeEntry::factory()->create([
+            'project_id' => $this->project->id,
+            'task_id' => $this->task->id,
+            'user_id' => $this->member->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/time-tracking')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('entries', 1)
+                ->where('entries.0.user_id', $admin->id)
+                ->where('summary.scope', 'mine')
+                ->where('summary.week_target', 40)
+            );
+    }
 }

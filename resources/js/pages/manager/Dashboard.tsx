@@ -48,8 +48,7 @@ export default function Dashboard({ widgets }: DashboardProps) {
                         <PendingApprovalsCard data={widgets.pendingApprovals} />
                     )}
                     {widgets.teamHoursThisWeek &&
-                        (has(permissions, 'view_all_time_entries', isAdmin) ||
-                            has(permissions, 'manage_time_entries', isAdmin)) && (
+                        has(permissions, 'manage_time_entries', isAdmin) && (
                             <TeamHoursThisWeekCard data={widgets.teamHoursThisWeek} />
                         )}
                     {widgets.overdueTasks && has(permissions, 'manage_team', isAdmin) && (

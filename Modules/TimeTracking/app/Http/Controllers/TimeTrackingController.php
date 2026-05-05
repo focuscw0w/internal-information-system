@@ -25,14 +25,10 @@ class TimeTrackingController extends Controller
         $projects->load('tasks.assignedUsers');
 
         $user = auth()->user();
-        $viewAll = (bool) $user?->is_admin;
 
         $entriesQuery = TimeEntry::with(['task', 'project', 'user'])
+            ->where('user_id', $user->id)
             ->orderByDesc('entry_date');
-
-        if (! $viewAll) {
-            $entriesQuery->where('user_id', $user->id);
-        }
 
         $entries = $entriesQuery->get();
 
@@ -72,17 +68,12 @@ class TimeTrackingController extends Controller
             ->sum('hours');
 
         $prevWeekQuery = TimeEntry::query()
+            ->where('user_id', $user->id)
             ->whereBetween('entry_date', [$prevWeekStart, $prevWeekEnd]);
-
-        if (! $viewAll) {
-            $prevWeekQuery->where('user_id', $user->id);
-        }
 
         $prevWeekTotal = (float) $prevWeekQuery->sum('hours');
 
-        $weekTarget = $viewAll
-            ? $this->teamWeeklyCapacity()
-            : 40;
+        $weekTarget = 40;
 
         $weekRangeLabel = sprintf(
             '%s. %s - %s. %s %d',
@@ -106,7 +97,7 @@ class TimeTrackingController extends Controller
             })->values(),
             'entries' => $entries,
             'summary' => [
-                'scope' => $viewAll ? 'all' : 'mine',
+                'scope' => 'mine',
                 'week_start' => $weekStart->toDateString(),
                 'week_end' => $weekEnd->toDateString(),
                 'week_range_label' => $weekRangeLabel,
@@ -119,17 +110,6 @@ class TimeTrackingController extends Controller
                 'week_project_hours' => $weekProjectHours,
             ],
         ]);
-    }
-
-    private function teamWeeklyCapacity(): float
-    {
-        if (! class_exists(\Modules\CapacityManagement\Models\EmployeeCapacity::class)) {
-            return 40.0;
-        }
-
-        $sum = (float) \Modules\CapacityManagement\Models\EmployeeCapacity::sum('weekly_capacity_hours');
-
-        return $sum > 0 ? $sum : 40.0;
     }
 
     private function slovakMonthShort(int $month): string

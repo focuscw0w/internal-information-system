@@ -226,11 +226,7 @@ class TimeReportController extends Controller
                     ->orWhereHas('team', function (Builder $teamQuery) use ($user) {
                         $teamQuery
                             ->where('user_id', $user->id)
-                            ->where(function (Builder $permissionQuery) {
-                                $permissionQuery
-                                    ->whereJsonContains('permissions', 'view_all_time_entries')
-                                    ->orWhereJsonContains('permissions', 'manage_time_entries');
-                            });
+                            ->whereJsonContains('permissions', 'manage_time_entries');
                     });
             })
             ->pluck('id')

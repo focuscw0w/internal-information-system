@@ -153,15 +153,9 @@ class ManagerController extends Controller
             ->where(function ($query) use ($user) {
                 $query
                     ->where('owner_id', $user->id)
-                    ->orWhereHas('team', function ($teamQuery) use ($user) {
-                        $teamQuery
-                            ->where('user_id', $user->id)
-                            ->where(function ($permissionQuery) {
-                                $permissionQuery
-                                    ->whereJsonContains('permissions', 'view_all_time_entries')
-                                    ->orWhereJsonContains('permissions', 'manage_time_entries');
-                            });
-                    });
+                    ->orWhereHas('team', fn ($teamQuery) => $teamQuery
+                        ->where('user_id', $user->id)
+                        ->whereJsonContains('permissions', 'manage_time_entries'));
             })
             ->pluck('id');
     }

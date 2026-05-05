@@ -80,6 +80,28 @@ class ManagerTimeWorkflowTest extends TestCase
     }
 
     #[Test]
+    public function admin_can_open_approvals_queue(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        TimeEntry::factory()->create([
+            'project_id' => $this->managedProject->id,
+            'task_id' => $this->managedTask->id,
+            'user_id' => $this->member->id,
+            'status' => TimeEntryStatusEnum::Pending->value,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/manager/time/approvals')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('TimeTracking/manager/Approvals', false)
+                ->has('entries.data', 1)
+                ->where('entries.data.0.project_id', $this->managedProject->id)
+            );
+    }
+
+    #[Test]
     public function regular_project_member_cannot_access_manager_dashboard_or_reports(): void
     {
         $regularMember = User::factory()->create();
@@ -107,6 +129,65 @@ class ManagerTimeWorkflowTest extends TestCase
 
         $this->actingAs($regularMember)
             ->get('/manager/time/reports/export')
+            ->assertForbidden();
+    }
+
+    #[Test]
+    public function project_time_viewer_cannot_access_manager_dashboard(): void
+    {
+        $timeViewer = User::factory()->create();
+
+        $this->managedProject->team()->attach($timeViewer->id, [
+            'permissions' => json_encode([
+                'view_project',
+                'view_tasks',
+                'view_team',
+                'view_all_time_entries',
+            ]),
+            'allocation' => 100,
+        ]);
+
+        $this->actingAs($timeViewer)
+            ->get('/manager')
+            ->assertForbidden();
+
+        $this->actingAs($timeViewer)
+            ->get('/manager/time/reports')
+            ->assertForbidden();
+
+        $this->actingAs($timeViewer)
+            ->getJson('/manager/time/reports/data')
+            ->assertForbidden();
+
+        $this->actingAs($timeViewer)
+            ->get('/manager/time/reports/export')
+            ->assertForbidden();
+
+        $this->actingAs($timeViewer)
+            ->get('/manager/time/approvals')
+            ->assertForbidden();
+    }
+
+    #[Test]
+    public function manage_team_member_can_access_manager_dashboard_but_not_time_reports(): void
+    {
+        $teamManager = User::factory()->create();
+
+        $this->managedProject->team()->attach($teamManager->id, [
+            'permissions' => json_encode([
+                'view_project',
+                'view_tasks',
+                'manage_team',
+            ]),
+            'allocation' => 100,
+        ]);
+
+        $this->actingAs($teamManager)
+            ->get('/manager')
+            ->assertOk();
+
+        $this->actingAs($teamManager)
+            ->get('/manager/time/reports')
             ->assertForbidden();
     }
 
@@ -278,6 +359,39 @@ class ManagerTimeWorkflowTest extends TestCase
             ->assertJsonCount(1, 'byProject')
             ->assertJsonPath('byProject.0.project_id', $this->managedProject->id)
             ->assertJsonPath('byProject.0.total_hours', 2);
+    }
+
+    #[Test]
+    public function owner_reports_are_scoped_to_owned_projects(): void
+    {
+        $owner = User::factory()->create();
+        $ownedProject = Project::factory()->create(['owner_id' => $owner->id]);
+        $ownedTask = Task::factory()->create(['project_id' => $ownedProject->id]);
+
+        TimeEntry::factory()->create([
+            'project_id' => $ownedProject->id,
+            'task_id' => $ownedTask->id,
+            'user_id' => $this->member->id,
+            'entry_date' => now()->toDateString(),
+            'hours' => 4,
+            'status' => TimeEntryStatusEnum::Approved->value,
+        ]);
+
+        TimeEntry::factory()->create([
+            'project_id' => $this->otherProject->id,
+            'task_id' => $this->otherTask->id,
+            'user_id' => $this->member->id,
+            'entry_date' => now()->toDateString(),
+            'hours' => 8,
+            'status' => TimeEntryStatusEnum::Approved->value,
+        ]);
+
+        $this->actingAs($owner)
+            ->getJson('/manager/time/reports/data?status=approved')
+            ->assertOk()
+            ->assertJsonCount(1, 'byProject')
+            ->assertJsonPath('byProject.0.project_id', $ownedProject->id)
+            ->assertJsonPath('byProject.0.total_hours', 4);
     }
 
     #[Test]

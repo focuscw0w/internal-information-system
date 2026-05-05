@@ -90,9 +90,7 @@ export default function Index({ projects, entries, summary }: IndexProps) {
     const currentUserId = props.auth.user.id;
     const permissions = (props.current_user_permissions as string[] | undefined) ?? [];
     const isAdmin = Boolean(props.auth.user?.is_admin);
-    const canUseReports =
-        hasPermission(permissions, 'view_all_time_entries', isAdmin) ||
-        hasPermission(permissions, 'manage_time_entries', isAdmin);
+    const canUseReports = hasPermission(permissions, 'manage_time_entries', isAdmin);
     const canUseApprovals = hasPermission(permissions, 'manage_time_entries', isAdmin);
     const [view, setView] = useState<'week' | 'month'>('week');
     const { timer, startTimer } = useTimer();

@@ -24,11 +24,6 @@ class EnsureCanAccessManagerArea
             || $this->hasGlobalPermission($user, PermissionEnum::CAPACITY_MANAGE->value)
             || Project::managedBy($user)->exists()
             || Project::whereUserCanManageTimeEntries($user)->exists()
-            || Project::query()->whereHas('team', function ($query) use ($user) {
-                $query
-                    ->where('user_id', $user->id)
-                    ->whereJsonContains('permissions', 'view_all_time_entries');
-            })->exists()
         ) {
             return $next($request);
         }
