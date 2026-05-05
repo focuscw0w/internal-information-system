@@ -40,23 +40,24 @@ class CapacityManagementControllerTest extends TestCase
     }
 
     #[Test]
-    public function authenticated_user_can_access_capacity_dashboard(): void
+    public function regular_user_cannot_access_capacity_dashboard(): void
     {
         $response = $this->actingAs($this->regularUser)->get('/capacity-management');
 
-        $response->assertOk();
-        $response->assertInertia(fn ($page) => $page->component('CapacityManagement/Index', false));
+        $response->assertForbidden();
     }
 
     #[Test]
-    public function dashboard_passes_can_manage_false_for_regular_user(): void
+    public function admin_can_access_capacity_dashboard_without_explicit_permission(): void
     {
-        $response = $this->actingAs($this->regularUser)->get('/capacity-management');
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $response = $this->actingAs($admin)->get('/capacity-management');
 
         $response->assertOk();
         $response->assertInertia(fn ($page) =>
             $page->component('CapacityManagement/Index', false)
-                ->where('can_manage', false)
+                ->where('can_manage', true)
         );
     }
 
@@ -75,7 +76,7 @@ class CapacityManagementControllerTest extends TestCase
     #[Test]
     public function dashboard_contains_expected_data_keys(): void
     {
-        $response = $this->actingAs($this->regularUser)->get('/capacity-management');
+        $response = $this->actingAs($this->manager)->get('/capacity-management');
 
         $response->assertOk();
         $response->assertInertia(fn ($page) =>

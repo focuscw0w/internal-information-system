@@ -6,6 +6,7 @@ use App\Enums\PermissionEnum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Models\Project;
+use Modules\Project\Models\Task;
 use Modules\User\Models\User;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
@@ -29,10 +30,18 @@ class AdminProjectAccessTest extends TestCase
 
     private function createAdmin(): User
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['is_admin' => true]);
         $admin->syncPermissions(PermissionEnum::all());
 
         return $admin;
+    }
+
+    private function createProjectViewer(): User
+    {
+        $viewer = User::factory()->create(['is_admin' => false]);
+        $viewer->givePermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value);
+
+        return $viewer;
     }
 
     private function createProject(?User $owner = null): Project
@@ -210,6 +219,133 @@ class AdminProjectAccessTest extends TestCase
             $projectData['current_user_permissions'],
             'Admin by mal dostať všetky projektové permissions v response'
         );
+    }
+
+    // =========================================================================
+    // GLOBAL PROJECT VIEWER – READ ONLY
+    // =========================================================================
+
+    public function test_project_view_all_user_sees_all_projects_in_list(): void
+    {
+        $viewer = $this->createProjectViewer();
+
+        Project::factory()->create([
+            'owner_id' => User::factory()->create()->id,
+            'name' => 'Projekt A',
+        ]);
+        Project::factory()->create([
+            'owner_id' => User::factory()->create()->id,
+            'name' => 'Projekt B',
+        ]);
+
+        $response = $this->actingAs($viewer)
+            ->get('/projects')
+            ->assertOk();
+
+        $response->assertSee('Projekt A');
+        $response->assertSee('Projekt B');
+    }
+
+    public function test_project_view_all_user_can_view_foreign_project_detail(): void
+    {
+        $viewer = $this->createProjectViewer();
+        $project = $this->createProject();
+
+        $this->actingAs($viewer)
+            ->get("/projects/{$project->id}")
+            ->assertOk();
+    }
+
+    public function test_project_view_all_user_can_view_foreign_task_detail(): void
+    {
+        $viewer = $this->createProjectViewer();
+        $project = $this->createProject();
+        $task = Task::factory()->create(['project_id' => $project->id]);
+
+        $this->actingAs($viewer)
+            ->get("/projects/{$project->id}/tasks/{$task->id}")
+            ->assertOk();
+    }
+
+    public function test_project_view_all_user_gets_only_read_permissions_in_response(): void
+    {
+        $viewer = $this->createProjectViewer();
+        $project = $this->createProject();
+
+        $response = $this->actingAs($viewer)
+            ->get("/projects/{$project->id}")
+            ->assertOk();
+
+        $page = $response->original->getData()['page'];
+        $projectData = $page['props']['project'];
+
+        $this->assertEqualsCanonicalizing(
+            ProjectPermission::viewPermissions(),
+            $projectData['current_user_permissions'],
+        );
+    }
+
+    public function test_project_view_all_user_cannot_mutate_foreign_project_or_tasks(): void
+    {
+        $viewer = $this->createProjectViewer();
+        $project = $this->createProject();
+        $task = Task::factory()->create(['project_id' => $project->id]);
+        $member = User::factory()->create();
+
+        $this->actingAs($viewer)
+            ->put("/projects/{$project->id}", [
+                'name' => 'Read only user tried this',
+                'status' => 'active',
+                'workload' => 'medium',
+                'start_date' => now()->format('Y-m-d'),
+                'end_date' => now()->addMonth()->format('Y-m-d'),
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($viewer)
+            ->delete("/projects/{$project->id}")
+            ->assertForbidden();
+
+        $this->actingAs($viewer)
+            ->post("/projects/{$project->id}/tasks", [
+                'title' => 'Forbidden task',
+                'status' => 'todo',
+                'priority' => 'medium',
+                'estimated_hours' => 4,
+                'due_date' => now()->addWeek()->format('Y-m-d'),
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($viewer)
+            ->put("/projects/{$project->id}/tasks/{$task->id}", [
+                'title' => 'Forbidden edit',
+                'status' => 'todo',
+                'priority' => 'medium',
+                'estimated_hours' => 4,
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($viewer)
+            ->post("/projects/{$project->id}/tasks/{$task->id}/assign", [
+                'assigned_users' => [$member->id],
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($viewer)
+            ->delete("/projects/{$project->id}/tasks/{$task->id}")
+            ->assertForbidden();
+
+        $this->actingAs($viewer)
+            ->put("/projects/{$project->id}/team", [
+                'team_members' => [$member->id],
+                'team_settings' => [
+                    $member->id => [
+                        'permissions' => [ProjectPermission::VIEW_PROJECT->value],
+                        'allocation' => 100,
+                    ],
+                ],
+            ])
+            ->assertForbidden();
     }
 
     // =========================================================================

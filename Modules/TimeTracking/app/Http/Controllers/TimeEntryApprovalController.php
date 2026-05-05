@@ -12,7 +12,6 @@ use Inertia\Response;
 use Modules\Project\Models\Project;
 use Modules\TimeTracking\Enums\TimeEntryStatusEnum;
 use Modules\TimeTracking\Models\TimeEntry;
-use Throwable;
 
 class TimeEntryApprovalController extends Controller
 {
@@ -20,16 +19,15 @@ class TimeEntryApprovalController extends Controller
     {
         $user = $request->user();
         $isAdmin = (bool) $user->is_admin;
-        $canManageGlobally = $this->hasGlobalPermission($user, 'manage_time_entries');
-        $projectIds = ($isAdmin || $canManageGlobally)
+        $projectIds = $isAdmin
             ? Project::query()->pluck('id')
             : Project::whereUserCanManageTimeEntries($user)->pluck('id');
 
-        abort_if(! $isAdmin && ! $canManageGlobally && $projectIds->isEmpty(), 403);
+        abort_if(! $isAdmin && $projectIds->isEmpty(), 403);
 
         $entries = TimeEntry::pending()
             ->with(['user:id,name,email', 'project:id,name', 'task:id,title'])
-            ->when(! $isAdmin && ! $canManageGlobally, fn ($query) => $query->whereIn('project_id', $projectIds))
+            ->when(! $isAdmin, fn ($query) => $query->whereIn('project_id', $projectIds))
             ->when($request->filled('user_id'), fn ($query) => $query->where('user_id', $request->integer('user_id')))
             ->when($request->filled('project_id'), fn ($query) => $query->where('project_id', $request->integer('project_id')))
             ->when($request->filled('date_from'), fn ($query) => $query->whereDate('entry_date', '>=', $request->date('date_from')))
@@ -45,7 +43,7 @@ class TimeEntryApprovalController extends Controller
             ->get(['id', 'name']);
 
         $filterUsers = TimeEntry::pending()
-            ->when(! $isAdmin && ! $canManageGlobally, fn ($query) => $query->whereIn('project_id', $projectIds))
+            ->when(! $isAdmin, fn ($query) => $query->whereIn('project_id', $projectIds))
             ->with('user:id,name,email')
             ->get()
             ->pluck('user')
@@ -155,17 +153,7 @@ class TimeEntryApprovalController extends Controller
         }
 
         return $user->is_admin
-            || $this->hasGlobalPermission($user, 'manage_time_entries')
             || $entry->project->userHasPermission($user, 'manage_time_entries');
-    }
-
-    private function hasGlobalPermission($user, string $permission): bool
-    {
-        try {
-            return $user->can($permission);
-        } catch (Throwable) {
-            return false;
-        }
     }
 
     private function serializeEntry(TimeEntry $entry): array

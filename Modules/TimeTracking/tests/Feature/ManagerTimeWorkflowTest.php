@@ -2,6 +2,7 @@
 
 namespace Modules\TimeTracking\Tests\Feature;
 
+use App\Enums\PermissionEnum;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Project\Models\Project;
@@ -312,7 +313,7 @@ class ManagerTimeWorkflowTest extends TestCase
     }
 
     #[Test]
-    public function user_with_global_manage_permission_can_approve_anywhere(): void
+    public function user_with_global_manage_permission_cannot_approve_outside_project_scope(): void
     {
         Permission::firstOrCreate(['name' => 'manage_time_entries', 'guard_name' => 'web']);
 
@@ -328,12 +329,36 @@ class ManagerTimeWorkflowTest extends TestCase
 
         $this->actingAs($globalManager)
             ->post("/manager/time/approvals/{$entry->id}/approve")
-            ->assertRedirect();
+            ->assertForbidden();
 
         $this->assertDatabaseHas('time_entries', [
             'id' => $entry->id,
-            'status' => TimeEntryStatusEnum::Approved->value,
-            'approved_by' => $globalManager->id,
+            'status' => TimeEntryStatusEnum::Pending->value,
+            'approved_by' => null,
+        ]);
+    }
+
+    #[Test]
+    public function project_view_all_user_cannot_approve_foreign_time_entry(): void
+    {
+        $viewer = User::factory()->create();
+        $viewer->givePermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value);
+
+        $entry = TimeEntry::factory()->create([
+            'project_id' => $this->otherProject->id,
+            'task_id' => $this->otherTask->id,
+            'user_id' => $this->member->id,
+            'status' => TimeEntryStatusEnum::Pending->value,
+        ]);
+
+        $this->actingAs($viewer)
+            ->post("/manager/time/approvals/{$entry->id}/approve")
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('time_entries', [
+            'id' => $entry->id,
+            'status' => TimeEntryStatusEnum::Pending->value,
+            'approved_by' => null,
         ]);
     }
 

@@ -87,6 +87,7 @@ const hasPermission = (permissions: string[], permission: string, isAdmin: boole
 
 export default function Index({ projects, entries, summary }: IndexProps) {
     const { props } = usePage<SharedData>();
+    const currentUserId = props.auth.user.id;
     const permissions = (props.current_user_permissions as string[] | undefined) ?? [];
     const isAdmin = Boolean(props.auth.user?.is_admin);
     const canUseReports =
@@ -166,7 +167,9 @@ export default function Index({ projects, entries, summary }: IndexProps) {
             ? projects[0]
             : projects.find((project) => project.id === selectedProjectId);
 
-    const taskOptions = selectedProject?.tasks ?? [];
+    const taskOptions = (selectedProject?.tasks ?? []).filter((task) =>
+        task.assigned_users?.some((user) => user.id === currentUserId),
+    );
     const effectiveTaskId: number | null =
         selectedTaskId !== '' && taskOptions.some((t) => t.id === selectedTaskId)
             ? (selectedTaskId as number)

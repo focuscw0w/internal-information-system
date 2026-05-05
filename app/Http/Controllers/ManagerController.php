@@ -28,10 +28,6 @@ class ManagerController extends Controller
         $isAdmin = (bool) $user->is_admin;
         $widgets = [];
 
-        $canManageTeamGlobally = $this->hasGlobalPermission($user, 'manage_team');
-        $canManageTimeGlobally = $this->hasGlobalPermission($user, 'manage_time_entries');
-        $canViewAllTimeGlobally = $this->hasGlobalPermission($user, 'view_all_time_entries');
-
         if ($isAdmin || $this->hasGlobalPermission($user, PermissionEnum::CAPACITY_MANAGE->value)) {
             $dashboard = $this->capacityService->buildDashboard();
             $people = collect($dashboard['people'] ?? []);
@@ -43,9 +39,9 @@ class ManagerController extends Controller
             ];
         }
 
-        $managedTimeProjectIds = $this->managedTimeProjectIds($user, $isAdmin || $canManageTimeGlobally);
+        $managedTimeProjectIds = $this->managedTimeProjectIds($user, $isAdmin);
 
-        if ($isAdmin || $canManageTimeGlobally || $managedTimeProjectIds->isNotEmpty()) {
+        if ($isAdmin || $managedTimeProjectIds->isNotEmpty()) {
             $widgets['pendingApprovals'] = [
                 'count' => TimeEntry::pending()
                     ->when(! $isAdmin, fn ($query) => $query->whereIn('project_id', $managedTimeProjectIds))
@@ -53,9 +49,9 @@ class ManagerController extends Controller
             ];
         }
 
-        $managedProjectIds = $this->managedProjectIds($user, $isAdmin || $canManageTeamGlobally);
+        $managedProjectIds = $this->managedProjectIds($user, $isAdmin);
 
-        if ($isAdmin || $canManageTeamGlobally || $managedProjectIds->isNotEmpty()) {
+        if ($isAdmin || $managedProjectIds->isNotEmpty()) {
             $widgets['overdueTasks'] = Task::overdue()
                 ->when(! $isAdmin, fn ($query) => $query->whereIn('project_id', $managedProjectIds))
                 ->with('project:id,name')
@@ -97,12 +93,12 @@ class ManagerController extends Controller
                 ]);
         }
 
-        if ($isAdmin || $canViewAllTimeGlobally || $canManageTimeGlobally || $this->canViewAnyTimeEntries($user) || $managedTimeProjectIds->isNotEmpty()) {
+        $viewTimeProjectIds = $this->viewTimeProjectIds($user, $isAdmin);
+
+        if ($isAdmin || $viewTimeProjectIds->isNotEmpty()) {
             $from = Carbon::now()->subDays(6)->startOfDay();
             $to = Carbon::now()->endOfDay();
-            $projectIds = ($isAdmin || $canViewAllTimeGlobally || $canManageTimeGlobally || $this->canViewAnyTimeEntries($user))
-                ? null
-                : $managedTimeProjectIds->all();
+            $projectIds = $isAdmin ? null : $viewTimeProjectIds->all();
             $totals = $this->timeEntryService->getTotalHoursPerUserInPeriod($from, $to, null, $projectIds);
             $users = User::query()
                 ->whereIn('id', $totals->keys()->all())
@@ -147,15 +143,27 @@ class ManagerController extends Controller
         return Project::whereUserCanManageTimeEntries($user)->pluck('id');
     }
 
-    private function canViewAnyTimeEntries($user): bool
+    private function viewTimeProjectIds($user, bool $isAdmin): Collection
     {
+        if ($isAdmin) {
+            return Project::query()->pluck('id');
+        }
+
         return Project::query()
-            ->whereHas('team', function ($query) use ($user) {
+            ->where(function ($query) use ($user) {
                 $query
-                    ->where('user_id', $user->id)
-                    ->whereJsonContains('permissions', 'view_all_time_entries');
+                    ->where('owner_id', $user->id)
+                    ->orWhereHas('team', function ($teamQuery) use ($user) {
+                        $teamQuery
+                            ->where('user_id', $user->id)
+                            ->where(function ($permissionQuery) {
+                                $permissionQuery
+                                    ->whereJsonContains('permissions', 'view_all_time_entries')
+                                    ->orWhereJsonContains('permissions', 'manage_time_entries');
+                            });
+                    });
             })
-            ->exists();
+            ->pluck('id');
     }
 
     private function hasGlobalPermission($user, string $permission): bool

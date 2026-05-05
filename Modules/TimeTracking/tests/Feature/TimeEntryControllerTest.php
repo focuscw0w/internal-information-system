@@ -107,10 +107,10 @@ class TimeEntryControllerTest extends TestCase
     }
 
     #[Test]
-    public function global_project_viewer_can_see_all_project_time_entries(): void
+    public function global_project_viewer_does_not_see_all_project_time_entries(): void
     {
-        $admin = User::factory()->create();
-        $admin->givePermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value);
+        $viewer = User::factory()->create();
+        $viewer->givePermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value);
 
         TimeEntry::factory()->create([
             'project_id' => $this->project->id,
@@ -124,13 +124,36 @@ class TimeEntryControllerTest extends TestCase
             'user_id' => $this->member->id,
         ]);
 
-        $response = $this->actingAs($admin)
+        $response = $this->actingAs($viewer)
             ->get("/projects/{$this->project->id}/time-entries");
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page->component('TimeTracking/TimeEntry', false)
-            ->has('entries', 2)
+            ->has('entries', 0)
         );
+    }
+
+    #[Test]
+    public function global_project_viewer_cannot_create_time_entry_in_foreign_project(): void
+    {
+        $viewer = User::factory()->create();
+        $viewer->givePermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value);
+        $this->task->assignedUsers()->attach($viewer->id);
+
+        $this->actingAs($viewer)
+            ->post("/projects/{$this->project->id}/time-entries", [
+                'task_id' => $this->task->id,
+                'entry_date' => '2026-03-07',
+                'hours' => 3.5,
+                'description' => 'Read-only users cannot log here',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('time_entries', [
+            'project_id' => $this->project->id,
+            'task_id' => $this->task->id,
+            'user_id' => $viewer->id,
+        ]);
     }
 
     #[Test]
@@ -414,6 +437,42 @@ class TimeEntryControllerTest extends TestCase
             ->has('projects')
             ->has('entries')
         );
+    }
+
+    #[Test]
+    public function time_tracking_dashboard_only_sends_assigned_tasks_for_selection(): void
+    {
+        $unassignedTask = Task::factory()->create([
+            'project_id' => $this->project->id,
+        ]);
+
+        $response = $this->actingAs($this->member)
+            ->get('/time-tracking');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('TimeTracking/Index', false)
+            ->has('projects.0.tasks', 1)
+            ->where('projects.0.tasks.0.id', $this->task->id)
+        );
+
+        $this->assertNotSame($unassignedTask->id, $this->task->id);
+    }
+
+    #[Test]
+    public function timer_projects_endpoint_only_returns_projects_with_assigned_tasks(): void
+    {
+        $otherProject = Project::factory()->create(['owner_id' => $this->member->id]);
+        Task::factory()->create(['project_id' => $otherProject->id]);
+
+        $response = $this->actingAs($this->member)
+            ->getJson('/api/timer/projects');
+
+        $response->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.id', $this->project->id)
+            ->assertJsonCount(1, '0.tasks')
+            ->assertJsonPath('0.tasks.0.id', $this->task->id);
     }
 
     #[Test]

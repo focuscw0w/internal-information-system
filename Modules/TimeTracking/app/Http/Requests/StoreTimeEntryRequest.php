@@ -3,6 +3,7 @@
 namespace Modules\TimeTracking\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 
 class StoreTimeEntryRequest extends FormRequest
@@ -12,7 +13,9 @@ class StoreTimeEntryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $project = Project::find((int) $this->route('projectId'));
+
+        return $project?->userIsParticipant($this->user()) ?? false;
     }
 
     /**

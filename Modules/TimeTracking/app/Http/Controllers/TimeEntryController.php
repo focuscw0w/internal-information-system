@@ -101,11 +101,16 @@ class TimeEntryController extends Controller
     {
         $userId = auth()->id();
 
-        $projects = Project::with('tasks:id,project_id,title')
+        $projects = Project::with([
+            'tasks' => fn ($query) => $query
+                ->select('id', 'project_id', 'title')
+                ->whereHas('assignedUsers', fn ($assignedQuery) => $assignedQuery->where('users.id', $userId)),
+        ])
             ->where(function ($q) use ($userId) {
                 $q->where('owner_id', $userId)
                     ->orWhereHas('team', fn ($q) => $q->where('user_id', $userId));
             })
+            ->whereHas('tasks.assignedUsers', fn ($query) => $query->where('users.id', $userId))
             ->get(['id', 'name']);
 
         return response()->json($projects);

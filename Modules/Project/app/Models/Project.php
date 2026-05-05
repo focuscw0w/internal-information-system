@@ -166,57 +166,57 @@ class Project extends Model
 
     public function userPermissions(User $user): array
     {
-        if ($this->owner_id === $user->id) {
-            return ProjectPermission::allValues();
-        }
-
-        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
+        if ($user->is_admin || $this->owner_id === $user->id) {
             return ProjectPermission::allValues();
         }
 
         $teamMember = $this->team()->where('user_id', $user->id)->first();
 
-        if (! $teamMember) {
-            return [];
+        if ($teamMember) {
+            $permissions = $teamMember->pivot->permissions;
+
+            if (is_string($permissions)) {
+                $permissions = json_decode($permissions, true) ?? [];
+            }
+
+            return is_array($permissions) ? $permissions : [];
         }
 
-        $permissions = $teamMember->pivot->permissions;
-
-        if (is_string($permissions)) {
-            $permissions = json_decode($permissions, true) ?? [];
+        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
+            return ProjectPermission::viewPermissions();
         }
 
-        return is_array($permissions) ? $permissions : [];
+        return [];
     }
 
     public function userHasPermission(User $user, string $permission): bool
     {
-        if ($this->owner_id === $user->id) {
-            return true;
-        }
-
-        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
+        if ($user->is_admin || $this->owner_id === $user->id) {
             return true;
         }
 
         $teamMember = $this->team()->where('user_id', $user->id)->first();
 
-        if (! $teamMember) {
-            return false;
+        if ($teamMember) {
+            $permissions = $teamMember->pivot->permissions;
+
+            if (is_string($permissions)) {
+                $permissions = json_decode($permissions, true) ?? [];
+            }
+
+            return in_array($permission, (array) $permissions, strict: true);
         }
 
-        $permissions = $teamMember->pivot->permissions;
-
-        if (is_string($permissions)) {
-            $permissions = json_decode($permissions, true) ?? [];
+        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
+            return in_array($permission, ProjectPermission::viewPermissions(), strict: true);
         }
 
-        return in_array($permission, (array) $permissions, strict: true);
+        return false;
     }
 
     public function userHasAnyPermission(User $user, array $permissions): bool
     {
-        if ($this->owner_id === $user->id) {
+        if ($user->is_admin || $this->owner_id === $user->id) {
             return true;
         }
 
@@ -231,7 +231,7 @@ class Project extends Model
 
     public function userHasAllPermissions(User $user, array $permissions): bool
     {
-        if ($this->owner_id === $user->id) {
+        if ($user->is_admin || $this->owner_id === $user->id) {
             return true;
         }
 
@@ -244,6 +244,13 @@ class Project extends Model
         return true;
     }
 
+    public function userIsParticipant(User $user): bool
+    {
+        return $user->is_admin
+            || $this->owner_id === $user->id
+            || $this->team()->where('user_id', $user->id)->exists();
+    }
+
     public function scopeForUser(Builder $query, int $userId): Builder
     {
         return $query->where('owner_id', $userId)
@@ -252,7 +259,7 @@ class Project extends Model
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
+        if ($user->is_admin || $user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
             return $query;
         }
 

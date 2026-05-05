@@ -11,7 +11,9 @@ class EnsureCapacityManagementAccess
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()?->can(PermissionEnum::CAPACITY_MANAGE->value)) {
+        $user = $request->user();
+
+        if (! $user?->is_admin && ! $user?->can(PermissionEnum::CAPACITY_MANAGE->value)) {
             abort(403);
         }
 

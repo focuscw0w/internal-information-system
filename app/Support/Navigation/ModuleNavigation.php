@@ -36,7 +36,7 @@ class ModuleNavigation
                     continue;
                 }
 
-                if ($requiredPermission && (! $user || ! $user->can($requiredPermission))) {
+                if ($requiredPermission && (! $user || (! $user->is_admin && ! $user->can($requiredPermission)))) {
                     continue;
                 }
 
@@ -66,9 +66,6 @@ class ModuleNavigation
     {
         return $user->is_admin
             || self::hasGlobalPermission($user, PermissionEnum::CAPACITY_MANAGE->value)
-            || self::hasGlobalPermission($user, 'manage_team')
-            || self::hasGlobalPermission($user, 'manage_time_entries')
-            || self::hasGlobalPermission($user, 'view_all_time_entries')
             || Project::managedBy($user)->exists()
             || Project::whereUserCanManageTimeEntries($user)->exists()
             || Project::query()->whereHas('team', function ($query) use ($user) {

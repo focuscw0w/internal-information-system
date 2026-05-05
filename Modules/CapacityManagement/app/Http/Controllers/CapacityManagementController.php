@@ -19,7 +19,7 @@ class CapacityManagementController extends Controller
     {
         return Inertia::render('CapacityManagement/Index', [
             'dashboard' => $this->capacityService->buildDashboard(),
-            'can_manage' => $request->user()?->can(PermissionEnum::CAPACITY_MANAGE->value) ?? false,
+            'can_manage' => ($request->user()?->is_admin || $request->user()?->can(PermissionEnum::CAPACITY_MANAGE->value)) ?? false,
         ]);
     }
 

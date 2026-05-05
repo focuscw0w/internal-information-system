@@ -3,11 +3,12 @@
 
 namespace Modules\Project\Http\Middleware;
 
+use App\Enums\PermissionEnum;
 use Closure;
 use Illuminate\Http\Request;
+use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Models\Project;
 use Symfony\Component\HttpFoundation\Response;
-use App\Enums\PermissionEnum;
 
 class CheckProjectPermission
 {
@@ -19,12 +20,14 @@ class CheckProjectPermission
             abort(401, 'You must be logged in to access this source.');
         }
 
-        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
-            return $next($request);
-        }
-
         $projectId = $request->route('id') ?? $request->route('projectId');
         $project = Project::findOrFail($projectId);
+
+        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)
+            && $this->onlyReadPermissions($permissions)
+        ) {
+            return $next($request);
+        }
 
         foreach ($permissions as $permission) {
             if (!$project->userHasPermission($user, $permission)) {
@@ -33,5 +36,14 @@ class CheckProjectPermission
         }
 
         return $next($request);
+    }
+
+    private function onlyReadPermissions(array $permissions): bool
+    {
+        if ($permissions === []) {
+            return false;
+        }
+
+        return empty(array_diff($permissions, ProjectPermission::viewPermissions()));
     }
 }

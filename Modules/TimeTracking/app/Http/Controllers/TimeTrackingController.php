@@ -94,7 +94,16 @@ class TimeTrackingController extends Controller
         );
 
         return Inertia::render('TimeTracking/Index', [
-            'projects' => $projects->map(fn ($project) => (new ProjectResource($project))->resolve())->values(),
+            'projects' => $projects->map(function ($project) use ($user) {
+                $data = (new ProjectResource($project))->resolve();
+                $data['tasks'] = collect($data['tasks'] ?? [])
+                    ->filter(fn (array $task) => collect($task['assigned_users'] ?? [])
+                        ->contains('id', $user->id))
+                    ->values()
+                    ->all();
+
+                return $data;
+            })->values(),
             'entries' => $entries,
             'summary' => [
                 'scope' => $viewAll ? 'all' : 'mine',

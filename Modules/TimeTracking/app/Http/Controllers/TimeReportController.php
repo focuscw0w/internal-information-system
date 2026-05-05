@@ -15,7 +15,6 @@ use Modules\TimeTracking\Models\TimeEntry;
 use Modules\TimeTracking\Services\TimeEntryService;
 use Modules\User\Models\User;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Throwable;
 
 class TimeReportController extends Controller
 {
@@ -215,32 +214,31 @@ class TimeReportController extends Controller
     private function scopedProjectIds(Request $request): ?array
     {
         $user = $request->user();
-        $canViewAll = $user->is_admin
-            || $this->hasGlobalPermission($user, 'view_all_time_entries')
-            || $this->hasGlobalPermission($user, 'manage_time_entries')
-            || Project::query()->whereHas('team', function ($query) use ($user) {
-                $query
-                    ->where('user_id', $user->id)
-                    ->whereJsonContains('permissions', 'view_all_time_entries');
-            })->exists();
 
-        if ($canViewAll) {
+        if ($user->is_admin) {
             return null;
         }
 
-        $projectIds = Project::whereUserCanManageTimeEntries($user)->pluck('id')->all();
+        $projectIds = Project::query()
+            ->where(function (Builder $query) use ($user) {
+                $query
+                    ->where('owner_id', $user->id)
+                    ->orWhereHas('team', function (Builder $teamQuery) use ($user) {
+                        $teamQuery
+                            ->where('user_id', $user->id)
+                            ->where(function (Builder $permissionQuery) {
+                                $permissionQuery
+                                    ->whereJsonContains('permissions', 'view_all_time_entries')
+                                    ->orWhereJsonContains('permissions', 'manage_time_entries');
+                            });
+                    });
+            })
+            ->pluck('id')
+            ->all();
+
         abort_if($projectIds === [], 403);
 
         return $projectIds;
-    }
-
-    private function hasGlobalPermission($user, string $permission): bool
-    {
-        try {
-            return $user->can($permission);
-        } catch (Throwable) {
-            return false;
-        }
     }
 
     private function intersectIds(?array $scopeIds, array $requestedIds): ?array

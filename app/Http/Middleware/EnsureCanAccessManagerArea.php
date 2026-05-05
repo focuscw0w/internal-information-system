@@ -22,9 +22,6 @@ class EnsureCanAccessManagerArea
         if (
             $user->is_admin
             || $this->hasGlobalPermission($user, PermissionEnum::CAPACITY_MANAGE->value)
-            || $this->hasGlobalPermission($user, 'manage_team')
-            || $this->hasGlobalPermission($user, 'manage_time_entries')
-            || $this->hasGlobalPermission($user, 'view_all_time_entries')
             || Project::managedBy($user)->exists()
             || Project::whereUserCanManageTimeEntries($user)->exists()
             || Project::query()->whereHas('team', function ($query) use ($user) {

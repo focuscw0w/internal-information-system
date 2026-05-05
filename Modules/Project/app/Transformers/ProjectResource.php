@@ -2,9 +2,7 @@
 
 namespace Modules\Project\Transformers;
 
-use App\Enums\PermissionEnum;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Modules\Project\Enums\ProjectPermission;
 
 class ProjectResource extends JsonResource
 {
@@ -132,13 +130,7 @@ class ProjectResource extends JsonResource
             }),
 
             'current_user_permissions' => $this->when(auth()->check(), function () {
-                $user = auth()->user();
-
-                if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
-                    return ProjectPermission::allValues();
-                }
-
-                return $this->resource->userPermissions($user);
+                return $this->resource->userPermissions(auth()->user());
             }),
 
             'created_at' => $this->created_at?->toISOString(),
