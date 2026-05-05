@@ -80,6 +80,37 @@ class ManagerTimeWorkflowTest extends TestCase
     }
 
     #[Test]
+    public function regular_project_member_cannot_access_manager_dashboard_or_reports(): void
+    {
+        $regularMember = User::factory()->create();
+
+        $this->managedProject->team()->attach($regularMember->id, [
+            'permissions' => json_encode([
+                'view_project',
+                'view_tasks',
+                'edit_tasks',
+            ]),
+            'allocation' => 100,
+        ]);
+
+        $this->actingAs($regularMember)
+            ->get('/manager')
+            ->assertForbidden();
+
+        $this->actingAs($regularMember)
+            ->get('/manager/time/reports')
+            ->assertForbidden();
+
+        $this->actingAs($regularMember)
+            ->getJson('/manager/time/reports/data')
+            ->assertForbidden();
+
+        $this->actingAs($regularMember)
+            ->get('/manager/time/reports/export')
+            ->assertForbidden();
+    }
+
+    #[Test]
     public function approvals_queue_only_lists_entries_from_projects_the_user_can_manage(): void
     {
         TimeEntry::factory()->create([
