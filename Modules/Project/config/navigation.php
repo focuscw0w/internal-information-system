@@ -6,7 +6,7 @@ return [
         [
             'title' => 'Projekty',
             'route' => 'projects.projects',
-            'icon' => 'FolderKanban',
+            'icon' => 'Briefcase',
             'order' => 50,
         ],
     ],

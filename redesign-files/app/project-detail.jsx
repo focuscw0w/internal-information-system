@@ -115,6 +115,8 @@ const KanbanBoard = ({ onOpenTask }) => {
 };
 
 const ProjectDetailPage = ({ projectId, onBack, onOpenTask }) => {
+  const [taskModal, setTaskModal] = useState(null);
+  const [editProjectModal, setEditProjectModal] = useState(false);
   const p = PROJECTS_DATA.find(x => x.id === projectId) || PROJECTS_DATA[0];
   const [tab, setTab] = useState('overview');
   const [search, setSearch] = useState('');
@@ -148,8 +150,8 @@ const ProjectDetailPage = ({ projectId, onBack, onOpenTask }) => {
         </div>
         <div className="page-head__actions">
           <button className="btn"><I.users /> Spravovať tím</button>
-          <button className="btn"><I.settings /> Upraviť projekt</button>
-          <button className="btn btn--primary"><I.plus /> Nová úloha</button>
+          <button className="btn" onClick={() => setEditProjectModal(true)}><I.settings /> Upraviť projekt</button>
+          <button className="btn btn--primary" onClick={() => setTaskModal('create')}><I.plus /> Nová úloha</button>
         </div>
       </div>
 

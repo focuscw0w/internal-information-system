@@ -123,7 +123,7 @@
     --sidebar-foreground: var(--text-primary);
     --sidebar-primary: oklch(0.16 0.004 250);
     --sidebar-primary-foreground: oklch(1 0 0);
-    --sidebar-accent: var(--bg-surface);
+    --sidebar-accent: var(--bg-subtle);
     --sidebar-accent-foreground: var(--text-primary);
     --sidebar-border: oklch(0.9 0.006 250);
     --sidebar-ring: var(--accent-blue);

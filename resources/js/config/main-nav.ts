@@ -1,11 +1,11 @@
-import { Clock, FolderKanban, Gauge, LayoutDashboard, Users } from 'lucide-react';
+import { Briefcase, Clock, Gauge, Layers, Users } from 'lucide-react';
 
 export const iconMap = {
-    FolderKanban,
+    Briefcase,
     Clock,
     Gauge,
+    Layers,
     Users,
-    LayoutDashboard,
 } as const;
 
 export type IconName = keyof typeof iconMap;
@@ -15,5 +15,5 @@ export function resolveIcon(name?: string | null) {
     return iconMap[name as IconName];
   }
 
-  return iconMap.FolderKanban; 
+  return iconMap.Briefcase;
 }

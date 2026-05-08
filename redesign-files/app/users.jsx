@@ -33,6 +33,7 @@ const USER_STATUS = {
 };
 
 const UsersPage = () => {
+  const [userModal, setUserModal] = useStateUsers(null);
   const [search, setSearch] = useStateUsers('');
   const [roleFilter, setRoleFilter] = useStateUsers('');
   const [statusFilter, setStatusFilter] = useStateUsers('');
@@ -79,7 +80,7 @@ const UsersPage = () => {
         <div className="page-head__actions">
           <button className="btn"><I.download /> Export</button>
           <button className="btn"><I.users /> Skupiny a role</button>
-          <button className="btn btn--primary"><I.plus /> Pozvať používateľa</button>
+          <button className="btn btn--primary" onClick={() => setUserModal('create')}><I.plus /> Pridať používateľa</button>
         </div>
       </div>
 
@@ -289,6 +290,7 @@ const UsersPage = () => {
           </div>
         </>
       )}
+      <UserModal open={!!userModal} mode={userModal} onClose={() => setUserModal(null)} />
     </div>
   );
 };

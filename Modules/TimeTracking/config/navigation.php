@@ -6,7 +6,7 @@ return [
         [
             'title' => 'Tímové riadenie',
             'route' => 'manager.dashboard',
-            'icon' => 'Gauge',
+            'icon' => 'Layers',
             'order' => 30,
             'manager_area' => true,
         ],

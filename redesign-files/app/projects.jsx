@@ -87,6 +87,7 @@ const ProjectCard = ({ p, onOpen }) => {
 };
 
 const ProjectsPage = ({ onOpen }) => {
+  const [projectModal, setProjectModal] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [workloadFilter, setWorkloadFilter] = useState('');
@@ -116,7 +117,7 @@ const ProjectsPage = ({ onOpen }) => {
         </div>
         <div className="page-head__actions">
           <button className="btn"><I.download /> Export</button>
-          <button className="btn btn--primary"><I.plus /> Nový projekt</button>
+          <button className="btn btn--primary" onClick={() => setProjectModal('create')}><I.plus /> Nový projekt</button>
         </div>
       </div>
 
@@ -229,6 +230,7 @@ const ProjectsPage = ({ onOpen }) => {
           </table>
         </div>
       )}
+      <ProjectModal open={!!projectModal} mode={projectModal} onClose={() => setProjectModal(null)} />
     </div>
   );
 };

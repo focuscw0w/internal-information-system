@@ -265,6 +265,7 @@ button { font-family: inherit; font-size: inherit; }
 /* Page header --------------------------------------------- */
 .page { animation: pageIn 0.18s ease-out; }
 @keyframes pageIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 .page-head {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
@@ -642,3 +643,74 @@ button { font-family: inherit; font-size: inherit; }
 /* utility — date format helper used in JS */
 
 /* tweaks panel takes care of its own styling via the starter */
+
+
+/* ============ Modals ============ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: color-mix(in oklab, #0b1220 55%, transparent);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  animation: modalFadeIn 160ms ease-out;
+}
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 64px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px -10px rgba(0,0,0,.25), 0 8px 24px -8px rgba(0,0,0,.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalSlideIn 180ms cubic-bezier(.22,1,.36,1);
+}
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(8px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+.modal__head {
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.modal__title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.modal__sub {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+.modal__body {
+  padding: 20px 22px;
+  overflow-y: auto;
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+.modal__foot {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2, var(--surface));
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
