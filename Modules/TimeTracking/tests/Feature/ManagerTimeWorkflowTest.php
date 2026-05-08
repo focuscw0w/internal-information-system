@@ -80,7 +80,7 @@ class ManagerTimeWorkflowTest extends TestCase
     }
 
     #[Test]
-    public function admin_can_open_approvals_queue(): void
+    public function admin_can_see_pending_approvals_on_manager_dashboard(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
 
@@ -92,12 +92,12 @@ class ManagerTimeWorkflowTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/manager/time/approvals')
+            ->get('/manager')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('TimeTracking/manager/Approvals', false)
-                ->has('entries.data', 1)
-                ->where('entries.data.0.project_id', $this->managedProject->id)
+                ->component('manager/Dashboard', false)
+                ->has('widgets.pendingApprovalEntries', 1)
+                ->where('widgets.pendingApprovalEntries.0.project.id', $this->managedProject->id)
             );
     }
 
@@ -163,9 +163,6 @@ class ManagerTimeWorkflowTest extends TestCase
             ->get('/manager/time/reports/export')
             ->assertForbidden();
 
-        $this->actingAs($timeViewer)
-            ->get('/manager/time/approvals')
-            ->assertForbidden();
     }
 
     #[Test]
@@ -192,7 +189,7 @@ class ManagerTimeWorkflowTest extends TestCase
     }
 
     #[Test]
-    public function approvals_queue_only_lists_entries_from_projects_the_user_can_manage(): void
+    public function manager_dashboard_only_lists_approval_entries_from_projects_the_user_can_manage(): void
     {
         TimeEntry::factory()->create([
             'project_id' => $this->managedProject->id,
@@ -209,12 +206,12 @@ class ManagerTimeWorkflowTest extends TestCase
         ]);
 
         $this->actingAs($this->manager)
-            ->get('/manager/time/approvals')
+            ->get('/manager')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('TimeTracking/manager/Approvals', false)
-                ->has('entries.data', 1)
-                ->where('entries.data.0.project_id', $this->managedProject->id)
+                ->component('manager/Dashboard', false)
+                ->has('widgets.pendingApprovalEntries', 1)
+                ->where('widgets.pendingApprovalEntries.0.project.id', $this->managedProject->id)
             );
     }
 
@@ -532,56 +529,6 @@ class ManagerTimeWorkflowTest extends TestCase
             ]);
             $this->assertNotNull($entry->fresh()->approved_at);
         }
-    }
-
-    #[Test]
-    public function approvals_index_respects_filters(): void
-    {
-        $memberA = $this->member;
-        $memberB = User::factory()->create();
-
-        $entryA = TimeEntry::factory()->create([
-            'project_id' => $this->managedProject->id,
-            'task_id' => $this->managedTask->id,
-            'user_id' => $memberA->id,
-            'entry_date' => '2026-04-15',
-            'status' => TimeEntryStatusEnum::Pending->value,
-        ]);
-        $entryB = TimeEntry::factory()->create([
-            'project_id' => $this->managedProject->id,
-            'task_id' => $this->managedTask->id,
-            'user_id' => $memberB->id,
-            'entry_date' => '2026-04-15',
-            'status' => TimeEntryStatusEnum::Pending->value,
-        ]);
-        $entryC = TimeEntry::factory()->create([
-            'project_id' => $this->managedProject->id,
-            'task_id' => $this->managedTask->id,
-            'user_id' => $memberA->id,
-            'entry_date' => '2026-03-01',
-            'status' => TimeEntryStatusEnum::Pending->value,
-        ]);
-
-        $this->actingAs($this->manager)
-            ->get('/manager/time/approvals?user_id='.$memberA->id)
-            ->assertOk()
-            ->assertInertia(fn ($page) => $page
-                ->component('TimeTracking/manager/Approvals', false)
-                ->has('entries.data', 2)
-            );
-
-        $this->actingAs($this->manager)
-            ->get('/manager/time/approvals?date_from=2026-04-01&date_to=2026-04-30')
-            ->assertOk()
-            ->assertInertia(fn ($page) => $page->has('entries.data', 2));
-
-        $this->actingAs($this->manager)
-            ->get('/manager/time/approvals?user_id='.$memberA->id.'&date_from=2026-04-01&date_to=2026-04-30')
-            ->assertOk()
-            ->assertInertia(fn ($page) => $page
-                ->has('entries.data', 1)
-                ->where('entries.data.0.id', $entryA->id)
-            );
     }
 
     #[Test]
