@@ -9,8 +9,6 @@ use Modules\TimeTracking\Http\Controllers\TimeReportController;
 
 Route::middleware(['web', 'auth'])->group(function () {
     Route::prefix('manager/time')->name('manager.time.')->middleware(EnsureCanAccessManagerArea::class)->group(function () {
-        Route::get('/approvals', [TimeEntryApprovalController::class, 'index'])
-            ->name('approvals.index');
         Route::post('/approvals/bulk', [TimeEntryApprovalController::class, 'bulkApprove'])
             ->name('approvals.bulk');
         Route::post('/approvals/{id}/approve', [TimeEntryApprovalController::class, 'approve'])

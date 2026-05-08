@@ -37,16 +37,59 @@ class ManagerController extends Controller
                 'overloaded_count' => $people->where('is_over_capacity', true)->count(),
                 'free_count' => $people->where('weekly_utilization', '<', 80)->count(),
             ];
+
+            $widgets['teamMembers'] = $people
+                ->sortByDesc('weekly_utilization')
+                ->take(8)
+                ->values()
+                ->map(fn (array $person) => [
+                    'id' => (int) ($person['id'] ?? 0),
+                    'name' => (string) ($person['name'] ?? 'Bez mena'),
+                    'weekly_capacity_hours' => (float) ($person['weekly_capacity_hours'] ?? 40),
+                    'weekly_load_hours' => (float) ($person['weekly_load_hours'] ?? 0),
+                    'weekly_utilization' => (float) ($person['weekly_utilization'] ?? 0),
+                    'free_capacity_hours' => (float) ($person['free_capacity_hours'] ?? 0),
+                    'is_over_capacity' => (bool) ($person['is_over_capacity'] ?? false),
+                    'status' => (string) ($person['status'] ?? 'green'),
+                ])
+                ->all();
         }
 
         $managedTimeProjectIds = $this->managedTimeProjectIds($user, $isAdmin);
 
         if ($isAdmin || $managedTimeProjectIds->isNotEmpty()) {
+            $pendingApprovalsQuery = TimeEntry::pending()
+                ->when(! $isAdmin, fn ($query) => $query->whereIn('project_id', $managedTimeProjectIds));
+
             $widgets['pendingApprovals'] = [
-                'count' => TimeEntry::pending()
-                    ->when(! $isAdmin, fn ($query) => $query->whereIn('project_id', $managedTimeProjectIds))
-                    ->count(),
+                'count' => (clone $pendingApprovalsQuery)->count(),
             ];
+
+            $widgets['pendingApprovalEntries'] = (clone $pendingApprovalsQuery)
+                ->with(['user:id,name,email', 'project:id,name', 'task:id,title'])
+                ->orderBy('entry_date')
+                ->limit(8)
+                ->get()
+                ->map(fn (TimeEntry $entry) => [
+                    'id' => $entry->id,
+                    'entry_date' => $entry->entry_date?->toDateString(),
+                    'hours' => (float) $entry->hours,
+                    'description' => $entry->description,
+                    'user' => [
+                        'id' => $entry->user?->id,
+                        'name' => $entry->user?->name ?? 'Bez mena',
+                        'email' => $entry->user?->email,
+                    ],
+                    'project' => [
+                        'id' => $entry->project?->id,
+                        'name' => $entry->project?->name ?? 'Bez projektu',
+                    ],
+                    'task' => [
+                        'id' => $entry->task?->id,
+                        'title' => $entry->task?->title ?? 'Bez úlohy',
+                    ],
+                ])
+                ->all();
         }
 
         $managedProjectIds = $this->managedProjectIds($user, $isAdmin);
@@ -91,6 +134,27 @@ class ManagerController extends Controller
                         'name' => $project->owner?->name ?? 'Bez vlastníka',
                     ],
                 ]);
+
+            $widgets['managedProjects'] = Project::query()
+                ->when(! $isAdmin, fn ($query) => $query->whereIn('id', $managedProjectIds))
+                ->whereNotIn('status', ['completed', 'cancelled'])
+                ->withCount('team')
+                ->orderByRaw('CASE WHEN end_date IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('end_date')
+                ->limit(8)
+                ->get()
+                ->map(fn (Project $project) => [
+                    'id' => $project->id,
+                    'name' => $project->name,
+                    'status' => $project->status,
+                    'progress' => $project->progress,
+                    'end_date' => $project->end_date?->toDateString(),
+                    'team_size' => (int) $project->team_count,
+                    'is_overdue' => $project->is_overdue,
+                    'days_remaining' => $project->days_remaining,
+                    'is_at_risk' => $project->is_at_risk,
+                ])
+                ->all();
         }
 
         $viewTimeProjectIds = $this->viewTimeProjectIds($user, $isAdmin);

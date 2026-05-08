@@ -5,7 +5,11 @@ export type PendingApprovalsWidget = {
     count: number;
 };
 
-export function PendingApprovalsCard({ data }: { data: PendingApprovalsWidget }) {
+export function PendingApprovalsCard({
+    data,
+}: {
+    data: PendingApprovalsWidget;
+}) {
     return (
         <section className="card">
             <div className="card__head">
@@ -20,8 +24,8 @@ export function PendingApprovalsCard({ data }: { data: PendingApprovalsWidget })
                     {data.count}
                     <sub>záznamov</sub>
                 </div>
-                <Link href="/manager/time/approvals" className="btn btn--primary mt-4">
-                    Review
+                <Link href="/manager" className="btn btn--primary mt-4">
+                    Otvoriť prehľad
                 </Link>
             </div>
         </section>

@@ -21,6 +21,8 @@ Route::middleware('auth')->group(function () {
         ->middleware(EnsureCanAccessManagerArea::class)
         ->group(function () {
             Route::get('/', [ManagerController::class, 'dashboard'])->name('dashboard');
+            Route::redirect('approvals', '/manager')->name('approvals');
+            Route::redirect('reports', '/manager/time/reports')->name('reports');
         });
 
     Route::get('dashboard', function () {

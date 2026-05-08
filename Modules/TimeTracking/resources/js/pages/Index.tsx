@@ -1,5 +1,6 @@
-import { Head, Link, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem, SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
     Check,
@@ -10,14 +11,13 @@ import {
     Plus,
 } from 'lucide-react';
 import { Project } from 'Modules/Project/resources/js/types/types';
-import { TimeEntry } from '../types/types';
-import { BreadcrumbItem, SharedData } from '@/types';
 import { useMemo, useState } from 'react';
-import { useTimer } from '../context/timer-context';
-import { StopTimerDialog } from '../components/time-entry-table/dialogs/stop-timer';
-import { ManualEntryDialog } from '../components/index/manual-entry-dialog';
 import { EntryRowActions } from '../components/index/entry-row-actions';
+import { ManualEntryDialog } from '../components/index/manual-entry-dialog';
 import { QuickAddCard } from '../components/index/quick-add-card';
+import { StopTimerDialog } from '../components/time-entry-table/dialogs/stop-timer';
+import { useTimer } from '../context/timer-context';
+import { TimeEntry } from '../types/types';
 
 interface WeekDay {
     date: string;
@@ -50,13 +50,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Evidencia času', href: '/time-tracking' },
 ];
 
-const projectColors = [
-    '#6366f1',
-    '#0ea5e9',
-    '#10b981',
-    '#94a3b8',
-    '#d97706',
-];
+const projectColors = ['#6366f1', '#0ea5e9', '#10b981', '#94a3b8', '#d97706'];
 
 const formatHours = (hours: number) =>
     Number.isInteger(hours) ? `${hours}h` : `${hours.toFixed(1)}h`;
@@ -82,16 +76,28 @@ const statusBadge = (status: TimeEntry['status']) => {
     return { className: 'badge badge--success', label: 'Schválené' };
 };
 
-const hasPermission = (permissions: string[], permission: string, isAdmin: boolean) =>
-    isAdmin || permissions.includes(permission);
+const hasPermission = (
+    permissions: string[],
+    permission: string,
+    isAdmin: boolean,
+) => isAdmin || permissions.includes(permission);
 
 export default function Index({ projects, entries, summary }: IndexProps) {
     const { props } = usePage<SharedData>();
     const currentUserId = props.auth.user.id;
-    const permissions = (props.current_user_permissions as string[] | undefined) ?? [];
+    const permissions =
+        (props.current_user_permissions as string[] | undefined) ?? [];
     const isAdmin = Boolean(props.auth.user?.is_admin);
-    const canUseReports = hasPermission(permissions, 'manage_time_entries', isAdmin);
-    const canUseApprovals = hasPermission(permissions, 'manage_time_entries', isAdmin);
+    const canUseReports = hasPermission(
+        permissions,
+        'manage_time_entries',
+        isAdmin,
+    );
+    const canUseApprovals = hasPermission(
+        permissions,
+        'manage_time_entries',
+        isAdmin,
+    );
     const [view, setView] = useState<'week' | 'month'>('week');
     const { timer, startTimer } = useTimer();
     const running = timer.isRunning;
@@ -102,15 +108,23 @@ export default function Index({ projects, entries, summary }: IndexProps) {
     );
     const [selectedTaskId, setSelectedTaskId] = useState<number | ''>('');
     const [timerNote, setTimerNote] = useState('');
-    const [entryProjectFilter, setEntryProjectFilter] = useState<number | 'all'>('all');
+    const [entryProjectFilter, setEntryProjectFilter] = useState<
+        number | 'all'
+    >('all');
     const [stopOpen, setStopOpen] = useState(false);
     const [manualOpen, setManualOpen] = useState(false);
 
     const projectById = useMemo(
-        () => new Map(projects.map((project, index) => [project.id, {
-            project,
-            color: projectColors[index % projectColors.length],
-        }])),
+        () =>
+            new Map(
+                projects.map((project, index) => [
+                    project.id,
+                    {
+                        project,
+                        color: projectColors[index % projectColors.length],
+                    },
+                ]),
+            ),
         [projects],
     );
 
@@ -122,9 +136,12 @@ export default function Index({ projects, entries, summary }: IndexProps) {
     const monthTarget = Number(summary.month_target) || 168;
     const isTeamScope = summary.scope === 'all';
 
-    const filteredEntries = entryProjectFilter === 'all'
-        ? entries
-        : entries.filter((entry) => entry.project_id === entryProjectFilter);
+    const filteredEntries =
+        entryProjectFilter === 'all'
+            ? entries
+            : entries.filter(
+                  (entry) => entry.project_id === entryProjectFilter,
+              );
 
     const totalEntriesHours = filteredEntries.reduce(
         (sum, entry) => sum + Number(entry.hours),
@@ -148,9 +165,7 @@ export default function Index({ projects, entries, summary }: IndexProps) {
     const weekDays = summary.week_daily_hours;
     const maxDayHours = Math.max(10, ...weekDays.map((day) => day.hours));
     const daysWithHours = weekDays.filter((day) => day.hours > 0).length;
-    const dailyAverage = daysWithHours
-        ? weekTotal / daysWithHours
-        : 0;
+    const dailyAverage = daysWithHours ? weekTotal / daysWithHours : 0;
 
     const breakdown = projects
         .map((project, index) => ({
@@ -169,9 +184,10 @@ export default function Index({ projects, entries, summary }: IndexProps) {
         task.assigned_users?.some((user) => user.id === currentUserId),
     );
     const effectiveTaskId: number | null =
-        selectedTaskId !== '' && taskOptions.some((t) => t.id === selectedTaskId)
+        selectedTaskId !== '' &&
+        taskOptions.some((t) => t.id === selectedTaskId)
             ? (selectedTaskId as number)
-            : taskOptions[0]?.id ?? null;
+            : (taskOptions[0]?.id ?? null);
 
     const handleTimerToggle = () => {
         if (running) {
@@ -222,7 +238,7 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                             </button>
                         )}
                         {canUseApprovals ? (
-                            <Link href="/manager/time/approvals" className="btn">
+                            <Link href="/manager" className="btn">
                                 <CheckCheck className="h-4 w-4" />
                                 Schvaľovanie
                             </Link>
@@ -299,7 +315,7 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                                 value={
                                     running && timer.taskId
                                         ? timer.taskId
-                                        : effectiveTaskId ?? ''
+                                        : (effectiveTaskId ?? '')
                                 }
                                 disabled={running || !taskOptions.length}
                                 onChange={(event) =>
@@ -324,7 +340,9 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                                 className="input w-full"
                                 placeholder="Krátka poznámka (voliteľné)..."
                                 value={timerNote}
-                                onChange={(event) => setTimerNote(event.target.value)}
+                                onChange={(event) =>
+                                    setTimerNote(event.target.value)
+                                }
                                 disabled={running}
                             />
                         </div>
@@ -434,7 +452,9 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                                                 <div className="flex w-full flex-1 flex-col items-center justify-end">
                                                     <span className="mono mb-1 text-xs text-muted-foreground">
                                                         {day.hours
-                                                            ? formatHours(day.hours)
+                                                            ? formatHours(
+                                                                  day.hours,
+                                                              )
                                                             : '-'}
                                                     </span>
                                                     <div
@@ -470,8 +490,8 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                                 <div>
                                     <h3 className="card__title">Záznamy</h3>
                                     <div className="card__sub">
-                                        {filteredEntries.length} záznamov, celkom{' '}
-                                        {formatHours(totalEntriesHours)}
+                                        {filteredEntries.length} záznamov,
+                                        celkom {formatHours(totalEntriesHours)}
                                     </div>
                                 </div>
                                 <div className="command-bar__filters">
@@ -482,13 +502,20 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                                             setEntryProjectFilter(
                                                 event.target.value === 'all'
                                                     ? 'all'
-                                                    : Number(event.target.value),
+                                                    : Number(
+                                                          event.target.value,
+                                                      ),
                                             )
                                         }
                                     >
-                                        <option value="all">Všetky projekty</option>
+                                        <option value="all">
+                                            Všetky projekty
+                                        </option>
                                         {projects.map((project) => (
-                                            <option key={project.id} value={project.id}>
+                                            <option
+                                                key={project.id}
+                                                value={project.id}
+                                            >
                                                 {project.name}
                                             </option>
                                         ))}
@@ -581,7 +608,9 @@ function DayGroup({
 }) {
     const total = entries.reduce((sum, entry) => sum + Number(entry.hours), 0);
     const dateObject = new Date(date);
-    const dayLabel = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'][dateObject.getDay()];
+    const dayLabel = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'][
+        dateObject.getDay()
+    ];
 
     return (
         <div>
