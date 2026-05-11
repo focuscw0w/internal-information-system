@@ -1,11 +1,17 @@
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { AlertTriangle, Download, MoreHorizontal, RefreshCw, Zap } from 'lucide-react';
+import axios from 'axios';
+import { AlertTriangle, Download, MoreHorizontal } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { HistoryChart } from '../components/shared/history-chart';
-import type { DashboardData, Person, ProjectPrediction } from '../types/capacity';
+import type {
+    DashboardData,
+    Person,
+    ProjectPrediction,
+    SimulationData,
+} from '../types/capacity';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Kapacitné plánovanie', href: '/capacity-management' },
@@ -17,6 +23,13 @@ type CapacityManagementPageProps = {
 };
 
 type FilterKey = 'all' | 'overloaded' | 'risky' | 'free';
+type SimulationPayload = {
+    deadline_days_shift?: number;
+    team_size?: number;
+    remaining_hours?: number;
+};
+
+const SIMULATION_DEBOUNCE_MS = 300;
 
 const initials = (name: string) =>
     name
@@ -39,9 +52,7 @@ const utilizationColor = (utilization: number) => {
     return 'var(--success-text)';
 };
 
-export default function Index({
-    dashboard,
-}: CapacityManagementPageProps) {
+export default function Index({ dashboard }: CapacityManagementPageProps) {
     const [filter, setFilter] = useState<FilterKey>('all');
     const [search, setSearch] = useState('');
 
@@ -55,8 +66,7 @@ export default function Index({
 
     const riskyPeople = dashboard.people.filter(
         (person) =>
-            person.weekly_utilization >= 90 &&
-            person.weekly_utilization <= 100,
+            person.weekly_utilization >= 90 && person.weekly_utilization <= 100,
     );
     const freePeople = dashboard.people.filter(
         (person) => person.weekly_utilization < 60,
@@ -103,8 +113,8 @@ export default function Index({
                             Kapacitné plánovanie
                         </h1>
                         <p className="page-head__subtitle">
-                            Prehľad ukazuje, kde tím nestíha, kto je preťažený
-                            a kde je ešte priestor na zmenu. Aktuálny týždeň:{' '}
+                            Prehľad ukazuje, kde tím nestíha, kto je preťažený a
+                            kde je ešte priestor na zmenu. Aktuálny týždeň:{' '}
                             <strong className="font-semibold text-foreground">
                                 28. apr - 4. máj 2026
                             </strong>
@@ -112,27 +122,9 @@ export default function Index({
                     </div>
                     <div className="page-head__actions">
                         <button type="button" className="btn">
-                            <RefreshCw className="h-4 w-4" />
-                            Sync s projektmi
-                        </button>
-                        <button type="button" className="btn">
                             <Download className="h-4 w-4" />
                             Export
                         </button>
-                        {simulationProject ? (
-                            <Link
-                                href={`/capacity-management/simulation/project/${simulationProject.id}`}
-                                className="btn btn--primary"
-                            >
-                                <Zap className="h-4 w-4" />
-                                Spustiť simuláciu
-                            </Link>
-                        ) : (
-                            <button type="button" className="btn btn--primary" disabled>
-                                <Zap className="h-4 w-4" />
-                                Spustiť simuláciu
-                            </button>
-                        )}
                     </div>
                 </div>
 
@@ -140,11 +132,13 @@ export default function Index({
                     <div className="flex items-center gap-3 rounded-lg border border-[var(--danger-border)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-text)]">
                         <AlertTriangle className="h-5 w-5 shrink-0" />
                         <div className="flex-1">
-                            <strong>{overloadedPeople.length} ľudí je preťažených</strong>{' '}
+                            <strong>
+                                {overloadedPeople.length} ľudí je preťažených
+                            </strong>{' '}
                             tento týždeň. Najviac{' '}
                             <strong>{overloadedPeople[0].name}</strong> (
-                            {overloadedPeople[0].weekly_utilization}%).
-                            Zvážte prerozdelenie úloh alebo posun deadlineov.
+                            {overloadedPeople[0].weekly_utilization}%). Zvážte
+                            prerozdelenie úloh alebo posun deadlineov.
                         </div>
                         <button type="button" className="btn btn--sm bg-card">
                             Pozrieť odporúčania
@@ -199,7 +193,9 @@ export default function Index({
                         <span className="kpi__label">Predikcia projektov</span>
                         <span className="kpi__value">
                             {finishableProjects}
-                            <sub>/ {dashboard.prediction.projects.length} stihne</sub>
+                            <sub>
+                                / {dashboard.prediction.projects.length} stihne
+                            </sub>
                         </span>
                         <span
                             className="kpi__delta"
@@ -301,14 +297,19 @@ export default function Index({
                                 </select>
                             </div>
                             <div className="card__body">
-                                <HistoryChart data={dashboard.history} height={220} />
+                                <HistoryChart
+                                    data={dashboard.history}
+                                    height={220}
+                                />
                             </div>
                         </section>
                     </main>
 
                     <aside className="col gap-4">
                         <SimulatorCard project={simulationProject} />
-                        <RiskProjectsCard projects={dashboard.prediction.projects} />
+                        <RiskProjectsCard
+                            projects={dashboard.prediction.projects}
+                        />
                     </aside>
                 </div>
             </div>
@@ -410,16 +411,22 @@ function RecommendationsCard({
                     >
                         <span
                             className="dot"
-                            style={{ background: utilizationColor(row.utilization) }}
+                            style={{
+                                background: utilizationColor(row.utilization),
+                            }}
                         />
-                        <span className="avatar avatar--sm">{initials(row.name)}</span>
+                        <span className="avatar avatar--sm">
+                            {initials(row.name)}
+                        </span>
                         <div className="min-w-0 flex-1 text-sm">
                             <div className="font-medium text-foreground">
                                 {row.name}{' '}
                                 <span
                                     className="mono text-xs"
                                     style={{
-                                        color: utilizationColor(row.utilization),
+                                        color: utilizationColor(
+                                            row.utilization,
+                                        ),
                                     }}
                                 >
                                     {row.utilization}%
@@ -446,7 +453,9 @@ function PersonRow({ person }: { person: Person }) {
         <tr>
             <td>
                 <div className="flex items-center gap-3">
-                    <span className="avatar avatar--sm">{initials(person.name)}</span>
+                    <span className="avatar avatar--sm">
+                        {initials(person.name)}
+                    </span>
                     <div>
                         <div className="font-medium text-foreground">
                             {person.name}
@@ -460,7 +469,10 @@ function PersonRow({ person }: { person: Person }) {
             <td>
                 <div className="flex items-center gap-3">
                     <div className="min-w-32 flex-1">
-                        <ProgressLine value={person.weekly_utilization} tone={tone} />
+                        <ProgressLine
+                            value={person.weekly_utilization}
+                            tone={tone}
+                        />
                     </div>
                     <span className="mono min-w-16 text-right text-xs">
                         {person.weekly_load_hours}h /{' '}
@@ -471,7 +483,9 @@ function PersonRow({ person }: { person: Person }) {
             <td>
                 <span
                     className="mono font-semibold"
-                    style={{ color: utilizationColor(person.weekly_utilization) }}
+                    style={{
+                        color: utilizationColor(person.weekly_utilization),
+                    }}
                 >
                     {person.weekly_utilization}%
                 </span>
@@ -520,6 +534,110 @@ function PersonRow({ person }: { person: Person }) {
 }
 
 function SimulatorCard({ project }: { project?: ProjectPrediction }) {
+    const [simulation, setSimulation] = useState<SimulationData | null>(null);
+    const [deadlineDaysShift, setDeadlineDaysShift] = useState(0);
+    const [teamSize, setTeamSize] = useState(0);
+    const [remainingHours, setRemainingHours] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const runSimulation = useCallback(
+        (payload: SimulationPayload, debounce = true) => {
+            if (!project) return;
+
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+            }
+
+            const request = () => {
+                setLoading(true);
+                setError(null);
+
+                axios
+                    .post<{ simulation: SimulationData }>(
+                        `/capacity-management/simulation/project/${project.id}/run`,
+                        payload,
+                        {
+                            headers: {
+                                Accept: 'application/json',
+                            },
+                        },
+                    )
+                    .then(({ data }) => {
+                        setSimulation(data.simulation);
+                    })
+                    .catch(() => {
+                        setError('Simuláciu sa nepodarilo prepočítať.');
+                    })
+                    .finally(() => setLoading(false));
+            };
+
+            if (debounce) {
+                timerRef.current = setTimeout(request, SIMULATION_DEBOUNCE_MS);
+            } else {
+                request();
+            }
+        },
+        [project],
+    );
+
+    useEffect(() => {
+        if (!project) {
+            setSimulation(null);
+            setDeadlineDaysShift(0);
+            setTeamSize(0);
+            setRemainingHours(0);
+            return;
+        }
+
+        setDeadlineDaysShift(0);
+        setTeamSize(0);
+        setRemainingHours(project.remaining_hours);
+        runSimulation({}, false);
+
+        return () => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+            }
+        };
+    }, [project, runSimulation]);
+
+    useEffect(() => {
+        if (!simulation) return;
+
+        setTeamSize(simulation.simulated_team_size);
+        setRemainingHours(simulation.simulated_remaining_hours);
+    }, [simulation]);
+
+    const baselineTeamSize = simulation?.baseline_team_size ?? 0;
+    const baselineRemainingHours =
+        simulation?.baseline_remaining_hours ?? project?.remaining_hours ?? 0;
+    const canUseSliders = Boolean(project && simulation);
+    const predictionWillMeet =
+        simulation?.will_meet_deadline ?? project?.can_finish ?? false;
+    const predictionConfidence = project?.confidence ?? 0;
+    const teamMax = Math.max(baselineTeamSize * 3, 10);
+    const remainingMax = Math.max(Math.round(baselineRemainingHours * 2), 100);
+
+    const resetSimulation = () => {
+        const nextTeamSize = simulation?.baseline_team_size ?? baselineTeamSize;
+        const nextRemainingHours =
+            simulation?.baseline_remaining_hours ?? baselineRemainingHours;
+
+        setDeadlineDaysShift(0);
+        setTeamSize(nextTeamSize);
+        setRemainingHours(nextRemainingHours);
+        runSimulation(
+            {
+                deadline_days_shift: 0,
+                team_size: nextTeamSize,
+                remaining_hours: nextRemainingHours,
+            },
+            false,
+        );
+    };
+
     return (
         <section className="card">
             <div className="card__head">
@@ -532,7 +650,11 @@ function SimulatorCard({ project }: { project?: ProjectPrediction }) {
             </div>
             <div className="card__body space-y-4">
                 <LabeledValue label="Projekt">
-                    <select className="select w-full" value={project?.id ?? ''} disabled>
+                    <select
+                        className="select w-full"
+                        value={project?.id ?? ''}
+                        disabled
+                    >
                         {project ? (
                             <option value={project.id}>{project.name}</option>
                         ) : (
@@ -540,26 +662,100 @@ function SimulatorCard({ project }: { project?: ProjectPrediction }) {
                         )}
                     </select>
                 </LabeledValue>
-                <SliderPreview label="Veľkosť tímu" value="8 ľudí" />
-                <SliderPreview label="Posun deadline-u" value="+0 dní" />
-                <SliderPreview
+                <SliderControl
+                    label="Veľkosť tímu"
+                    value={teamSize}
+                    displayValue={`${teamSize} ľudí`}
+                    min={0}
+                    max={teamMax}
+                    step={1}
+                    disabled={!canUseSliders}
+                    onChange={(value) => {
+                        setTeamSize(value);
+                        runSimulation({
+                            deadline_days_shift: deadlineDaysShift,
+                            team_size: value,
+                            remaining_hours: remainingHours,
+                        });
+                    }}
+                />
+                <SliderControl
+                    label="Posun deadline-u"
+                    value={deadlineDaysShift}
+                    displayValue={
+                        deadlineDaysShift > 0
+                            ? `+${deadlineDaysShift} dní`
+                            : `${deadlineDaysShift} dní`
+                    }
+                    min={-30}
+                    max={90}
+                    step={1}
+                    disabled={!canUseSliders}
+                    onChange={(value) => {
+                        setDeadlineDaysShift(value);
+                        runSimulation({
+                            deadline_days_shift: value,
+                            team_size: teamSize,
+                            remaining_hours: remainingHours,
+                        });
+                    }}
+                />
+                <SliderControl
                     label="Zostávajúce hodiny"
-                    value={`${project?.remaining_hours ?? 0}h`}
+                    value={Math.round(remainingHours)}
+                    displayValue={`${Math.round(remainingHours)}h`}
+                    min={0}
+                    max={remainingMax}
+                    step={5}
+                    disabled={!canUseSliders}
+                    onChange={(value) => {
+                        setRemainingHours(value);
+                        runSimulation({
+                            deadline_days_shift: deadlineDaysShift,
+                            team_size: teamSize,
+                            remaining_hours: value,
+                        });
+                    }}
                 />
                 <div className="rounded-md border border-[var(--warning-border)] bg-[var(--warning-soft)] p-3">
-                    <div className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-[var(--warning-text)]">
+                    <div className="mb-1 text-[11px] font-semibold tracking-widest text-[var(--warning-text)] uppercase">
                         Predikcia
                     </div>
                     <div className="text-sm text-foreground">
                         Projekt{' '}
                         <strong>
-                            {project?.can_finish ? 'stihne deadline' : 'nestihne deadline'}
+                            {predictionWillMeet
+                                ? 'stihne deadline'
+                                : 'nestihne deadline'}
                         </strong>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                        Istota výpočtu {project?.confidence ?? 0}%
+                        {simulation?.forecast_finish_date
+                            ? `Odhad dokončenia ${new Date(simulation.forecast_finish_date).toLocaleDateString('sk-SK')}`
+                            : `Istota výpočtu ${predictionConfidence}%`}
                     </div>
                 </div>
+                {(loading || error) && (
+                    <div
+                        className={`text-xs ${error ? 'text-[var(--danger-text)]' : 'text-muted-foreground'}`}
+                    >
+                        {error ?? 'Prepočítavam simuláciu...'}
+                    </div>
+                )}
+                {simulation &&
+                    (deadlineDaysShift !== 0 ||
+                        teamSize !== simulation.baseline_team_size ||
+                        remainingHours !==
+                            simulation.baseline_remaining_hours) && (
+                        <button
+                            type="button"
+                            className="btn btn--ghost btn--sm w-full"
+                            onClick={resetSimulation}
+                            disabled={loading}
+                        >
+                            Resetovať simuláciu
+                        </button>
+                    )}
                 {project && (
                     <Link
                         href={`/capacity-management/simulation/project/${project.id}`}
@@ -573,10 +769,37 @@ function SimulatorCard({ project }: { project?: ProjectPrediction }) {
     );
 }
 
-function SliderPreview({ label, value }: { label: string; value: string }) {
+function SliderControl({
+    label,
+    value,
+    displayValue,
+    min,
+    max,
+    step,
+    disabled,
+    onChange,
+}: {
+    label: string;
+    value: number;
+    displayValue: string;
+    min: number;
+    max: number;
+    step: number;
+    disabled: boolean;
+    onChange: (value: number) => void;
+}) {
     return (
-        <LabeledValue label={label} value={value}>
-            <input type="range" className="w-full accent-[var(--accent-blue)]" disabled />
+        <LabeledValue label={label} value={displayValue}>
+            <input
+                type="range"
+                className="w-full accent-[var(--accent-blue)] disabled:opacity-50"
+                min={min}
+                max={max}
+                step={step}
+                value={value}
+                disabled={disabled}
+                onChange={(event) => onChange(Number(event.target.value))}
+            />
         </LabeledValue>
     );
 }
@@ -592,9 +815,13 @@ function LabeledValue({
 }) {
     return (
         <div>
-            <div className="mb-1.5 flex justify-between text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+            <div className="mb-1.5 flex justify-between text-[11px] font-medium tracking-widest text-muted-foreground uppercase">
                 <span>{label}</span>
-                {value && <span className="mono normal-case tracking-normal">{value}</span>}
+                {value && (
+                    <span className="mono tracking-normal normal-case">
+                        {value}
+                    </span>
+                )}
             </div>
             {children}
         </div>
@@ -635,7 +862,10 @@ function RiskProjectsCard({ projects }: { projects: ProjectPrediction[] }) {
                                     {project.confidence}% istota
                                 </span>
                             </div>
-                            <ProgressLine value={project.confidence} tone={tone} />
+                            <ProgressLine
+                                value={project.confidence}
+                                tone={tone}
+                            />
                             <div className="mt-1 text-xs text-muted-foreground">
                                 {project.days_remaining} dní do deadline-u
                             </div>

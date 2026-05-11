@@ -115,6 +115,29 @@ class ProjectSimulationControllerTest extends TestCase
     }
 
     #[Test]
+    public function manager_can_run_project_simulation_as_json_for_dashboard_card(): void
+    {
+        $response = $this->actingAs($this->manager)
+            ->postJson("/capacity-management/simulation/project/{$this->project->id}/run", [
+                'deadline_days_shift' => 7,
+                'team_size' => 2,
+                'remaining_hours' => 50,
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('simulation.project_id', $this->project->id)
+            ->assertJsonPath('simulation.simulated_team_size', 2)
+            ->assertJsonPath('simulation.simulated_remaining_hours', 50)
+            ->assertJsonStructure([
+                'simulation' => [
+                    'burn_down_points',
+                    'forecast_finish_date',
+                    'will_meet_deadline',
+                ],
+            ]);
+    }
+
+    #[Test]
     public function run_simulation_validates_payload(): void
     {
         $response = $this->actingAs($this->manager)

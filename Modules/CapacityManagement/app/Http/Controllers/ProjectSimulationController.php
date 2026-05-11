@@ -44,6 +44,12 @@ class ProjectSimulationController extends Controller
         $input      = ProjectSimulationInput::fromValidated($request->validated());
         $simulation = $this->simulationService->simulate($project, $input);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'simulation' => $simulation->toArray(),
+            ]);
+        }
+
         return Inertia::render('CapacityManagement/ProjectSimulation', [
             'simulation' => $simulation->toArray(),
         ]);
