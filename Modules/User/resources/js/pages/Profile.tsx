@@ -1,11 +1,18 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import { Mail, Settings } from 'lucide-react';
-import { UserProjectsCard } from '../../../../Project/resources/js/components/profile/user-projects-card';
-import { UserTimeTrackingCard } from '../../../../TimeTracking/resources/js/components/profile/user-time-tracking-card';
-import { UserInfoCard } from '../components/profile/user-info-card';
-import { UserPermissionsCard } from '../components/profile/user-permissions-card';
+import { Head, Link } from '@inertiajs/react';
+import {
+    ArrowRight,
+    Briefcase,
+    Calendar,
+    Clock,
+    Layers,
+    Mail,
+    MessageSquare,
+    Settings,
+} from 'lucide-react';
+import type { ElementType } from 'react';
+import { useMemo, useState } from 'react';
 
 interface ProfilePermission {
     value: string;
@@ -15,7 +22,6 @@ interface ProfilePermission {
 interface ProfileProject {
     id: number;
     name: string;
-    role: string;
     permissions: string[];
     tasks_assigned: number;
     tasks_completed: number;
@@ -48,6 +54,45 @@ interface ProfilePageProps {
     timeTracking: TimeTrackingSummary;
 }
 
+type ProfileTab = 'overview' | 'projects' | 'activity' | 'settings';
+
+const monthTarget = 168;
+const weekTarget = 40;
+
+const initials = (name: string) =>
+    name
+        .split(' ')
+        .map((part) => part[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+
+const formatMonthYear = (date: string) =>
+    new Date(date).toLocaleDateString('sk-SK', {
+        month: 'long',
+        year: 'numeric',
+    });
+
+const formatDate = (date: string) =>
+    new Date(date).toLocaleDateString('sk-SK', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    });
+
+const clampPercent = (value: number) => Math.max(0, Math.min(value, 100));
+
+function ProgressBar({ value }: { value: number }) {
+    return (
+        <div className="progress">
+            <div
+                className="progress__fill"
+                style={{ width: `${clampPercent(value)}%` }}
+            />
+        </div>
+    );
+}
+
 export default function Profile({
     user,
     isOwnProfile,
@@ -55,6 +100,7 @@ export default function Profile({
     projects,
     timeTracking,
 }: ProfilePageProps) {
+    const [tab, setTab] = useState<ProfileTab>('overview');
     const breadcrumbs: BreadcrumbItem[] = isOwnProfile
         ? [{ title: 'Môj profil', href: '/profile' }]
         : [
@@ -71,7 +117,44 @@ export default function Profile({
         (sum, project) => sum + project.tasks_completed,
         0,
     );
-    const monthTarget = 168;
+    const openTasks = Math.max(totalAssigned - totalCompleted, 0);
+    const completionRate =
+        totalAssigned > 0
+            ? Math.round((totalCompleted / totalAssigned) * 100)
+            : 0;
+    const weekUtilization = Math.round(
+        (timeTracking.total_hours_this_week / weekTarget) * 100,
+    );
+
+    const activityItems = useMemo(
+        () =>
+            timeTracking.recent_entries.map((entry) => ({
+                id: entry.id,
+                title: 'Zaznamenaný čas',
+                target: `${entry.hours}h · ${entry.task_title}`,
+                project: entry.project_name,
+                when: formatDate(entry.entry_date),
+                description: entry.description,
+            })),
+        [timeTracking.recent_entries],
+    );
+
+    const tabs: {
+        id: ProfileTab;
+        label: string;
+        icon: ElementType;
+        count?: number;
+    }[] = [
+        { id: 'overview', label: 'Prehľad', icon: Layers },
+        {
+            id: 'projects',
+            label: 'Moje projekty',
+            icon: Briefcase,
+            count: projects.length,
+        },
+        { id: 'activity', label: 'Aktivita', icon: Clock },
+        { id: 'settings', label: 'Nastavenia', icon: Settings },
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -82,46 +165,55 @@ export default function Profile({
                     <div className="profile-hero__cover" />
                     <div className="profile-hero__body">
                         <span className="avatar avatar--lg bg-pink-600">
-                            {user.name
-                                .split(' ')
-                                .map((part) => part[0])
-                                .join('')
-                                .slice(0, 2)
-                                .toUpperCase()}
+                            {initials(user.name)}
                         </span>
+
                         <div className="profile-hero__main">
                             <div className="flex flex-wrap items-center gap-2">
                                 <h1 className="page-head__title">
                                     {user.name}
                                 </h1>
-                                {permissions.length > 0 && (
-                                    <span className="badge badge--accent">
-                                        {permissions[0].label}
-                                    </span>
-                                )}
                                 <span className="badge badge--success">
                                     Aktívny
                                 </span>
                             </div>
+
                             <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                                 <span className="inline-flex items-center gap-1.5">
                                     <Mail className="h-4 w-4" />
                                     {user.email}
                                 </span>
-                                <span>
-                                    V tíme od{' '}
-                                    {new Date(user.created_at).toLocaleDateString(
-                                        'sk-SK',
-                                        { month: 'long', year: 'numeric' },
-                                    )}
+                                <span className="inline-flex items-center gap-1.5">
+                                    <Calendar className="h-4 w-4" />V systéme od{' '}
+                                    {formatMonthYear(user.created_at)}
                                 </span>
-                                <span>Oddelenie: nepridané v DB</span>
                             </div>
                         </div>
-                        <button type="button" className="btn btn--primary" disabled>
-                            <Settings className="h-4 w-4" />
-                            Upraviť profil
-                        </button>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            <button type="button" className="btn" disabled>
+                                <MessageSquare className="h-4 w-4" />
+                                Správa
+                            </button>
+                            {isOwnProfile ? (
+                                <Link
+                                    href="/settings/profile"
+                                    className="btn btn--primary"
+                                >
+                                    <Settings className="h-4 w-4" />
+                                    Upraviť profil
+                                </Link>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="btn btn--primary"
+                                    disabled
+                                >
+                                    <Settings className="h-4 w-4" />
+                                    Upraviť profil
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -130,14 +222,12 @@ export default function Profile({
                         <span className="kpi__label">Aktívne projekty</span>
                         <span className="kpi__value">{projects.length}</span>
                         <span className="kpi__delta">
-                            Z projektových členstiev
+                            Projekty, v ktorých je používateľ členom
                         </span>
                     </div>
                     <div className="kpi">
                         <span className="kpi__label">Otvorené úlohy</span>
-                        <span className="kpi__value">
-                            {Math.max(totalAssigned - totalCompleted, 0)}
-                        </span>
+                        <span className="kpi__value">{openTasks}</span>
                         <span className="kpi__delta kpi__delta--up">
                             {totalCompleted} dokončených
                         </span>
@@ -148,39 +238,337 @@ export default function Profile({
                             {timeTracking.total_hours_this_month}
                             <sub>h / {monthTarget}h</sub>
                         </span>
-                        <div className="progress mt-3">
-                            <div
-                                className="progress__fill"
-                                style={{
-                                    width: `${Math.min(
-                                        (timeTracking.total_hours_this_month /
-                                            monthTarget) *
-                                            100,
-                                        100,
-                                    )}%`,
-                                }}
+                        <div className="mt-3">
+                            <ProgressBar
+                                value={
+                                    (timeTracking.total_hours_this_month /
+                                        monthTarget) *
+                                    100
+                                }
                             />
                         </div>
                     </div>
                     <div className="kpi">
-                        <span className="kpi__label">Včas dokončené</span>
-                        <span className="kpi__value text-muted-foreground">
-                            N/A
+                        <span className="kpi__label">Dokončenosť úloh</span>
+                        <span className="kpi__value">
+                            {completionRate}
+                            <sub>%</sub>
                         </span>
                         <span className="kpi__delta">
-                            Placeholder, výpočet ešte nie je v logike
+                            {totalCompleted} z {totalAssigned} úloh
                         </span>
                     </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                    <UserInfoCard user={user} />
-                    <UserPermissionsCard permissions={permissions} />
+                <div className="tabbar">
+                    {tabs.map(({ id, label, icon: Icon, count }) => (
+                        <button
+                            key={id}
+                            type="button"
+                            className={`tab ${tab === id ? 'is-active' : ''}`}
+                            onClick={() => setTab(id)}
+                        >
+                            <Icon className="h-4 w-4" />
+                            {label}
+                            {count !== undefined && (
+                                <span className="tab__count">{count}</span>
+                            )}
+                        </button>
+                    ))}
                 </div>
 
-                <UserProjectsCard projects={projects} />
-                <UserTimeTrackingCard summary={timeTracking} />
+                {tab === 'overview' && (
+                    <div className="grid-main-side">
+                        <div className="col gap-5">
+                            <section className="card">
+                                <div className="card__head">
+                                    <h2 className="card__title">O mne</h2>
+                                </div>
+                                <div className="card__body text-sm leading-6 text-muted-foreground">
+                                    {user.name} je členom interného systému so
+                                    zodpovednosťami naprieč projektmi a úlohami.
+                                    Profil zobrazuje aktuálne projektové
+                                    členstvá, aktivitu a evidovaný pracovný čas.
+                                </div>
+                            </section>
+
+                            <ActivityCard activityItems={activityItems} />
+                        </div>
+
+                        <div className="col gap-4">
+                            <section className="card">
+                                <div className="card__head">
+                                    <h2 className="card__title">Kontakt</h2>
+                                </div>
+                                <div className="card__body space-y-3 text-sm">
+                                    <InfoRow
+                                        label="E-mail"
+                                        value={user.email}
+                                    />
+                                    <InfoRow
+                                        label="Účet vytvorený"
+                                        value={formatDate(user.created_at)}
+                                    />
+                                </div>
+                            </section>
+
+                            <section className="card">
+                                <div className="card__head">
+                                    <h2 className="card__title">
+                                        Tento týždeň
+                                    </h2>
+                                </div>
+                                <div className="card__body">
+                                    <div className="mb-3 flex items-baseline gap-1">
+                                        <span className="mono text-2xl font-semibold">
+                                            {timeTracking.total_hours_this_week}
+                                        </span>
+                                        <span className="text-sm text-muted-foreground">
+                                            z {weekTarget}h
+                                        </span>
+                                    </div>
+                                    <ProgressBar value={weekUtilization} />
+                                    <div className="mt-2 flex justify-between text-xs text-muted-foreground">
+                                        <span>Vyťaženie</span>
+                                        <span>{weekUtilization}%</span>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section className="card">
+                                <div className="card__head">
+                                    <h2 className="card__title">
+                                        Systémové oprávnenia
+                                    </h2>
+                                </div>
+                                <div className="card__body">
+                                    <p className="text-sm text-muted-foreground">
+                                        {permissions.length > 0
+                                            ? `${permissions.length} pridelených oprávnení`
+                                            : 'Žiadne systémové oprávnenia.'}
+                                    </p>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                )}
+
+                {tab === 'projects' && <ProjectsTable projects={projects} />}
+
+                {tab === 'activity' && (
+                    <ActivityCard activityItems={activityItems} expanded />
+                )}
+
+                {tab === 'settings' && (
+                    <div className="grid-main-side">
+                        <section className="card">
+                            <div className="card__head">
+                                <h2 className="card__title">Profilové údaje</h2>
+                            </div>
+                            <div className="card__body grid gap-4 sm:grid-cols-2">
+                                <ReadOnlyField label="Meno" value={user.name} />
+                                <ReadOnlyField
+                                    label="E-mail"
+                                    value={user.email}
+                                />
+                                <ReadOnlyField
+                                    label="Účet vytvorený"
+                                    value={formatDate(user.created_at)}
+                                />
+                                <ReadOnlyField
+                                    label="Aktívne projekty"
+                                    value={String(projects.length)}
+                                />
+                            </div>
+                        </section>
+
+                        <section className="card">
+                            <div className="card__head">
+                                <h2 className="card__title">Bezpečnosť</h2>
+                            </div>
+                            <div className="card__body space-y-2">
+                                <Link
+                                    href="/settings/password"
+                                    className="btn w-full justify-start"
+                                >
+                                    Zmeniť heslo
+                                </Link>
+                                <button
+                                    type="button"
+                                    className="btn w-full justify-start"
+                                    disabled
+                                >
+                                    Aktívne relácie
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+                )}
             </div>
         </AppLayout>
+    );
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">{label}</span>
+            <span className="text-right font-medium">{value}</span>
+        </div>
+    );
+}
+
+function ReadOnlyField({ label, value }: { label: string; value: string }) {
+    return (
+        <label className="grid gap-2">
+            <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                {label}
+            </span>
+            <input className="input" value={value} readOnly />
+        </label>
+    );
+}
+
+function ActivityCard({
+    activityItems,
+    expanded = false,
+}: {
+    activityItems: {
+        id: number;
+        title: string;
+        target: string;
+        project: string;
+        when: string;
+        description: string | null;
+    }[];
+    expanded?: boolean;
+}) {
+    const visibleItems = expanded ? activityItems : activityItems.slice(0, 4);
+
+    return (
+        <section className="card">
+            <div className="card__head">
+                <h2 className="card__title">Posledná aktivita</h2>
+                {!expanded && activityItems.length > 4 && (
+                    <button type="button" className="btn btn--ghost btn--sm">
+                        Všetka aktivita
+                        <ArrowRight className="h-3 w-3" />
+                    </button>
+                )}
+            </div>
+            <div className="card__body card__body--flush">
+                {visibleItems.length > 0 ? (
+                    visibleItems.map((item, index) => (
+                        <div
+                            key={item.id}
+                            className={`flex gap-3 px-4 py-4 ${
+                                index === 0 ? '' : 'border-t border-border'
+                            }`}
+                        >
+                            <span className="grid size-8 shrink-0 place-items-center rounded-md bg-[var(--accent-blue-soft)] text-[var(--accent-blue-text)]">
+                                <Clock className="h-4 w-4" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                                <div className="text-sm">
+                                    <span className="text-muted-foreground">
+                                        {item.title}:{' '}
+                                    </span>
+                                    <span className="font-medium">
+                                        {item.target}
+                                    </span>
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                    {item.project} · {item.when}
+                                    {item.description &&
+                                        ` · ${item.description}`}
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+                        Zatiaľ tu nie je žiadna aktivita.
+                    </div>
+                )}
+            </div>
+        </section>
+    );
+}
+
+function ProjectsTable({ projects }: { projects: ProfileProject[] }) {
+    return (
+        <section className="card overflow-hidden">
+            <div className="overflow-x-auto">
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>Projekt</th>
+                            <th>Úlohy</th>
+                            <th>Dokončené</th>
+                            <th>Postup</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {projects.length === 0 && (
+                            <tr>
+                                <td colSpan={5}>
+                                    <div className="py-10 text-center text-sm text-muted-foreground">
+                                        Používateľ nie je členom žiadneho
+                                        projektu.
+                                    </div>
+                                </td>
+                            </tr>
+                        )}
+
+                        {projects.map((project) => {
+                            const progress =
+                                project.tasks_assigned > 0
+                                    ? Math.round(
+                                          (project.tasks_completed /
+                                              project.tasks_assigned) *
+                                              100,
+                                      )
+                                    : 0;
+
+                            return (
+                                <tr key={project.id}>
+                                    <td>
+                                        <Link
+                                            href={`/projects/${project.id}`}
+                                            className="font-medium hover:underline"
+                                        >
+                                            {project.name}
+                                        </Link>
+                                    </td>
+                                    <td className="mono text-sm">
+                                        {project.tasks_assigned}
+                                    </td>
+                                    <td className="mono text-sm">
+                                        {project.tasks_completed}
+                                    </td>
+                                    <td className="min-w-56">
+                                        <div className="flex items-center gap-3">
+                                            <ProgressBar value={progress} />
+                                            <span className="mono min-w-9 text-xs text-muted-foreground">
+                                                {progress}%
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="text-right">
+                                        <Link
+                                            href={`/projects/${project.id}`}
+                                            className="icon-btn ml-auto"
+                                        >
+                                            <ArrowRight className="h-4 w-4" />
+                                        </Link>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </section>
     );
 }

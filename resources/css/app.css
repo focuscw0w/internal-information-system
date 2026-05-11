@@ -86,7 +86,7 @@
     --background: var(--bg-app);
     --foreground: var(--text-primary);
 
-    --card: var(--sidebar);
+    --card: var(--bg-surface);
     --card-foreground: var(--text-primary);
 
     --popover: var(--bg-surface);
@@ -107,7 +107,7 @@
     --destructive: var(--danger);
     --destructive-foreground: oklch(1 0 0);
 
-    --border: oklch(0.91 0.006 250);
+    --border: oklch(0.93 0.006 250);
     --input: oklch(0.89 0.006 250);
     --ring: var(--accent-blue);
 
