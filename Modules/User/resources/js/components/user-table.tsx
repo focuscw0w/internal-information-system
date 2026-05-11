@@ -1,3 +1,4 @@
+import { Checkbox } from '@/components/ui/checkbox';
 import { MoreHorizontal, Search, UserRound, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { AvailablePermissions, ManagedUser } from '../types/types';
@@ -170,11 +171,11 @@ export const UserTable = ({
                         <thead>
                             <tr>
                                 <th className="w-10">
-                                    <input
-                                        type="checkbox"
+                                    <Checkbox
                                         aria-label="Vybrať všetkých používateľov"
                                         checked={allVisibleSelected}
-                                        onChange={toggleAllVisible}
+                                        onCheckedChange={toggleAllVisible}
+                                        className="bg-white data-[state=checked]:bg-primary"
                                     />
                                 </th>
                                 <th>Používateľ</th>
@@ -207,11 +208,13 @@ export const UserTable = ({
                             {filteredUsers.map((user) => (
                                 <tr key={user.id}>
                                     <td>
-                                        <input
-                                            type="checkbox"
+                                        <Checkbox
                                             aria-label={`Vybrať používateľa ${user.name}`}
                                             checked={selectedIds.has(user.id)}
-                                            onChange={() => toggleUser(user.id)}
+                                            onCheckedChange={() =>
+                                                toggleUser(user.id)
+                                            }
+                                            className="bg-white data-[state=checked]:bg-primary"
                                         />
                                     </td>
                                     <td>
