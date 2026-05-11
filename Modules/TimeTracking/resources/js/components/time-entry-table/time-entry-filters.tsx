@@ -40,7 +40,7 @@ export const TimeEntryFilters = ({
         <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm ring-1 ring-slate-100">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-card text-slate-500 shadow-sm ring-1 ring-slate-100">
                         <Filter className="h-4 w-4" />
                     </span>
                     <div>
@@ -54,7 +54,7 @@ export const TimeEntryFilters = ({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    <span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-500 shadow-sm ring-1 ring-slate-100">
+                    <span className="w-fit rounded-full bg-card px-3 py-1 text-xs font-medium text-slate-500 shadow-sm ring-1 ring-slate-100">
                         {filteredCount} z {totalCount}
                     </span>
 
@@ -62,7 +62,7 @@ export const TimeEntryFilters = ({
                         <button
                             type="button"
                             onClick={onClear}
-                            className="inline-flex h-8 items-center justify-center gap-1 rounded-lg bg-white px-3 text-xs font-medium whitespace-nowrap text-slate-500 shadow-sm ring-1 ring-slate-100 transition-colors hover:text-slate-700"
+                            className="inline-flex h-8 items-center justify-center gap-1 rounded-lg bg-card px-3 text-xs font-medium whitespace-nowrap text-slate-500 shadow-sm ring-1 ring-slate-100 transition-colors hover:text-slate-700"
                         >
                             <X className="h-3.5 w-3.5" />
                             Zrušiť filtre
@@ -86,7 +86,7 @@ export const TimeEntryFilters = ({
                                         : null,
                                 )
                             }
-                            className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-card px-3 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                         >
                             <option value="">Všetky úlohy</option>
                             {tasks.map((task) => (
@@ -106,7 +106,7 @@ export const TimeEntryFilters = ({
                                             : null,
                                     )
                                 }
-                                className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-card px-3 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                             >
                                 <option value="">Všetci používatelia</option>
                                 {users.map((user) => (
@@ -132,7 +132,7 @@ export const TimeEntryFilters = ({
                                 onChange={(e) =>
                                     onDateFromChange(e.target.value)
                                 }
-                                className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-card px-3 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                             />
                         </label>
 
@@ -142,7 +142,7 @@ export const TimeEntryFilters = ({
                                 type="date"
                                 value={dateToFilter}
                                 onChange={(e) => onDateToChange(e.target.value)}
-                                className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-card px-3 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                             />
                         </label>
                     </div>

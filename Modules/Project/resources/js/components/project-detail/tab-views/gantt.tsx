@@ -171,7 +171,7 @@ export function GanttChart({ project }: GanttChartProps) {
                     onChange={(e) =>
                         setStatusFilter((e.target.value as TaskStatus) || null)
                     }
-                    className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
+                    className="rounded-md border border-gray-200 bg-card px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
                 >
                     <option value="">Všetky stavy</option>
                     <option value="todo">To Do</option>
@@ -187,7 +187,7 @@ export function GanttChart({ project }: GanttChartProps) {
                             (e.target.value as TaskPriority) || null,
                         )
                     }
-                    className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
+                    className="rounded-md border border-gray-200 bg-card px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
                 >
                     <option value="">Všetky priority</option>
                     <option value="urgent">Urgentná</option>
@@ -204,7 +204,7 @@ export function GanttChart({ project }: GanttChartProps) {
                                 e.target.value ? Number(e.target.value) : null,
                             )
                         }
-                        className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
+                        className="rounded-md border border-gray-200 bg-card px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
                     >
                         <option value="">Všetci členovia</option>
                         {assignees.map((u) => (

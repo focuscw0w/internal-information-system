@@ -1,11 +1,11 @@
 import { FormDialog } from '@/components/dialogs/form-dialog';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { useForm } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
-import { useState } from 'react';
 import { Task } from 'Modules/Project/resources/js/types/types';
+import { useState } from 'react';
 import { TimeEntry } from '../../../types/types';
 
 interface EditTimeEntryDialogProps {
@@ -15,10 +15,10 @@ interface EditTimeEntryDialogProps {
 }
 
 export const EditTimeEntryDialog = ({
-                                        entry,
-                                        projectId,
-                                        tasks,
-                                    }: EditTimeEntryDialogProps) => {
+    entry,
+    projectId,
+    tasks,
+}: EditTimeEntryDialogProps) => {
     const [open, setOpen] = useState(false);
 
     const { data, setData, put, processing, errors } = useForm({
@@ -71,7 +71,7 @@ export const EditTimeEntryDialog = ({
                         id="task_id"
                         value={data.task_id}
                         onChange={(e) => setData('task_id', e.target.value)}
-                        className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="mt-1 w-full rounded-md border border-gray-200 bg-card px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                     >
                         <option value="">Vyberte úlohu...</option>
                         {tasks.map((task) => (
@@ -81,7 +81,9 @@ export const EditTimeEntryDialog = ({
                         ))}
                     </select>
                     {errors.task_id && (
-                        <p className="mt-1 text-xs text-red-500">{errors.task_id}</p>
+                        <p className="mt-1 text-xs text-red-500">
+                            {errors.task_id}
+                        </p>
                     )}
                 </div>
 
@@ -96,7 +98,9 @@ export const EditTimeEntryDialog = ({
                         className="mt-1"
                     />
                     {errors.entry_date && (
-                        <p className="mt-1 text-xs text-red-500">{errors.entry_date}</p>
+                        <p className="mt-1 text-xs text-red-500">
+                            {errors.entry_date}
+                        </p>
                     )}
                 </div>
 
@@ -114,7 +118,9 @@ export const EditTimeEntryDialog = ({
                         className="mt-1"
                     />
                     {errors.hours && (
-                        <p className="mt-1 text-xs text-red-500">{errors.hours}</p>
+                        <p className="mt-1 text-xs text-red-500">
+                            {errors.hours}
+                        </p>
                     )}
                 </div>
 
@@ -127,10 +133,12 @@ export const EditTimeEntryDialog = ({
                         onChange={(e) => setData('description', e.target.value)}
                         placeholder="Čo ste robili..."
                         rows={3}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                     />
                     {errors.description && (
-                        <p className="mt-1 text-xs text-red-500">{errors.description}</p>
+                        <p className="mt-1 text-xs text-red-500">
+                            {errors.description}
+                        </p>
                     )}
                 </div>
             </div>

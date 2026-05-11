@@ -74,7 +74,9 @@ const formatDate = (dateString: string) => {
 };
 
 export function Timeline({ project }: TimelineProps) {
-    const [typeFilter, setTypeFilter] = useState<ActivityTypeFilter | null>(null);
+    const [typeFilter, setTypeFilter] = useState<ActivityTypeFilter | null>(
+        null,
+    );
     const [newestFirst, setNewestFirst] = useState(true);
 
     const allActivities: Activity[] = project.activities ?? [];
@@ -83,7 +85,9 @@ export function Timeline({ project }: TimelineProps) {
         .filter((a) => !typeFilter || a.type === typeFilter)
         .slice()
         .sort((a, b) => {
-            const diff = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            const diff =
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime();
             return newestFirst ? diff : -diff;
         });
 
@@ -104,9 +108,12 @@ export function Timeline({ project }: TimelineProps) {
                         <select
                             value={typeFilter ?? ''}
                             onChange={(e) =>
-                                setTypeFilter((e.target.value as ActivityTypeFilter) || null)
+                                setTypeFilter(
+                                    (e.target.value as ActivityTypeFilter) ||
+                                        null,
+                                )
                             }
-                            className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
+                            className="rounded-md border border-gray-200 bg-card px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
                         >
                             <option value="">Všetky typy</option>
                             {ACTIVITY_TYPE_OPTIONS.map((o) => (
@@ -118,8 +125,12 @@ export function Timeline({ project }: TimelineProps) {
 
                         <button
                             onClick={() => setNewestFirst((v) => !v)}
-                            className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 transition-colors hover:bg-gray-50"
-                            title={newestFirst ? 'Najnovšie navrchu' : 'Najstaršie navrchu'}
+                            className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-card px-2.5 py-1.5 text-xs text-gray-700 transition-colors hover:bg-gray-50"
+                            title={
+                                newestFirst
+                                    ? 'Najnovšie navrchu'
+                                    : 'Najstaršie navrchu'
+                            }
                         >
                             <ArrowUpDown className="h-3 w-3" />
                             {newestFirst ? 'Najnovšie' : 'Najstaršie'}
@@ -149,9 +160,13 @@ export function Timeline({ project }: TimelineProps) {
                     <div className="flex items-start gap-4 border-l-2 border-blue-500 py-3 pl-4">
                         <Calendar className="h-4 w-4 text-blue-500" />
                         <div className="flex-1">
-                            <p className="font-medium text-gray-900">Začiatok projektu</p>
+                            <p className="font-medium text-gray-900">
+                                Začiatok projektu
+                            </p>
                             <p className="text-sm text-gray-500">
-                                {new Date(project.start_date).toLocaleDateString('sk-SK')}
+                                {new Date(
+                                    project.start_date,
+                                ).toLocaleDateString('sk-SK')}
                             </p>
                         </div>
                     </div>
@@ -162,20 +177,31 @@ export function Timeline({ project }: TimelineProps) {
                             key={activity.id}
                             className={`flex items-start gap-4 border-l-2 ${getBorderColor(activity.type)} py-3 pl-4`}
                         >
-                            <div className="pt-0.5">{getActivityIcon(activity.type)}</div>
+                            <div className="pt-0.5">
+                                {getActivityIcon(activity.type)}
+                            </div>
                             <div className="flex-1">
-                                <p className="text-sm text-gray-900">{activity.description}</p>
+                                <p className="text-sm text-gray-900">
+                                    {activity.description}
+                                </p>
                                 <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
                                     <span>{activity.user.name}</span>
                                     <span>•</span>
-                                    <span>{formatDate(activity.created_at)}</span>
+                                    <span>
+                                        {formatDate(activity.created_at)}
+                                    </span>
                                 </div>
 
                                 {activity.type === 'task_status_changed' &&
                                     Boolean(activity.metadata?.old_status) && (
                                         <p className="mt-1 text-xs text-gray-400">
-                                            {String(activity.metadata?.old_status)} →{' '}
-                                            {String(activity.metadata?.new_status)}
+                                            {String(
+                                                activity.metadata?.old_status,
+                                            )}{' '}
+                                            →{' '}
+                                            {String(
+                                                activity.metadata?.new_status,
+                                            )}
                                         </p>
                                     )}
                             </div>
@@ -196,9 +222,13 @@ export function Timeline({ project }: TimelineProps) {
                     <div className="flex items-start gap-4 border-l-2 border-green-500 py-3 pl-4">
                         <Calendar className="h-4 w-4 text-green-500" />
                         <div className="flex-1">
-                            <p className="font-medium text-gray-900">Deadline projektu</p>
+                            <p className="font-medium text-gray-900">
+                                Deadline projektu
+                            </p>
                             <p className="text-sm text-gray-500">
-                                {new Date(project.end_date).toLocaleDateString('sk-SK')}
+                                {new Date(project.end_date).toLocaleDateString(
+                                    'sk-SK',
+                                )}
                                 {project.days_remaining > 0
                                     ? ` • Zostáva ${project.days_remaining} dní`
                                     : ' • Projekt skončil'}

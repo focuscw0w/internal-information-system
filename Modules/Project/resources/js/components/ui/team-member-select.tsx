@@ -18,7 +18,9 @@ export const TeamMemberSelect = ({
 }: TeamMemberSelectProps) => {
     const membersWithCapacity = allUsers.filter(
         (user): user is TeamMember =>
-            'weekly_utilization' in user || 'free_capacity_hours' in user || 'is_over_capacity' in user,
+            'weekly_utilization' in user ||
+            'free_capacity_hours' in user ||
+            'is_over_capacity' in user,
     );
 
     const selectedWarnings = membersWithCapacity.filter((user) => {
@@ -56,7 +58,7 @@ export const TeamMemberSelect = ({
                 )}
             </Label>
 
-            <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-gray-300 bg-white p-3">
+            <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-gray-300 bg-card p-3">
                 {allUsers.length === 0 ? (
                     <p className="py-4 text-center text-sm text-gray-500">
                         Žiadni používatelia
@@ -65,14 +67,19 @@ export const TeamMemberSelect = ({
                     allUsers.map((user) => {
                         const isSelected = selectedMembers.includes(user.id);
                         const utilization =
-                            'weekly_utilization' in user && typeof user.weekly_utilization === 'number'
+                            'weekly_utilization' in user &&
+                            typeof user.weekly_utilization === 'number'
                                 ? user.weekly_utilization
                                 : null;
                         const isOverCapacity =
-                            'is_over_capacity' in user && typeof user.is_over_capacity === 'boolean'
+                            'is_over_capacity' in user &&
+                            typeof user.is_over_capacity === 'boolean'
                                 ? user.is_over_capacity
                                 : false;
-                        const isNearCapacity = utilization !== null && utilization >= 80 && utilization <= 100;
+                        const isNearCapacity =
+                            utilization !== null &&
+                            utilization >= 80 &&
+                            utilization <= 100;
 
                         return (
                             <button
@@ -136,7 +143,9 @@ export const TeamMemberSelect = ({
                         <div>
                             <p className="font-medium">Kapacitné varovanie</p>
                             <p className="mt-1">
-                                Vybraní ľudia sú už na hrane alebo nad kapacitou. Priradenie ďalšej úlohy môže zvýšiť riziko preťaženia.
+                                Vybraní ľudia sú už na hrane alebo nad
+                                kapacitou. Priradenie ďalšej úlohy môže zvýšiť
+                                riziko preťaženia.
                             </p>
                             <ul className="mt-2 list-inside list-disc text-xs">
                                 {selectedWarnings.map((user) => (

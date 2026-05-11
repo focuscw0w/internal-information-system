@@ -10,18 +10,18 @@ interface SubtaskFiltersProps {
 }
 
 export const SubtaskFilters = ({
-                                   completionFilter,
-                                   filteredCount,
-                                   totalCount,
-                                   onChange,
-                               }: SubtaskFiltersProps) => {
+    completionFilter,
+    filteredCount,
+    totalCount,
+    onChange,
+}: SubtaskFiltersProps) => {
     return (
         <div className="flex items-center gap-2 pt-2">
             <Filter className="h-4 w-4 text-gray-400" />
             <select
                 value={completionFilter}
                 onChange={(e) => onChange(e.target.value as CompletionFilter)}
-                className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="rounded-md border border-gray-200 bg-card px-2.5 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
             >
                 <option value="all">Všetky</option>
                 <option value="incomplete">Nedokončené</option>

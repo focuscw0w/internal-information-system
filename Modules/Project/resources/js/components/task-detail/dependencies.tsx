@@ -130,7 +130,7 @@ export function Dependencies({ task, project, canEdit }: DependenciesProps) {
                         {predecessors.map((p) => (
                             <div
                                 key={p.id}
-                                className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm"
+                                className="flex items-center gap-2 rounded-full border border-gray-200 bg-card px-3 py-1.5 text-sm"
                             >
                                 <span
                                     className={`h-2 w-2 rounded-full ${STATUS_DOT[p.status]}`}

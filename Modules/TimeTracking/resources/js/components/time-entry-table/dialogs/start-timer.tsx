@@ -1,9 +1,9 @@
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { Label } from '@/components/ui/label';
-import { useTimer } from '../../../context/timer-context';
-import { useState, useEffect } from 'react';
 import { Project } from 'Modules/Project/resources/js/types/types';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { useTimer } from '../../../context/timer-context';
 
 interface StartTimerDialogProps {
     open: boolean;
@@ -11,9 +11,9 @@ interface StartTimerDialogProps {
 }
 
 export const StartTimerDialog = ({
-                                     open,
-                                     onOpenChange,
-                                 }: StartTimerDialogProps) => {
+    open,
+    onOpenChange,
+}: StartTimerDialogProps) => {
     const { startTimer } = useTimer();
 
     const [projects, setProjects] = useState<Project[]>([]);
@@ -40,7 +40,9 @@ export const StartTimerDialog = ({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const project = projects.find((p) => p.id === parseInt(selectedProjectId));
+        const project = projects.find(
+            (p) => p.id === parseInt(selectedProjectId),
+        );
         const task = tasks.find((t) => t.id === parseInt(selectedTaskId));
 
         if (!project || !task) return;
@@ -67,7 +69,9 @@ export const StartTimerDialog = ({
         >
             <div className="space-y-4">
                 {loading ? (
-                    <p className="text-sm text-gray-500">Načítavam projekty...</p>
+                    <p className="text-sm text-gray-500">
+                        Načítavam projekty...
+                    </p>
                 ) : (
                     <>
                         {/* Project */}
@@ -80,7 +84,7 @@ export const StartTimerDialog = ({
                                     setSelectedProjectId(e.target.value);
                                     setSelectedTaskId('');
                                 }}
-                                className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="mt-1 w-full rounded-md border border-gray-200 bg-card px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                             >
                                 <option value="">Vyberte projekt...</option>
                                 {projects.map((project) => (
@@ -97,9 +101,11 @@ export const StartTimerDialog = ({
                             <select
                                 id="timer_task"
                                 value={selectedTaskId}
-                                onChange={(e) => setSelectedTaskId(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedTaskId(e.target.value)
+                                }
                                 disabled={!selectedProjectId}
-                                className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+                                className="mt-1 w-full rounded-md border border-gray-200 bg-card px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:opacity-50"
                             >
                                 <option value="">
                                     {selectedProjectId

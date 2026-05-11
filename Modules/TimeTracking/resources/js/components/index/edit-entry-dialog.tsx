@@ -2,8 +2,8 @@ import { FormDialog } from '@/components/dialogs/form-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
-import { useEffect } from 'react';
 import { Task } from 'Modules/Project/resources/js/types/types';
+import { useEffect } from 'react';
 import { TimeEntry } from '../../types/types';
 
 interface EditEntryDialogProps {
@@ -64,7 +64,7 @@ export function EditEntryDialog({
                         id="edit_task_id"
                         value={data.task_id}
                         onChange={(e) => setData('task_id', e.target.value)}
-                        className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="mt-1 w-full rounded-md border border-gray-200 bg-card px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                     >
                         <option value="">Vyberte úlohu...</option>
                         {tasks.map((task) => (
@@ -74,7 +74,9 @@ export function EditEntryDialog({
                         ))}
                     </select>
                     {errors.task_id && (
-                        <p className="mt-1 text-xs text-red-500">{errors.task_id}</p>
+                        <p className="mt-1 text-xs text-red-500">
+                            {errors.task_id}
+                        </p>
                     )}
                 </div>
 
@@ -85,7 +87,9 @@ export function EditEntryDialog({
                             id="edit_date"
                             type="date"
                             value={data.entry_date}
-                            onChange={(e) => setData('entry_date', e.target.value)}
+                            onChange={(e) =>
+                                setData('entry_date', e.target.value)
+                            }
                             className="mt-1"
                         />
                         {errors.entry_date && (
@@ -107,7 +111,9 @@ export function EditEntryDialog({
                             className="mt-1"
                         />
                         {errors.hours && (
-                            <p className="mt-1 text-xs text-red-500">{errors.hours}</p>
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.hours}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -119,7 +125,7 @@ export function EditEntryDialog({
                         value={data.description}
                         onChange={(e) => setData('description', e.target.value)}
                         rows={3}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                     />
                     {errors.description && (
                         <p className="mt-1 text-xs text-red-500">

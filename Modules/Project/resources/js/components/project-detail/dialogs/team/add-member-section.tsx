@@ -30,7 +30,7 @@ export const AddMemberSection = ({
             </Label>
             <div className="flex gap-2">
                 <Select value={selectedUserId} onValueChange={onUserSelect}>
-                    <SelectTrigger className="flex-1 bg-white">
+                    <SelectTrigger className="flex-1 bg-card">
                         <SelectValue placeholder="Vyberte používateľa..." />
                     </SelectTrigger>
                     <SelectContent>

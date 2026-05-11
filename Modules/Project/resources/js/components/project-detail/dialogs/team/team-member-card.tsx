@@ -13,14 +13,14 @@ interface TeamMemberCardProps {
 }
 
 export const TeamMemberCard = ({
-                                   user,
-                                   settings,
-                                   onRemove,
-                                   onSettingChange,
-                                   onTogglePermission,
-                               }: TeamMemberCardProps) => {
+    user,
+    settings,
+    onRemove,
+    onSettingChange,
+    onTogglePermission,
+}: TeamMemberCardProps) => {
     return (
-        <div className="rounded-lg border bg-white p-4 shadow-sm">
+        <div className="rounded-lg border bg-card p-4 shadow-sm">
             {/* Header */}
             <div className="mb-3 flex items-start justify-between">
                 <div className="flex items-start gap-3">

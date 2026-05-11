@@ -1,10 +1,10 @@
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForm, usePage } from '@inertiajs/react';
 import { SharedData } from '@/types';
-import { useMemo } from 'react';
+import { useForm, usePage } from '@inertiajs/react';
 import { Project } from 'Modules/Project/resources/js/types/types';
+import { useMemo } from 'react';
 
 interface ManualEntryDialogProps {
     open: boolean;
@@ -21,8 +21,7 @@ export function ManualEntryDialog({
 }: ManualEntryDialogProps) {
     const currentUserId = usePage<SharedData>().props.auth.user.id;
 
-    const defaultProjectId =
-        initialProjectId ?? projects[0]?.id ?? '';
+    const defaultProjectId = initialProjectId ?? projects[0]?.id ?? '';
 
     const { data, setData, post, processing, errors, reset } = useForm({
         project_id: String(defaultProjectId),
@@ -88,7 +87,7 @@ export function ManualEntryDialog({
                             setData('project_id', e.target.value);
                             setData('task_id', '');
                         }}
-                        className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="mt-1 w-full rounded-md border border-gray-200 bg-card px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                     >
                         <option value="">Vyberte projekt...</option>
                         {projects.map((project) => (
@@ -106,7 +105,7 @@ export function ManualEntryDialog({
                         value={data.task_id}
                         onChange={(e) => setData('task_id', e.target.value)}
                         disabled={!availableTasks.length}
-                        className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
+                        className="mt-1 w-full rounded-md border border-gray-200 bg-card px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:opacity-60"
                     >
                         <option value="">
                             {availableTasks.length
@@ -120,7 +119,9 @@ export function ManualEntryDialog({
                         ))}
                     </select>
                     {errors.task_id && (
-                        <p className="mt-1 text-xs text-red-500">{errors.task_id}</p>
+                        <p className="mt-1 text-xs text-red-500">
+                            {errors.task_id}
+                        </p>
                     )}
                 </div>
 
@@ -131,7 +132,9 @@ export function ManualEntryDialog({
                             id="manual_date"
                             type="date"
                             value={data.entry_date}
-                            onChange={(e) => setData('entry_date', e.target.value)}
+                            onChange={(e) =>
+                                setData('entry_date', e.target.value)
+                            }
                             className="mt-1"
                         />
                         {errors.entry_date && (
@@ -154,7 +157,9 @@ export function ManualEntryDialog({
                             className="mt-1"
                         />
                         {errors.hours && (
-                            <p className="mt-1 text-xs text-red-500">{errors.hours}</p>
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.hours}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -167,7 +172,7 @@ export function ManualEntryDialog({
                         onChange={(e) => setData('description', e.target.value)}
                         placeholder="Čo si robil..."
                         rows={3}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                     />
                     {errors.description && (
                         <p className="mt-1 text-xs text-red-500">

@@ -86,13 +86,13 @@
     --background: var(--bg-app);
     --foreground: var(--text-primary);
 
-    --card: var(--bg-surface);
+    --card: var(--sidebar);
     --card-foreground: var(--text-primary);
 
     --popover: var(--bg-surface);
     --popover-foreground: var(--text-primary);
 
-    --primary: oklch(0.16 0.004 250);
+    --primary: var(--accent-blue);
     --primary-foreground: oklch(1 0 0);
 
     --secondary: var(--bg-muted);
@@ -119,7 +119,7 @@
 
     --radius: 0.5rem;
 
-    --sidebar: oklch(0.985 0.002 250);
+    --sidebar: var(--bg-app);
     --sidebar-foreground: var(--text-primary);
     --sidebar-primary: oklch(0.16 0.004 250);
     --sidebar-primary-foreground: oklch(1 0 0);
@@ -210,7 +210,7 @@
     }
 
     .kpi__value {
-        @apply mt-2 flex items-baseline gap-1 text-3xl font-semibold leading-none tracking-tight text-foreground;
+        @apply mt-2 flex items-baseline gap-1 text-3xl leading-none font-semibold tracking-tight text-foreground;
         font-variant-numeric: tabular-nums;
     }
 
@@ -280,7 +280,7 @@
     .input,
     .select,
     .textarea {
-        @apply rounded-md border border-input bg-card text-sm text-foreground shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus:border-ring;
+        @apply rounded-md border border-input bg-card text-sm text-foreground shadow-xs transition-colors outline-none placeholder:text-muted-foreground focus:border-ring;
     }
 
     .input,
@@ -375,7 +375,7 @@
     }
 
     .table thead tr {
-        @apply border-b border-border bg-muted/60 text-left text-[11px] uppercase tracking-wide text-muted-foreground;
+        @apply border-b border-border bg-muted/60 text-left text-[11px] tracking-wide text-muted-foreground uppercase;
     }
 
     .table th {

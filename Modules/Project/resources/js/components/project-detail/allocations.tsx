@@ -11,7 +11,7 @@ export const Allocations = ({ project }: AllocationsProps) => {
     return (
         <>
             {project.allocations && project.allocations.length > 0 && (
-                <Card className="border-gray-100 bg-white shadow-sm">
+                <Card className="border-gray-100 bg-card shadow-sm">
                     <CardHeader>
                         <CardTitle className="flex items-center text-lg">
                             <Users className="mr-2 h-5 w-5 text-gray-700" />

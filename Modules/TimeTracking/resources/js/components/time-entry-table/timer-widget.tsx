@@ -24,7 +24,7 @@ export const TimerWidget = () => {
 
     return (
         <>
-            <div className="fixed right-6 bottom-6 z-50 flex items-center gap-3 rounded-full border border-gray-200 bg-white px-5 py-3 shadow-lg">
+            <div className="fixed right-6 bottom-6 z-50 flex items-center gap-3 rounded-full border border-gray-200 bg-card px-5 py-3 shadow-lg">
                 <div className="flex items-center gap-2">
                     <span className="relative flex h-2.5 w-2.5">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
