@@ -3,6 +3,7 @@ import { GlobalSearchDialog } from '@/components/global-search/global-search-dia
 import { NotificationBell } from '@/components/notification-bell';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { useSearchShortcut } from '@/hooks/use-search-shortcut';
 import { type BreadcrumbItem as BreadcrumbItemType } from '@/types';
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -13,6 +14,7 @@ export function AppSidebarHeader({
     breadcrumbs?: BreadcrumbItemType[];
 }) {
     const [searchOpen, setSearchOpen] = useState(false);
+    const searchShortcut = useSearchShortcut();
 
     useEffect(() => {
         const handler = (event: KeyboardEvent) => {
@@ -43,7 +45,7 @@ export function AppSidebarHeader({
                         type="button"
                         onClick={() => setSearchOpen(true)}
                         className="hidden h-8 w-[min(30rem,42vw)] items-center justify-between rounded-md border border-input bg-card px-3 text-sm text-muted-foreground shadow-xs transition-[border-color,color,box-shadow] hover:border-ring hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20 focus-visible:outline-none md:flex"
-                        title="Hľadať (Ctrl/Cmd + K)"
+                        title={searchShortcut.title}
                     >
                         <span className="flex min-w-0 items-center gap-2">
                             <Search className="h-4 w-4 shrink-0" />
@@ -52,7 +54,7 @@ export function AppSidebarHeader({
                             </span>
                         </span>
                         <kbd className="ml-3 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                            ⌘K
+                            {searchShortcut.display}
                         </kbd>
                     </button>
                     <Button
@@ -60,7 +62,7 @@ export function AppSidebarHeader({
                         size="icon"
                         className="md:hidden"
                         onClick={() => setSearchOpen(true)}
-                        title="Hľadať (Ctrl/Cmd + K)"
+                        title={searchShortcut.title}
                     >
                         <Search className="h-5 w-5 text-primary" />
                     </Button>

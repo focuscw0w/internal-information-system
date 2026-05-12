@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
+import { useSearchShortcut } from '@/hooks/use-search-shortcut';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
@@ -71,6 +72,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const { auth } = page.props;
     const getInitials = useInitials();
     const [searchOpen, setSearchOpen] = useState(false);
+    const searchShortcut = useSearchShortcut();
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
@@ -213,7 +215,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 size="icon"
                                 className="group h-9 w-9 cursor-pointer"
                                 onClick={() => setSearchOpen(true)}
-                                title="Hľadať (Ctrl/Cmd + K)"
+                                title={searchShortcut.title}
                             >
                                 <Search className="!size-5 opacity-80 group-hover:opacity-100" />
                             </Button>
@@ -286,7 +288,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     </div>
                 </div>
             )}
-            <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+            <GlobalSearchDialog
+                open={searchOpen}
+                onOpenChange={setSearchOpen}
+            />
         </>
     );
 }
