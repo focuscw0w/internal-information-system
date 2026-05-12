@@ -22,6 +22,7 @@ use Modules\Project\Models\ProjectAllocation;
 use Modules\Project\Models\Subtask;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
+use Modules\TimeTracking\Enums\TimeEntryStatusEnum;
 use Modules\TimeTracking\Enums\TimeTrackingPermission;
 use Modules\TimeTracking\Models\TimeEntry;
 use Modules\User\Models\User;
@@ -898,10 +899,19 @@ class RealisticOperationsSeeder extends Seeder
             ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'simon', 'task' => 'erp-tests', 'hours' => 8.0, 'description' => 'Regresné testy migrácie na opravených datasetoch.'],
             ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'nina', 'task' => 'mobile-release', 'hours' => 2.0, 'description' => 'Aktualizácia release poznámok a FAQ pre sklad.'],
             ['date' => $this->currentWeekStart->addDay()->toDateString(), 'user' => 'nina', 'task' => 'report-export', 'hours' => 4.0, 'description' => 'Potvrdenie exportných stĺpcov s používateľmi.'],
+            ...$this->currentMonthTimeEntries(),
         ];
 
         foreach ($entries as $entry) {
+            $entryDate = CarbonImmutable::parse($entry['date']);
+
+            if ($entryDate->isAfter($this->today)) {
+                continue;
+            }
+
             $task = $this->tasks[$entry['task']];
+            $status = $entry['status'] ?? $this->defaultTimeEntryStatus($entryDate);
+            $approvalData = $this->approvalDataForEntry($entry, $task, $entryDate, $status);
 
             $this->timeEntryService->create([
                 'project_id' => $task->project_id,
@@ -910,8 +920,114 @@ class RealisticOperationsSeeder extends Seeder
                 'entry_date' => $entry['date'],
                 'hours' => $entry['hours'],
                 'description' => $entry['description'],
+                'status' => $status,
+                ...$approvalData,
             ]);
         }
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function currentMonthTimeEntries(): array
+    {
+        return [
+            ['date' => $this->businessDayOfCurrentMonth(0), 'user' => 'admin', 'task' => 'report-access', 'hours' => 1.5, 'description' => 'Mesačné otvorenie reportingových prístupov a kontrola čakajúcich žiadostí.'],
+            ['date' => $this->businessDayOfCurrentMonth(1), 'user' => 'martina', 'task' => 'erp-etl', 'hours' => 5.0, 'description' => 'Májová kontrola validačných pravidiel po importe pilotných faktúr.'],
+            ['date' => $this->businessDayOfCurrentMonth(1), 'user' => 'peter', 'task' => 'erp-api', 'hours' => 5.5, 'description' => 'Doplnenie retry logiky pre skladové pohyby po víkendovom importe.'],
+            ['date' => $this->businessDayOfCurrentMonth(1), 'user' => 'eva', 'task' => 'report-export', 'hours' => 4.0, 'description' => 'Úprava Excel exportu pre májový controllingový balík.'],
+            ['date' => $this->businessDayOfCurrentMonth(2), 'user' => 'lukas', 'task' => 'mobile-release', 'hours' => 6.0, 'description' => 'Release review po pilotnej zmene skladových procesov.'],
+            ['date' => $this->businessDayOfCurrentMonth(2), 'user' => 'nina', 'task' => 'report-export', 'hours' => 3.0, 'description' => 'Overenie názvov KPI stĺpcov s vedúcimi tímov.'],
+            ['date' => $this->businessDayOfCurrentMonth(2), 'user' => 'simon', 'task' => 'erp-tests', 'hours' => 5.0, 'description' => 'Regresné scenáre pre májové objednávky a dobropisy.'],
+            ['date' => $this->businessDayOfCurrentMonth(3), 'user' => 'admin', 'task' => 'report-access', 'hours' => 2.0, 'description' => 'Oprava prístupového filtra pre oddelenie logistiky.', 'status' => TimeEntryStatusEnum::Rejected->value, 'rejection_reason' => 'Chýba presný dopad na používateľské role logistiky.'],
+            ['date' => $this->businessDayOfCurrentMonth(3), 'user' => 'martina', 'task' => 'erp-cutover', 'hours' => 3.0, 'description' => 'Doplnenie zodpovedností do cutover checklistu pre ostrý prechod.'],
+            ['date' => $this->businessDayOfCurrentMonth(3), 'user' => 'peter', 'task' => 'erp-data-model', 'hours' => 4.0, 'description' => 'Kontrola väzieb objednávok na skladové rezervácie pred sign-offom.'],
+            ['date' => $this->businessDayOfCurrentMonth(4), 'user' => 'eva', 'task' => 'erp-dashboard', 'hours' => 5.0, 'description' => 'Doplnenie drilldownu oneskorených objednávok pre májový dashboard.'],
+            ['date' => $this->businessDayOfCurrentMonth(4), 'user' => 'simon', 'task' => 'erp-tests', 'hours' => 4.5, 'description' => 'Smoke test importov po úpravách auditného logu.'],
+            ['date' => $this->businessDayOfCurrentMonth(5), 'user' => 'nina', 'task' => 'mobile-release', 'hours' => 3.5, 'description' => 'Zber spätnej väzby z pilotného skladu po release kandidátovi.'],
+            ['date' => $this->businessDayOfCurrentMonth(5), 'user' => 'admin', 'task' => 'report-access', 'hours' => 1.5, 'description' => 'Kontrola práv pre manažérsky detail reportov.'],
+            ['date' => $this->businessDayOfCurrentMonth(6), 'user' => 'eva', 'task' => 'report-export', 'hours' => 3.0, 'description' => 'Zapracovanie pripomienok k exportným súčtom pred odoslaním reportu.', 'status' => TimeEntryStatusEnum::Pending->value],
+            ['date' => $this->businessDayOfCurrentMonth(6), 'user' => 'martina', 'task' => 'erp-cleanup', 'hours' => 4.0, 'description' => 'Doriešenie legacy partnerov bez jednoznačného identifikátora.', 'status' => TimeEntryStatusEnum::Pending->value],
+            ['date' => $this->businessDayOfCurrentMonth(7), 'user' => 'lukas', 'task' => 'erp-audit', 'hours' => 2.5, 'description' => 'Audit importných pipeline pred finálnym cutover rozhodnutím.', 'status' => TimeEntryStatusEnum::Pending->value],
+            ['date' => $this->businessDayOfCurrentMonth(7), 'user' => 'peter', 'task' => 'erp-api', 'hours' => 3.5, 'description' => 'Doriešenie duplicitných skladových pohybov po opakovanom odoslaní.', 'status' => TimeEntryStatusEnum::Pending->value],
+        ];
+    }
+
+    private function businessDayOfCurrentMonth(int $offset): string
+    {
+        $date = $this->today->startOfMonth();
+
+        while ($date->isWeekend()) {
+            $date = $date->addDay();
+        }
+
+        for ($days = 0; $days < $offset; $days++) {
+            $date = $date->addDay();
+
+            while ($date->isWeekend()) {
+                $date = $date->addDay();
+            }
+        }
+
+        return $date->toDateString();
+    }
+
+    private function defaultTimeEntryStatus(CarbonImmutable $entryDate): string
+    {
+        return $entryDate->isBefore($this->today)
+            ? TimeEntryStatusEnum::Approved->value
+            : TimeEntryStatusEnum::Pending->value;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function approvalDataForEntry(array $entry, Task $task, CarbonImmutable $entryDate, string $status): array
+    {
+        if ($status === TimeEntryStatusEnum::Approved->value) {
+            $approvedAt = $entryDate->addDay()->setTime(10, 30);
+            $latestApprovedAt = CarbonImmutable::now()->subMinutes(30);
+
+            if ($approvedAt->isAfter($latestApprovedAt)) {
+                $approvedAt = $latestApprovedAt;
+            }
+
+            return [
+                'approved_by' => $this->approverForEntry($entry['user'], $task)->id,
+                'approved_at' => $approvedAt,
+                'rejection_reason' => null,
+            ];
+        }
+
+        if ($status === TimeEntryStatusEnum::Rejected->value) {
+            return [
+                'approved_by' => null,
+                'approved_at' => null,
+                'rejection_reason' => $entry['rejection_reason'] ?? 'Potrebné doplniť presnejší popis práce pred schválením.',
+            ];
+        }
+
+        return [
+            'approved_by' => null,
+            'approved_at' => null,
+            'rejection_reason' => null,
+        ];
+    }
+
+    private function approverForEntry(string $userKey, Task $task): User
+    {
+        $projectName = collect($this->projects)
+            ->first(fn (Project $project) => $project->id === $task->project_id)
+            ?->name;
+
+        $preferredApprover = match ($projectName) {
+            'ERP migrácia 2026' => $userKey === 'martina' ? 'lukas' : 'martina',
+            'Mobilný sklad' => $userKey === 'lukas' ? 'nina' : 'lukas',
+            'Interný reporting' => $userKey === 'admin' ? 'martina' : 'admin',
+            default => 'admin',
+        };
+
+        return $this->users[$preferredApprover];
     }
 
     private function applyPostTimeEntryAdjustments(): void

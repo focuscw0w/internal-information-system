@@ -13,6 +13,7 @@ use Modules\Project\Notifications\ProjectCapacityAtRiskNotification;
 use Modules\Project\Notifications\ProjectOverdueNotification;
 use Modules\Project\Notifications\TaskHoursExceededNotification;
 use Modules\Project\Notifications\UserOverloadedNotification;
+use Modules\TimeTracking\Enums\TimeEntryStatusEnum;
 use Modules\TimeTracking\Models\TimeEntry;
 use Modules\User\Models\User;
 use PHPUnit\Framework\Attributes\Test;
@@ -26,7 +27,7 @@ class RealisticOperationsSeederTest extends TestCase
     {
         parent::setUp();
 
-        Carbon::setTestNow('2026-04-14 09:00:00');
+        Carbon::setTestNow('2026-05-12 09:00:00');
     }
 
     protected function tearDown(): void
@@ -72,6 +73,17 @@ class RealisticOperationsSeederTest extends TestCase
         $this->assertDatabaseHas('notifications', ['type' => ProjectCapacityAtRiskNotification::class]);
         $this->assertDatabaseHas('notifications', ['type' => ProjectOverdueNotification::class]);
         $this->assertDatabaseHas('notifications', ['type' => TaskHoursExceededNotification::class]);
+
+        $currentMonthEntries = TimeEntry::query()
+            ->whereBetween('entry_date', [Carbon::now()->startOfMonth(), Carbon::now()])
+            ->get();
+
+        $this->assertTrue($currentMonthEntries->contains('status', TimeEntryStatusEnum::Approved->value));
+        $this->assertTrue($currentMonthEntries->contains('status', TimeEntryStatusEnum::Pending->value));
+        $this->assertTrue($currentMonthEntries->contains('status', TimeEntryStatusEnum::Rejected->value));
+        $this->assertTrue($currentMonthEntries
+            ->where('status', TimeEntryStatusEnum::Approved->value)
+            ->every(fn (TimeEntry $entry) => $entry->approved_by !== null && $entry->approved_at !== null));
     }
 
     #[Test]
