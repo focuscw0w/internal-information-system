@@ -1,8 +1,17 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Calendar, FileText, GanttChartSquare, KanbanIcon, Users } from 'lucide-react';
-import { GanttChart } from '../components/project-detail/tab-views/gantt';
+import {
+    ArrowLeft,
+    Calendar,
+    FileText,
+    GanttChartSquare,
+    KanbanIcon,
+    Plus,
+    Users,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Kanban } from '../components/project-detail/kanban/kanban';
+import { GanttChart } from '../components/project-detail/tab-views/gantt';
 import { ProjectOverview } from '../components/project-detail/tab-views/project-overview';
 import { Team } from '../components/project-detail/tab-views/team';
 import { Timeline } from '../components/project-detail/tab-views/timeline';
@@ -13,13 +22,16 @@ import { BadgeLabel } from '../components/ui/badge';
 import ProjectLayout from '../layouts/project-layout';
 import { Project } from '../types/types';
 
-type TeamCapacitySnapshot = Record<number, {
-    weekly_capacity_hours: number;
-    weekly_load_hours: number;
-    weekly_utilization: number;
-    free_capacity_hours: number;
-    is_over_capacity: boolean;
-}>;
+type TeamCapacitySnapshot = Record<
+    number,
+    {
+        weekly_capacity_hours: number;
+        weekly_load_hours: number;
+        weekly_utilization: number;
+        free_capacity_hours: number;
+        is_over_capacity: boolean;
+    }
+>;
 
 export default function Show({
     project,
@@ -36,11 +48,32 @@ export default function Show({
         })),
     };
     const permissions = project.current_user_permissions ?? [];
+    const canCreateTasks = permissions.includes('create_tasks');
+    const [createTaskOpen, setCreateTaskOpen] = useState(false);
 
     const can = (permission: string) => permissions.includes(permission);
     const atRiskTaskCount =
-        project.tasks?.filter((task) => task.is_at_risk && task.status !== 'done')
-            .length ?? 0;
+        project.tasks?.filter(
+            (task) => task.is_at_risk && task.status !== 'done',
+        ).length ?? 0;
+
+    useEffect(() => {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('action') !== 'create-task') {
+            return;
+        }
+
+        if (canCreateTasks) {
+            setCreateTaskOpen(true);
+        }
+
+        url.searchParams.delete('action');
+        window.history.replaceState(
+            null,
+            '',
+            `${url.pathname}${url.search}${url.hash}`,
+        );
+    }, [canCreateTasks]);
 
     return (
         <ProjectLayout project={projectWithCapacity}>
@@ -55,11 +88,14 @@ export default function Show({
                 <div className="page-head">
                     <div>
                         <div className="mb-2 flex flex-wrap items-center gap-2">
-                            <span className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+                            <span className="text-[11px] font-medium tracking-widest text-muted-foreground uppercase">
                                 {project.owner?.name ?? 'Internal'}
                             </span>
                             <BadgeLabel type="status" value={project.status} />
-                            <BadgeLabel type="workload" value={project.workload} />
+                            <BadgeLabel
+                                type="workload"
+                                value={project.workload}
+                            />
                         </div>
                         <h1 className="page-head__title">{project.name}</h1>
                         <p className="page-head__subtitle">
@@ -91,10 +127,21 @@ export default function Show({
                                 text="Upraviť projekt"
                             />
                         )}
-                        {can('edit_tasks') && (
+                        {canCreateTasks && (
                             <CreateTaskDialog
                                 projectId={project.id}
                                 team={project.team}
+                                open={createTaskOpen}
+                                onOpenChange={setCreateTaskOpen}
+                                trigger={
+                                    <button
+                                        type="button"
+                                        className="btn btn--primary"
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                        Nová úloha
+                                    </button>
+                                }
                             />
                         )}
                     </div>
@@ -170,10 +217,11 @@ export default function Show({
 
                 <Tabs defaultValue="overview" className="mb-12 w-full">
                     <div className="flex items-center justify-between">
-                        <TabsList variant="line" className="tabbar w-full justify-start">
-                            <TabsTrigger
-                                value="overview"
-                            >
+                        <TabsList
+                            variant="line"
+                            className="tabbar w-full justify-start"
+                        >
+                            <TabsTrigger value="overview">
                                 <FileText className="h-4 w-4" />
                                 Prehľad
                             </TabsTrigger>
@@ -184,28 +232,20 @@ export default function Show({
                                     {project.tasks?.length ?? 0}
                                 </span>
                             </TabsTrigger>
-                            <TabsTrigger
-                                value="kanban"
-                            >
+                            <TabsTrigger value="kanban">
                                 <KanbanIcon className="h-4 w-4" />
                                 Kanban
                             </TabsTrigger>
-                            <TabsTrigger
-                                value="timeline"
-                            >
+                            <TabsTrigger value="timeline">
                                 <Calendar className="h-4 w-4" />
                                 Časová os
                             </TabsTrigger>
-                            <TabsTrigger
-                                value="gantt"
-                            >
+                            <TabsTrigger value="gantt">
                                 <GanttChartSquare className="h-4 w-4" />
                                 Gantt
                             </TabsTrigger>
                             {can('view_team') && (
-                                <TabsTrigger
-                                    value="team"
-                                >
+                                <TabsTrigger value="team">
                                     <Users className="h-4 w-4" />
                                     Tím
                                 </TabsTrigger>

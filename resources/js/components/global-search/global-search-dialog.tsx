@@ -2,10 +2,16 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { router } from '@inertiajs/react';
 import {
+    Activity,
+    BarChart3,
     CheckSquare,
+    ClipboardCheck,
     FolderOpen,
+    FolderPlus,
+    LayoutDashboard,
     Loader2,
     MessageSquare,
+    PlusCircle,
     Search,
     User as UserIcon,
 } from 'lucide-react';
@@ -18,11 +24,11 @@ import {
     useState,
 } from 'react';
 
-type SearchResultType = 'project' | 'task' | 'user' | 'comment';
+type SearchResultType = 'action' | 'project' | 'task' | 'user' | 'comment';
 
 interface SearchResultItem {
     type: SearchResultType;
-    id: number;
+    id: number | string;
     title: string;
     subtitle: string;
     url: string;
@@ -30,6 +36,7 @@ interface SearchResultItem {
 }
 
 interface SearchResults {
+    actions: SearchResultItem[];
     projects: SearchResultItem[];
     tasks: SearchResultItem[];
     users: SearchResultItem[];
@@ -42,6 +49,7 @@ interface GlobalSearchDialogProps {
 }
 
 const EMPTY_RESULTS: SearchResults = {
+    actions: [],
     projects: [],
     tasks: [],
     users: [],
@@ -49,6 +57,7 @@ const EMPTY_RESULTS: SearchResults = {
 };
 
 const GROUP_LABELS: Record<keyof SearchResults, string> = {
+    actions: 'Akcie',
     projects: 'Projekty',
     tasks: 'Úlohy',
     users: 'Používatelia',
@@ -59,10 +68,23 @@ const ICON_MAP: Record<
     SearchResultType,
     React.ComponentType<{ className?: string }>
 > = {
+    action: PlusCircle,
     project: FolderOpen,
     task: CheckSquare,
     user: UserIcon,
     comment: MessageSquare,
+};
+
+const ACTION_ICON_MAP: Record<
+    string,
+    React.ComponentType<{ className?: string }>
+> = {
+    activity: Activity,
+    'bar-chart-3': BarChart3,
+    'clipboard-check': ClipboardCheck,
+    'folder-plus': FolderPlus,
+    'layout-dashboard': LayoutDashboard,
+    'plus-circle': PlusCircle,
 };
 
 export function GlobalSearchDialog({
@@ -81,6 +103,7 @@ export function GlobalSearchDialog({
 
     const flatResults = useMemo<SearchResultItem[]>(
         () => [
+            ...results.actions,
             ...results.projects,
             ...results.tasks,
             ...results.users,
@@ -103,11 +126,6 @@ export function GlobalSearchDialog({
         if (!open) return;
 
         const trimmed = debouncedQuery.trim();
-        if (trimmed.length < 2) {
-            setResults(EMPTY_RESULTS);
-            setLoading(false);
-            return;
-        }
 
         abortRef.current?.abort();
         const controller = new AbortController();
@@ -167,9 +185,9 @@ export function GlobalSearchDialog({
     };
 
     const trimmed = debouncedQuery.trim();
-    const showEmptyState = trimmed.length < 2;
-    const showNoResults =
-        !showEmptyState && !loading && flatResults.length === 0;
+    const showEmptyState = !loading && flatResults.length === 0;
+    const showNoResults = trimmed.length > 0 && showEmptyState;
+    const showStartState = trimmed.length === 0 && showEmptyState;
 
     let cursor = 0;
 
@@ -187,7 +205,7 @@ export function GlobalSearchDialog({
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Hľadať projekty, úlohy, ľudí, komentáre..."
+                        placeholder="Hľadať projekty, úlohy, ľudí, komentáre alebo akcie..."
                         className="flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
                         autoFocus
                     />
@@ -197,9 +215,9 @@ export function GlobalSearchDialog({
                 </div>
 
                 <div className="max-h-[60vh] overflow-y-auto py-2">
-                    {showEmptyState && (
+                    {showStartState && (
                         <p className="px-4 py-8 text-center text-sm text-gray-400">
-                            Začnite písať (minimálne 2 znaky)...
+                            Žiadne rýchle akcie nie sú dostupné.
                         </p>
                     )}
 
@@ -209,7 +227,7 @@ export function GlobalSearchDialog({
                         </p>
                     )}
 
-                    {!showEmptyState && flatResults.length > 0 && (
+                    {flatResults.length > 0 && (
                         <div className="space-y-1">
                             {(
                                 Object.keys(GROUP_LABELS) as Array<
@@ -228,7 +246,12 @@ export function GlobalSearchDialog({
                                             const itemIndex = cursor++;
                                             const isActive =
                                                 itemIndex === activeIndex;
-                                            const Icon = ICON_MAP[item.type];
+                                            const Icon =
+                                                item.type === 'action'
+                                                    ? (ACTION_ICON_MAP[
+                                                          item.icon
+                                                      ] ?? ICON_MAP.action)
+                                                    : ICON_MAP[item.type];
 
                                             return (
                                                 <button

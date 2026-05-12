@@ -2,11 +2,13 @@
 
 namespace Modules\Project\Http\Requests\Project;
 
+use App\Enums\PermissionEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Enums\ProjectStatus;
 use Modules\Project\Enums\ProjectWorkload;
-use Modules\Project\Enums\ProjectPermission;
+use Throwable;
 
 class CreateProjectRequest extends FormRequest
 {
@@ -15,7 +17,21 @@ class CreateProjectRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->is_admin) {
+            return true;
+        }
+
+        try {
+            return $user->can(PermissionEnum::PROJECTS_CREATE->value);
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     /**
@@ -69,6 +85,7 @@ class CreateProjectRequest extends FormRequest
     public function getStatusEnum(): ProjectStatus
     {
         $status = $this->validated()['status'] ?? null;
+
         return $status ? ProjectStatus::from($status) : ProjectStatus::PLANNING;
     }
 
@@ -78,6 +95,7 @@ class CreateProjectRequest extends FormRequest
     public function getWorkloadEnum(): ProjectWorkload
     {
         $workload = $this->validated()['workload'] ?? null;
+
         return $workload ? ProjectWorkload::from($workload) : ProjectWorkload::LOW;
     }
 }

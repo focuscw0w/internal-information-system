@@ -1,5 +1,4 @@
 import { InertiaLinkProps } from '@inertiajs/react';
-import { LucideIcon } from 'lucide-react';
 
 export interface Auth {
     user: User;
@@ -88,6 +87,7 @@ export interface SharedData {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
+    current_user_permissions?: string[];
     sidebarOpen: boolean;
     notifications: { unread_count: number };
     flash?: FlashData;

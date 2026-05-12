@@ -1,5 +1,6 @@
 import { FormDialog } from '@/components/dialogs/form-dialog';
 import { useForm } from '@inertiajs/react';
+import { Edit } from 'lucide-react';
 import { useState } from 'react';
 import {
     Project,
@@ -7,7 +8,6 @@ import {
     TeamMemberSettings,
 } from '../../../../types/types';
 import { TeamMemberSettingsForm } from '../../team/team-member-settings';
-import { Edit } from 'lucide-react';
 
 interface EditTeamMemberDialogProps {
     project: Project;
@@ -118,6 +118,7 @@ export const EditTeamMemberDialog = ({
             onSubmit={handleSubmit}
             processing={processing}
             submitLabel="Uložiť zmeny"
+            size="lg"
         >
             <TeamMemberSettingsForm
                 userId={member.id}

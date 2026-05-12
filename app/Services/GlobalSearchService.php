@@ -4,18 +4,24 @@ namespace App\Services;
 
 use App\Enums\PermissionEnum;
 use Illuminate\Database\Eloquent\Builder;
+use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Models\Comment;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\User\Models\User;
+use Throwable;
 
 class GlobalSearchService
 {
     public function search(string $query, User $user, int $perGroup = 5): array
     {
         $term = trim($query);
+        $like = '%'.$this->escapeLike($term).'%';
+        $visibleProjectIds = Project::visibleTo($user)->pluck('id')->all();
+
         if (mb_strlen($term) < 2) {
             return [
+                'actions' => $this->searchActions($user, $term, $perGroup),
                 'projects' => [],
                 'tasks' => [],
                 'users' => [],
@@ -23,16 +29,144 @@ class GlobalSearchService
             ];
         }
 
-        $like = '%'.$this->escapeLike($term).'%';
-
-        $visibleProjectIds = Project::visibleTo($user)->pluck('id')->all();
-
         return [
+            'actions' => $this->searchActions($user, $term, $perGroup),
             'projects' => $this->searchProjects($user, $like, $perGroup),
             'tasks' => $this->searchTasks($visibleProjectIds, $like, $perGroup),
             'comments' => $this->searchComments($visibleProjectIds, $like, $perGroup),
             'users' => $this->searchUsers($user, $like, $perGroup),
         ];
+    }
+
+    private function searchActions(User $user, string $term, int $perGroup): array
+    {
+        $actions = [];
+        $actionLimit = max($perGroup, 8);
+
+        if ($user->is_admin || $this->hasGlobalPermission($user, PermissionEnum::PROJECTS_CREATE->value)) {
+            $actions[] = $this->action(
+                'create-project',
+                'Vytvoriť projekt',
+                'Nový projekt s tímom, termínmi a kapacitou',
+                '/projects?action=create-project',
+                'folder-plus',
+                ['novy projekt', 'nový projekt', 'vytvorit projekt', 'vytvoriť projekt', 'pridat projekt', 'pridať projekt', 'create project']
+            );
+        }
+
+        foreach ($this->createTaskActions($user, $term, $perGroup) as $action) {
+            $actions[] = $action;
+        }
+
+        if ($this->canAccessManagerArea($user)) {
+            $actions[] = $this->action(
+                'manager-dashboard',
+                'Tímové riadenie',
+                'Prehľad schvaľovaní, rizík, kapacít a tímovej práce',
+                '/manager',
+                'layout-dashboard',
+                ['manager', 'timove riadenie', 'dashboard']
+            );
+
+            $actions[] = $this->action(
+                'time-reports',
+                'Reporty času',
+                'Prehľady a exporty odpracovaného času',
+                '/manager/time/reports',
+                'bar-chart-3',
+                ['report', 'reporty', 'cas', 'time reports']
+            );
+        }
+
+        if ($user->is_admin || Project::whereUserCanManageTimeEntries($user)->exists()) {
+            $actions[] = $this->action(
+                'time-approvals',
+                'Schvaľovania',
+                'Schváliť alebo zamietnuť čakajúce záznamy času',
+                '/manager/approvals',
+                'clipboard-check',
+                ['schvalovanie', 'approval', 'approvals', 'time approvals']
+            );
+        }
+
+        if ($user->is_admin || $this->hasGlobalPermission($user, PermissionEnum::CAPACITY_MANAGE->value)) {
+            $actions[] = $this->action(
+                'capacity-management',
+                'Kapacity',
+                'Správa týždenných kapacít a vyťaženia tímu',
+                '/capacity-management',
+                'activity',
+                ['kapacity', 'capacity', 'vytazenie']
+            );
+        }
+
+        return collect($actions)
+            ->filter(fn (array $action) => $this->matchesAction($action, $term))
+            ->take($actionLimit)
+            ->map(fn (array $action) => [
+                'type' => 'action',
+                'id' => $action['id'],
+                'title' => $action['title'],
+                'subtitle' => $action['subtitle'],
+                'url' => $action['url'],
+                'icon' => $action['icon'],
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function createTaskActions(User $user, string $term, int $perGroup): array
+    {
+        $query = Project::visibleTo($user)
+            ->orderByDesc('updated_at')
+            ->limit($perGroup * 3);
+
+        if (mb_strlen($term) >= 2 && ! $this->matchesGenericCreateTaskTerm($term)) {
+            $like = '%'.$this->escapeLike($term).'%';
+            $query->where('name', 'like', $like);
+        }
+
+        return $query
+            ->get(['id', 'name', 'owner_id', 'updated_at'])
+            ->filter(fn (Project $project) => $project->userHasPermission($user, ProjectPermission::CREATE_TASKS->value))
+            ->take($perGroup)
+            ->map(fn (Project $project) => $this->action(
+                "create-task-{$project->id}",
+                "Nová úloha v {$project->name}",
+                'Otvoriť formulár novej úlohy v projekte',
+                "/projects/{$project->id}?action=create-task",
+                'plus-circle',
+                ['nova uloha', 'nová úloha', 'pridat ulohu', 'pridať úlohu', 'create task', $project->name]
+            ))
+            ->values()
+            ->all();
+    }
+
+    private function action(string $id, string $title, string $subtitle, string $url, string $icon, array $keywords): array
+    {
+        return compact('id', 'title', 'subtitle', 'url', 'icon', 'keywords');
+    }
+
+    private function matchesAction(array $action, string $term): bool
+    {
+        if ($term === '') {
+            return true;
+        }
+
+        $haystack = mb_strtolower(implode(' ', [
+            $action['title'],
+            $action['subtitle'],
+            ...$action['keywords'],
+        ]));
+
+        return str_contains($haystack, mb_strtolower($term));
+    }
+
+    private function matchesGenericCreateTaskTerm(string $term): bool
+    {
+        $haystack = 'nova uloha nová úloha pridat ulohu pridať úlohu create task task uloha';
+
+        return str_contains($haystack, mb_strtolower($term));
     }
 
     private function searchProjects(User $user, string $like, int $perGroup): array
@@ -115,7 +249,7 @@ class GlobalSearchService
 
     private function searchUsers(User $user, string $like, int $perGroup): array
     {
-        $canViewAll = $user->hasPermissionTo(PermissionEnum::USERS_VIEW->value);
+        $canViewAll = $user->is_admin || $this->hasGlobalPermission($user, PermissionEnum::USERS_VIEW->value);
 
         $query = User::query()
             ->where(function (Builder $q) use ($like) {
@@ -170,5 +304,22 @@ class GlobalSearchService
     private function escapeLike(string $value): string
     {
         return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
+    }
+
+    private function canAccessManagerArea(User $user): bool
+    {
+        return $user->is_admin
+            || $this->hasGlobalPermission($user, PermissionEnum::CAPACITY_MANAGE->value)
+            || Project::managedBy($user)->exists()
+            || Project::whereUserCanManageTimeEntries($user)->exists();
+    }
+
+    private function hasGlobalPermission(User $user, string $permission): bool
+    {
+        try {
+            return $user->can($permission);
+        } catch (Throwable) {
+            return false;
+        }
     }
 }

@@ -12,6 +12,8 @@ interface CreateTaskDialogProps {
     team: TeamMember[];
     initialStatus?: TaskStatus;
     trigger?: ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
 export function CreateTaskDialog({
@@ -19,8 +21,13 @@ export function CreateTaskDialog({
     team,
     initialStatus = 'todo',
     trigger,
+    open,
+    onOpenChange,
 }: CreateTaskDialogProps) {
-    const [open, setOpen] = useState(false);
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isControlled = open !== undefined;
+    const dialogOpen = isControlled ? open : internalOpen;
+    const setDialogOpen = onOpenChange ?? setInternalOpen;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
@@ -37,7 +44,7 @@ export function CreateTaskDialog({
         e.preventDefault();
         post(`/projects/${projectId}/tasks`, {
             onSuccess: () => {
-                setOpen(false);
+                setDialogOpen(false);
                 reset();
             },
         });
@@ -59,8 +66,8 @@ export function CreateTaskDialog({
 
     return (
         <FormDialog
-            open={open}
-            onOpenChange={setOpen}
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
             trigger={
                 trigger ?? (
                     <Button
@@ -105,7 +112,7 @@ export function CreateTaskDialog({
                     id="status"
                     type="select"
                     value={data.status}
-                    onChange={(value) => setData('status', value)}
+                    onChange={(value) => setData('status', value as TaskStatus)}
                     error={errors.status}
                     options={statusOptions}
                 />

@@ -2,6 +2,7 @@
 
 namespace Modules\Project\Tests\Feature;
 
+use App\Enums\PermissionEnum;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
@@ -133,6 +134,7 @@ class ProjectAllocationSyncTest extends TestCase
     public function project_creation_with_team_creates_project_allocations(): void
     {
         $owner = User::factory()->create();
+        $owner->givePermissionTo(PermissionEnum::PROJECTS_CREATE->value);
         $member = User::factory()->create();
         EmployeeCapacity::create(['user_id' => $member->id, 'weekly_capacity_hours' => 32]);
 

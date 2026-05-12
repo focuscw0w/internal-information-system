@@ -33,13 +33,23 @@ export function FormDialog({
     onSubmit,
     processing,
     submitLabel = 'Uložiť',
+    size = 'md',
     children,
 }: FormDialogProps) {
+    const sizeClass = {
+        sm: 'sm:max-w-lg',
+        md: 'sm:max-w-2xl',
+        lg: 'sm:max-w-3xl',
+        xl: 'sm:max-w-4xl',
+    }[size];
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
-            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+            <DialogContent
+                className={`max-h-[90vh] overflow-y-auto ${sizeClass}`}
+            >
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     {description && (

@@ -2,13 +2,14 @@ import { FormDialog } from '@/components/dialogs/form-dialog';
 import { FormField } from '@/components/dialogs/form-field';
 import { Button } from '@/components/ui/button';
 import { useUsers } from '@/hooks/use-users';
+import { SharedData } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
 import { AlertCircle, Loader2, Plus } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { statusOptions, workloadOptions } from '../utils';
 import { ProjectStatus, WorkloadLevel } from '../../../types/types';
 import { TeamMemberSelect } from '../../ui/team-member-select';
-import { SharedData } from '@/types';
+import { statusOptions, workloadOptions } from '../utils';
 
 interface CreateProjectFormData {
     name: string;
@@ -20,8 +21,21 @@ interface CreateProjectFormData {
     team_members: number[];
 }
 
-export const CreateProjectDialog = () => {
-    const [open, setOpen] = useState(false);
+interface CreateProjectDialogProps {
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    trigger?: ReactNode;
+}
+
+export const CreateProjectDialog = ({
+    open,
+    onOpenChange,
+    trigger,
+}: CreateProjectDialogProps = {}) => {
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isControlled = open !== undefined;
+    const dialogOpen = isControlled ? open : internalOpen;
+    const setDialogOpen = onOpenChange ?? setInternalOpen;
 
     const { data: users = [], isLoading, isError } = useUsers();
     const currentUser = usePage<SharedData>().props.auth.user;
@@ -43,7 +57,7 @@ export const CreateProjectDialog = () => {
 
         post('/projects', {
             onSuccess: () => {
-                setOpen(false);
+                setDialogOpen(false);
                 reset();
             },
             onError: (errors) => {
@@ -54,13 +68,15 @@ export const CreateProjectDialog = () => {
 
     return (
         <FormDialog
-            open={open}
-            onOpenChange={setOpen}
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
             trigger={
-                <Button variant="default" size="sm">
-                    <Plus className="h-4 w-4" />
-                    Nový projekt
-                </Button>
+                trigger ?? (
+                    <Button variant="default" size="sm">
+                        <Plus className="h-4 w-4" />
+                        Nový projekt
+                    </Button>
+                )
             }
             title="Vytvoriť nový projekt"
             description="Zadajte základné informácie o projekte."
