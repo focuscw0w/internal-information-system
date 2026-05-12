@@ -109,8 +109,11 @@ export const EditTeamMemberDialog = ({
             open={open}
             onOpenChange={handleOpen}
             trigger={
-                <button className="flex cursor-pointer items-center justify-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                    <Edit size={25} />
+                <button
+                    className="flex cursor-pointer items-center justify-center rounded-md p-1.5 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    title="Upraviť člena"
+                >
+                    <Edit className="h-3.5 w-3.5" />
                 </button>
             }
             title={`Upraviť člena – ${member.name}`}

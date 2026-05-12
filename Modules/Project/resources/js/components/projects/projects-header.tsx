@@ -4,7 +4,15 @@ import { Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CreateProjectDialog } from './dialogs/create-project';
 
-export const ProjectsHeader = () => {
+interface ProjectsHeaderProps {
+    exportCount: number;
+    onExportProjects: () => void;
+}
+
+export const ProjectsHeader = ({
+    exportCount,
+    onExportProjects,
+}: ProjectsHeaderProps) => {
     const { props } = usePage<SharedData>();
     const permissions =
         (props.current_user_permissions as string[] | undefined) ?? [];
@@ -40,7 +48,17 @@ export const ProjectsHeader = () => {
                 </p>
             </div>
             <div className="page-head__actions">
-                <button type="button" className="btn">
+                <button
+                    type="button"
+                    className="btn"
+                    onClick={onExportProjects}
+                    disabled={exportCount === 0}
+                    title={
+                        exportCount > 0
+                            ? `Exportovať ${exportCount} projektov do CSV`
+                            : 'Nie je čo exportovať'
+                    }
+                >
                     <Download className="h-4 w-4" />
                     Export
                 </button>

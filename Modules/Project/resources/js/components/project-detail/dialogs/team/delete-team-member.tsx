@@ -51,10 +51,10 @@ export const RemoveTeamMemberDialog = ({
             trigger={
                 <button
                     onClick={(e) => e.stopPropagation()}
-                    className="cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600"
-                    title="Zmazať projekt"
+                    className="cursor-pointer rounded-md p-1.5 text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600"
+                    title="Odstrániť člena"
                 >
-                    <Trash2 size={25} />
+                    <Trash2 className="h-3.5 w-3.5" />
                 </button>
             }
             title="Odstrániť člena z tímu?"
