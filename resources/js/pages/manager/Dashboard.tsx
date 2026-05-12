@@ -1,3 +1,4 @@
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -17,7 +18,6 @@ import {
     Clock,
     Download,
     Gauge,
-    MoreHorizontal,
     TrendingUp,
     Users,
     X,
@@ -197,7 +197,6 @@ export default function Dashboard({ widgets }: DashboardProps) {
 
     const [tab, setTab] = useState<Tab>('approvals');
     const [selected, setSelected] = useState<number[]>([]);
-    const [approvalFilter, setApprovalFilter] = useState<'all' | 'time'>('all');
     const [rejectEntry, setRejectEntry] = useState<PendingApprovalEntry | null>(
         null,
     );
@@ -205,11 +204,9 @@ export default function Dashboard({ widgets }: DashboardProps) {
 
     const pendingEntries = widgets.pendingApprovalEntries ?? [];
     const selectedSet = useMemo(() => new Set(selected), [selected]);
-    const visibleApprovals =
-        approvalFilter === 'all' ? pendingEntries : pendingEntries;
     const allSelected =
-        visibleApprovals.length > 0 &&
-        visibleApprovals.every((entry) => selectedSet.has(entry.id));
+        pendingEntries.length > 0 &&
+        pendingEntries.every((entry) => selectedSet.has(entry.id));
 
     const teamRows = useMemo<TeamMember[]>(() => {
         if (widgets.teamMembers?.length) return widgets.teamMembers;
@@ -246,11 +243,14 @@ export default function Dashboard({ widgets }: DashboardProps) {
     const atRiskCount = widgets.atRiskProjects?.length ?? 0;
     const overdueCount = widgets.overdueTasks?.length ?? 0;
     const managedProjects = widgets.managedProjects ?? [];
+    const weekRange = widgets.teamHoursThisWeek
+        ? `${formatDate(widgets.teamHoursThisWeek.from)} - ${formatDate(
+              widgets.teamHoursThisWeek.to,
+          )}`
+        : 'Tento týždeň';
 
     const toggleAll = () => {
-        setSelected(
-            allSelected ? [] : visibleApprovals.map((entry) => entry.id),
-        );
+        setSelected(allSelected ? [] : pendingEntries.map((entry) => entry.id));
     };
 
     const toggleEntry = (id: number, checked: boolean) => {
@@ -319,10 +319,13 @@ export default function Dashboard({ widgets }: DashboardProps) {
                             <Download className="size-4" />
                             Export
                         </Link>
-                        <button type="button" className="btn">
+                        <span
+                            className="btn cursor-default"
+                            aria-label={`Obdobie: ${weekRange}`}
+                        >
                             <CalendarDays className="size-4" />
-                            Tento týždeň
-                        </button>
+                            {weekRange}
+                        </span>
                     </div>
                 </div>
 
@@ -403,12 +406,10 @@ export default function Dashboard({ widgets }: DashboardProps) {
 
                 {tab === 'approvals' && canManageTime ? (
                     <ApprovalsPanel
-                        entries={visibleApprovals}
+                        entries={pendingEntries}
                         selectedSet={selectedSet}
                         selectedCount={selected.length}
                         allSelected={allSelected}
-                        filter={approvalFilter}
-                        onFilterChange={setApprovalFilter}
                         onToggleAll={toggleAll}
                         onToggleEntry={toggleEntry}
                         onApprove={approve}
@@ -525,13 +526,22 @@ function KpiCard({
     );
 }
 
+function DetailMetric({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="rounded-md border border-border bg-muted/30 p-3">
+            <div className="mb-1 text-xs font-medium text-muted-foreground">
+                {label}
+            </div>
+            <div className="text-base font-semibold">{value}</div>
+        </div>
+    );
+}
+
 function ApprovalsPanel({
     entries,
     selectedSet,
     selectedCount,
     allSelected,
-    filter,
-    onFilterChange,
     onToggleAll,
     onToggleEntry,
     onApprove,
@@ -543,8 +553,6 @@ function ApprovalsPanel({
     selectedSet: Set<number>;
     selectedCount: number;
     allSelected: boolean;
-    filter: 'all' | 'time';
-    onFilterChange: (filter: 'all' | 'time') => void;
     onToggleAll: () => void;
     onToggleEntry: (id: number, checked: boolean) => void;
     onApprove: (id: number) => void;
@@ -552,175 +560,252 @@ function ApprovalsPanel({
     onApproveSelected: () => void;
     onClearSelection: () => void;
 }) {
+    const [detailEntry, setDetailEntry] = useState<PendingApprovalEntry | null>(
+        null,
+    );
+
     return (
-        <section className="card">
-            <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3">
-                {[
-                    ['all', 'Všetko', entries.length],
-                    ['time', 'Výkazy času', entries.length],
-                ].map(([id, label, count]) => (
-                    <button
-                        key={id}
-                        type="button"
-                        className={`btn btn--sm ${filter === id ? 'btn--primary' : 'btn--ghost'}`}
-                        onClick={() => onFilterChange(id as 'all' | 'time')}
-                    >
-                        {label}
-                        <span className="text-[11px] opacity-70">{count}</span>
-                    </button>
-                ))}
+        <>
+            <section className="card">
+                <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3">
+                    <div>
+                        <h3 className="card__title">Čakajúce výkazy času</h3>
+                        <div className="card__sub">
+                            {entries.length} záznamov na schválenie
+                        </div>
+                    </div>
 
-                <div className="flex-1" />
+                    <div className="flex-1" />
 
-                {selectedCount > 0 ? (
-                    <>
-                        <span className="text-xs text-muted-foreground">
-                            Vybraných {selectedCount}
-                        </span>
-                        <button
-                            type="button"
-                            className="btn btn--sm btn--ghost"
-                            onClick={onClearSelection}
-                        >
-                            Zrušiť výber
-                        </button>
-                        <button
-                            type="button"
-                            className="btn btn--sm btn--primary"
-                            onClick={onApproveSelected}
-                        >
-                            <Check className="size-3.5" />
-                            Schváliť ({selectedCount})
-                        </button>
-                    </>
-                ) : (
-                    <button type="button" className="btn btn--sm" disabled>
-                        Nastaviť pravidlá
-                    </button>
-                )}
-            </div>
+                    {selectedCount > 0 ? (
+                        <>
+                            <span className="text-xs text-muted-foreground">
+                                Vybraných {selectedCount}
+                            </span>
+                            <button
+                                type="button"
+                                className="btn btn--sm btn--ghost"
+                                onClick={onClearSelection}
+                            >
+                                Zrušiť výber
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn--sm btn--primary"
+                                onClick={onApproveSelected}
+                            >
+                                <Check className="size-3.5" />
+                                Schváliť ({selectedCount})
+                            </button>
+                        </>
+                    ) : null}
+                </div>
 
-            <div className="overflow-x-auto">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th className="w-10">
-                                <input
-                                    type="checkbox"
-                                    checked={allSelected}
-                                    onChange={onToggleAll}
-                                />
-                            </th>
-                            <th>Položka</th>
-                            <th>Projekt</th>
-                            <th>Úloha</th>
-                            <th>Obdobie</th>
-                            <th className="text-right">Hodiny</th>
-                            <th />
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {entries.map((entry) => {
-                            const selected = selectedSet.has(entry.id);
+                <div className="overflow-x-auto">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th className="w-10">
+                                    <Checkbox
+                                        checked={allSelected}
+                                        onCheckedChange={onToggleAll}
+                                        aria-label="Vybrať všetky výkazy"
+                                    />
+                                </th>
+                                <th>Položka</th>
+                                <th>Projekt</th>
+                                <th>Úloha</th>
+                                <th>Obdobie</th>
+                                <th className="text-right">Hodiny</th>
+                                <th />
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {entries.map((entry) => {
+                                const selected = selectedSet.has(entry.id);
 
-                            return (
-                                <tr
-                                    key={entry.id}
-                                    className={selected ? 'bg-accent/60' : ''}
-                                >
-                                    <td>
-                                        <input
-                                            type="checkbox"
-                                            checked={selected}
-                                            onChange={(event) =>
-                                                onToggleEntry(
-                                                    entry.id,
-                                                    event.target.checked,
-                                                )
+                                return (
+                                    <tr
+                                        key={entry.id}
+                                        className={`cursor-pointer ${selected ? 'bg-accent/60' : ''}`}
+                                        onClick={() => setDetailEntry(entry)}
+                                    >
+                                        <td
+                                            onClick={(event) =>
+                                                event.stopPropagation()
                                             }
-                                        />
-                                    </td>
-                                    <td>
-                                        <div className="flex items-center gap-3">
-                                            <Avatar name={entry.user.name} />
-                                            <div className="min-w-0">
-                                                <div className="truncate text-sm font-medium">
-                                                    {entry.user.name}
-                                                </div>
-                                                <div className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--accent-blue-text)]">
-                                                    <Clock className="size-3.5" />
-                                                    Výkaz času
+                                        >
+                                            <Checkbox
+                                                checked={selected}
+                                                onCheckedChange={(checked) =>
+                                                    onToggleEntry(
+                                                        entry.id,
+                                                        checked === true,
+                                                    )
+                                                }
+                                                aria-label={`Vybrať výkaz ${entry.user.name}`}
+                                            />
+                                        </td>
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar
+                                                    name={entry.user.name}
+                                                />
+                                                <div className="min-w-0">
+                                                    <div className="truncate text-sm font-medium">
+                                                        {entry.user.name}
+                                                    </div>
+                                                    <div className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--accent-blue-text)]">
+                                                        <Clock className="size-3.5" />
+                                                        Výkaz času
+                                                    </div>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td className="max-w-48 truncate">
+                                            {entry.project.name}
+                                        </td>
+                                        <td className="max-w-64 truncate text-muted-foreground">
+                                            {entry.task.title}
+                                        </td>
+                                        <td className="mono text-xs text-muted-foreground">
+                                            {formatDate(entry.entry_date)}
+                                        </td>
+                                        <td className="mono text-right text-sm font-semibold">
+                                            {formatHours(entry.hours)}h
+                                        </td>
+                                        <td>
+                                            <div
+                                                className="flex justify-end gap-1"
+                                                onClick={(event) =>
+                                                    event.stopPropagation()
+                                                }
+                                            >
+                                                <button
+                                                    type="button"
+                                                    className="icon-btn text-[var(--success-text)]"
+                                                    title="Schváliť"
+                                                    onClick={() =>
+                                                        onApprove(entry.id)
+                                                    }
+                                                >
+                                                    <Check className="size-4" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="icon-btn text-[var(--danger-text)]"
+                                                    title="Zamietnuť"
+                                                    onClick={() =>
+                                                        onRejectRequest(entry)
+                                                    }
+                                                >
+                                                    <X className="size-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                            {entries.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan={7}
+                                        className="py-12 text-center text-muted-foreground"
+                                    >
+                                        <CheckCheck className="mx-auto mb-2 size-8 text-[var(--success-text)]" />
+                                        <div className="font-medium text-foreground">
+                                            Všetko schválené
                                         </div>
-                                    </td>
-                                    <td className="max-w-48 truncate">
-                                        {entry.project.name}
-                                    </td>
-                                    <td className="max-w-64 truncate text-muted-foreground">
-                                        {entry.task.title}
-                                    </td>
-                                    <td className="mono text-xs text-muted-foreground">
-                                        {formatDate(entry.entry_date)}
-                                    </td>
-                                    <td className="mono text-right text-sm font-semibold">
-                                        {formatHours(entry.hours)}h
-                                    </td>
-                                    <td>
-                                        <div className="flex justify-end gap-1">
-                                            <button
-                                                type="button"
-                                                className="icon-btn text-[var(--success-text)]"
-                                                title="Schváliť"
-                                                onClick={() =>
-                                                    onApprove(entry.id)
-                                                }
-                                            >
-                                                <Check className="size-4" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="icon-btn text-[var(--danger-text)]"
-                                                title="Zamietnuť"
-                                                onClick={() =>
-                                                    onRejectRequest(entry)
-                                                }
-                                            >
-                                                <X className="size-4" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="icon-btn"
-                                                title="Detail nie je dostupný"
-                                                disabled
-                                            >
-                                                <MoreHorizontal className="size-4" />
-                                            </button>
+                                        <div className="mt-1 text-sm">
+                                            Žiadne čakajúce výkazy.
                                         </div>
                                     </td>
                                 </tr>
-                            );
-                        })}
-                        {entries.length === 0 ? (
-                            <tr>
-                                <td
-                                    colSpan={7}
-                                    className="py-12 text-center text-muted-foreground"
-                                >
-                                    <CheckCheck className="mx-auto mb-2 size-8 text-[var(--success-text)]" />
-                                    <div className="font-medium text-foreground">
-                                        Všetko schválené
-                                    </div>
-                                    <div className="mt-1 text-sm">
-                                        Žiadne čakajúce výkazy.
-                                    </div>
-                                </td>
-                            </tr>
-                        ) : null}
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                            ) : null}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <Dialog
+                open={detailEntry !== null}
+                onOpenChange={(open) => {
+                    if (!open) setDetailEntry(null);
+                }}
+            >
+                {detailEntry && (
+                    <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                            <div className="flex items-start gap-3 pr-8">
+                                <Avatar name={detailEntry.user.name} />
+                                <div>
+                                    <DialogTitle>
+                                        Výkaz času - {detailEntry.user.name}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        {detailEntry.project.name} ·{' '}
+                                        {formatDate(detailEntry.entry_date)}
+                                    </DialogDescription>
+                                </div>
+                            </div>
+                        </DialogHeader>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <DetailMetric
+                                label="Používateľ"
+                                value={detailEntry.user.name}
+                            />
+                            <DetailMetric
+                                label="Hodiny"
+                                value={`${formatHours(detailEntry.hours)}h`}
+                            />
+                            <DetailMetric
+                                label="Projekt"
+                                value={detailEntry.project.name}
+                            />
+                            <DetailMetric
+                                label="Úloha"
+                                value={detailEntry.task.title}
+                            />
+                        </div>
+
+                        <div className="rounded-md border border-border bg-muted/30 p-3">
+                            <div className="mb-1 text-xs font-medium text-muted-foreground">
+                                Popis práce
+                            </div>
+                            <p className="text-sm">
+                                {detailEntry.description || 'Bez popisu'}
+                            </p>
+                        </div>
+
+                        <DialogFooter>
+                            <button
+                                type="button"
+                                className="btn"
+                                onClick={() => {
+                                    onRejectRequest(detailEntry);
+                                    setDetailEntry(null);
+                                }}
+                            >
+                                <X className="size-4" />
+                                Zamietnuť
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn--primary"
+                                onClick={() => {
+                                    onApprove(detailEntry.id);
+                                    setDetailEntry(null);
+                                }}
+                            >
+                                <Check className="size-4" />
+                                Schváliť
+                            </button>
+                        </DialogFooter>
+                    </DialogContent>
+                )}
+            </Dialog>
+        </>
     );
 }
 
@@ -737,169 +822,249 @@ function TeamPanel({
     atRiskCount: number;
     onShowApprovals: () => void;
 }) {
+    const [selectedMember, setSelectedMember] = useState<TeamMember | null>(
+        null,
+    );
+
     return (
-        <div className="grid-main-side">
-            <section className="card">
-                <div className="card__head">
-                    <div>
-                        <h3 className="card__title">Vyťaženie tímu</h3>
-                        <div className="card__sub">
-                            {rows.length} ľudí · tento týždeň
+        <>
+            <div className="grid-main-side">
+                <section className="card">
+                    <div className="card__head">
+                        <div>
+                            <h3 className="card__title">Vyťaženie tímu</h3>
+                            <div className="card__sub">
+                                {rows.length} ľudí · tento týždeň
+                            </div>
                         </div>
+                        <Gauge className="size-5 text-[var(--accent-blue-text)]" />
                     </div>
-                    <Gauge className="size-5 text-[var(--accent-blue-text)]" />
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Člen tímu</th>
-                                <th className="w-64">Vyťaženie</th>
-                                <th>Hodiny / cieľ</th>
-                                <th>Voľná kapacita</th>
-                                <th />
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {rows.map((member) => (
-                                <tr key={member.id}>
-                                    <td>
-                                        <div className="flex items-center gap-3">
-                                            <Avatar name={member.name} />
-                                            <span className="font-medium">
-                                                {member.name}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className="flex items-center gap-3">
-                                            <div className="min-w-32 flex-1">
-                                                <ProgressBar
-                                                    value={
-                                                        member.weekly_utilization
-                                                    }
-                                                />
+                    <div className="overflow-x-auto">
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Člen tímu</th>
+                                    <th className="w-64">Vyťaženie</th>
+                                    <th>Hodiny / cieľ</th>
+                                    <th>Voľná kapacita</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {rows.map((member) => (
+                                    <tr
+                                        key={member.id}
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                            setSelectedMember(member)
+                                        }
+                                    >
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar name={member.name} />
+                                                <span className="font-medium">
+                                                    {member.name}
+                                                </span>
                                             </div>
+                                        </td>
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <div className="min-w-32 flex-1">
+                                                    <ProgressBar
+                                                        value={
+                                                            member.weekly_utilization
+                                                        }
+                                                    />
+                                                </div>
+                                                <span
+                                                    className={`mono min-w-11 text-right text-xs font-semibold ${
+                                                        member.is_over_capacity
+                                                            ? 'text-[var(--danger-text)]'
+                                                            : ''
+                                                    }`}
+                                                >
+                                                    {Math.round(
+                                                        member.weekly_utilization,
+                                                    )}
+                                                    %
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="mono text-xs">
+                                            {formatHours(
+                                                member.weekly_load_hours,
+                                            )}
+                                            h{' '}
+                                            <span className="text-muted-foreground">
+                                                /{' '}
+                                                {formatHours(
+                                                    member.weekly_capacity_hours,
+                                                )}
+                                                h
+                                            </span>
+                                        </td>
+                                        <td>
                                             <span
-                                                className={`mono min-w-11 text-right text-xs font-semibold ${
+                                                className={`badge ${
                                                     member.is_over_capacity
-                                                        ? 'text-[var(--danger-text)]'
-                                                        : ''
+                                                        ? 'badge--danger'
+                                                        : member.free_capacity_hours >=
+                                                            8
+                                                          ? 'badge--success'
+                                                          : 'badge--neutral'
                                                 }`}
                                             >
-                                                {Math.round(
-                                                    member.weekly_utilization,
-                                                )}
-                                                %
+                                                {member.is_over_capacity
+                                                    ? 'Nad kapacitou'
+                                                    : `${formatHours(member.free_capacity_hours)}h`}
                                             </span>
-                                        </div>
-                                    </td>
-                                    <td className="mono text-xs">
-                                        {formatHours(member.weekly_load_hours)}h{' '}
-                                        <span className="text-muted-foreground">
-                                            /{' '}
-                                            {formatHours(
-                                                member.weekly_capacity_hours,
-                                            )}
-                                            h
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span
-                                            className={`badge ${
-                                                member.is_over_capacity
-                                                    ? 'badge--danger'
-                                                    : member.free_capacity_hours >=
-                                                        8
-                                                      ? 'badge--success'
-                                                      : 'badge--neutral'
-                                            }`}
+                                        </td>
+                                    </tr>
+                                ))}
+                                {rows.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan={4}
+                                            className="py-10 text-center text-muted-foreground"
                                         >
-                                            {member.is_over_capacity
-                                                ? 'Nad kapacitou'
-                                                : `${formatHours(member.free_capacity_hours)}h`}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button
-                                            type="button"
-                                            className="icon-btn"
-                                        >
-                                            <MoreHorizontal className="size-4" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {rows.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={5}
-                                        className="py-10 text-center text-muted-foreground"
-                                    >
-                                        Zatiaľ tu nie sú tímové dáta.
-                                    </td>
-                                </tr>
-                            ) : null}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <aside className="col gap-4">
-                <section className="card">
-                    <div className="card__head">
-                        <h3 className="card__title">Upozornenia</h3>
-                    </div>
-                    <div className="card__body space-y-3">
-                        <AlertItem
-                            tone="warning"
-                            title={`${atRiskCount} rizikových projektov`}
-                            subtitle="Projekty, ktoré potrebujú kontrolu plánu"
-                        />
-                        <AlertItem
-                            tone="danger"
-                            title={`${overdueCount} overdue úloh`}
-                            subtitle="Najstaršie položky v manažovaných projektoch"
-                        />
-                        <AlertItem
-                            tone="accent"
-                            title={`${pendingCount} výkazov čaká`}
-                            subtitle="Schváľ alebo otvor detailnú frontu"
-                        />
+                                            Zatiaľ tu nie sú tímové dáta.
+                                        </td>
+                                    </tr>
+                                ) : null}
+                            </tbody>
+                        </table>
                     </div>
                 </section>
 
-                <section className="card">
-                    <div className="card__head">
-                        <h3 className="card__title">Rýchle akcie</h3>
-                    </div>
-                    <div className="card__body flex flex-col gap-2">
-                        <button
-                            type="button"
-                            className="btn btn--ghost justify-start"
-                            onClick={onShowApprovals}
-                        >
-                            <CheckCheck className="size-4" />
-                            Schváliť výkazy
-                        </button>
-                        <Link
-                            href="/manager/time/reports"
-                            className="btn btn--ghost justify-start"
-                        >
-                            <BarChart3 className="size-4" />
-                            Otvoriť reporty
-                        </Link>
-                        <Link
-                            href="/users"
-                            className="btn btn--ghost justify-start"
-                        >
-                            <Users className="size-4" />
-                            Otvoriť tím
-                        </Link>
-                    </div>
-                </section>
-            </aside>
-        </div>
+                <aside className="col gap-4">
+                    <section className="card">
+                        <div className="card__head">
+                            <h3 className="card__title">Upozornenia</h3>
+                        </div>
+                        <div className="card__body space-y-3">
+                            <AlertItem
+                                tone="warning"
+                                title={`${atRiskCount} rizikových projektov`}
+                                subtitle="Projekty, ktoré potrebujú kontrolu plánu"
+                            />
+                            <AlertItem
+                                tone="danger"
+                                title={`${overdueCount} overdue úloh`}
+                                subtitle="Najstaršie položky v manažovaných projektoch"
+                            />
+                            <AlertItem
+                                tone="accent"
+                                title={`${pendingCount} výkazov čaká`}
+                                subtitle="Schváľ alebo otvor detailnú frontu"
+                            />
+                        </div>
+                    </section>
+
+                    <section className="card">
+                        <div className="card__head">
+                            <h3 className="card__title">Rýchle akcie</h3>
+                        </div>
+                        <div className="card__body flex flex-col gap-2">
+                            <button
+                                type="button"
+                                className="btn btn--ghost justify-start"
+                                onClick={onShowApprovals}
+                            >
+                                <CheckCheck className="size-4" />
+                                Schváliť výkazy
+                            </button>
+                            <Link
+                                href="/manager/time/reports"
+                                className="btn btn--ghost justify-start"
+                            >
+                                <BarChart3 className="size-4" />
+                                Otvoriť reporty
+                            </Link>
+                            <Link
+                                href="/users"
+                                className="btn btn--ghost justify-start"
+                            >
+                                <Users className="size-4" />
+                                Otvoriť tím
+                            </Link>
+                        </div>
+                    </section>
+                </aside>
+            </div>
+
+            <Dialog
+                open={selectedMember !== null}
+                onOpenChange={(open) => {
+                    if (!open) setSelectedMember(null);
+                }}
+            >
+                {selectedMember && (
+                    <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                            <div className="flex items-start gap-3 pr-8">
+                                <Avatar name={selectedMember.name} />
+                                <div>
+                                    <DialogTitle>
+                                        {selectedMember.name}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        Tímová kapacita a vyťaženie za aktuálny
+                                        týždeň
+                                    </DialogDescription>
+                                </div>
+                            </div>
+                        </DialogHeader>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <DetailMetric
+                                label="Odpracované hodiny"
+                                value={`${formatHours(
+                                    selectedMember.weekly_load_hours,
+                                )}h`}
+                            />
+                            <DetailMetric
+                                label="Týždenná kapacita"
+                                value={`${formatHours(
+                                    selectedMember.weekly_capacity_hours,
+                                )}h`}
+                            />
+                            <DetailMetric
+                                label="Vyťaženie"
+                                value={`${Math.round(
+                                    selectedMember.weekly_utilization,
+                                )}%`}
+                            />
+                            <DetailMetric
+                                label="Voľná kapacita"
+                                value={
+                                    selectedMember.is_over_capacity
+                                        ? 'Nad kapacitou'
+                                        : `${formatHours(
+                                              selectedMember.free_capacity_hours,
+                                          )}h`
+                                }
+                            />
+                        </div>
+
+                        <div>
+                            <div className="mb-2 flex items-center justify-between text-sm">
+                                <span className="font-medium">
+                                    Využitie kapacity
+                                </span>
+                                <span className="mono text-xs text-muted-foreground">
+                                    {Math.round(
+                                        selectedMember.weekly_utilization,
+                                    )}
+                                    %
+                                </span>
+                            </div>
+                            <ProgressBar
+                                value={selectedMember.weekly_utilization}
+                            />
+                        </div>
+                    </DialogContent>
+                )}
+            </Dialog>
+        </>
     );
 }
 

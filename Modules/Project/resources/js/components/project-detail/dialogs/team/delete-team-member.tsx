@@ -54,7 +54,7 @@ export const RemoveTeamMemberDialog = ({
                     className="cursor-pointer rounded-md p-1.5 text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600"
                     title="Odstrániť člena"
                 >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-5 w-5" />
                 </button>
             }
             title="Odstrániť člena z tímu?"

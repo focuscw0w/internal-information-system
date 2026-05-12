@@ -113,7 +113,7 @@ export const EditTeamMemberDialog = ({
                     className="flex cursor-pointer items-center justify-center rounded-md p-1.5 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
                     title="Upraviť člena"
                 >
-                    <Edit className="h-3.5 w-3.5" />
+                    <Edit className="h-5 w-5" />
                 </button>
             }
             title={`Upraviť člena – ${member.name}`}
