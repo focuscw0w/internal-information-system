@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Column, DataTable } from '@/components/ui/data-table';
 import { router } from '@inertiajs/react';
 import { CircleDashed, Filter } from 'lucide-react';
 import { useState } from 'react';
 import { Project, Task, TaskPriority, TaskStatus } from '../../../types/types';
-import { Column, DataTable } from '@/components/ui/data-table';
 import { CreateTaskDialog } from './dialogs/create-task';
 import { TaskActions } from './task-actions';
 import { TaskColumns } from './task-columns';
@@ -16,10 +16,17 @@ interface TaskTableProps {
 export const TaskTable = ({ project }: TaskTableProps) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<TaskStatus | null>(null);
-    const [priorityFilter, setPriorityFilter] = useState<TaskPriority | null>(null);
+    const [priorityFilter, setPriorityFilter] = useState<TaskPriority | null>(
+        null,
+    );
     const [assigneeFilter, setAssigneeFilter] = useState<number | null>(null);
 
-    const hasActiveFilters = !!(searchQuery || statusFilter || priorityFilter || assigneeFilter);
+    const hasActiveFilters = !!(
+        searchQuery ||
+        statusFilter ||
+        priorityFilter ||
+        assigneeFilter
+    );
 
     const permissions = project.current_user_permissions ?? [];
     const can = (permission: string) => permissions.includes(permission);
@@ -38,10 +45,18 @@ export const TaskTable = ({ project }: TaskTableProps) => {
         .filter((u, i, arr) => arr.findIndex((a) => a.id === u.id) === i);
 
     const tasks = allTasks.filter((task) => {
-        if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+        if (
+            searchQuery &&
+            !task.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+            return false;
         if (statusFilter && task.status !== statusFilter) return false;
         if (priorityFilter && task.priority !== priorityFilter) return false;
-        if (assigneeFilter && !(task.assigned_users ?? []).some((u) => u.id === assigneeFilter)) return false;
+        if (
+            assigneeFilter &&
+            !(task.assigned_users ?? []).some((u) => u.id === assigneeFilter)
+        )
+            return false;
         return true;
     });
 
@@ -128,7 +143,7 @@ export const TaskTable = ({ project }: TaskTableProps) => {
                         hasActiveFilters ? (
                             <button
                                 onClick={clearFilters}
-                                className="text-sm text-blue-500 hover:underline"
+                                className="text-sm text-primary hover:underline"
                             >
                                 Zrušiť filtre
                             </button>

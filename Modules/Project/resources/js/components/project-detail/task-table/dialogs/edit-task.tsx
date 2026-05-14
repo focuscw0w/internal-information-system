@@ -84,7 +84,7 @@ export const EditTaskDialog = ({
                     onClick={(e) => e.stopPropagation()}
                     className={
                         triggerClassName ??
-                        'flex cursor-pointer items-center justify-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600'
+                        'flex cursor-pointer items-center justify-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-primary/5 hover:text-primary'
                     }
                     title="Upraviť úlohu"
                 >

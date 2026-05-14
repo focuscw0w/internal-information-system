@@ -110,7 +110,7 @@ export const EditTeamMemberDialog = ({
             onOpenChange={handleOpen}
             trigger={
                 <button
-                    className="flex cursor-pointer items-center justify-center rounded-md p-1.5 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    className="flex cursor-pointer items-center justify-center rounded-md p-1.5 text-gray-600 transition-colors hover:bg-primary/5 hover:text-primary"
                     title="Upraviť člena"
                 >
                     <Edit className="h-5 w-5" />

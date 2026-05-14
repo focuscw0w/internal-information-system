@@ -88,7 +88,7 @@ export const TeamMemberSelect = ({
                                 onClick={() => toggleMember(user.id)}
                                 className={`flex w-full cursor-pointer items-center gap-3 rounded-md p-2 transition-colors ${
                                     isSelected
-                                        ? 'bg-blue-600 text-white'
+                                        ? 'bg-primary text-primary-foreground'
                                         : 'text-gray-900 hover:bg-gray-50'
                                 }`}
                             >
@@ -100,7 +100,7 @@ export const TeamMemberSelect = ({
                                         <span
                                             className={`text-xs ${
                                                 isSelected
-                                                    ? 'text-blue-100'
+                                                    ? 'text-primary-foreground/80'
                                                     : 'text-gray-500'
                                             }`}
                                         >

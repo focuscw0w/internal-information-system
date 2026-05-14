@@ -313,7 +313,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                     </p>
                     <button
                         onClick={clearFilters}
-                        className="text-xs text-blue-500 hover:underline"
+                        className="text-xs text-primary hover:underline"
                     >
                         Zrušiť filtre
                     </button>

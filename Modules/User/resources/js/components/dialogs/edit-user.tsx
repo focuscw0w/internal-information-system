@@ -64,7 +64,7 @@ export const EditUserDialog = ({
             trigger={
                 <button
                     onClick={(e) => e.stopPropagation()}
-                    className="cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    className="cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-primary/5 hover:text-primary"
                     title="Upraviť používateľa"
                 >
                     <Edit size={18} />

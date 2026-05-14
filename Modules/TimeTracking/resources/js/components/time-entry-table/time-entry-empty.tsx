@@ -1,6 +1,6 @@
 import { Clock, Filter } from 'lucide-react';
-import { CreateTimeEntryDialog } from './dialogs/create-time-entry';
 import { Project, Task } from 'Modules/Project/resources/js/types/types';
+import { CreateTimeEntryDialog } from './dialogs/create-time-entry';
 
 interface TimeEntryEmptyProps {
     hasActiveFilters: boolean;
@@ -24,7 +24,7 @@ export const TimeEntryEmpty = ({
                 </p>
                 <button
                     onClick={onClearFilters}
-                    className="mt-4 text-sm text-blue-500 hover:underline"
+                    className="mt-4 text-sm text-primary hover:underline"
                 >
                     Zrušiť filtre
                 </button>
