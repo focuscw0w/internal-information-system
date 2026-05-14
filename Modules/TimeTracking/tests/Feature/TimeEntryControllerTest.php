@@ -526,6 +526,7 @@ class TimeEntryControllerTest extends TestCase
                 ->where('entries.0.user_id', $admin->id)
                 ->where('summary.scope', 'mine')
                 ->where('summary.week_target', 40)
+                ->where('summary.month_target', 160)
             );
     }
 }

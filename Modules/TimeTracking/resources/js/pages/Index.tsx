@@ -1,15 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
-import {
-    BarChart3,
-    Check,
-    CheckCheck,
-    Download,
-    Pause,
-    Play,
-    Plus,
-} from 'lucide-react';
+import { Head, usePage } from '@inertiajs/react';
+import { Check, Pause, Play, Plus } from 'lucide-react';
 import { Project } from 'Modules/Project/resources/js/types/types';
 import { useMemo, useState } from 'react';
 import { EntryRowActions } from '../components/index/entry-row-actions';
@@ -76,28 +68,9 @@ const statusBadge = (status: TimeEntry['status']) => {
     return { className: 'badge badge--success', label: 'Schválené' };
 };
 
-const hasPermission = (
-    permissions: string[],
-    permission: string,
-    isAdmin: boolean,
-) => isAdmin || permissions.includes(permission);
-
 export default function Index({ projects, entries, summary }: IndexProps) {
     const { props } = usePage<SharedData>();
     const currentUserId = props.auth.user.id;
-    const permissions =
-        (props.current_user_permissions as string[] | undefined) ?? [];
-    const isAdmin = Boolean(props.auth.user?.is_admin);
-    const canUseReports = hasPermission(
-        permissions,
-        'manage_time_entries',
-        isAdmin,
-    );
-    const canUseApprovals = hasPermission(
-        permissions,
-        'manage_time_entries',
-        isAdmin,
-    );
     const [view, setView] = useState<'week' | 'month'>('week');
     const { timer, startTimer } = useTimer();
     const running = timer.isRunning;
@@ -133,7 +106,7 @@ export default function Index({ projects, entries, summary }: IndexProps) {
     const prevWeekTotal = Number(summary.prev_week_total);
     const weekDelta = weekTotal - prevWeekTotal;
     const weekTarget = Number(summary.week_target) || 40;
-    const monthTarget = Number(summary.month_target) || 168;
+    const monthTarget = Number(summary.month_target) || 160;
     const isTeamScope = summary.scope === 'all';
 
     const filteredEntries =
@@ -224,30 +197,6 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                                 {summary.week_range_label}
                             </strong>
                         </p>
-                    </div>
-                    <div className="page-head__actions">
-                        {canUseReports ? (
-                            <Link href="/manager/time/reports" className="btn">
-                                <BarChart3 className="h-4 w-4" />
-                                Reporty
-                            </Link>
-                        ) : (
-                            <button type="button" className="btn" disabled>
-                                <Download className="h-4 w-4" />
-                                Export CSV
-                            </button>
-                        )}
-                        {canUseApprovals ? (
-                            <Link href="/manager" className="btn">
-                                <CheckCheck className="h-4 w-4" />
-                                Schvaľovanie
-                            </Link>
-                        ) : (
-                            <button type="button" className="btn" disabled>
-                                <CheckCheck className="h-4 w-4" />
-                                Čaká na schválenie automaticky
-                            </button>
-                        )}
                     </div>
                 </div>
 

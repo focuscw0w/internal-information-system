@@ -2,19 +2,17 @@
 
 namespace Modules\TimeTracking\Http\Controllers;
 
-use Carbon\Carbon;
-use Inertia\Inertia;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Transformers\ProjectResource;
 use Modules\TimeTracking\Models\TimeEntry;
 
 class TimeTrackingController extends Controller
 {
-    public function __construct(private readonly ProjectServiceInterface $projectService)
-    {
-    }
+    public function __construct(private readonly ProjectServiceInterface $projectService) {}
 
     /**
      * Display a listing of the resource.
@@ -74,6 +72,7 @@ class TimeTrackingController extends Controller
         $prevWeekTotal = (float) $prevWeekQuery->sum('hours');
 
         $weekTarget = 40;
+        $monthTarget = $weekTarget * 4;
 
         $weekRangeLabel = sprintf(
             '%s. %s - %s. %s %d',
@@ -105,7 +104,7 @@ class TimeTrackingController extends Controller
                 'prev_week_total' => $prevWeekTotal,
                 'month_total' => $monthTotal,
                 'week_target' => $weekTarget,
-                'month_target' => $weekTarget * 4.2,
+                'month_target' => $monthTarget,
                 'week_daily_hours' => $weekDailyHours,
                 'week_project_hours' => $weekProjectHours,
             ],
@@ -141,9 +140,7 @@ class TimeTrackingController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-    }
+    public function store(Request $request) {}
 
     /**
      * Show the specified resource.
@@ -164,14 +161,10 @@ class TimeTrackingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
-    {
-    }
+    public function update(Request $request, $id) {}
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
-    {
-    }
+    public function destroy($id) {}
 }

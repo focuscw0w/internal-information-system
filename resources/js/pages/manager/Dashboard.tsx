@@ -1596,7 +1596,7 @@ function ReportsPanel({
                         </div>
                         <Link
                             href="/manager/time/reports"
-                            className="btn btn--sm"
+                            className="btn btn--primary h-10 px-4 text-sm"
                         >
                             Detail reportov
                         </Link>
