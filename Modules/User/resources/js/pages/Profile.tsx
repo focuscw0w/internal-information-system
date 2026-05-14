@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
     Briefcase,
@@ -17,6 +17,7 @@ import { useMemo, useState } from 'react';
 interface ProfilePermission {
     value: string;
     label: string;
+    description: string;
 }
 
 interface ProfileProject {
@@ -56,7 +57,7 @@ interface ProfilePageProps {
 
 type ProfileTab = 'overview' | 'projects' | 'activity' | 'settings';
 
-const monthTarget = 168;
+const monthTarget = 160;
 const weekTarget = 40;
 
 const initials = (name: string) =>
@@ -100,7 +101,9 @@ export default function Profile({
     projects,
     timeTracking,
 }: ProfilePageProps) {
+    const { props } = usePage<SharedData>();
     const [tab, setTab] = useState<ProfileTab>('overview');
+    const canEditOwnProfile = Boolean(props.auth.user?.is_admin);
     const breadcrumbs: BreadcrumbItem[] = isOwnProfile
         ? [{ title: 'Môj profil', href: '/profile' }]
         : [
@@ -162,7 +165,6 @@ export default function Profile({
 
             <div className="page page-enter">
                 <div className="profile-hero">
-                    <div className="profile-hero__cover" />
                     <div className="profile-hero__body">
                         <span className="avatar avatar--lg bg-pink-600">
                             {initials(user.name)}
@@ -195,7 +197,7 @@ export default function Profile({
                                 <MessageSquare className="h-4 w-4" />
                                 Správa
                             </button>
-                            {isOwnProfile ? (
+                            {isOwnProfile && canEditOwnProfile ? (
                                 <Link
                                     href="/settings/profile"
                                     className="btn btn--primary"
@@ -203,16 +205,7 @@ export default function Profile({
                                     <Settings className="h-4 w-4" />
                                     Upraviť profil
                                 </Link>
-                            ) : (
-                                <button
-                                    type="button"
-                                    className="btn btn--primary"
-                                    disabled
-                                >
-                                    <Settings className="h-4 w-4" />
-                                    Upraviť profil
-                                </button>
-                            )}
+                            ) : null}
                         </div>
                     </div>
                 </div>
@@ -342,11 +335,27 @@ export default function Profile({
                                     </h2>
                                 </div>
                                 <div className="card__body">
-                                    <p className="text-sm text-muted-foreground">
-                                        {permissions.length > 0
-                                            ? `${permissions.length} pridelených oprávnení`
-                                            : 'Žiadne systémové oprávnenia.'}
-                                    </p>
+                                    {permissions.length > 0 ? (
+                                        <ul className="space-y-3">
+                                            {permissions.map((permission) => (
+                                                <li
+                                                    key={permission.value}
+                                                    className="rounded-md border border-border px-3 py-2"
+                                                >
+                                                    <div className="text-sm font-medium text-foreground">
+                                                        {permission.label}
+                                                    </div>
+                                                    <div className="mt-1 text-xs leading-5 text-muted-foreground">
+                                                        {permission.description}
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">
+                                            Žiadne systémové oprávnenia.
+                                        </p>
+                                    )}
                                 </div>
                             </section>
                         </div>

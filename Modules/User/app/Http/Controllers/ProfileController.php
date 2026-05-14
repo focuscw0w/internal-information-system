@@ -66,6 +66,7 @@ class ProfileController extends Controller
             ->map(fn ($perm) => [
                 'value' => $perm->value,
                 'label' => $perm->label(),
+                'description' => $perm->description(),
             ])
             ->values()
             ->toArray();

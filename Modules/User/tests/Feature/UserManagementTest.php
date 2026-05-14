@@ -161,7 +161,7 @@ class UserManagementTest extends TestCase
         $this->assertFalse($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
     }
 
-     public function test_update_with_null_permissions_removes_existing_permissions(): void
+    public function test_update_with_null_permissions_removes_existing_permissions(): void
     {
         $admin = $this->createAdmin();
         $user = $this->createRegularUser();
@@ -263,6 +263,7 @@ class UserManagementTest extends TestCase
         $this->assertEquals($user->email, $props['user']['email']);
         $this->assertFalse($props['isOwnProfile']);
         $this->assertCount(1, $props['permissions']);
+        $this->assertSame(PermissionEnum::PROJECTS_CREATE->description(), $props['permissions'][0]['description']);
     }
 
     // =========================================================================

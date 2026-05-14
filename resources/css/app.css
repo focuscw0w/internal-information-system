@@ -435,10 +435,6 @@
         @apply overflow-hidden rounded-lg border border-border bg-card shadow-xs;
     }
 
-    .profile-hero__cover {
-        @apply h-20 border-b border-border bg-muted;
-    }
-
     .profile-hero__body {
         @apply flex flex-col gap-4 p-5 md:flex-row md:items-center;
     }
