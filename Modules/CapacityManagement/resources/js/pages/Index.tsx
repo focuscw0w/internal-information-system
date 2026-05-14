@@ -122,7 +122,6 @@ export default function Index({ dashboard }: CapacityManagementPageProps) {
         return true;
     });
 
-    const simulationProject = dashboard.prediction.projects[0];
     const finishableProjects = dashboard.prediction.projects.filter(
         (project) => project.can_finish,
     ).length;
@@ -436,7 +435,9 @@ export default function Index({ dashboard }: CapacityManagementPageProps) {
                     </main>
 
                     <aside className="col gap-4">
-                        <SimulatorCard project={simulationProject} />
+                        <SimulatorCard
+                            projects={dashboard.prediction.projects}
+                        />
                         <RiskProjectsCard
                             projects={dashboard.prediction.projects}
                         />
@@ -660,7 +661,10 @@ function PersonRow({ person }: { person: Person }) {
     );
 }
 
-function SimulatorCard({ project }: { project?: ProjectPrediction }) {
+function SimulatorCard({ projects }: { projects: ProjectPrediction[] }) {
+    const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
+        projects[0]?.id ?? null,
+    );
     const [simulation, setSimulation] = useState<SimulationData | null>(null);
     const [deadlineDaysShift, setDeadlineDaysShift] = useState(0);
     const [teamSize, setTeamSize] = useState(0);
@@ -668,6 +672,30 @@ function SimulatorCard({ project }: { project?: ProjectPrediction }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const selectedProjectIdRef = useRef<number | null>(selectedProjectId);
+
+    const project = useMemo(
+        () =>
+            projects.find((item) => item.id === selectedProjectId) ??
+            projects[0],
+        [projects, selectedProjectId],
+    );
+
+    useEffect(() => {
+        selectedProjectIdRef.current = selectedProjectId;
+    }, [selectedProjectId]);
+
+    useEffect(() => {
+        if (projects.length === 0) {
+            setSelectedProjectId(null);
+
+            return;
+        }
+
+        if (!projects.some((item) => item.id === selectedProjectId)) {
+            setSelectedProjectId(projects[0].id);
+        }
+    }, [projects, selectedProjectId]);
 
     const runSimulation = useCallback(
         (payload: SimulationPayload, debounce = true) => {
@@ -678,12 +706,14 @@ function SimulatorCard({ project }: { project?: ProjectPrediction }) {
             }
 
             const request = () => {
+                const requestProjectId = project.id;
+
                 setLoading(true);
                 setError(null);
 
                 axios
                     .post<{ simulation: SimulationData }>(
-                        `/capacity-management/simulation/project/${project.id}/run`,
+                        `/capacity-management/simulation/project/${requestProjectId}/run`,
                         payload,
                         {
                             headers: {
@@ -692,12 +722,24 @@ function SimulatorCard({ project }: { project?: ProjectPrediction }) {
                         },
                     )
                     .then(({ data }) => {
+                        if (selectedProjectIdRef.current !== requestProjectId) {
+                            return;
+                        }
+
                         setSimulation(data.simulation);
                     })
                     .catch(() => {
+                        if (selectedProjectIdRef.current !== requestProjectId) {
+                            return;
+                        }
+
                         setError('Simuláciu sa nepodarilo prepočítať.');
                     })
-                    .finally(() => setLoading(false));
+                    .finally(() => {
+                        if (selectedProjectIdRef.current === requestProjectId) {
+                            setLoading(false);
+                        }
+                    });
             };
 
             if (debounce) {
@@ -715,6 +757,7 @@ function SimulatorCard({ project }: { project?: ProjectPrediction }) {
             setDeadlineDaysShift(0);
             setTeamSize(0);
             setRemainingHours(0);
+            setLoading(false);
             return;
         }
 
@@ -780,10 +823,17 @@ function SimulatorCard({ project }: { project?: ProjectPrediction }) {
                     <select
                         className="select w-full"
                         value={project?.id ?? ''}
-                        disabled
+                        disabled={projects.length === 0}
+                        onChange={(event) =>
+                            setSelectedProjectId(Number(event.target.value))
+                        }
                     >
-                        {project ? (
-                            <option value={project.id}>{project.name}</option>
+                        {projects.length > 0 ? (
+                            projects.map((item) => (
+                                <option key={item.id} value={item.id}>
+                                    {item.name}
+                                </option>
+                            ))
                         ) : (
                             <option>Žiadny projekt</option>
                         )}
