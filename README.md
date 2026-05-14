@@ -189,5 +189,5 @@ implementácii modulov pre správu používateľov, projektový manažment, evid
 
 ## Licencia
 
-Projekt vychádza z Laravel starter kitu. Licenčné podmienky uprav podľa
-požiadaviek školy alebo organizácie pred verejným publikovaním repozitára.
+Tento projekt je licencovaný pod licenciou MIT. Podrobnosti sú uvedené v súbore
+[LICENSE](LICENSE).
