@@ -52,6 +52,33 @@ const utilizationColor = (utilization: number) => {
     return 'var(--success-text)';
 };
 
+const csvValue = (value: string | number | boolean | null | undefined) => {
+    const text = value === null || value === undefined ? '' : String(value);
+
+    return `"${text.replace(/"/g, '""')}"`;
+};
+
+const downloadCsv = (
+    filename: string,
+    rows: Array<Array<string | number | boolean>>,
+) => {
+    const csv = rows
+        .map((row) => row.map((value) => csvValue(value)).join(','))
+        .join('\r\n');
+    const blob = new Blob([`\uFEFF${csv}`], {
+        type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+};
+
 export default function Index({ dashboard }: CapacityManagementPageProps) {
     const [filter, setFilter] = useState<FilterKey>('all');
     const [search, setSearch] = useState('');
@@ -101,6 +128,85 @@ export default function Index({ dashboard }: CapacityManagementPageProps) {
     const weeklyFreeCapacity =
         dashboard.weekly_overview.capacity_hours -
         dashboard.weekly_overview.load_hours;
+    const exportDashboard = () => {
+        const date = new Date().toISOString().slice(0, 10);
+
+        downloadCsv(`kapacitne-planovanie-${date}.csv`, [
+            ['Sekcia', 'Názov', 'Metrika', 'Hodnota', 'Doplnok'],
+            [
+                'Prehľad',
+                'Týždeň',
+                'Kapacita',
+                dashboard.weekly_overview.capacity_hours,
+                'h',
+            ],
+            [
+                'Prehľad',
+                'Týždeň',
+                'Zaťaženie',
+                dashboard.weekly_overview.load_hours,
+                'h',
+            ],
+            [
+                'Prehľad',
+                'Týždeň',
+                'Vyťaženie',
+                dashboard.weekly_overview.utilization,
+                '%',
+            ],
+            [
+                'Prehľad',
+                'Mesiac',
+                'Kapacita',
+                dashboard.monthly_overview.capacity_hours,
+                'h',
+            ],
+            [
+                'Prehľad',
+                'Mesiac',
+                'Zaťaženie',
+                dashboard.monthly_overview.load_hours,
+                'h',
+            ],
+            [
+                'Prehľad',
+                'Mesiac',
+                'Vyťaženie',
+                dashboard.monthly_overview.utilization,
+                '%',
+            ],
+            ...filteredPeople.map((person) => [
+                'Ľudia',
+                person.name,
+                'Týždeň',
+                person.weekly_load_hours,
+                `${person.weekly_utilization}% z ${person.weekly_capacity_hours}h`,
+            ]),
+            ...filteredPeople.map((person) => [
+                'Ľudia',
+                person.name,
+                'Mesiac',
+                person.monthly_load_hours,
+                `${person.monthly_utilization}% z ${person.monthly_capacity_hours}h`,
+            ]),
+            ...dashboard.prediction.projects.map((project) => [
+                'Projekty',
+                project.name,
+                'Predikcia',
+                project.confidence,
+                project.can_finish
+                    ? `Stihne, ${project.days_remaining} dní`
+                    : `Riziko, ${project.remaining_hours}h zostáva`,
+            ]),
+            ...dashboard.history.map((point) => [
+                'História',
+                point.week_label,
+                'Vyťaženie',
+                point.utilization,
+                `${point.load_hours}h`,
+            ]),
+        ]);
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -121,7 +227,17 @@ export default function Index({ dashboard }: CapacityManagementPageProps) {
                         </p>
                     </div>
                     <div className="page-head__actions">
-                        <button type="button" className="btn">
+                        <button
+                            type="button"
+                            className="btn"
+                            onClick={exportDashboard}
+                            disabled={dashboard.people.length === 0}
+                            title={
+                                dashboard.people.length === 0
+                                    ? 'Nie sú žiadne kapacitné dáta na export'
+                                    : 'Exportovať kapacitný dashboard do CSV'
+                            }
+                        >
                             <Download className="h-4 w-4" />
                             Export
                         </button>

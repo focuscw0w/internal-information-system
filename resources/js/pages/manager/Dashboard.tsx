@@ -156,6 +156,30 @@ const formatDate = (date: string | null) => {
     }).format(new Date(date));
 };
 
+const csvValue = (value: string | number | null | undefined): string => {
+    const text = value === null || value === undefined ? '' : String(value);
+
+    return `"${text.replace(/"/g, '""')}"`;
+};
+
+const downloadCsv = (filename: string, rows: Array<Array<string | number>>) => {
+    const csv = rows
+        .map((row) => row.map((value) => csvValue(value)).join(','))
+        .join('\r\n');
+    const blob = new Blob([`\uFEFF${csv}`], {
+        type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+};
+
 const initials = (name: string) =>
     name
         .split(' ')
@@ -334,6 +358,70 @@ export default function Dashboard({ widgets }: DashboardProps) {
             },
         );
     };
+    const exportDashboard = () => {
+        const date = new Date().toISOString().slice(0, 10);
+        const projectGroups = widgets.teamProjectGroups ?? [];
+
+        downloadCsv(`manazersky-pohlad-${date}.csv`, [
+            ['Sekcia', 'Názov', 'Metrika', 'Hodnota', 'Doplnok'],
+            [
+                'Prehľad',
+                'Čaká na schválenie',
+                'Počet',
+                widgets.pendingApprovals?.count ?? 0,
+                'výkazov',
+            ],
+            [
+                'Prehľad',
+                'Hodiny tímu',
+                'Týždeň',
+                totalTeamHours,
+                `${formatHours(totalTeamCapacity)}h kapacita`,
+            ],
+            ['Prehľad', 'Vyťaženie tímu', 'Týždeň', teamUtilization, '%'],
+            ...pendingEntries.map((entry) => [
+                'Schvaľovania',
+                entry.user.name,
+                entry.project.name,
+                entry.hours,
+                entry.entry_date ?? '',
+            ]),
+            ...managedProjects.map((project) => [
+                'Projekty',
+                project.name,
+                'Pokrok',
+                project.progress,
+                project.is_at_risk
+                    ? 'Ohrozený'
+                    : project.is_overdue
+                      ? 'Po termíne'
+                      : project.status,
+            ]),
+            ...(widgets.overdueTasks ?? []).map((task) => [
+                'Overdue úlohy',
+                task.title,
+                task.project.name,
+                task.priority,
+                task.due_date ?? '',
+            ]),
+            ...teamRows.map((member) => [
+                'Tím podľa ľudí',
+                member.name,
+                'Vyťaženie',
+                Math.round(member.weekly_utilization),
+                `${formatHours(member.weekly_load_hours)}h / ${formatHours(member.weekly_capacity_hours)}h`,
+            ]),
+            ...projectGroups.flatMap((group) =>
+                group.members.map((member) => [
+                    'Tím podľa projektov',
+                    group.name,
+                    member.name,
+                    member.project_weekly_hours,
+                    `${member.project_allocation}% alokácia`,
+                ]),
+            ),
+        ]);
+    };
 
     return (
         <ManagerLayout>
@@ -349,13 +437,14 @@ export default function Dashboard({ widgets }: DashboardProps) {
                         </p>
                     </div>
                     <div className="page-head__actions">
-                        <Link
-                            href="/manager/time/reports/export"
+                        <button
+                            type="button"
                             className="btn"
+                            onClick={exportDashboard}
                         >
                             <Download className="size-4" />
                             Export
-                        </Link>
+                        </button>
                         <span
                             className="btn cursor-default"
                             aria-label={`Obdobie: ${weekRange}`}
@@ -870,6 +959,76 @@ function TeamPanel({
         (sum, group) => sum + group.members.length,
         0,
     );
+    const exportDisabled =
+        viewMode === 'projects'
+            ? projectMembershipCount === 0
+            : rows.length === 0;
+
+    const exportTeam = () => {
+        if (exportDisabled) return;
+
+        const date = new Date().toISOString().slice(0, 10);
+
+        if (viewMode === 'projects') {
+            downloadCsv(`moj-tim-podla-projektov-${date}.csv`, [
+                [
+                    'Projekt',
+                    'Člen tímu',
+                    'Rola',
+                    'Alokácia (%)',
+                    'Hodiny v projekte',
+                    'Kapacita v projekte',
+                    'Projektové vyťaženie (%)',
+                    'Celkové vyťaženie (%)',
+                ],
+                ...groups.flatMap((group) =>
+                    group.members.map((member) => [
+                        group.name,
+                        member.name,
+                        member.role === 'owner'
+                            ? 'Vlastník'
+                            : member.role === 'unassigned'
+                              ? 'Bez projektu'
+                              : 'Člen',
+                        member.project_allocation,
+                        member.project_weekly_hours,
+                        member.weekly_capacity_hours,
+                        Math.round(member.weekly_utilization),
+                        Math.round(member.total_weekly_utilization),
+                    ]),
+                ),
+            ]);
+
+            return;
+        }
+
+        downloadCsv(`moj-tim-podla-ludi-${date}.csv`, [
+            [
+                'Člen tímu',
+                'Počet projektov',
+                'Projekty',
+                'Odpracované hodiny',
+                'Týždenná kapacita',
+                'Vyťaženie (%)',
+                'Voľná kapacita',
+            ],
+            ...rows.map((member) => [
+                member.name,
+                member.project_count ?? 0,
+                (member.projects ?? [])
+                    .map(
+                        (project) => `${project.name} (${project.allocation}%)`,
+                    )
+                    .join('; '),
+                member.weekly_load_hours,
+                member.weekly_capacity_hours,
+                Math.round(member.weekly_utilization),
+                member.is_over_capacity
+                    ? 'Nad kapacitou'
+                    : member.free_capacity_hours,
+            ]),
+        ]);
+    };
 
     return (
         <>
@@ -884,20 +1043,36 @@ function TeamPanel({
                                     : `${rows.length} ľudí · tento týždeň`}
                             </div>
                         </div>
-                        <div className="tabbar mb-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <div className="tabbar mb-0">
+                                <button
+                                    type="button"
+                                    className={`tab ${viewMode === 'projects' ? 'is-active' : ''}`}
+                                    onClick={() => setViewMode('projects')}
+                                >
+                                    Podľa projektov
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`tab ${viewMode === 'people' ? 'is-active' : ''}`}
+                                    onClick={() => setViewMode('people')}
+                                >
+                                    Podľa ľudí
+                                </button>
+                            </div>
                             <button
                                 type="button"
-                                className={`tab ${viewMode === 'projects' ? 'is-active' : ''}`}
-                                onClick={() => setViewMode('projects')}
+                                className="btn btn--sm"
+                                onClick={exportTeam}
+                                disabled={exportDisabled}
+                                title={
+                                    exportDisabled
+                                        ? 'Nie sú žiadne tímové dáta na export'
+                                        : 'Exportovať aktuálny tímový pohľad do CSV'
+                                }
                             >
-                                Podľa projektov
-                            </button>
-                            <button
-                                type="button"
-                                className={`tab ${viewMode === 'people' ? 'is-active' : ''}`}
-                                onClick={() => setViewMode('people')}
-                            >
-                                Podľa ľudí
+                                <Download className="size-4" />
+                                CSV
                             </button>
                         </div>
                     </div>

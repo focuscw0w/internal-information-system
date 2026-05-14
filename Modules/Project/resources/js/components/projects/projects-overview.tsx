@@ -78,6 +78,9 @@ const projectToCsvRow = (project: Project): Array<string | number> => [
     `${window.location.origin}/projects/${project.id}`,
 ];
 
+const canExportProject = (project: Project): boolean =>
+    project.current_user_permissions.includes('export_data');
+
 const downloadCsv = (projects: Project[]): void => {
     const rows = [
         csvHeaders,
@@ -165,12 +168,14 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
         0,
     );
     const tasksTotal = projects.reduce((sum, p) => sum + p.tasks_total, 0);
+    const exportableProjects = filtered.filter(canExportProject);
 
     return (
         <div>
             <ProjectsHeader
-                exportCount={filtered.length}
-                onExportProjects={() => downloadCsv(filtered)}
+                exportCount={exportableProjects.length}
+                canExportProjects={exportableProjects.length > 0}
+                onExportProjects={() => downloadCsv(exportableProjects)}
             />
 
             <div className="kpi-grid mb-6">

@@ -6,11 +6,13 @@ import { CreateProjectDialog } from './dialogs/create-project';
 
 interface ProjectsHeaderProps {
     exportCount: number;
+    canExportProjects: boolean;
     onExportProjects: () => void;
 }
 
 export const ProjectsHeader = ({
     exportCount,
+    canExportProjects,
     onExportProjects,
 }: ProjectsHeaderProps) => {
     const { props } = usePage<SharedData>();
@@ -52,11 +54,13 @@ export const ProjectsHeader = ({
                     type="button"
                     className="btn"
                     onClick={onExportProjects}
-                    disabled={exportCount === 0}
+                    disabled={!canExportProjects || exportCount === 0}
                     title={
-                        exportCount > 0
-                            ? `Exportovať ${exportCount} projektov do CSV`
-                            : 'Nie je čo exportovať'
+                        !canExportProjects
+                            ? 'Nemáš oprávnenie exportovať projekty'
+                            : exportCount > 0
+                              ? `Exportovať ${exportCount} projektov do CSV`
+                              : 'Nie je čo exportovať'
                     }
                 >
                     <Download className="h-4 w-4" />
