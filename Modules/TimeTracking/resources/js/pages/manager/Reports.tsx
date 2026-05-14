@@ -58,13 +58,14 @@ type Props = {
 };
 
 type Tab = 'users' | 'projects' | 'timeline';
+type ExportType = 'summary' | 'details';
 
 const formatHours = (hours: number) =>
     new Intl.NumberFormat('sk-SK', {
         maximumFractionDigits: 2,
     }).format(hours);
 
-const buildParams = (filters: Filters, tab?: Tab) => {
+const buildParams = (filters: Filters, exportType?: ExportType) => {
     const params = new URLSearchParams();
     params.set('date_from', filters.date_from);
     params.set('date_to', filters.date_to);
@@ -73,7 +74,7 @@ const buildParams = (filters: Filters, tab?: Tab) => {
         params.set('project_ids', filters.project_ids.join(','));
     if (filters.user_ids.length)
         params.set('user_ids', filters.user_ids.join(','));
-    if (tab) params.set('tab', tab);
+    if (exportType) params.set('type', exportType);
     return params;
 };
 
@@ -113,17 +114,11 @@ export default function Reports({ filters, data, filterOptions }: Props) {
         return { hours, entries };
     }, [reportData.byUser]);
 
-    const activeTabRows = useMemo(() => {
-        if (activeTab === 'projects') return reportData.byProject.length;
-        if (activeTab === 'timeline') return reportData.timeline.length;
-        return reportData.byUser.length;
-    }, [activeTab, reportData]);
+    const isExportDisabled = totals.entries === 0;
 
-    const isExportDisabled = activeTabRows === 0;
-
-    const exportCsv = () => {
+    const exportCsv = (type: ExportType) => {
         if (isExportDisabled) return;
-        window.location.href = `/manager/time/reports/export?${buildParams(filterState, activeTab).toString()}`;
+        window.location.href = `/manager/time/reports/export?${buildParams(filterState, type).toString()}`;
     };
 
     return (
@@ -145,17 +140,31 @@ export default function Reports({ filters, data, filterOptions }: Props) {
                     <div className="page-head__actions">
                         <button
                             type="button"
-                            className="btn btn--primary"
-                            onClick={exportCsv}
+                            className="btn btn--secondary"
+                            onClick={() => exportCsv('summary')}
                             disabled={isExportDisabled}
                             title={
                                 isExportDisabled
                                     ? 'Nie sú žiadne dáta na export'
-                                    : undefined
+                                    : 'Exportovať súhrn podľa osoby a projektu'
                             }
                         >
                             <Download className="h-4 w-4" />
-                            CSV
+                            Súhrn CSV
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn--primary"
+                            onClick={() => exportCsv('details')}
+                            disabled={isExportDisabled}
+                            title={
+                                isExportDisabled
+                                    ? 'Nie sú žiadne dáta na export'
+                                    : 'Exportovať detailné časové záznamy'
+                            }
+                        >
+                            <Download className="h-4 w-4" />
+                            Detail CSV
                         </button>
                     </div>
                 </div>

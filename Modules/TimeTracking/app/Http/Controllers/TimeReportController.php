@@ -41,43 +41,85 @@ class TimeReportController extends Controller
     public function export(Request $request): StreamedResponse
     {
         $filters = $this->normalizedFilters($request);
-        $dataset = $this->buildDataset($request, $filters);
-        $tab = $request->string('tab', 'users')->toString();
-        $filename = 'time-report-'.$tab.'-'.now()->format('Ymd-His').'.csv';
+        $type = $request->string('type', 'summary')->toString();
+        if (! in_array($type, ['summary', 'details'], true)) {
+            $type = 'summary';
+        }
 
-        return response()->streamDownload(function () use ($dataset, $tab) {
+        $filename = 'time-report-'.$type.'-'.now()->format('Ymd-His').'.csv';
+
+        return response()->streamDownload(function () use ($request, $filters, $type) {
             echo "\xEF\xBB\xBF";
             $handle = fopen('php://output', 'w');
 
-            if ($tab === 'projects') {
-                fputcsv($handle, ['Projekt', 'Hodiny', 'Počet záznamov', 'Top prispievatelia']);
-                foreach ($dataset['byProject'] as $row) {
-                    fputcsv($handle, [
-                        $row['project_name'],
-                        $row['total_hours'],
-                        $row['entries_count'],
-                        collect($row['top_contributors'])->pluck('name')->join(', '),
-                    ]);
-                }
-            } elseif ($tab === 'timeline') {
-                fputcsv($handle, ['Obdobie', 'Hodiny', 'Počet záznamov']);
-                foreach ($dataset['timeline'] as $row) {
-                    fputcsv($handle, [$row['label'], $row['total_hours'], $row['entries_count']]);
-                }
+            if ($type === 'details') {
+                $this->writeDetailsExport($handle, $request, $filters);
             } else {
-                fputcsv($handle, ['Osoba', 'Hodiny', 'Počet záznamov', 'Počet projektov']);
-                foreach ($dataset['byUser'] as $row) {
-                    fputcsv($handle, [
-                        $row['user_name'],
-                        $row['total_hours'],
-                        $row['entries_count'],
-                        $row['projects_count'],
-                    ]);
-                }
+                $this->writeSummaryExport($handle, $request, $filters);
             }
 
             fclose($handle);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    private function writeSummaryExport($handle, Request $request, array $filters): void
+    {
+        fputcsv($handle, [
+            'Projekt',
+            'Osoba',
+            'Email',
+            'Celkové hodiny',
+            'Schválené hodiny',
+            'Čakajúce hodiny',
+            'Zamietnuté hodiny',
+            'Počet záznamov',
+        ], ';');
+
+        foreach ($this->summaryExportRows($request, $filters) as $row) {
+            fputcsv($handle, [
+                $row['project_name'],
+                $row['user_name'],
+                $row['user_email'],
+                $this->csvHours($row['total_hours']),
+                $this->csvHours($row['approved_hours']),
+                $this->csvHours($row['pending_hours']),
+                $this->csvHours($row['rejected_hours']),
+                $row['entries_count'],
+            ], ';');
+        }
+    }
+
+    private function writeDetailsExport($handle, Request $request, array $filters): void
+    {
+        fputcsv($handle, [
+            'Dátum',
+            'Osoba',
+            'Email',
+            'Projekt',
+            'Úloha',
+            'Hodiny',
+            'Stav',
+            'Popis',
+            'Schválil',
+            'Schválené dňa',
+            'Dôvod zamietnutia',
+        ], ';');
+
+        foreach ($this->detailExportRows($request, $filters) as $row) {
+            fputcsv($handle, [
+                $row['entry_date'],
+                $row['user_name'],
+                $row['user_email'],
+                $row['project_name'],
+                $row['task_title'],
+                $this->csvHours($row['hours']),
+                $row['status'],
+                $row['description'],
+                $row['approved_by'],
+                $row['approved_at'],
+                $row['rejection_reason'],
+            ], ';');
+        }
     }
 
     private function buildDataset(Request $request, array $filters): array
@@ -171,6 +213,87 @@ class TimeReportController extends Controller
             ->when($userIds !== null, fn ($query) => $query->whereIn('user_id', $userIds))
             ->when($projectIds !== null, fn ($query) => $query->whereIn('project_id', $projectIds))
             ->when($status !== 'all', fn ($query) => $query->where('status', $status));
+    }
+
+    private function summaryExportRows(Request $request, array $filters): array
+    {
+        $from = Carbon::parse($filters['date_from'])->startOfDay();
+        $to = Carbon::parse($filters['date_to'])->endOfDay();
+        $projectScope = $this->scopedProjectIds($request);
+        $projectIds = $this->intersectIds($projectScope, $filters['project_ids']);
+        $userIds = $filters['user_ids'] ?: null;
+
+        return $this->baseEntriesQuery($from, $to, $userIds, $projectIds, $filters['status'])
+            ->with(['user:id,name,email', 'project:id,name'])
+            ->get(['id', 'project_id', 'user_id', 'hours', 'status'])
+            ->groupBy(fn (TimeEntry $entry) => $entry->user_id.'-'.$entry->project_id)
+            ->map(function ($entries) {
+                /** @var TimeEntry $first */
+                $first = $entries->first();
+
+                return [
+                    'user_name' => $first->user?->name ?? 'Používateľ #'.$first->user_id,
+                    'user_email' => $first->user?->email ?? '',
+                    'project_name' => $first->project?->name ?? 'Projekt #'.$first->project_id,
+                    'total_hours' => (float) $entries->sum('hours'),
+                    'approved_hours' => (float) $entries
+                        ->where('status', TimeEntryStatusEnum::Approved->value)
+                        ->sum('hours'),
+                    'pending_hours' => (float) $entries
+                        ->where('status', TimeEntryStatusEnum::Pending->value)
+                        ->sum('hours'),
+                    'rejected_hours' => (float) $entries
+                        ->where('status', TimeEntryStatusEnum::Rejected->value)
+                        ->sum('hours'),
+                    'entries_count' => $entries->count(),
+                ];
+            })
+            ->sortBy([
+                ['project_name', 'asc'],
+                ['user_name', 'asc'],
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function detailExportRows(Request $request, array $filters): array
+    {
+        $from = Carbon::parse($filters['date_from'])->startOfDay();
+        $to = Carbon::parse($filters['date_to'])->endOfDay();
+        $projectScope = $this->scopedProjectIds($request);
+        $projectIds = $this->intersectIds($projectScope, $filters['project_ids']);
+        $userIds = $filters['user_ids'] ?: null;
+
+        return $this->baseEntriesQuery($from, $to, $userIds, $projectIds, $filters['status'])
+            ->with([
+                'user:id,name,email',
+                'project:id,name',
+                'task:id,title',
+                'approver:id,name',
+            ])
+            ->orderBy('entry_date')
+            ->orderBy('project_id')
+            ->orderBy('user_id')
+            ->get()
+            ->map(fn (TimeEntry $entry) => [
+                'entry_date' => $entry->entry_date?->toDateString(),
+                'user_name' => $entry->user?->name ?? 'Používateľ #'.$entry->user_id,
+                'user_email' => $entry->user?->email ?? '',
+                'project_name' => $entry->project?->name ?? 'Projekt #'.$entry->project_id,
+                'task_title' => $entry->task?->title ?? 'Úloha #'.$entry->task_id,
+                'hours' => (float) $entry->hours,
+                'status' => TimeEntryStatusEnum::tryFrom($entry->status)?->label() ?? $entry->status,
+                'description' => $entry->description ?? '',
+                'approved_by' => $entry->approver?->name ?? '',
+                'approved_at' => $entry->approved_at?->format('Y-m-d H:i:s') ?? '',
+                'rejection_reason' => $entry->rejection_reason ?? '',
+            ])
+            ->all();
+    }
+
+    private function csvHours(float $hours): string
+    {
+        return number_format($hours, 2, '.', '');
     }
 
     private function normalizedFilters(Request $request): array

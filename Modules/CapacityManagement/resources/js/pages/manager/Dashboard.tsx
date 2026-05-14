@@ -164,7 +164,7 @@ const csvValue = (value: string | number | null | undefined): string => {
 
 const downloadCsv = (filename: string, rows: Array<Array<string | number>>) => {
     const csv = rows
-        .map((row) => row.map((value) => csvValue(value)).join(','))
+        .map((row) => row.map((value) => csvValue(value)).join(';'))
         .join('\r\n');
     const blob = new Blob([`\uFEFF${csv}`], {
         type: 'text/csv;charset=utf-8;',
@@ -361,138 +361,93 @@ export default function Dashboard({ widgets }: DashboardProps) {
     const exportDashboard = () => {
         const date = new Date().toISOString().slice(0, 10);
         const projectGroups = widgets.teamProjectGroups ?? [];
+        const pendingByProject = new Map<number, number>();
+        const overdueByProject = new Map<number, number>();
+
+        pendingEntries.forEach((entry) => {
+            if (!entry.project.id) return;
+
+            pendingByProject.set(
+                entry.project.id,
+                (pendingByProject.get(entry.project.id) ?? 0) + 1,
+            );
+        });
+
+        (widgets.overdueTasks ?? []).forEach((task) => {
+            overdueByProject.set(
+                task.project.id,
+                (overdueByProject.get(task.project.id) ?? 0) + 1,
+            );
+        });
+
+        const rows =
+            projectGroups.length > 0
+                ? projectGroups.map((project) => {
+                      const members = project.members.filter(
+                          (member) => member.role !== 'unassigned',
+                      );
+                      const weeklyHours = members.reduce(
+                          (sum, member) => sum + member.project_weekly_hours,
+                          0,
+                      );
+                      const weeklyCapacity = members.reduce(
+                          (sum, member) =>
+                              sum +
+                              (member.weekly_capacity_hours *
+                                  member.project_allocation) /
+                                  100,
+                          0,
+                      );
+                      const utilization =
+                          weeklyCapacity > 0
+                              ? Math.round((weeklyHours / weeklyCapacity) * 100)
+                              : 0;
+
+                      return [
+                          project.name,
+                          project.status,
+                          project.progress,
+                          project.end_date ?? '',
+                          members.length,
+                          Number(weeklyHours.toFixed(2)),
+                          Number(weeklyCapacity.toFixed(2)),
+                          utilization,
+                          pendingByProject.get(project.id ?? 0) ?? 0,
+                          overdueByProject.get(project.id ?? 0) ?? 0,
+                          project.is_at_risk || project.is_overdue
+                              ? 'Áno'
+                              : 'Nie',
+                      ];
+                  })
+                : managedProjects.map((project) => [
+                      project.name,
+                      project.status,
+                      project.progress,
+                      project.end_date ?? '',
+                      project.team_size,
+                      '',
+                      '',
+                      '',
+                      pendingByProject.get(project.id) ?? 0,
+                      overdueByProject.get(project.id) ?? 0,
+                      project.is_at_risk || project.is_overdue ? 'Áno' : 'Nie',
+                  ]);
 
         downloadCsv(`manazersky-pohlad-${date}.csv`, [
-            ['Manažérsky pohľad'],
-            ['Obdobie', weekRange],
-            [],
-            ['Prehľad'],
-            ['Ukazovateľ', 'Hodnota', 'Jednotka', 'Poznámka'],
-            [
-                'Čaká na schválenie',
-                widgets.pendingApprovals?.count ?? 0,
-                'výkazov',
-                'Počet čakajúcich time tracking záznamov',
-            ],
-            [
-                'Hodiny tímu',
-                totalTeamHours,
-                'h',
-                `Týždenná kapacita ${formatHours(totalTeamCapacity)}h`,
-            ],
-            [
-                'Vyťaženie tímu',
-                teamUtilization,
-                '%',
-                'Pomer odpracovaných hodín ku kapacite',
-            ],
-            [],
-            ['Schvaľovania'],
-            ['Dátum', 'Osoba', 'Projekt', 'Úloha', 'Hodiny', 'Popis'],
-            ...pendingEntries.map((entry) => [
-                entry.entry_date ?? '',
-                entry.user.name,
-                entry.project.name,
-                entry.task.title,
-                entry.hours,
-                entry.description ?? '',
-            ]),
-            ...(pendingEntries.length === 0
-                ? [['Žiadne čakajúce výkazy']]
-                : []),
-            [],
-            ['Manažované projekty'],
             [
                 'Projekt',
                 'Stav',
                 'Pokrok (%)',
                 'Deadline',
-                'Dní do deadline',
-                'Veľkosť tímu',
-                'Po termíne',
-                'Ohrozený',
-            ],
-            ...managedProjects.map((project) => [
-                project.name,
-                project.status,
-                project.progress,
-                project.end_date ?? '',
-                project.days_remaining,
-                project.team_size,
-                project.is_overdue ? 'Áno' : 'Nie',
-                project.is_at_risk ? 'Áno' : 'Nie',
-            ]),
-            ...(managedProjects.length === 0
-                ? [['Žiadne manažované projekty']]
-                : []),
-            [],
-            ['Overdue úlohy'],
-            ['Deadline', 'Projekt', 'Úloha', 'Priorita'],
-            ...(widgets.overdueTasks ?? []).map((task) => [
-                task.due_date ?? '',
-                task.project.name,
-                task.title,
-                task.priority,
-            ]),
-            ...((widgets.overdueTasks ?? []).length === 0
-                ? [['Žiadne overdue úlohy']]
-                : []),
-            [],
-            ['Tím podľa ľudí'],
-            [
-                'Osoba',
-                'Odpracované hodiny',
-                'Týždenná kapacita',
+                'Členovia',
+                'Hodiny',
+                'Kapacita',
                 'Vyťaženie (%)',
-                'Voľná kapacita',
-                'Počet projektov',
-                'Projekty',
+                'Čaká na schválenie',
+                'Overdue úlohy',
+                'Riziko',
             ],
-            ...teamRows.map((member) => [
-                member.name,
-                member.weekly_load_hours,
-                member.weekly_capacity_hours,
-                Math.round(member.weekly_utilization),
-                member.is_over_capacity
-                    ? 'Nad kapacitou'
-                    : member.free_capacity_hours,
-                member.project_count ?? 0,
-                (member.projects ?? [])
-                    .map(
-                        (project) => `${project.name} (${project.allocation}%)`,
-                    )
-                    .join('; '),
-            ]),
-            ...(teamRows.length === 0 ? [['Žiadne tímové dáta']] : []),
-            [],
-            ['Tím podľa projektov'],
-            [
-                'Projekt',
-                'Osoba',
-                'Rola',
-                'Alokácia (%)',
-                'Hodiny v projekte',
-                'Kapacita v projekte',
-                'Projektové vyťaženie (%)',
-                'Celkové vyťaženie (%)',
-            ],
-            ...projectGroups.flatMap((group) =>
-                group.members.map((member) => [
-                    group.name,
-                    member.name,
-                    member.role === 'owner'
-                        ? 'Vlastník'
-                        : member.role === 'unassigned'
-                          ? 'Bez projektu'
-                          : 'Člen',
-                    member.project_allocation,
-                    member.project_weekly_hours,
-                    member.weekly_capacity_hours,
-                    Math.round(member.weekly_utilization),
-                    Math.round(member.total_weekly_utilization),
-                ]),
-            ),
-            ...(projectGroups.length === 0 ? [['Žiadne projektové tímy']] : []),
+            ...rows,
         ]);
     };
 

@@ -2,12 +2,9 @@
 
 namespace Modules\TimeTracking\Tests\Feature;
 
-use Modules\CapacityManagement\Enums\CapacityPermission;
-use Modules\Project\Enums\ProjectGlobalPermission;
-use Modules\User\Contracts\PermissionRegistryInterface;
-use Modules\User\Enums\UserPermission;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Project\Enums\ProjectGlobalPermission;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Enums\TimeEntryStatusEnum;
@@ -470,7 +467,7 @@ class ManagerTimeWorkflowTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->manager)
-            ->get('/manager/time/reports/export?tab=users&status=approved');
+            ->get('/manager/time/reports/export?type=summary&status=approved');
 
         $response->assertOk();
         $this->assertStringStartsWith("\xEF\xBB\xBF", $response->streamedContent());
@@ -727,7 +724,7 @@ class ManagerTimeWorkflowTest extends TestCase
     }
 
     #[Test]
-    public function csv_export_users_tab_returns_correct_columns_and_aggregates(): void
+    public function csv_summary_export_returns_person_project_rows_with_status_totals(): void
     {
         $secondTask = Task::factory()->create([
             'project_id' => $this->managedProject->id,
@@ -747,95 +744,111 @@ class ManagerTimeWorkflowTest extends TestCase
             'user_id' => $this->member->id,
             'entry_date' => '2026-04-15',
             'hours' => 1.5,
-            'status' => TimeEntryStatusEnum::Approved->value,
+            'status' => TimeEntryStatusEnum::Pending->value,
+        ]);
+        TimeEntry::factory()->create([
+            'project_id' => $this->managedProject->id,
+            'task_id' => $secondTask->id,
+            'user_id' => $this->member->id,
+            'entry_date' => '2026-04-20',
+            'hours' => 1,
+            'status' => TimeEntryStatusEnum::Rejected->value,
         ]);
 
         $response = $this->actingAs($this->manager)
-            ->get('/manager/time/reports/export?tab=users&status=approved&date_from=2026-04-01&date_to=2026-04-30');
+            ->get('/manager/time/reports/export?type=summary&status=all&date_from=2026-04-01&date_to=2026-04-30');
 
         $response->assertOk();
         $this->assertStringContainsString('text/csv', $response->headers->get('Content-Type'));
         $this->assertStringContainsString('charset=UTF-8', $response->headers->get('Content-Type'));
         $this->assertStringContainsString('attachment', $response->headers->get('Content-Disposition'));
-        $this->assertStringContainsString('time-report-users-', $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('time-report-summary-', $response->headers->get('Content-Disposition'));
 
         $rows = $this->parseCsvRows($response->streamedContent());
 
-        $this->assertSame(['Osoba', 'Hodiny', 'Počet záznamov', 'Počet projektov'], $rows[0]);
-        $this->assertSame($this->member->name, $rows[1][0]);
-        $this->assertSame('4', $rows[1][1]);
-        $this->assertSame('2', $rows[1][2]);
-        $this->assertSame('1', $rows[1][3]);
-    }
-
-    #[Test]
-    public function csv_export_projects_tab_includes_top_contributors_column(): void
-    {
-        $contributorA = User::factory()->create(['name' => 'Alica Test']);
-        $contributorB = User::factory()->create(['name' => 'Boris Test']);
-
-        TimeEntry::factory()->create([
-            'project_id' => $this->managedProject->id,
-            'task_id' => $this->managedTask->id,
-            'user_id' => $contributorA->id,
-            'entry_date' => '2026-04-10',
-            'hours' => 5,
-            'status' => TimeEntryStatusEnum::Approved->value,
-        ]);
-        TimeEntry::factory()->create([
-            'project_id' => $this->managedProject->id,
-            'task_id' => $this->managedTask->id,
-            'user_id' => $contributorB->id,
-            'entry_date' => '2026-04-12',
-            'hours' => 2,
-            'status' => TimeEntryStatusEnum::Approved->value,
-        ]);
-
-        $response = $this->actingAs($this->manager)
-            ->get('/manager/time/reports/export?tab=projects&status=approved&date_from=2026-04-01&date_to=2026-04-30');
-
-        $response->assertOk();
-
-        $rows = $this->parseCsvRows($response->streamedContent());
-
-        $this->assertSame(['Projekt', 'Hodiny', 'Počet záznamov', 'Top prispievatelia'], $rows[0]);
+        $this->assertSame([
+            'Projekt',
+            'Osoba',
+            'Email',
+            'Celkové hodiny',
+            'Schválené hodiny',
+            'Čakajúce hodiny',
+            'Zamietnuté hodiny',
+            'Počet záznamov',
+        ], $rows[0]);
         $this->assertSame($this->managedProject->name, $rows[1][0]);
-        $this->assertStringContainsString('Alica Test', $rows[1][3]);
-        $this->assertStringContainsString('Boris Test', $rows[1][3]);
+        $this->assertSame($this->member->name, $rows[1][1]);
+        $this->assertSame($this->member->email, $rows[1][2]);
+        $this->assertSame('5.00', $rows[1][3]);
+        $this->assertSame('2.50', $rows[1][4]);
+        $this->assertSame('1.50', $rows[1][5]);
+        $this->assertSame('1.00', $rows[1][6]);
+        $this->assertSame('3', $rows[1][7]);
     }
 
     #[Test]
-    public function csv_export_timeline_tab_switches_to_weekly_granularity_for_long_ranges(): void
+    public function csv_details_export_returns_readable_time_entry_rows(): void
     {
+        $approver = User::factory()->create(['name' => 'Schvaľovač Test']);
+        $this->managedTask->update(['title' => 'Analýza reportov']);
+
         TimeEntry::factory()->create([
             'project_id' => $this->managedProject->id,
             'task_id' => $this->managedTask->id,
             'user_id' => $this->member->id,
-            'entry_date' => '2026-01-15',
-            'hours' => 2,
+            'entry_date' => '2026-04-10',
+            'hours' => 2.25,
+            'description' => 'Príprava podkladov pre manažéra.',
             'status' => TimeEntryStatusEnum::Approved->value,
+            'approved_by' => $approver->id,
+            'approved_at' => '2026-04-11 09:30:00',
         ]);
         TimeEntry::factory()->create([
             'project_id' => $this->managedProject->id,
             'task_id' => $this->managedTask->id,
             'user_id' => $this->member->id,
-            'entry_date' => '2026-04-15',
-            'hours' => 3,
-            'status' => TimeEntryStatusEnum::Approved->value,
+            'entry_date' => '2026-04-12',
+            'hours' => 1,
+            'description' => 'Neúplný popis.',
+            'status' => TimeEntryStatusEnum::Rejected->value,
+            'rejection_reason' => 'Doplniť detail práce.',
         ]);
 
         $response = $this->actingAs($this->manager)
-            ->get('/manager/time/reports/export?tab=timeline&status=approved&date_from=2026-01-01&date_to=2026-04-30');
+            ->get('/manager/time/reports/export?type=details&status=all&date_from=2026-04-01&date_to=2026-04-30');
 
         $response->assertOk();
+        $this->assertStringContainsString('time-report-details-', $response->headers->get('Content-Disposition'));
 
         $rows = $this->parseCsvRows($response->streamedContent());
 
-        $this->assertSame(['Obdobie', 'Hodiny', 'Počet záznamov'], $rows[0]);
+        $this->assertSame([
+            'Dátum',
+            'Osoba',
+            'Email',
+            'Projekt',
+            'Úloha',
+            'Hodiny',
+            'Stav',
+            'Popis',
+            'Schválil',
+            'Schválené dňa',
+            'Dôvod zamietnutia',
+        ], $rows[0]);
         $this->assertCount(3, $rows);
-        foreach (array_slice($rows, 1) as $row) {
-            $this->assertMatchesRegularExpression('/^\d{4}-\d{2}$/', $row[0]);
-        }
+        $this->assertSame('2026-04-10', $rows[1][0]);
+        $this->assertSame($this->member->name, $rows[1][1]);
+        $this->assertSame($this->member->email, $rows[1][2]);
+        $this->assertSame($this->managedProject->name, $rows[1][3]);
+        $this->assertSame('Analýza reportov', $rows[1][4]);
+        $this->assertSame('2.25', $rows[1][5]);
+        $this->assertSame('Schválené', $rows[1][6]);
+        $this->assertSame('Príprava podkladov pre manažéra.', $rows[1][7]);
+        $this->assertSame('Schvaľovač Test', $rows[1][8]);
+        $this->assertSame('2026-04-11 09:30:00', $rows[1][9]);
+        $this->assertSame('', $rows[1][10]);
+        $this->assertSame('Zamietnuté', $rows[2][6]);
+        $this->assertSame('Doplniť detail práce.', $rows[2][10]);
     }
 
     /**
@@ -848,7 +861,7 @@ class ManagerTimeWorkflowTest extends TestCase
         $handle = fopen('php://memory', 'r+');
         fwrite($handle, $content);
         rewind($handle);
-        while (($row = fgetcsv($handle)) !== false) {
+        while (($row = fgetcsv($handle, null, ';')) !== false) {
             $rows[] = $row;
         }
         fclose($handle);
