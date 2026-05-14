@@ -82,6 +82,7 @@ const downloadCsv = (
 export default function Index({ dashboard }: CapacityManagementPageProps) {
     const [filter, setFilter] = useState<FilterKey>('all');
     const [search, setSearch] = useState('');
+    const recommendationsRef = useRef<HTMLDivElement | null>(null);
 
     const overloadedPeople = useMemo(
         () =>
@@ -128,6 +129,13 @@ export default function Index({ dashboard }: CapacityManagementPageProps) {
     const weeklyFreeCapacity =
         dashboard.weekly_overview.capacity_hours -
         dashboard.weekly_overview.load_hours;
+    const showRecommendations = () => {
+        recommendationsRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+        });
+        recommendationsRef.current?.focus({ preventScroll: true });
+    };
     const exportDashboard = () => {
         const date = new Date().toISOString().slice(0, 10);
 
@@ -256,7 +264,11 @@ export default function Index({ dashboard }: CapacityManagementPageProps) {
                             {overloadedPeople[0].weekly_utilization}%). Zvážte
                             prerozdelenie úloh alebo posun deadlineov.
                         </div>
-                        <button type="button" className="btn btn--sm bg-card">
+                        <button
+                            type="button"
+                            className="btn btn--sm bg-card"
+                            onClick={showRecommendations}
+                        >
                             Pozrieť odporúčania
                         </button>
                     </div>
@@ -324,10 +336,12 @@ export default function Index({ dashboard }: CapacityManagementPageProps) {
 
                 <div className="grid-main-side">
                     <main className="col gap-5">
-                        <RecommendationsCard
-                            overloadedPeople={overloadedPeople}
-                            riskyProjects={riskyProjects}
-                        />
+                        <div ref={recommendationsRef} tabIndex={-1}>
+                            <RecommendationsCard
+                                overloadedPeople={overloadedPeople}
+                                riskyProjects={riskyProjects}
+                            />
+                        </div>
 
                         <section className="card">
                             <div className="card__head">
@@ -552,9 +566,6 @@ function RecommendationsCard({
                                 {row.note}
                             </div>
                         </div>
-                        <button type="button" className="btn btn--sm">
-                            Aplikovať
-                        </button>
                     </div>
                 ))}
             </div>
