@@ -24,8 +24,8 @@ const LoginPage = ({ onSuccess }) => {
       {/* Left — form */}
       <div style={{ display: 'flex', flexDirection: 'column', padding: '40px 56px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div className="brand-mark">A</div>
-          <div className="brand-name">Atlas
+          <div className="brand-mark">C</div>
+          <div className="brand-name">Cogitator
             <span className="brand-name__sub">Internal Information System</span>
           </div>
         </div>
@@ -92,7 +92,7 @@ const LoginPage = ({ onSuccess }) => {
             </div>
 
             <p style={{ marginTop: 32, fontSize: 12, color: 'var(--text-quaternary)', textAlign: 'center' }}>
-              © 2026 Atlas · v2.4.1
+              © 2026 Cogitator · v2.4.1
             </p>
           </div>
         </div>

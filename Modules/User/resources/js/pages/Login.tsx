@@ -26,10 +26,10 @@ export default function Login({ status }: LoginProps) {
                         className="flex items-center gap-2.5 self-start"
                     >
                         <span className="grid size-7 place-items-center rounded-[7px] bg-gradient-to-br from-[var(--text-primary)] to-[var(--text-secondary)] text-sm font-bold tracking-tight text-white">
-                            A
+                            C
                         </span>
                         <span className="text-sm font-semibold tracking-tight text-foreground">
-                            Atlas
+                            Cogitator
                             <span className="block text-[10.5px] font-normal tracking-normal text-muted-foreground">
                                 Internal Information System
                             </span>
