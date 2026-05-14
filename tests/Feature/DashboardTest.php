@@ -63,7 +63,7 @@ test('dashboard includes cross module overview data', function () {
         ->get(route('dashboard'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('dashboard')
+            ->component('CapacityManagement/dashboard')
             ->where('myTasksToday.0.title', 'Dnešná úloha')
             ->where('atRiskProjects.0.name', 'Rizikový projekt')
             ->where('timeWeekToDate.logged_hours', 4)

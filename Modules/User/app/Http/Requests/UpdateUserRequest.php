@@ -2,9 +2,9 @@
 
 namespace Modules\User\Http\Requests;
 
-use App\Enums\PermissionEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\User\Contracts\PermissionRegistryInterface;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -26,7 +26,7 @@ class UpdateUserRequest extends FormRequest
             ],
             'password' => ['nullable', 'string', 'min:8'],
             'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string', Rule::in(PermissionEnum::all())],
+            'permissions.*' => ['string', Rule::in(app(PermissionRegistryInterface::class)->all())],
         ];
     }
 }

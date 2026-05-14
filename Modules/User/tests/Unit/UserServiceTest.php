@@ -2,7 +2,10 @@
 
 namespace Modules\User\Tests\Unit;
 
-use App\Enums\PermissionEnum;
+use Modules\CapacityManagement\Enums\CapacityPermission;
+use Modules\Project\Enums\ProjectGlobalPermission;
+use Modules\User\Contracts\PermissionRegistryInterface;
+use Modules\User\Enums\UserPermission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Modules\User\Contracts\UserServiceInterface;
@@ -22,7 +25,7 @@ class UserServiceTest extends TestCase
     {
         parent::setUp();
 
-        foreach (PermissionEnum::all() as $permission) {
+        foreach (app(PermissionRegistryInterface::class)->all() as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
 
@@ -82,12 +85,12 @@ class UserServiceTest extends TestCase
             'name' => 'Oprávnený',
             'email' => 'opravneny@example.com',
             'password' => bcrypt('secret'),
-            'permissions' => [PermissionEnum::PROJECTS_CREATE->value],
+            'permissions' => [ProjectGlobalPermission::PROJECTS_CREATE->value],
         ]);
 
         $user = User::where('email', 'opravneny@example.com')->first();
 
-        $this->assertTrue($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
+        $this->assertTrue($user->hasPermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value));
     }
 
     #[Test]
@@ -166,17 +169,17 @@ class UserServiceTest extends TestCase
         $this->service->updateUser($user, [
             'name' => $user->name,
             'email' => $user->email,
-            'permissions' => [PermissionEnum::PROJECTS_CREATE->value],
+            'permissions' => [ProjectGlobalPermission::PROJECTS_CREATE->value],
         ]);
 
-        $this->assertTrue($user->fresh()->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
+        $this->assertTrue($user->fresh()->hasPermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value));
     }
 
     #[Test]
     public function it_removes_old_permissions_on_update(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo(PermissionEnum::PROJECTS_CREATE->value);
+        $user->givePermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value);
 
         $this->service->updateUser($user, [
             'name' => $user->name,
@@ -184,7 +187,7 @@ class UserServiceTest extends TestCase
             'permissions' => [],
         ]);
 
-        $this->assertFalse($user->fresh()->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
+        $this->assertFalse($user->fresh()->hasPermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value));
     }
 
     // =========================================================================

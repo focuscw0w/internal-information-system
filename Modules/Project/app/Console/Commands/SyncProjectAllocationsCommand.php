@@ -3,7 +3,7 @@
 namespace Modules\Project\Console\Commands;
 
 use Illuminate\Console\Command;
-use Modules\Project\Services\ProjectAllocationSyncService;
+use Modules\Project\Contracts\ProjectAllocationSyncInterface;
 
 class SyncProjectAllocationsCommand extends Command
 {
@@ -11,7 +11,7 @@ class SyncProjectAllocationsCommand extends Command
 
     protected $description = 'Prepočíta project allocations podľa aktuálneho tímu, dátumov projektu a kapacít.';
 
-    public function __construct(private readonly ProjectAllocationSyncService $allocationSyncService)
+    public function __construct(private readonly ProjectAllocationSyncInterface $allocationSyncService)
     {
         parent::__construct();
     }

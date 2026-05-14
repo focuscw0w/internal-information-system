@@ -12,19 +12,16 @@ Project time_tracking_module {
 
 Table users {
   id bigint [pk]
-  name varchar
   Note: 'STUB — full definition in user-module.dbml'
 }
 
 Table projects {
   id bigint [pk]
-  name varchar
   Note: 'STUB — full definition in project-module.dbml'
 }
 
 Table tasks {
   id bigint [pk]
-  title varchar
   Note: 'STUB — full definition in project-module.dbml'
 }
 

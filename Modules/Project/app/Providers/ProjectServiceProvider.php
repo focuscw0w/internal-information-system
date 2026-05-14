@@ -21,8 +21,15 @@ use Modules\Project\Services\CommentService;
 use Modules\Project\Contracts\CommentServiceInterface;
 use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Services\NotificationService;
+use Modules\Project\Contracts\ProjectAllocationSyncInterface;
+use Modules\Project\Contracts\SearchProviderInterface;
 use Modules\Project\Contracts\TaskDependencyServiceInterface;
+use Modules\Project\Services\ProjectAllocationSyncService;
+use Modules\Project\Services\Search\ProjectSearchProvider;
+use Modules\Project\Services\Search\SearchOrchestrator;
 use Modules\Project\Services\TaskDependencyService;
+use Modules\Project\Enums\ProjectGlobalPermission;
+use Modules\User\Contracts\PermissionRegistryInterface;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Modules\Project\Console\Commands\CheckAtRiskCommand;
@@ -55,6 +62,9 @@ class ProjectServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
 
         Gate::policy(Project::class, ProjectPolicy::class);
+
+        $this->app->make(PermissionRegistryInterface::class)
+            ->register(ProjectGlobalPermission::class);
     }
  
     /**
@@ -73,6 +83,13 @@ class ProjectServiceProvider extends ServiceProvider
         $this->app->bind(CommentServiceInterface::class, CommentService::class);
         $this->app->bind(NotificationServiceInterface::class, NotificationService::class);
         $this->app->bind(TaskDependencyServiceInterface::class, TaskDependencyService::class);
+        $this->app->bind(ProjectAllocationSyncInterface::class, ProjectAllocationSyncService::class);
+
+        $this->app->tag(ProjectSearchProvider::class, SearchProviderInterface::class);
+
+        $this->app->bind(SearchOrchestrator::class, function ($app) {
+            return new SearchOrchestrator($app->tagged(SearchProviderInterface::class));
+        });
     }
 
     /**

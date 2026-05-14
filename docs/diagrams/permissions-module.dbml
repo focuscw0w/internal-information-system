@@ -16,7 +16,6 @@ Project permissions_module {
 
 Table users {
   id bigint [pk]
-  name varchar
   Note: 'STUB — full definition in user-module.dbml. Polymorphic target of model_has_*.'
 }
 

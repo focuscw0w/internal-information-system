@@ -4,13 +4,14 @@ namespace Modules\CapacityManagement\Services;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Modules\CapacityManagement\Contracts\ProjectSimulationInterface;
 use Modules\CapacityManagement\DTO\ProjectSimulationInput;
 use Modules\CapacityManagement\DTO\ProjectSimulationResult;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\ProjectAllocation;
 
-class ProjectSimulationService
+class ProjectSimulationService implements ProjectSimulationInterface
 {
     /**
      * Run an in-memory burn-down simulation for a single project.

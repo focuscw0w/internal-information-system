@@ -4,8 +4,13 @@ namespace Modules\User\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\Project\Contracts\SearchProviderInterface;
+use Modules\User\Contracts\PermissionRegistryInterface;
 use Modules\User\Contracts\UserServiceInterface;
+use Modules\User\Enums\UserPermission;
+use Modules\User\Services\Search\UserSearchProvider;
 use Modules\User\Services\UserService;
+use Modules\User\Support\PermissionRegistry;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -29,6 +34,9 @@ class UserServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+
+        $this->app->make(PermissionRegistryInterface::class)
+            ->register(UserPermission::class);
     }
 
     /**
@@ -38,7 +46,9 @@ class UserServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+        $this->app->singleton(PermissionRegistryInterface::class, PermissionRegistry::class);
         $this->app->bind(UserServiceInterface::class, UserService::class);
+        $this->app->tag(UserSearchProvider::class, SearchProviderInterface::class);
     }
 
     /**

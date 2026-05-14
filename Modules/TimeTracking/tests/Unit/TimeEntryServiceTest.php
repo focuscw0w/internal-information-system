@@ -6,10 +6,10 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Project\Contracts\NotificationServiceInterface;
+use Modules\Project\Contracts\ProjectAllocationSyncInterface;
 use Modules\User\Models\User;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\ProjectAllocation;
-use Modules\Project\Services\ProjectAllocationSyncService;
 use Modules\Project\Models\Task;
 use Modules\TimeTracking\Models\TimeEntry;
 use Modules\TimeTracking\Services\TimeEntryService;
@@ -28,7 +28,7 @@ class TimeEntryServiceTest extends TestCase
         parent::setUp();
 
         $notificationService = $this->createMock(NotificationServiceInterface::class);
-        $this->service = new TimeEntryService($notificationService, app(ProjectAllocationSyncService::class));
+        $this->service = new TimeEntryService($notificationService, app(ProjectAllocationSyncInterface::class));
         $this->user = User::factory()->create();
         $this->project = Project::factory()->create([
             'owner_id' => $this->user->id,

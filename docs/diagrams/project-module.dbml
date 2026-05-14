@@ -15,7 +15,6 @@ Project project_module {
 // --- Stub of users for FK visualisation only (real definition in user-module) ---
 Table users {
   id bigint [pk]
-  name varchar
   Note: 'STUB — full definition in user-module.dbml'
 }
 

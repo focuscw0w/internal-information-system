@@ -6,9 +6,9 @@ use Carbon\Carbon;
 use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
 use Modules\CapacityManagement\DTO\CapacityInputs;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
+use Modules\Project\Contracts\ProjectAllocationSyncInterface;
 use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Models\ProjectAllocation;
-use Modules\Project\Services\ProjectAllocationSyncService;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\User\Contracts\UserServiceInterface;
 
@@ -19,7 +19,7 @@ class CapacityManagementService implements CapacityManagementServiceInterface
         private readonly TimeEntryServiceInterface $timeEntryService,
         private readonly ProjectServiceInterface $projectService,
         private readonly CapacityCalculator $calculator,
-        private readonly ProjectAllocationSyncService $allocationSyncService,
+        private readonly ProjectAllocationSyncInterface $allocationSyncService,
     ) {}
 
     /**
@@ -62,6 +62,30 @@ class CapacityManagementService implements CapacityManagementServiceInterface
         );
 
         $this->allocationSyncService->syncAllocationsForUserProjects($userId);
+    }
+
+    public function getWeeklyCapacityForUser(int $userId): ?int
+    {
+        $value = EmployeeCapacity::query()
+            ->where('user_id', $userId)
+            ->value('weekly_capacity_hours');
+
+        return $value !== null ? (int) $value : null;
+    }
+
+    public function getWeeklyCapacitiesForUsers(array $userIds): array
+    {
+        $userIds = array_values(array_unique(array_map('intval', $userIds)));
+
+        if ($userIds === []) {
+            return [];
+        }
+
+        return EmployeeCapacity::query()
+            ->whereIn('user_id', $userIds)
+            ->pluck('weekly_capacity_hours', 'user_id')
+            ->map(fn ($hours) => (int) $hours)
+            ->all();
     }
 
     /**

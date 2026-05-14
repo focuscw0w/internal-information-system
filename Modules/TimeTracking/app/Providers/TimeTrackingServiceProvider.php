@@ -4,9 +4,11 @@ namespace Modules\TimeTracking\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\Project\Contracts\SearchProviderInterface;
 use Modules\Project\Support\PermissionRegistry;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Enums\TimeTrackingPermission;
+use Modules\TimeTracking\Services\Search\TimeTrackingSearchProvider;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -44,6 +46,7 @@ class TimeTrackingServiceProvider extends ServiceProvider
         $this->app->register(RouteServiceProvider::class);
 
         $this->app->bind(TimeEntryServiceInterface::class, TimeEntryService::class);
+        $this->app->tag(TimeTrackingSearchProvider::class, SearchProviderInterface::class);
     }
 
     /**

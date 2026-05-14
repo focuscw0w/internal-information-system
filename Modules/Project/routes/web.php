@@ -1,14 +1,18 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Project\Http\Controllers\CommentController;
+use Modules\Project\Http\Controllers\GlobalSearchController;
 use Modules\Project\Http\Controllers\NotificationController;
 use Modules\Project\Http\Controllers\ProjectController;
-use Modules\Project\Http\Controllers\TaskController;
 use Modules\Project\Http\Controllers\SubtaskController;
-use Modules\Project\Http\Controllers\TeamController;
-use Modules\Project\Http\Controllers\CommentController;
+use Modules\Project\Http\Controllers\TaskController;
 use Modules\Project\Http\Controllers\TaskDependencyController;
+use Modules\Project\Http\Controllers\TeamController;
 
+Route::middleware(['web', 'auth', 'throttle:60,1'])
+    ->get('/api/global-search', GlobalSearchController::class)
+    ->name('global-search');
 
 Route::middleware(['web', 'auth'])
     ->prefix('projects')

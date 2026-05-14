@@ -2,7 +2,10 @@
 
 namespace Modules\CapacityManagement\Tests\Feature;
 
-use App\Enums\PermissionEnum;
+use Modules\CapacityManagement\Enums\CapacityPermission;
+use Modules\Project\Enums\ProjectGlobalPermission;
+use Modules\User\Contracts\PermissionRegistryInterface;
+use Modules\User\Enums\UserPermission;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
@@ -28,7 +31,7 @@ class ProjectSimulationControllerTest extends TestCase
         $this->seed(PermissionSeeder::class);
 
         $this->manager = User::factory()->create();
-        $this->manager->givePermissionTo(PermissionEnum::CAPACITY_MANAGE->value);
+        $this->manager->givePermissionTo(CapacityPermission::CAPACITY_MANAGE->value);
 
         $this->regularUser = User::factory()->create();
         $this->project = Project::factory()->create([

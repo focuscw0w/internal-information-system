@@ -3,13 +3,16 @@
 namespace Modules\Project\Services;
 
 use Carbon\Carbon;
-use Modules\CapacityManagement\Models\EmployeeCapacity;
+use Modules\CapacityManagement\Contracts\CapacityReaderInterface;
+use Modules\Project\Contracts\ProjectAllocationSyncInterface;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\ProjectAllocation;
 use Modules\TimeTracking\Models\TimeEntry;
 
-class ProjectAllocationSyncService
+class ProjectAllocationSyncService implements ProjectAllocationSyncInterface
 {
+    public function __construct(private readonly CapacityReaderInterface $capacityReader) {}
+
     public function syncCurrentTeamAllocations(Project $project): void
     {
         $project->loadMissing('team');
@@ -28,16 +31,15 @@ class ProjectAllocationSyncService
             ->whereNotIn('user_id', $teamUserIds)
             ->delete();
 
-        $capacities = EmployeeCapacity::query()
-            ->whereIn('user_id', $teamUserIds)
-            ->pluck('weekly_capacity_hours', 'user_id');
+        $capacities = $this->capacityReader->getWeeklyCapacitiesForUsers($teamUserIds);
 
         foreach ($project->team as $member) {
+            $memberId = (int) $member->id;
             $this->syncTeamMemberAllocation(
                 $project,
-                (int) $member->id,
+                $memberId,
                 (int) ($member->pivot->allocation ?? 100),
-                $capacities->has($member->id) ? (int) $capacities[$member->id] : null,
+                $capacities[$memberId] ?? null,
             );
         }
     }
@@ -191,11 +193,7 @@ class ProjectAllocationSyncService
 
     private function resolveUserWeeklyCapacity(int $userId): int
     {
-        $capacity = EmployeeCapacity::query()
-            ->where('user_id', $userId)
-            ->value('weekly_capacity_hours');
-
-        return $capacity !== null ? (int) $capacity : 40;
+        return $this->capacityReader->getWeeklyCapacityForUser($userId) ?? 40;
     }
 
     private function calculateAllocatedHours(

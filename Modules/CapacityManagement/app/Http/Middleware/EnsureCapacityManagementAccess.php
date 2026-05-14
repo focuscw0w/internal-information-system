@@ -2,9 +2,9 @@
 
 namespace Modules\CapacityManagement\Http\Middleware;
 
-use App\Enums\PermissionEnum;
 use Closure;
 use Illuminate\Http\Request;
+use Modules\CapacityManagement\Enums\CapacityPermission;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureCapacityManagementAccess
@@ -13,7 +13,7 @@ class EnsureCapacityManagementAccess
     {
         $user = $request->user();
 
-        if (! $user?->is_admin && ! $user?->can(PermissionEnum::CAPACITY_MANAGE->value)) {
+        if (! $user?->is_admin && ! $user?->can(CapacityPermission::CAPACITY_MANAGE->value)) {
             abort(403);
         }
 

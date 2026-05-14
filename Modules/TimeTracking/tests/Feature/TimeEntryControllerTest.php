@@ -2,7 +2,10 @@
 
 namespace Modules\TimeTracking\Tests\Feature;
 
-use App\Enums\PermissionEnum;
+use Modules\CapacityManagement\Enums\CapacityPermission;
+use Modules\Project\Enums\ProjectGlobalPermission;
+use Modules\User\Contracts\PermissionRegistryInterface;
+use Modules\User\Enums\UserPermission;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Project\Models\Project;
@@ -110,7 +113,7 @@ class TimeEntryControllerTest extends TestCase
     public function global_project_viewer_does_not_see_all_project_time_entries(): void
     {
         $viewer = User::factory()->create();
-        $viewer->givePermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value);
+        $viewer->givePermissionTo(ProjectGlobalPermission::PROJECTS_VIEW_ALL->value);
 
         TimeEntry::factory()->create([
             'project_id' => $this->project->id,
@@ -137,7 +140,7 @@ class TimeEntryControllerTest extends TestCase
     public function global_project_viewer_cannot_create_time_entry_in_foreign_project(): void
     {
         $viewer = User::factory()->create();
-        $viewer->givePermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value);
+        $viewer->givePermissionTo(ProjectGlobalPermission::PROJECTS_VIEW_ALL->value);
         $this->task->assignedUsers()->attach($viewer->id);
 
         $this->actingAs($viewer)

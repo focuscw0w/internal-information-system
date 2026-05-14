@@ -5,9 +5,9 @@ namespace Modules\TimeTracking\Services;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Modules\Project\Contracts\NotificationServiceInterface;
+use Modules\Project\Contracts\ProjectAllocationSyncInterface;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
-use Modules\Project\Services\ProjectAllocationSyncService;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Models\TimeEntry;
 use Modules\TimeTracking\Transformers\TimeEntryResource;
@@ -17,7 +17,7 @@ class TimeEntryService implements TimeEntryServiceInterface
 {
     public function __construct(
         private readonly NotificationServiceInterface $notificationService,
-        private readonly ?ProjectAllocationSyncService $allocationSyncService = null,
+        private readonly ?ProjectAllocationSyncInterface $allocationSyncService = null,
     ) {}
     /**
      * Get total tracked hours per user in a time period.

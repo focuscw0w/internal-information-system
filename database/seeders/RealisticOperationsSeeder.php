@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Enums\PermissionEnum;
+use Modules\CapacityManagement\Enums\CapacityPermission;
+use Modules\Project\Enums\ProjectGlobalPermission;
+use Modules\User\Contracts\PermissionRegistryInterface;
+use Modules\User\Enums\UserPermission;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
@@ -79,16 +82,16 @@ class RealisticOperationsSeeder extends Seeder
                 'name' => 'Admin Systému',
                 'email' => 'admin@test.com',
                 'is_admin' => true,
-                'permissions' => PermissionEnum::all(),
+                'permissions' => app(PermissionRegistryInterface::class)->all(),
             ],
             'martina' => [
                 'name' => 'Martina Bieliková',
                 'email' => 'martina.bielikova@test.com',
                 'is_admin' => false,
                 'permissions' => [
-                    PermissionEnum::USERS_VIEW->value,
-                    PermissionEnum::PROJECTS_CREATE->value,
-                    PermissionEnum::PROJECTS_VIEW_ALL->value,
+                    UserPermission::USERS_VIEW->value,
+                    ProjectGlobalPermission::PROJECTS_CREATE->value,
+                    ProjectGlobalPermission::PROJECTS_VIEW_ALL->value,
                 ],
             ],
             'lukas' => [
@@ -96,34 +99,34 @@ class RealisticOperationsSeeder extends Seeder
                 'email' => 'lukas.valo@test.com',
                 'is_admin' => false,
                 'permissions' => [
-                    PermissionEnum::USERS_VIEW->value,
-                    PermissionEnum::PROJECTS_VIEW_ALL->value,
-                    PermissionEnum::CAPACITY_MANAGE->value,
+                    UserPermission::USERS_VIEW->value,
+                    ProjectGlobalPermission::PROJECTS_VIEW_ALL->value,
+                    CapacityPermission::CAPACITY_MANAGE->value,
                 ],
             ],
             'peter' => [
                 'name' => 'Peter Sýkora',
                 'email' => 'peter.sykora@test.com',
                 'is_admin' => false,
-                'permissions' => [PermissionEnum::USERS_VIEW->value],
+                'permissions' => [UserPermission::USERS_VIEW->value],
             ],
             'eva' => [
                 'name' => 'Eva Malíková',
                 'email' => 'eva.malikova@test.com',
                 'is_admin' => false,
-                'permissions' => [PermissionEnum::USERS_VIEW->value],
+                'permissions' => [UserPermission::USERS_VIEW->value],
             ],
             'simon' => [
                 'name' => 'Simon Kubík',
                 'email' => 'simon.kubik@test.com',
                 'is_admin' => false,
-                'permissions' => [PermissionEnum::USERS_VIEW->value],
+                'permissions' => [UserPermission::USERS_VIEW->value],
             ],
             'nina' => [
                 'name' => 'Nina Holubová',
                 'email' => 'nina.holubova@test.com',
                 'is_admin' => false,
-                'permissions' => [PermissionEnum::USERS_VIEW->value],
+                'permissions' => [UserPermission::USERS_VIEW->value],
             ],
         ];
 

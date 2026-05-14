@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\Inertia\ModuleAwareViewFinder;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 
@@ -12,7 +13,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind('inertia.testing.view-finder', function ($app) {
+            return new ModuleAwareViewFinder(
+                $app['files'],
+                $app['config']->get('inertia.testing.page_paths'),
+                $app['config']->get('inertia.testing.page_extensions'),
+                base_path('Modules'),
+            );
+        });
     }
 
     /**

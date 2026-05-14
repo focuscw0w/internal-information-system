@@ -6,6 +6,10 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\CapacityManagement\Console\Commands\CheckCapacityNotificationsCommand;
+use Modules\CapacityManagement\Enums\CapacityPermission;
+use Modules\CapacityManagement\Services\Search\CapacitySearchProvider;
+use Modules\Project\Contracts\SearchProviderInterface;
+use Modules\User\Contracts\PermissionRegistryInterface;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -29,6 +33,9 @@ class CapacityManagementServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+
+        $this->app->make(PermissionRegistryInterface::class)
+            ->register(CapacityPermission::class);
     }
 
     /**
@@ -44,10 +51,21 @@ class CapacityManagementServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
+            \Modules\CapacityManagement\Contracts\CapacityReaderInterface::class,
+            \Modules\CapacityManagement\Services\CapacityReader::class,
+        );
+
+        $this->app->bind(
             \Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface::class,
             \Modules\CapacityManagement\Services\CapacityManagementService::class,
         );
 
+        $this->app->bind(
+            \Modules\CapacityManagement\Contracts\ProjectSimulationInterface::class,
+            \Modules\CapacityManagement\Services\ProjectSimulationService::class,
+        );
+
+        $this->app->tag(CapacitySearchProvider::class, SearchProviderInterface::class);
     }
 
     /**

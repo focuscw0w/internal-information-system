@@ -2,7 +2,10 @@
 
 namespace Modules\User\Tests\Feature;
 
-use App\Enums\PermissionEnum;
+use Modules\CapacityManagement\Enums\CapacityPermission;
+use Modules\Project\Enums\ProjectGlobalPermission;
+use Modules\User\Contracts\PermissionRegistryInterface;
+use Modules\User\Enums\UserPermission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Modules\User\Models\User;
@@ -21,7 +24,7 @@ class UserManagementTest extends TestCase
     {
         parent::setUp();
 
-        foreach (PermissionEnum::all() as $permission) {
+        foreach (app(PermissionRegistryInterface::class)->all() as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
     }
@@ -54,7 +57,7 @@ class UserManagementTest extends TestCase
         $admin = $this->createAdmin();
 
         $user = $this->createRegularUser();
-        $user->givePermissionTo(PermissionEnum::PROJECTS_CREATE->value);
+        $user->givePermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value);
 
         $response = $this->actingAs($admin)->get(route('user.index'));
 
@@ -63,7 +66,7 @@ class UserManagementTest extends TestCase
 
         $managedUser = collect($props['users'])->firstWhere('id', $user->id);
 
-        $this->assertContains(PermissionEnum::PROJECTS_CREATE->value, $managedUser['permissions']);
+        $this->assertContains(ProjectGlobalPermission::PROJECTS_CREATE->value, $managedUser['permissions']);
     }
 
     // =========================================================================
@@ -98,15 +101,15 @@ class UserManagementTest extends TestCase
             'email' => 'perms@example.com',
             'password' => 'strong-password-123',
             'permissions' => [
-                PermissionEnum::PROJECTS_CREATE->value,
-                PermissionEnum::USERS_VIEW->value,
+                ProjectGlobalPermission::PROJECTS_CREATE->value,
+                UserPermission::USERS_VIEW->value,
             ],
         ]);
 
         $user = User::where('email', 'perms@example.com')->first();
 
-        $this->assertTrue($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
-        $this->assertTrue($user->hasPermissionTo(PermissionEnum::USERS_VIEW->value));
+        $this->assertTrue($user->hasPermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value));
+        $this->assertTrue($user->hasPermissionTo(UserPermission::USERS_VIEW->value));
         $this->assertFalse($user->is_admin);
     }
 
@@ -138,18 +141,18 @@ class UserManagementTest extends TestCase
         $this->actingAs($admin)->put("/users/{$user->id}", [
             'name' => $user->name,
             'email' => $user->email,
-            'permissions' => [PermissionEnum::PROJECTS_CREATE->value],
+            'permissions' => [ProjectGlobalPermission::PROJECTS_CREATE->value],
         ])->assertRedirect();
 
         $user->refresh();
-        $this->assertTrue($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
+        $this->assertTrue($user->hasPermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value));
     }
 
     public function test_admin_can_remove_user_permissions(): void
     {
         $admin = $this->createAdmin();
         $user = $this->createRegularUser();
-        $user->givePermissionTo(PermissionEnum::PROJECTS_CREATE->value);
+        $user->givePermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value);
 
         $this->actingAs($admin)->put("/users/{$user->id}", [
             'name' => $user->name,
@@ -158,15 +161,15 @@ class UserManagementTest extends TestCase
         ])->assertRedirect();
 
         $user->refresh();
-        $this->assertFalse($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
+        $this->assertFalse($user->hasPermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value));
     }
 
     public function test_update_with_null_permissions_removes_existing_permissions(): void
     {
         $admin = $this->createAdmin();
         $user = $this->createRegularUser();
-        $user->givePermissionTo(PermissionEnum::PROJECTS_CREATE->value);
-        $this->assertTrue($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
+        $user->givePermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value);
+        $this->assertTrue($user->hasPermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value));
 
         $this->actingAs($admin)->put("/users/{$user->id}", [
             'name' => $user->name,
@@ -175,7 +178,7 @@ class UserManagementTest extends TestCase
         ])->assertRedirect();
 
         $user->refresh();
-        $this->assertFalse($user->hasPermissionTo(PermissionEnum::PROJECTS_CREATE->value));
+        $this->assertFalse($user->hasPermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value));
     }
 
     // =========================================================================
@@ -252,7 +255,7 @@ class UserManagementTest extends TestCase
     {
         $admin = $this->createAdmin();
         $user = $this->createRegularUser();
-        $user->givePermissionTo(PermissionEnum::PROJECTS_CREATE->value);
+        $user->givePermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value);
 
         $response = $this->actingAs($admin)->get("/users/{$user->id}");
 
@@ -263,7 +266,7 @@ class UserManagementTest extends TestCase
         $this->assertEquals($user->email, $props['user']['email']);
         $this->assertFalse($props['isOwnProfile']);
         $this->assertCount(1, $props['permissions']);
-        $this->assertSame(PermissionEnum::PROJECTS_CREATE->description(), $props['permissions'][0]['description']);
+        $this->assertSame(ProjectGlobalPermission::PROJECTS_CREATE->description(), $props['permissions'][0]['description']);
     }
 
     // =========================================================================

@@ -2,7 +2,10 @@
 
 namespace Modules\TimeTracking\Tests\Feature;
 
-use App\Enums\PermissionEnum;
+use Modules\CapacityManagement\Enums\CapacityPermission;
+use Modules\Project\Enums\ProjectGlobalPermission;
+use Modules\User\Contracts\PermissionRegistryInterface;
+use Modules\User\Enums\UserPermission;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Project\Models\Project;
@@ -74,7 +77,7 @@ class ManagerTimeWorkflowTest extends TestCase
             ->get('/manager')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('manager/Dashboard', false)
+                ->component('CapacityManagement/manager/Dashboard', false)
                 ->has('widgets.pendingApprovals')
             );
     }
@@ -95,7 +98,7 @@ class ManagerTimeWorkflowTest extends TestCase
             ->get('/manager')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('manager/Dashboard', false)
+                ->component('CapacityManagement/manager/Dashboard', false)
                 ->has('widgets.pendingApprovalEntries', 1)
                 ->where('widgets.pendingApprovalEntries.0.project.id', $this->managedProject->id)
             );
@@ -199,7 +202,7 @@ class ManagerTimeWorkflowTest extends TestCase
             ->get('/manager')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('manager/Dashboard', false)
+                ->component('CapacityManagement/manager/Dashboard', false)
                 ->has('widgets.teamProjectGroups', 1)
                 ->where('widgets.teamProjectGroups.0.name', 'Managed Alpha')
                 ->has('widgets.teamProjectGroups.0.members', 2)
@@ -241,7 +244,7 @@ class ManagerTimeWorkflowTest extends TestCase
             ->get('/manager')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('manager/Dashboard', false)
+                ->component('CapacityManagement/manager/Dashboard', false)
                 ->where('widgets.teamProjectGroups.0.name', 'Alpha Project')
                 ->where('widgets.teamProjectGroups.0.members.0.name', 'Shared User')
                 ->where('widgets.teamProjectGroups.0.members.0.project_allocation', 50)
@@ -272,7 +275,7 @@ class ManagerTimeWorkflowTest extends TestCase
             ->get('/manager')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('manager/Dashboard', false)
+                ->component('CapacityManagement/manager/Dashboard', false)
                 ->has('widgets.pendingApprovalEntries', 1)
                 ->where('widgets.pendingApprovalEntries.0.project.id', $this->managedProject->id)
             );
@@ -547,7 +550,7 @@ class ManagerTimeWorkflowTest extends TestCase
     public function project_view_all_user_cannot_approve_foreign_time_entry(): void
     {
         $viewer = User::factory()->create();
-        $viewer->givePermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value);
+        $viewer->givePermissionTo(ProjectGlobalPermission::PROJECTS_VIEW_ALL->value);
 
         $entry = TimeEntry::factory()->create([
             'project_id' => $this->otherProject->id,

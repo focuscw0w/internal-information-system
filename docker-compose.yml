@@ -1,5 +1,6 @@
 services:
   app:
+    image: internal-information-system-php-dev
     build:
       context: .
       dockerfile: Dockerfile
@@ -44,10 +45,7 @@ services:
       - app-network
 
   queue:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: php-dev
+    image: internal-information-system-php-dev
     command: php artisan queue:work --sleep=3 --tries=3
     volumes:
       - .:/var/www/html
@@ -59,10 +57,7 @@ services:
       - app-network
 
   scheduler:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: php-dev
+    image: internal-information-system-php-dev
     command: php artisan schedule:work
     volumes:
       - .:/var/www/html

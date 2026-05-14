@@ -5,6 +5,7 @@ namespace Modules\Project\Services;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Modules\Project\Contracts\NotificationServiceInterface;
+use Modules\Project\Contracts\ProjectAllocationSyncInterface;
 use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Enums\ProjectWorkload;
 use Modules\Project\Models\Project;
@@ -16,7 +17,7 @@ class TeamService implements TeamServiceInterface
      */
     public function __construct(
         private readonly NotificationServiceInterface $notificationService,
-        private readonly ProjectAllocationSyncService $allocationSyncService,
+        private readonly ProjectAllocationSyncInterface $allocationSyncService,
     ) {}
 
     /**

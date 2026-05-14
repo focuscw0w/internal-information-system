@@ -2,7 +2,7 @@
 
 namespace App\Support\Navigation;
 
-use App\Enums\PermissionEnum;
+use Modules\CapacityManagement\Enums\CapacityPermission;
 use Modules\Project\Models\Project;
 use Nwidart\Modules\Facades\Module;
 use Throwable;
@@ -65,7 +65,7 @@ class ModuleNavigation
     private static function canAccessManagerArea($user): bool
     {
         return $user->is_admin
-            || self::hasGlobalPermission($user, PermissionEnum::CAPACITY_MANAGE->value)
+            || self::hasGlobalPermission($user, CapacityPermission::CAPACITY_MANAGE->value)
             || Project::managedBy($user)->exists()
             || Project::whereUserCanManageTimeEntries($user)->exists();
     }

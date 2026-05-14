@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Modules\CapacityManagement\Http\Controllers;
 
-use App\Enums\PermissionEnum;
+use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
+use Modules\CapacityManagement\Enums\CapacityPermission;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
+use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Models\TimeEntry;
-use Modules\TimeTracking\Services\TimeEntryService;
 use Modules\User\Models\User;
 use Throwable;
 
@@ -19,14 +20,14 @@ class ManagerController extends Controller
 {
     public function __construct(
         private readonly CapacityManagementServiceInterface $capacityService,
-        private readonly TimeEntryService $timeEntryService,
+        private readonly TimeEntryServiceInterface $timeEntryService,
     ) {}
 
     public function dashboard(): Response
     {
         $user = auth()->user();
         $isAdmin = (bool) $user->is_admin;
-        $canManageCapacity = $isAdmin || $this->hasGlobalPermission($user, PermissionEnum::CAPACITY_MANAGE->value);
+        $canManageCapacity = $isAdmin || $this->hasGlobalPermission($user, CapacityPermission::CAPACITY_MANAGE->value);
         $widgets = [];
         $from = Carbon::now()->subDays(6)->startOfDay();
         $to = Carbon::now()->endOfDay();
@@ -190,7 +191,7 @@ class ManagerController extends Controller
             $this->buildTeamWidgets($user, $isAdmin, $canManageCapacity, $from, $to),
         );
 
-        return Inertia::render('manager/Dashboard', [
+        return Inertia::render('CapacityManagement/manager/Dashboard', [
             'widgets' => $widgets,
         ]);
     }

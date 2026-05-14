@@ -2,12 +2,12 @@
 
 namespace Modules\User\Http\Controllers;
 
-use App\Enums\PermissionEnum;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\User\Contracts\PermissionRegistryInterface;
 use Modules\User\Contracts\UserServiceInterface;
 use Modules\User\Http\Requests\StoreUserRequest;
 use Modules\User\Http\Requests\UpdateUserRequest;
@@ -15,7 +15,10 @@ use Modules\User\Models\User;
 
 class UserController extends Controller
 {
-    public function __construct(private readonly UserServiceInterface $userService) {}
+    public function __construct(
+        private readonly UserServiceInterface $userService,
+        private readonly PermissionRegistryInterface $permissions,
+    ) {}
 
     /**
      * Return a list of users in JSON format.
@@ -49,7 +52,7 @@ class UserController extends Controller
                     'permissions' => $user->getPermissionNames()->toArray(),
                     'created_at' => $user->created_at,
                 ]),
-            'availablePermissions' => PermissionEnum::groupedForFrontend(),
+            'availablePermissions' => $this->permissions->groupedForFrontend(),
             'status' => session('status'),
         ]);
     }

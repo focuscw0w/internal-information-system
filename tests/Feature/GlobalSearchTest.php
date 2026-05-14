@@ -1,6 +1,9 @@
 <?php
 
-use App\Enums\PermissionEnum;
+use Modules\CapacityManagement\Enums\CapacityPermission;
+use Modules\Project\Enums\ProjectGlobalPermission;
+use Modules\User\Contracts\PermissionRegistryInterface;
+use Modules\User\Enums\UserPermission;
 use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Models\Comment;
 use Modules\Project\Models\Project;
@@ -9,7 +12,7 @@ use Modules\User\Models\User;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
-    foreach (PermissionEnum::all() as $permission) {
+    foreach (app(PermissionRegistryInterface::class)->all() as $permission) {
         Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
     }
 });
@@ -21,7 +24,7 @@ function actionIds(array $results): array
 
 test('admin can search across modules and sees permitted quick actions', function () {
     $admin = User::factory()->create(['is_admin' => true, 'name' => 'CRM Admin']);
-    $admin->syncPermissions(PermissionEnum::all());
+    $admin->syncPermissions(app(PermissionRegistryInterface::class)->all());
 
     $project = Project::factory()->create(['name' => 'CRM Alpha']);
     $task = Task::factory()->create([
@@ -113,7 +116,7 @@ test('default user only sees visible project content and shared users', function
 
 test('create actions respect global and project permissions', function () {
     $creator = User::factory()->create();
-    $creator->givePermissionTo(PermissionEnum::PROJECTS_CREATE->value);
+    $creator->givePermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value);
 
     $taskCreator = User::factory()->create();
     $allowedProject = Project::factory()->create(['name' => 'CRM Allowed Project']);
@@ -151,7 +154,7 @@ test('create actions respect global and project permissions', function () {
 test('project creation endpoint requires create permission', function () {
     $user = User::factory()->create();
     $creator = User::factory()->create();
-    $creator->givePermissionTo(PermissionEnum::PROJECTS_CREATE->value);
+    $creator->givePermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value);
 
     $payload = [
         'name' => 'Permission Project',

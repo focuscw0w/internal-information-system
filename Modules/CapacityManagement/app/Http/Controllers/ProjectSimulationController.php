@@ -2,11 +2,11 @@
 
 namespace Modules\CapacityManagement\Http\Controllers;
 
-use App\Enums\PermissionEnum;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\CapacityManagement\DTO\ProjectSimulationInput;
+use Modules\CapacityManagement\Enums\CapacityPermission;
 use Modules\CapacityManagement\Http\Requests\ProjectSimulationRequest;
 use Modules\CapacityManagement\Services\ProjectSimulationService;
 use Modules\Project\Models\Project;
@@ -32,7 +32,7 @@ class ProjectSimulationController extends Controller
                 'status' => $project->status,
             ],
             'simulation' => $simulation->toArray(),
-            'can_manage' => $request->user()?->can(PermissionEnum::CAPACITY_MANAGE->value) ?? false,
+            'can_manage' => $request->user()?->can(CapacityPermission::CAPACITY_MANAGE->value) ?? false,
         ]);
     }
 

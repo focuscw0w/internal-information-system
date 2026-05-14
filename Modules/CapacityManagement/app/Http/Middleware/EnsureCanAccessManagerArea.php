@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace Modules\CapacityManagement\Http\Middleware;
 
-use App\Enums\PermissionEnum;
 use Closure;
 use Illuminate\Http\Request;
+use Modules\CapacityManagement\Enums\CapacityPermission;
 use Modules\Project\Models\Project;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -21,7 +21,7 @@ class EnsureCanAccessManagerArea
 
         if (
             $user->is_admin
-            || $this->hasGlobalPermission($user, PermissionEnum::CAPACITY_MANAGE->value)
+            || $this->hasGlobalPermission($user, CapacityPermission::CAPACITY_MANAGE->value)
             || Project::managedBy($user)->exists()
             || Project::whereUserCanManageTimeEntries($user)->exists()
         ) {

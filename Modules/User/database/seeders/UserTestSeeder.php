@@ -2,9 +2,9 @@
 
 namespace Modules\User\Database\Seeders;
 
-use App\Enums\PermissionEnum;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Modules\User\Contracts\PermissionRegistryInterface;
 use Modules\User\Models\User;
 
 class UserTestSeeder extends Seeder
@@ -21,14 +21,16 @@ class UserTestSeeder extends Seeder
         );
 
         $admin->update(['is_admin' => true]);
-        $admin->syncPermissions(PermissionEnum::all());
+
+        $allPermissions = app(PermissionRegistryInterface::class)->all();
+        $admin->syncPermissions($allPermissions);
 
         $this->command->info('');
         $this->command->info('✅ UserTestSeeder completed');
         $this->command->table(
             ['Rola', 'Email', 'Heslo', 'Permissions'],
             [
-                ['Admin', 'admin@test.com', 'password', implode(', ', PermissionEnum::all())],
+                ['Admin', 'admin@test.com', 'password', implode(', ', $allPermissions)],
             ]
         );
         $this->command->info('');

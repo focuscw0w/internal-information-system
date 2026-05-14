@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\EnsureCanAccessManagerArea;
+use Modules\CapacityManagement\Http\Middleware\EnsureCanAccessManagerArea;
 use Modules\TimeTracking\Http\Controllers\TimeTrackingController;
 use Modules\TimeTracking\Http\Controllers\TimeEntryController;
 use Modules\TimeTracking\Http\Controllers\TimeEntryApprovalController;

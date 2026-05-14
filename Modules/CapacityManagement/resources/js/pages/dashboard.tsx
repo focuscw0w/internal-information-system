@@ -9,9 +9,9 @@ import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { AlertTriangle, CalendarCheck, Clock3 } from 'lucide-react';
-import { AtRiskProjectsCard, type DashboardProject } from '../../../Modules/Project/resources/js/components/dashboard/at-risk-projects-card';
-import { TasksTodayCard, type DashboardTask } from '../../../Modules/Project/resources/js/components/dashboard/tasks-today-card';
-import { TimeWeekToDateCard, type TimeWeekToDate } from '../../../Modules/TimeTracking/resources/js/components/dashboard/time-week-to-date-card';
+import { AtRiskProjectsCard, type DashboardProject } from '../../../../Project/resources/js/components/dashboard/at-risk-projects-card';
+import { TasksTodayCard, type DashboardTask } from '../../../../Project/resources/js/components/dashboard/tasks-today-card';
+import { TimeWeekToDateCard, type TimeWeekToDate } from '../../../../TimeTracking/resources/js/components/dashboard/time-week-to-date-card';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

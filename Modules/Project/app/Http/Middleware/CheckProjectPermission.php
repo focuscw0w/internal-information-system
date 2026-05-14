@@ -3,9 +3,9 @@
 
 namespace Modules\Project\Http\Middleware;
 
-use App\Enums\PermissionEnum;
 use Closure;
 use Illuminate\Http\Request;
+use Modules\Project\Enums\ProjectGlobalPermission;
 use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Models\Project;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +23,7 @@ class CheckProjectPermission
         $projectId = $request->route('id') ?? $request->route('projectId');
         $project = Project::findOrFail($projectId);
 
-        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)
+        if ($user->hasPermissionTo(ProjectGlobalPermission::PROJECTS_VIEW_ALL->value)
             && $this->onlyReadPermissions($permissions)
         ) {
             return $next($request);

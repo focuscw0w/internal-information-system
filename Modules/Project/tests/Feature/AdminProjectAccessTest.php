@@ -2,7 +2,10 @@
 
 namespace Modules\Project\Tests\Feature;
 
-use App\Enums\PermissionEnum;
+use Modules\CapacityManagement\Enums\CapacityPermission;
+use Modules\Project\Enums\ProjectGlobalPermission;
+use Modules\User\Contracts\PermissionRegistryInterface;
+use Modules\User\Enums\UserPermission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Models\Project;
@@ -19,7 +22,7 @@ class AdminProjectAccessTest extends TestCase
     {
         parent::setUp();
 
-        foreach (PermissionEnum::all() as $permission) {
+        foreach (app(PermissionRegistryInterface::class)->all() as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
     }
@@ -31,7 +34,7 @@ class AdminProjectAccessTest extends TestCase
     private function createAdmin(): User
     {
         $admin = User::factory()->create(['is_admin' => true]);
-        $admin->syncPermissions(PermissionEnum::all());
+        $admin->syncPermissions(app(PermissionRegistryInterface::class)->all());
 
         return $admin;
     }
@@ -39,7 +42,7 @@ class AdminProjectAccessTest extends TestCase
     private function createProjectViewer(): User
     {
         $viewer = User::factory()->create(['is_admin' => false]);
-        $viewer->givePermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value);
+        $viewer->givePermissionTo(ProjectGlobalPermission::PROJECTS_VIEW_ALL->value);
 
         return $viewer;
     }
@@ -364,12 +367,12 @@ class AdminProjectAccessTest extends TestCase
 
     public function test_user_with_only_projects_create_cannot_view_others_projects(): void
     {
-        foreach (PermissionEnum::all() as $permission) {
+        foreach (app(PermissionRegistryInterface::class)->all() as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
         $user = User::factory()->create();
-        $user->givePermissionTo(PermissionEnum::PROJECTS_CREATE->value);
+        $user->givePermissionTo(ProjectGlobalPermission::PROJECTS_CREATE->value);
 
         $project = $this->createProject();
 

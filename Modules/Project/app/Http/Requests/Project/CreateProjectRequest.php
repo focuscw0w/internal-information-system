@@ -2,9 +2,9 @@
 
 namespace Modules\Project\Http\Requests\Project;
 
-use App\Enums\PermissionEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Project\Enums\ProjectGlobalPermission;
 use Modules\Project\Enums\ProjectPermission;
 use Modules\Project\Enums\ProjectStatus;
 use Modules\Project\Enums\ProjectWorkload;
@@ -28,7 +28,7 @@ class CreateProjectRequest extends FormRequest
         }
 
         try {
-            return $user->can(PermissionEnum::PROJECTS_CREATE->value);
+            return $user->can(ProjectGlobalPermission::PROJECTS_CREATE->value);
         } catch (Throwable) {
             return false;
         }

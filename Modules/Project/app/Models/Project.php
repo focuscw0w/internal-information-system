@@ -2,7 +2,6 @@
 
 namespace Modules\Project\Models;
 
-use App\Enums\PermissionEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Project\Database\Factories\ProjectFactory;
+use Modules\Project\Enums\ProjectGlobalPermission;
 use Modules\Project\Enums\ProjectPermission;
 use Modules\User\Models\User;
 
@@ -182,7 +182,7 @@ class Project extends Model
             return is_array($permissions) ? $permissions : [];
         }
 
-        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
+        if ($user->hasPermissionTo(ProjectGlobalPermission::PROJECTS_VIEW_ALL->value)) {
             return ProjectPermission::viewPermissions();
         }
 
@@ -207,7 +207,7 @@ class Project extends Model
             return in_array($permission, (array) $permissions, strict: true);
         }
 
-        if ($user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
+        if ($user->hasPermissionTo(ProjectGlobalPermission::PROJECTS_VIEW_ALL->value)) {
             return in_array($permission, ProjectPermission::viewPermissions(), strict: true);
         }
 
@@ -259,7 +259,7 @@ class Project extends Model
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->is_admin || $user->hasPermissionTo(PermissionEnum::PROJECTS_VIEW_ALL->value)) {
+        if ($user->is_admin || $user->hasPermissionTo(ProjectGlobalPermission::PROJECTS_VIEW_ALL->value)) {
             return $query;
         }
 

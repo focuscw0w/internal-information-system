@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Project\Contracts\NotificationServiceInterface;
+use Modules\Project\Contracts\ProjectAllocationSyncInterface;
 use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Models\Project;
@@ -20,7 +21,7 @@ class ProjectService implements ProjectServiceInterface
     public function __construct(
         protected TeamServiceInterface $teamService,
         protected NotificationServiceInterface $notificationService,
-        protected ProjectAllocationSyncService $allocationSyncService,
+        protected ProjectAllocationSyncInterface $allocationSyncService,
     ) {}
 
     /**
