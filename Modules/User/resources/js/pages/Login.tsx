@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, Head, Link } from '@inertiajs/react';
-import { Eye, EyeOff, LoaderCircle, LockKeyhole } from 'lucide-react';
+import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 
 interface LoginProps {
@@ -168,27 +168,11 @@ export default function Login({ status }: LoginProps) {
                                 )}
                             </Form>
 
-                            <div className="mt-7 rounded-md border border-border bg-muted/60 px-4 py-3 text-xs text-muted-foreground">
-                                <div className="mb-1 flex items-center gap-1.5 font-medium text-[var(--text-secondary)]">
-                                    <LockKeyhole className="size-3" />
-                                    Single sign-on
-                                </div>
-                                Alebo sa prihlás cez{' '}
-                                <span className="font-medium text-[var(--accent-blue-text)]">
-                                    firemný SSO
-                                </span>
-                                .
-                            </div>
-
                             {status && (
                                 <div className="mt-4 rounded-md border border-[var(--success-border)] bg-[var(--success-soft)] px-4 py-3 text-center text-sm font-medium text-[var(--success-text)]">
                                     {status}
                                 </div>
                             )}
-
-                            <p className="mt-8 text-center text-xs text-muted-foreground">
-                                © 2026 Atlas · v2.4.1
-                            </p>
                         </div>
                     </div>
                 </section>
