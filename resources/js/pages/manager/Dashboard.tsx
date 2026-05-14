@@ -17,7 +17,6 @@ import {
     CheckCheck,
     Clock,
     Download,
-    Gauge,
     TrendingUp,
     Users,
     X,
@@ -52,6 +51,39 @@ type TeamMember = {
     weekly_utilization: number;
     free_capacity_hours: number;
     is_over_capacity: boolean;
+    project_count?: number;
+    projects?: TeamMemberProject[];
+};
+
+type TeamMemberProject = {
+    id: number;
+    name: string;
+    allocation: number;
+    weekly_hours: number;
+    role: 'owner' | 'member';
+};
+
+type TeamProjectMember = TeamMember & {
+    email: string | null;
+    role: 'owner' | 'member' | 'unassigned';
+    permissions: string[];
+    project_allocation: number;
+    project_weekly_hours: number;
+    total_weekly_capacity_hours: number;
+    total_weekly_load_hours: number;
+    total_weekly_utilization: number;
+};
+
+type TeamProjectGroup = {
+    id: number | null;
+    name: string;
+    status: string;
+    progress: number;
+    end_date: string | null;
+    is_overdue: boolean;
+    days_remaining: number;
+    is_at_risk: boolean;
+    members: TeamProjectMember[];
 };
 
 type TeamHoursWidget = {
@@ -96,6 +128,7 @@ type Widgets = {
     pendingApprovals?: PendingApprovalsWidget;
     pendingApprovalEntries?: PendingApprovalEntry[];
     teamMembers?: TeamMember[];
+    teamProjectGroups?: TeamProjectGroup[];
     overdueTasks?: ManagerTask[];
     atRiskProjects?: ManagerProject[];
     teamHoursThisWeek?: TeamHoursWidget;
@@ -167,9 +200,13 @@ function ProgressBar({ value }: { value: number }) {
 function ProjectStatusBadge({
     project,
 }: {
-    project: ManagedProject | ManagerProject;
+    project: {
+        status: string;
+        is_overdue: boolean;
+        is_at_risk?: boolean;
+    };
 }) {
-    const isAtRisk = 'is_at_risk' in project && project.is_at_risk;
+    const isAtRisk = Boolean(project.is_at_risk);
     const cls = project.is_overdue
         ? 'badge--danger'
         : isAtRisk
@@ -422,6 +459,7 @@ export default function Dashboard({ widgets }: DashboardProps) {
                 {tab === 'team' ? (
                     <TeamPanel
                         rows={teamRows}
+                        groups={widgets.teamProjectGroups ?? []}
                         pendingCount={widgets.pendingApprovals?.count ?? 0}
                         overdueCount={overdueCount}
                         atRiskCount={atRiskCount}
@@ -811,12 +849,14 @@ function ApprovalsPanel({
 
 function TeamPanel({
     rows,
+    groups,
     pendingCount,
     overdueCount,
     atRiskCount,
     onShowApprovals,
 }: {
     rows: TeamMember[];
+    groups: TeamProjectGroup[];
     pendingCount: number;
     overdueCount: number;
     atRiskCount: number;
@@ -824,6 +864,11 @@ function TeamPanel({
 }) {
     const [selectedMember, setSelectedMember] = useState<TeamMember | null>(
         null,
+    );
+    const [viewMode, setViewMode] = useState<'projects' | 'people'>('projects');
+    const projectMembershipCount = groups.reduce(
+        (sum, group) => sum + group.members.length,
+        0,
     );
 
     return (
@@ -834,105 +879,40 @@ function TeamPanel({
                         <div>
                             <h3 className="card__title">Vyťaženie tímu</h3>
                             <div className="card__sub">
-                                {rows.length} ľudí · tento týždeň
+                                {viewMode === 'projects'
+                                    ? `${groups.length} projektov · ${projectMembershipCount} zaradení`
+                                    : `${rows.length} ľudí · tento týždeň`}
                             </div>
                         </div>
-                        <Gauge className="size-5 text-[var(--accent-blue-text)]" />
+                        <div className="tabbar mb-0">
+                            <button
+                                type="button"
+                                className={`tab ${viewMode === 'projects' ? 'is-active' : ''}`}
+                                onClick={() => setViewMode('projects')}
+                            >
+                                Podľa projektov
+                            </button>
+                            <button
+                                type="button"
+                                className={`tab ${viewMode === 'people' ? 'is-active' : ''}`}
+                                onClick={() => setViewMode('people')}
+                            >
+                                Podľa ľudí
+                            </button>
+                        </div>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Člen tímu</th>
-                                    <th className="w-64">Vyťaženie</th>
-                                    <th>Hodiny / cieľ</th>
-                                    <th>Voľná kapacita</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {rows.map((member) => (
-                                    <tr
-                                        key={member.id}
-                                        className="cursor-pointer"
-                                        onClick={() =>
-                                            setSelectedMember(member)
-                                        }
-                                    >
-                                        <td>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar name={member.name} />
-                                                <span className="font-medium">
-                                                    {member.name}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className="flex items-center gap-3">
-                                                <div className="min-w-32 flex-1">
-                                                    <ProgressBar
-                                                        value={
-                                                            member.weekly_utilization
-                                                        }
-                                                    />
-                                                </div>
-                                                <span
-                                                    className={`mono min-w-11 text-right text-xs font-semibold ${
-                                                        member.is_over_capacity
-                                                            ? 'text-[var(--danger-text)]'
-                                                            : ''
-                                                    }`}
-                                                >
-                                                    {Math.round(
-                                                        member.weekly_utilization,
-                                                    )}
-                                                    %
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="mono text-xs">
-                                            {formatHours(
-                                                member.weekly_load_hours,
-                                            )}
-                                            h{' '}
-                                            <span className="text-muted-foreground">
-                                                /{' '}
-                                                {formatHours(
-                                                    member.weekly_capacity_hours,
-                                                )}
-                                                h
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                className={`badge ${
-                                                    member.is_over_capacity
-                                                        ? 'badge--danger'
-                                                        : member.free_capacity_hours >=
-                                                            8
-                                                          ? 'badge--success'
-                                                          : 'badge--neutral'
-                                                }`}
-                                            >
-                                                {member.is_over_capacity
-                                                    ? 'Nad kapacitou'
-                                                    : `${formatHours(member.free_capacity_hours)}h`}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {rows.length === 0 ? (
-                                    <tr>
-                                        <td
-                                            colSpan={4}
-                                            className="py-10 text-center text-muted-foreground"
-                                        >
-                                            Zatiaľ tu nie sú tímové dáta.
-                                        </td>
-                                    </tr>
-                                ) : null}
-                            </tbody>
-                        </table>
-                    </div>
+
+                    {viewMode === 'projects' ? (
+                        <ProjectTeamTable
+                            groups={groups}
+                            onSelectMember={setSelectedMember}
+                        />
+                    ) : (
+                        <PeopleTeamTable
+                            rows={rows}
+                            onSelectMember={setSelectedMember}
+                        />
+                    )}
                 </section>
 
                 <aside className="col gap-4">
@@ -1045,6 +1025,41 @@ function TeamPanel({
                             />
                         </div>
 
+                        {selectedMember.projects?.length ? (
+                            <div>
+                                <div className="mb-2 text-sm font-medium">
+                                    Projekty
+                                </div>
+                                <div className="space-y-2">
+                                    {selectedMember.projects.map((project) => (
+                                        <div
+                                            key={project.id}
+                                            className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm"
+                                        >
+                                            <div>
+                                                <div className="font-medium">
+                                                    {project.name}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {project.role === 'owner'
+                                                        ? 'Vlastník'
+                                                        : 'Člen tímu'}{' '}
+                                                    · {project.allocation}%
+                                                    alokácia
+                                                </div>
+                                            </div>
+                                            <span className="mono text-xs">
+                                                {formatHours(
+                                                    project.weekly_hours,
+                                                )}
+                                                h
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
+
                         <div>
                             <div className="mb-2 flex items-center justify-between text-sm">
                                 <span className="font-medium">
@@ -1065,6 +1080,249 @@ function TeamPanel({
                 )}
             </Dialog>
         </>
+    );
+}
+
+function ProjectTeamTable({
+    groups,
+    onSelectMember,
+}: {
+    groups: TeamProjectGroup[];
+    onSelectMember: (member: TeamMember) => void;
+}) {
+    return (
+        <div className="space-y-5">
+            {groups.map((group) => (
+                <div
+                    key={group.id ?? 'unassigned'}
+                    className="rounded-md border border-border"
+                >
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h4 className="text-sm font-semibold">
+                                    {group.name}
+                                </h4>
+                                {group.id !== null ? (
+                                    <ProjectStatusBadge project={group} />
+                                ) : (
+                                    <span className="badge badge--neutral">
+                                        Bez projektu
+                                    </span>
+                                )}
+                            </div>
+                            <div className="mt-1 text-xs text-muted-foreground">
+                                {group.members.length} členov
+                                {group.end_date
+                                    ? ` · deadline ${formatDate(group.end_date)}`
+                                    : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Člen tímu</th>
+                                    <th>Rola</th>
+                                    <th>Alokácia</th>
+                                    <th className="w-64">
+                                        Projektové vyťaženie
+                                    </th>
+                                    <th>Hodiny / alokácia</th>
+                                    <th>Celkové vyťaženie</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {group.members.map((member) => (
+                                    <tr
+                                        key={`${group.id ?? 'unassigned'}-${member.id}`}
+                                        className="cursor-pointer"
+                                        onClick={() => onSelectMember(member)}
+                                    >
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar name={member.name} />
+                                                <span className="font-medium">
+                                                    {member.name}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className="badge badge--neutral">
+                                                {member.role === 'owner'
+                                                    ? 'Vlastník'
+                                                    : member.role ===
+                                                        'unassigned'
+                                                      ? 'Bez projektu'
+                                                      : 'Člen'}
+                                            </span>
+                                        </td>
+                                        <td className="mono text-xs">
+                                            {member.project_allocation}%
+                                        </td>
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <div className="min-w-32 flex-1">
+                                                    <ProgressBar
+                                                        value={
+                                                            member.weekly_utilization
+                                                        }
+                                                    />
+                                                </div>
+                                                <span
+                                                    className={`mono min-w-11 text-right text-xs font-semibold ${
+                                                        member.is_over_capacity
+                                                            ? 'text-[var(--danger-text)]'
+                                                            : ''
+                                                    }`}
+                                                >
+                                                    {Math.round(
+                                                        member.weekly_utilization,
+                                                    )}
+                                                    %
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="mono text-xs">
+                                            {formatHours(
+                                                member.project_weekly_hours,
+                                            )}
+                                            h{' '}
+                                            <span className="text-muted-foreground">
+                                                /{' '}
+                                                {formatHours(
+                                                    member.weekly_capacity_hours,
+                                                )}
+                                                h
+                                            </span>
+                                        </td>
+                                        <td className="mono text-xs">
+                                            {Math.round(
+                                                member.total_weekly_utilization,
+                                            )}
+                                            %
+                                        </td>
+                                    </tr>
+                                ))}
+                                {group.members.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan={6}
+                                            className="py-8 text-center text-muted-foreground"
+                                        >
+                                            Projekt zatiaľ nemá členov tímu.
+                                        </td>
+                                    </tr>
+                                ) : null}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ))}
+            {groups.length === 0 ? (
+                <div className="py-10 text-center text-muted-foreground">
+                    Zatiaľ tu nie sú tímové dáta.
+                </div>
+            ) : null}
+        </div>
+    );
+}
+
+function PeopleTeamTable({
+    rows,
+    onSelectMember,
+}: {
+    rows: TeamMember[];
+    onSelectMember: (member: TeamMember) => void;
+}) {
+    return (
+        <div className="overflow-x-auto">
+            <table className="table">
+                <thead>
+                    <tr>
+                        <th>Člen tímu</th>
+                        <th>Projekty</th>
+                        <th className="w-64">Vyťaženie</th>
+                        <th>Hodiny / cieľ</th>
+                        <th>Voľná kapacita</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows.map((member) => (
+                        <tr
+                            key={member.id}
+                            className="cursor-pointer"
+                            onClick={() => onSelectMember(member)}
+                        >
+                            <td>
+                                <div className="flex items-center gap-3">
+                                    <Avatar name={member.name} />
+                                    <span className="font-medium">
+                                        {member.name}
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <span className="badge badge--neutral">
+                                    {member.project_count ?? 0}
+                                </span>
+                            </td>
+                            <td>
+                                <div className="flex items-center gap-3">
+                                    <div className="min-w-32 flex-1">
+                                        <ProgressBar
+                                            value={member.weekly_utilization}
+                                        />
+                                    </div>
+                                    <span
+                                        className={`mono min-w-11 text-right text-xs font-semibold ${
+                                            member.is_over_capacity
+                                                ? 'text-[var(--danger-text)]'
+                                                : ''
+                                        }`}
+                                    >
+                                        {Math.round(member.weekly_utilization)}%
+                                    </span>
+                                </div>
+                            </td>
+                            <td className="mono text-xs">
+                                {formatHours(member.weekly_load_hours)}h{' '}
+                                <span className="text-muted-foreground">
+                                    /{' '}
+                                    {formatHours(member.weekly_capacity_hours)}h
+                                </span>
+                            </td>
+                            <td>
+                                <span
+                                    className={`badge ${
+                                        member.is_over_capacity
+                                            ? 'badge--danger'
+                                            : member.free_capacity_hours >= 8
+                                              ? 'badge--success'
+                                              : 'badge--neutral'
+                                    }`}
+                                >
+                                    {member.is_over_capacity
+                                        ? 'Nad kapacitou'
+                                        : `${formatHours(member.free_capacity_hours)}h`}
+                                </span>
+                            </td>
+                        </tr>
+                    ))}
+                    {rows.length === 0 ? (
+                        <tr>
+                            <td
+                                colSpan={5}
+                                className="py-10 text-center text-muted-foreground"
+                            >
+                                Zatiaľ tu nie sú tímové dáta.
+                            </td>
+                        </tr>
+                    ) : null}
+                </tbody>
+            </table>
+        </div>
     );
 }
 

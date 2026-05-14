@@ -189,6 +189,69 @@ class ManagerTimeWorkflowTest extends TestCase
     }
 
     #[Test]
+    public function manager_dashboard_groups_my_team_by_managed_projects(): void
+    {
+        $this->manager->update(['name' => 'Manager Person']);
+        $this->managedProject->owner->update(['name' => 'Owner Person']);
+        $this->managedProject->update(['name' => 'Managed Alpha']);
+
+        $this->actingAs($this->manager)
+            ->get('/manager')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('manager/Dashboard', false)
+                ->has('widgets.teamProjectGroups', 1)
+                ->where('widgets.teamProjectGroups.0.name', 'Managed Alpha')
+                ->has('widgets.teamProjectGroups.0.members', 2)
+                ->where('widgets.teamProjectGroups.0.members.0.name', 'Manager Person')
+                ->where('widgets.teamProjectGroups.0.members.0.role', 'member')
+                ->where('widgets.teamProjectGroups.0.members.1.name', 'Owner Person')
+                ->where('widgets.teamProjectGroups.0.members.1.role', 'owner')
+            );
+    }
+
+    #[Test]
+    public function admin_dashboard_lists_a_person_under_each_project_they_belong_to(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true, 'name' => 'Admin User']);
+        $sharedMember = User::factory()->create(['name' => 'Shared User']);
+
+        $this->manager->update(['name' => 'Zzz Manager']);
+        $this->managedProject->owner->update(['name' => 'Zzz Owner A']);
+        $this->otherProject->owner->update(['name' => 'Zzz Owner B']);
+        $this->managedProject->update([
+            'name' => 'Alpha Project',
+            'end_date' => now()->addDay(),
+        ]);
+        $this->otherProject->update([
+            'name' => 'Beta Project',
+            'end_date' => now()->addDays(2),
+        ]);
+
+        $this->managedProject->team()->attach($sharedMember->id, [
+            'permissions' => json_encode(['view_project']),
+            'allocation' => 50,
+        ]);
+        $this->otherProject->team()->attach($sharedMember->id, [
+            'permissions' => json_encode(['view_project']),
+            'allocation' => 25,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/manager')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('manager/Dashboard', false)
+                ->where('widgets.teamProjectGroups.0.name', 'Alpha Project')
+                ->where('widgets.teamProjectGroups.0.members.0.name', 'Shared User')
+                ->where('widgets.teamProjectGroups.0.members.0.project_allocation', 50)
+                ->where('widgets.teamProjectGroups.1.name', 'Beta Project')
+                ->where('widgets.teamProjectGroups.1.members.0.name', 'Shared User')
+                ->where('widgets.teamProjectGroups.1.members.0.project_allocation', 25)
+            );
+    }
+
+    #[Test]
     public function manager_dashboard_only_lists_approval_entries_from_projects_the_user_can_manage(): void
     {
         TimeEntry::factory()->create([
