@@ -1,15 +1,14 @@
 <?php
 
 return [
-    'group' => 'Správa systému',
+    'group' => 'Administrácia',
     'items' => [
         [
             'title' => 'Používatelia',
             'route' => 'user.index',
             'icon' => 'Users',
             'admin_only' => true,
-            'order' => 50,
+            'order' => 10,
         ],
     ],
 ];
- 

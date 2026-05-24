@@ -38,6 +38,8 @@ class RealisticOperationsSeeder extends Seeder
 
     private CarbonImmutable $seedWindowStart;
 
+    private CarbonImmutable $seedWindowEnd;
+
     private TimeEntryServiceInterface $timeEntryService;
 
     private NotificationServiceInterface $notificationService;
@@ -56,6 +58,7 @@ class RealisticOperationsSeeder extends Seeder
         $this->today = CarbonImmutable::today();
         $this->currentWeekStart = $this->today->startOfWeek();
         $this->seedWindowStart = $this->currentWeekStart->subWeeks(2);
+        $this->seedWindowEnd = $this->today->addDays(90);
         $this->timeEntryService = app(TimeEntryServiceInterface::class);
         $this->notificationService = app(NotificationServiceInterface::class);
 
@@ -177,7 +180,7 @@ class RealisticOperationsSeeder extends Seeder
             'status' => ProjectStatus::ACTIVE->value,
             'workload' => ProjectWorkload::HIGH->value,
             'start_date' => $this->seedWindowStart->subWeek(),
-            'end_date' => $this->today->addDays(18),
+            'end_date' => $this->seedWindowEnd,
             'progress' => 0,
             'capacity_used' => 88,
             'capacity_available' => 12,
@@ -247,7 +250,7 @@ class RealisticOperationsSeeder extends Seeder
             'status' => ProjectStatus::PLANNING->value,
             'workload' => ProjectWorkload::MEDIUM->value,
             'start_date' => $this->seedWindowStart,
-            'end_date' => $this->today->addDays(45),
+            'end_date' => $this->seedWindowEnd,
             'progress' => 0,
             'capacity_used' => 46,
             'capacity_available' => 54,
@@ -304,7 +307,7 @@ class RealisticOperationsSeeder extends Seeder
             'priority' => TaskPriority::HIGH->value,
             'estimated_hours' => 120,
             'start_date' => $this->seedWindowStart->addDays(1),
-            'due_date' => $this->today->addDays(12),
+            'due_date' => $this->today->addDays(45),
             'assigned_users' => ['martina', 'peter'],
             'assigned_by' => 'martina',
         ]);
@@ -316,7 +319,7 @@ class RealisticOperationsSeeder extends Seeder
             'priority' => TaskPriority::URGENT->value,
             'estimated_hours' => 190,
             'start_date' => $this->seedWindowStart->addDays(2),
-            'due_date' => $this->today->addDays(9),
+            'due_date' => $this->today->addDays(30),
             'assigned_users' => ['martina'],
             'assigned_by' => 'martina',
         ]);
@@ -328,7 +331,7 @@ class RealisticOperationsSeeder extends Seeder
             'priority' => TaskPriority::URGENT->value,
             'estimated_hours' => 180,
             'start_date' => $this->seedWindowStart,
-            'due_date' => $this->today->addDays(7),
+            'due_date' => $this->today->addDays(24),
             'assigned_users' => ['peter'],
             'assigned_by' => 'martina',
         ]);
@@ -340,7 +343,7 @@ class RealisticOperationsSeeder extends Seeder
             'priority' => TaskPriority::HIGH->value,
             'estimated_hours' => 110,
             'start_date' => $this->seedWindowStart,
-            'due_date' => $this->today->addDays(10),
+            'due_date' => $this->today->addDays(35),
             'assigned_users' => ['eva'],
             'assigned_by' => 'martina',
         ]);
@@ -352,7 +355,7 @@ class RealisticOperationsSeeder extends Seeder
             'priority' => TaskPriority::HIGH->value,
             'estimated_hours' => 96,
             'start_date' => $this->seedWindowStart->addWeek(),
-            'due_date' => $this->today->addDays(6),
+            'due_date' => $this->today->addDays(28),
             'assigned_users' => ['simon'],
             'assigned_by' => 'martina',
         ]);
@@ -363,8 +366,8 @@ class RealisticOperationsSeeder extends Seeder
             'status' => TaskStatus::TODO->value,
             'priority' => TaskPriority::MEDIUM->value,
             'estimated_hours' => 72,
-            'start_date' => $this->today->addDays(4),
-            'due_date' => $this->today->addDays(20),
+            'start_date' => $this->today->addDays(35),
+            'due_date' => $this->today->addDays(65),
             'assigned_users' => ['lukas'],
             'assigned_by' => 'martina',
         ]);
@@ -376,7 +379,7 @@ class RealisticOperationsSeeder extends Seeder
             'priority' => TaskPriority::URGENT->value,
             'estimated_hours' => 84,
             'start_date' => $this->today,
-            'due_date' => $this->today->addDay(),
+            'due_date' => $this->today->addDays(14),
             'assigned_users' => ['martina', 'lukas'],
             'assigned_by' => 'martina',
         ]);
@@ -388,7 +391,7 @@ class RealisticOperationsSeeder extends Seeder
             'priority' => TaskPriority::HIGH->value,
             'estimated_hours' => 68,
             'start_date' => $this->today,
-            'due_date' => $this->today->addDays(3),
+            'due_date' => $this->today->addDays(21),
             'assigned_users' => ['martina'],
             'assigned_by' => 'martina',
         ]);
@@ -447,8 +450,8 @@ class RealisticOperationsSeeder extends Seeder
             'status' => TaskStatus::TODO->value,
             'priority' => TaskPriority::MEDIUM->value,
             'estimated_hours' => 20,
-            'start_date' => $this->today->addDays(5),
-            'due_date' => $this->today->addDays(16),
+            'start_date' => $this->today->addDays(30),
+            'due_date' => $this->today->addDays(60),
             'assigned_users' => ['nina'],
             'assigned_by' => 'lukas',
         ]);
@@ -473,7 +476,7 @@ class RealisticOperationsSeeder extends Seeder
             'priority' => TaskPriority::HIGH->value,
             'estimated_hours' => 28,
             'start_date' => $this->seedWindowStart->addWeek(),
-            'due_date' => $this->today->addDays(8),
+            'due_date' => $this->today->addDays(40),
             'assigned_users' => ['eva', 'nina'],
             'assigned_by' => 'admin',
         ]);
@@ -485,7 +488,7 @@ class RealisticOperationsSeeder extends Seeder
             'priority' => TaskPriority::MEDIUM->value,
             'estimated_hours' => 20,
             'start_date' => $this->seedWindowStart->addWeek(),
-            'due_date' => $this->today->addDays(14),
+            'due_date' => $this->today->addDays(50),
             'assigned_users' => ['admin'],
             'assigned_by' => 'admin',
         ]);
@@ -496,8 +499,8 @@ class RealisticOperationsSeeder extends Seeder
             'status' => TaskStatus::TODO->value,
             'priority' => TaskPriority::LOW->value,
             'estimated_hours' => 12,
-            'start_date' => $this->today->addDays(10),
-            'due_date' => $this->today->addDays(18),
+            'start_date' => $this->today->addDays(55),
+            'due_date' => $this->today->addDays(75),
             'assigned_users' => ['simon'],
             'assigned_by' => 'admin',
         ]);
@@ -1123,7 +1126,7 @@ class RealisticOperationsSeeder extends Seeder
                 ['Časové záznamy', (string) TimeEntry::count()],
                 ['Kapacity', (string) EmployeeCapacity::count()],
                 ['Notifikácie', (string) $notificationCount],
-                ['Obdobie', $this->seedWindowStart->toDateString().' - '.$this->today->toDateString()],
+                ['Obdobie', $this->seedWindowStart->toDateString().' - '.$this->seedWindowEnd->toDateString()],
             ]
         );
         $this->command->info('');
@@ -1162,8 +1165,6 @@ class RealisticOperationsSeeder extends Seeder
 
     private function createAllocations(Project $project, array $allocations): void
     {
-        $windowEnd = $this->currentWeekStart->addWeeks(4)->subDay();
-
         foreach ($allocations as $allocation) {
             ProjectAllocation::create([
                 'project_id' => $project->id,
@@ -1172,7 +1173,7 @@ class RealisticOperationsSeeder extends Seeder
                 'used_hours' => $allocation['used_hours'],
                 'percentage' => $allocation['percentage'],
                 'start_date' => $this->currentWeekStart,
-                'end_date' => $windowEnd,
+                'end_date' => $this->seedWindowEnd,
                 'notes' => $allocation['notes'],
             ]);
         }

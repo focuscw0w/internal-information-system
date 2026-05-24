@@ -136,6 +136,13 @@ class TimeReportController extends Controller
         $totalsByProject = $this->timeEntryService
             ->getTotalHoursPerProjectInPeriod($from, $to, $userIds, $projectIds, $status);
 
+        $periodDays = $from->diffInDays($to) + 1;
+        $prevTo = $from->copy()->subDay()->endOfDay();
+        $prevFrom = $prevTo->copy()->subDays($periodDays - 1)->startOfDay();
+        $previousPeriodHours = (float) $this->timeEntryService
+            ->getTotalHoursPerUserInPeriod($prevFrom, $prevTo, $userIds, $projectIds, $status)
+            ->sum();
+
         $base = $this->baseEntriesQuery($from, $to, $userIds, $projectIds, $status);
 
         $users = User::query()
@@ -202,6 +209,7 @@ class TimeReportController extends Controller
                 'top_contributors' => $topContributors[$projectId] ?? [],
             ])->sortByDesc('total_hours')->values(),
             'timeline' => $timeline,
+            'previous_period_hours' => $previousPeriodHours,
         ];
     }
 

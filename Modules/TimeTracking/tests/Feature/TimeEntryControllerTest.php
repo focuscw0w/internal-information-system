@@ -285,7 +285,7 @@ class TimeEntryControllerTest extends TestCase
     // ── UPDATE ──────────────────────────────────────────────
 
     #[Test]
-    public function user_can_update_own_entry(): void
+    public function member_cannot_update_own_entry(): void
     {
         $entry = TimeEntry::factory()->create([
             'project_id' => $this->project->id,
@@ -302,11 +302,7 @@ class TimeEntryControllerTest extends TestCase
                 'description' => 'Updated',
             ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('success');
-
-        $entry->refresh();
-        $this->assertEquals(4.0, $entry->hours);
+        $response->assertForbidden();
     }
 
     #[Test]
@@ -353,7 +349,7 @@ class TimeEntryControllerTest extends TestCase
     // ── DELETE ──────────────────────────────────────────────
 
     #[Test]
-    public function user_can_delete_own_entry(): void
+    public function member_cannot_delete_own_entry(): void
     {
         $entry = TimeEntry::factory()->create([
             'project_id' => $this->project->id,
@@ -364,9 +360,8 @@ class TimeEntryControllerTest extends TestCase
         $response = $this->actingAs($this->member)
             ->delete("/projects/{$this->project->id}/time-entries/{$entry->id}");
 
-        $response->assertRedirect();
-        $response->assertSessionHas('success');
-        $this->assertDatabaseMissing('time_entries', ['id' => $entry->id]);
+        $response->assertForbidden();
+        $this->assertDatabaseHas('time_entries', ['id' => $entry->id]);
     }
 
     #[Test]
@@ -420,7 +415,7 @@ class TimeEntryControllerTest extends TestCase
 
         $this->task->update(['actual_hours' => 5.0]);
 
-        $this->actingAs($this->member)
+        $this->actingAs($this->owner)
             ->delete("/projects/{$this->project->id}/time-entries/{$entry1->id}");
 
         $this->task->refresh();

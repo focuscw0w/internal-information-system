@@ -1,6 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SharedData } from '@/types';
-import { usePage } from '@inertiajs/react';
 import { Project } from 'Modules/Project/resources/js/types/types';
 import { useState } from 'react';
 import { TimeEntry } from '../../types/types';
@@ -25,7 +23,6 @@ const groupByDate = (entries: TimeEntry[]): Record<string, TimeEntry[]> => {
 };
 
 export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
-    const currentUserId = usePage<SharedData>().props.auth.user.id;
     const permissions = project.current_user_permissions ?? [];
     const canManageTimeEntries = permissions.includes('manage_time_entries');
 
@@ -70,8 +67,7 @@ export const TimeEntryTable = ({ project, entries }: TimeEntryTableProps) => {
     const grouped = groupByDate(filteredEntries);
     const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
-    const canEdit = (entry: TimeEntry) =>
-        canManageTimeEntries || entry.user_id === currentUserId;
+    const canEdit = (_entry: TimeEntry) => canManageTimeEntries;
 
     return (
         <Card>

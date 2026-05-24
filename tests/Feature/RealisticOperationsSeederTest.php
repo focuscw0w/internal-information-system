@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
 use Modules\Project\Models\ActivityLog;
 use Modules\Project\Models\Project;
+use Modules\Project\Models\ProjectAllocation;
 use Modules\Project\Models\Task;
 use Modules\Project\Notifications\ProjectCapacityAtRiskNotification;
 use Modules\Project\Notifications\ProjectOverdueNotification;
@@ -55,6 +56,18 @@ class RealisticOperationsSeederTest extends TestCase
         $this->assertSame('active', $mobile->status);
         $this->assertSame('active', $reporting->status);
         $this->assertTrue($mobile->is_overdue);
+
+        $seedWindowEnd = Carbon::now()->addDays(90)->toDateString();
+
+        $this->assertSame($seedWindowEnd, Carbon::parse($erp->end_date)->toDateString());
+        $this->assertSame($seedWindowEnd, Carbon::parse($reporting->end_date)->toDateString());
+        $this->assertSame(Carbon::now()->subDays(2)->toDateString(), Carbon::parse($mobile->end_date)->toDateString());
+        $this->assertTrue(ProjectAllocation::query()
+            ->get()
+            ->every(fn (ProjectAllocation $allocation) => Carbon::parse($allocation->end_date)->toDateString() === $seedWindowEnd));
+        $this->assertTrue(TimeEntry::query()
+            ->get()
+            ->every(fn (TimeEntry $entry) => Carbon::parse($entry->entry_date)->lte(Carbon::now())));
 
         $simon = User::where('email', 'simon.kubik@test.com')->firstOrFail();
         $simonCapacity = EmployeeCapacity::where('user_id', $simon->id)->firstOrFail();

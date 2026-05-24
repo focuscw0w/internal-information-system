@@ -119,28 +119,6 @@ export default function Manage({
                     </div>
                 )}
 
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    <div className="kpi">
-                        <span className="kpi__label">Celkom používateľov</span>
-                        <span className="kpi__value">{users.length}</span>
-                        <span className="kpi__delta">
-                            Dáta z používateľskej databázy
-                        </span>
-                    </div>
-                    <div className="kpi">
-                        <span className="kpi__label">Aktívni</span>
-                        <span className="kpi__value">{users.length}</span>
-                        <span className="kpi__delta">100% z celku</span>
-                    </div>
-                    <div className="kpi">
-                        <span className="kpi__label">Čakajúce pozvánky</span>
-                        <span className="kpi__value">0</span>
-                        <span className="kpi__delta">
-                            Bez čakajúcich pozvánok
-                        </span>
-                    </div>
-                </div>
-
                 <UserTable
                     users={users}
                     availablePermissions={availablePermissions}

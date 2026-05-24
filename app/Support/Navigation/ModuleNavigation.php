@@ -24,10 +24,11 @@ class ModuleNavigation
 
             $nav = require $path;
 
-            $groupTitle = $nav['group'] ?? 'Ostatné';
+            $defaultGroupTitle = $nav['group'] ?? 'Ostatné';
             $items = $nav['items'] ?? [];
 
             foreach ($items as $item) {
+                $groupTitle = $item['group'] ?? $defaultGroupTitle;
                 $requiredPermission = $item['permission'] ?? null;
                 $adminOnly = $item['admin_only'] ?? false;
                 $managerArea = $item['manager_area'] ?? false;
@@ -58,6 +59,11 @@ class ModuleNavigation
         foreach ($groups as &$g) {
             usort($g['items'], fn ($a, $b) => ($a['order'] ?? 999) <=> ($b['order'] ?? 999));
         }
+        unset($g);
+
+        $groupOrder = ['Prehľad' => 10, 'Manažment' => 20, 'Administrácia' => 30];
+        uasort($groups, fn ($a, $b) =>
+            ($groupOrder[$a['title']] ?? 999) <=> ($groupOrder[$b['title']] ?? 999));
 
         return array_values($groups);
     }

@@ -31,7 +31,7 @@ export function NavUser() {
                             className="group h-12 rounded-lg border border-border bg-card text-sidebar-accent-foreground shadow-xs data-[state=open]:bg-sidebar-accent"
                             data-test="sidebar-menu-button"
                         >
-                            <UserInfo user={auth.user} />
+                            <UserInfo user={auth.user} showEmail />
                             <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>

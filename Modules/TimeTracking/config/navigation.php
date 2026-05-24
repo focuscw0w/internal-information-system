@@ -1,20 +1,29 @@
 <?php
 
 return [
-    'group' => 'Kapacitný manažment',
     'items' => [
-        [
-            'title' => 'Tímové riadenie',
-            'route' => 'manager.dashboard',
-            'icon' => 'Layers',
-            'order' => 30,
-            'manager_area' => true,
-        ],
         [
             'title' => 'Sledovanie času',
             'route' => 'time-tracking.index',
             'icon' => 'Clock',
-            'order' => 50,
+            'group' => 'Prehľad',
+            'order' => 20,
+        ],
+        [
+            'title' => 'Tímové riadenie',
+            'route' => 'manager.dashboard',
+            'icon' => 'Layers',
+            'group' => 'Manažment',
+            'manager_area' => true,
+            'order' => 10,
+        ],
+        [
+            'title' => 'Výkazy času',
+            'route' => 'manager.time.reports.index',
+            'icon' => 'BarChart3',
+            'group' => 'Manažment',
+            'manager_area' => true,
+            'order' => 20,
         ],
     ],
 ];

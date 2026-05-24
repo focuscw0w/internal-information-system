@@ -133,8 +133,7 @@ class TimeEntryService implements TimeEntryServiceInterface
         $oldProjectId = $entry->project_id;
         $oldUserId = $entry->user_id;
 
-        if (! $project->userHasPermission(auth()->user(), 'manage_time_entries')
-            && (! $project->userIsParticipant(auth()->user()) || $entry->user_id !== auth()->id())) {
+        if (! $project->userHasPermission(auth()->user(), 'manage_time_entries')) {
             abort(403);
         }
 
@@ -165,8 +164,7 @@ class TimeEntryService implements TimeEntryServiceInterface
         $entry = TimeEntry::findOrFail($entryId);
         $project = Project::findOrFail($entry->project_id);
 
-        if (! $project->userHasPermission(auth()->user(), 'manage_time_entries')
-            && (! $project->userIsParticipant(auth()->user()) || $entry->user_id !== auth()->id())) {
+        if (! $project->userHasPermission(auth()->user(), 'manage_time_entries')) {
             abort(403);
         }
 

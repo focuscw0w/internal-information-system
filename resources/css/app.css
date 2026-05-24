@@ -230,6 +230,10 @@
         color: var(--danger-text);
     }
 
+    .kpi__delta--neutral {
+        @apply text-muted-foreground;
+    }
+
     .command-bar {
         @apply flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card shadow-xs;
         padding: 10px 12px;
@@ -498,6 +502,74 @@
 
     .page-head__back svg {
         @apply h-4 w-4;
+    }
+
+    .multi-select__wrap {
+        @apply relative;
+    }
+
+    .multi-select {
+        @apply inline-flex h-8 min-w-[160px] items-center gap-2 rounded-md border border-input bg-card px-3 text-sm text-foreground shadow-xs transition-colors hover:border-ring;
+    }
+
+    .multi-select__placeholder {
+        @apply flex-1 text-left text-muted-foreground;
+    }
+
+    .multi-select__selected {
+        @apply flex-1 truncate text-left font-medium text-foreground;
+    }
+
+    .multi-select__clear {
+        @apply inline-flex size-4 cursor-pointer items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground;
+    }
+
+    .multi-select__caret {
+        @apply h-3 w-3 shrink-0 text-muted-foreground;
+    }
+
+    .multi-select__menu {
+        @apply absolute top-[calc(100%+4px)] left-0 z-30 flex max-h-80 w-72 flex-col overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md;
+    }
+
+    .multi-select__search {
+        @apply flex items-center gap-2 border-b border-border px-3 py-2 text-muted-foreground;
+    }
+
+    .multi-select__search input {
+        @apply h-6 w-full border-0 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground;
+    }
+
+    .multi-select__list {
+        @apply flex-1 overflow-y-auto py-1;
+    }
+
+    .multi-select__empty {
+        @apply px-3.5 py-3 text-xs text-muted-foreground;
+    }
+
+    .multi-select__item {
+        @apply flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-muted;
+    }
+
+    .multi-select__check {
+        @apply inline-flex size-4 shrink-0 items-center justify-center rounded-sm border border-input;
+    }
+
+    .multi-select__check.is-on {
+        @apply border-transparent bg-primary text-primary-foreground;
+    }
+
+    .multi-select__foot {
+        @apply flex items-center justify-between border-t border-border px-3 py-1.5;
+    }
+
+    .multi-select__count {
+        @apply text-xs text-muted-foreground;
+    }
+
+    .multi-select__link {
+        @apply cursor-pointer border-0 bg-transparent p-0 text-xs text-[color:var(--accent-blue-text)] hover:underline;
     }
 }
 

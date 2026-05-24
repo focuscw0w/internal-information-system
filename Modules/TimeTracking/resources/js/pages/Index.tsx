@@ -614,10 +614,14 @@ function DayGroup({
                             <span className="mono text-sm font-semibold">
                                 {formatHours(Number(entry.hours))}
                             </span>
-                            <EntryRowActions
-                                entry={entry}
-                                project={projectMeta?.project}
-                            />
+                            {projectMeta?.project.current_user_permissions?.includes(
+                                'manage_time_entries',
+                            ) ? (
+                                <EntryRowActions
+                                    entry={entry}
+                                    project={projectMeta?.project}
+                                />
+                            ) : null}
                         </div>
                     </div>
                 );

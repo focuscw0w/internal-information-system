@@ -1,10 +1,20 @@
-import { Briefcase, Clock, Gauge, Layers, Users } from 'lucide-react';
-
-export const iconMap = {
+import {
+    BarChart3,
     Briefcase,
     Clock,
     Gauge,
     Layers,
+    LayoutDashboard,
+    Users,
+} from 'lucide-react';
+
+export const iconMap = {
+    BarChart3,
+    Briefcase,
+    Clock,
+    Gauge,
+    Layers,
+    LayoutDashboard,
     Users,
 } as const;
 

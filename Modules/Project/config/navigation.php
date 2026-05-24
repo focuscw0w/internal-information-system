@@ -1,13 +1,13 @@
 <?php
 
 return [
-    'group' => 'Projektový manažment',
+    'group' => 'Prehľad',
     'items' => [
         [
             'title' => 'Projekty',
             'route' => 'projects.projects',
             'icon' => 'Briefcase',
-            'order' => 50,
+            'order' => 30,
         ],
     ],
 ];

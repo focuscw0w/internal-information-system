@@ -26,11 +26,6 @@ export function UserInfo({
                         {user.email}
                     </span>
                 )}
-                {!showEmail && (
-                    <span className="truncate text-[11px] text-muted-foreground">
-                        Project Lead
-                    </span>
-                )}
             </div>
         </>
     );
