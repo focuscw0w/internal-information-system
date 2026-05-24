@@ -9,10 +9,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\Project\Contracts\CommentServiceInterface;
 use Modules\Project\Contracts\NotificationServiceInterface;
+use Modules\Project\Contracts\Repositories\CommentRepositoryInterface;
 use Modules\Project\Models\Comment;
-use Modules\Project\Models\CommentAttachment;
 use Modules\Project\Models\Task;
-use Modules\User\Models\User;
 
 class CommentService implements CommentServiceInterface
 {
@@ -29,6 +28,7 @@ class CommentService implements CommentServiceInterface
 
     public function __construct(
         private readonly NotificationServiceInterface $notificationService,
+        private readonly CommentRepositoryInterface $comments,
     ) {}
 
     /**
@@ -39,7 +39,7 @@ class CommentService implements CommentServiceInterface
         $task->loadMissing('project.team', 'project.owner');
 
         return DB::transaction(function () use ($task, $userId, $data, $files) {
-            $comment = $task->comments()->create([
+            $comment = $this->comments->createForTask($task, [
                 'user_id' => $userId,
                 'body' => $data['body'],
             ]);
@@ -63,7 +63,7 @@ class CommentService implements CommentServiceInterface
                     ])
                     ->all();
 
-                DB::table('comment_mentions')->insertOrIgnore($rows);
+                $this->comments->insertMentions($rows);
             }
 
             DB::afterCommit(function () use ($comment, $mentionedUserIds) {
@@ -71,7 +71,7 @@ class CommentService implements CommentServiceInterface
                     return;
                 }
 
-                $users = User::whereIn('id', $mentionedUserIds)->get();
+                $users = $this->comments->usersByIds(collect($mentionedUserIds));
                 $this->notificationService->notifyCommentMentioned(
                     $comment->fresh(['user', 'task.project']),
                     $users
@@ -99,7 +99,7 @@ class CommentService implements CommentServiceInterface
             return;
         }
 
-        CommentAttachment::create([
+        $this->comments->createAttachment([
             'comment_id' => $comment->id,
             'uploaded_by_user_id' => $userId,
             'disk' => self::ATTACHMENT_DISK,
@@ -149,7 +149,7 @@ class CommentService implements CommentServiceInterface
             return [];
         }
 
-        $candidates = User::whereIn('id', $allowedUserIds)->get(['id', 'name', 'email']);
+        $candidates = $this->comments->usersByIds($allowedUserIds);
 
         $resolved = collect();
         foreach ($candidates as $user) {

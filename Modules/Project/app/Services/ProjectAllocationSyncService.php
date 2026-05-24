@@ -5,13 +5,18 @@ namespace Modules\Project\Services;
 use Carbon\Carbon;
 use Modules\CapacityManagement\Contracts\CapacityReaderInterface;
 use Modules\Project\Contracts\ProjectAllocationSyncInterface;
+use Modules\Project\Contracts\Repositories\ProjectAllocationRepositoryInterface;
+use Modules\Project\Contracts\Repositories\ProjectRepositoryInterface;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\ProjectAllocation;
-use Modules\TimeTracking\Models\TimeEntry;
 
 class ProjectAllocationSyncService implements ProjectAllocationSyncInterface
 {
-    public function __construct(private readonly CapacityReaderInterface $capacityReader) {}
+    public function __construct(
+        private readonly CapacityReaderInterface $capacityReader,
+        private readonly ProjectRepositoryInterface $projects,
+        private readonly ProjectAllocationRepositoryInterface $allocations,
+    ) {}
 
     public function syncCurrentTeamAllocations(Project $project): void
     {
@@ -19,17 +24,12 @@ class ProjectAllocationSyncService implements ProjectAllocationSyncInterface
         $teamUserIds = $project->team->pluck('id')->map(fn ($id) => (int) $id)->all();
 
         if ($teamUserIds === []) {
-            ProjectAllocation::query()
-                ->where('project_id', $project->id)
-                ->delete();
+            $this->allocations->deleteForProject($project->id);
 
             return;
         }
 
-        ProjectAllocation::query()
-            ->where('project_id', $project->id)
-            ->whereNotIn('user_id', $teamUserIds)
-            ->delete();
+        $this->allocations->deleteExceptUsers($project->id, $teamUserIds);
 
         $capacities = $this->capacityReader->getWeeklyCapacitiesForUsers($teamUserIds);
 
@@ -46,10 +46,7 @@ class ProjectAllocationSyncService implements ProjectAllocationSyncInterface
 
     public function syncAllocationsForUserProjects(int $userId): int
     {
-        $projects = Project::query()
-            ->whereHas('team', fn ($query) => $query->where('users.id', $userId))
-            ->with('team')
-            ->get();
+        $projects = $this->projects->withTeamForUser($userId);
 
         foreach ($projects as $project) {
             $member = $project->team->firstWhere('id', $userId);
@@ -71,9 +68,7 @@ class ProjectAllocationSyncService implements ProjectAllocationSyncInterface
 
     public function syncAllProjectAllocations(): int
     {
-        $projects = Project::query()
-            ->with('team')
-            ->get();
+        $projects = $this->projects->allWithTeam();
 
         foreach ($projects as $project) {
             $this->syncCurrentTeamAllocations($project);
@@ -90,31 +85,23 @@ class ProjectAllocationSyncService implements ProjectAllocationSyncInterface
             return;
         }
 
-        ProjectAllocation::query()
-            ->where('project_id', $project->id)
-            ->whereIn('user_id', $userIds)
-            ->delete();
+        $this->allocations->deleteForProjectUsers($project->id, $userIds);
     }
 
     public function syncUsedHoursForProjectUser(int $projectId, int $userId): void
     {
-        ProjectAllocation::query()
-            ->where('project_id', $projectId)
-            ->where('user_id', $userId)
-            ->get()
+        $this->allocations->forProjectUser($projectId, $userId)
             ->each(function (ProjectAllocation $allocation) use ($projectId, $userId) {
                 $usedHours = (int) round(
-                    (float) TimeEntry::query()
-                        ->where('project_id', $projectId)
-                        ->where('user_id', $userId)
-                        ->whereBetween('entry_date', [
-                            $allocation->start_date->toDateString(),
-                            $allocation->end_date->toDateString(),
-                        ])
-                        ->sum('hours')
+                    $this->allocations->sumUsedHours(
+                        $projectId,
+                        $userId,
+                        $allocation->start_date->toDateString(),
+                        $allocation->end_date->toDateString(),
+                    )
                 );
 
-                $allocation->update([
+                $this->allocations->update($allocation, [
                     'used_hours' => $usedHours,
                 ]);
             });
@@ -129,11 +116,7 @@ class ProjectAllocationSyncService implements ProjectAllocationSyncInterface
     {
         [$startDate, $endDate] = $this->resolveProjectWindow($project);
 
-        $existingAllocations = ProjectAllocation::query()
-            ->where('project_id', $project->id)
-            ->where('user_id', $userId)
-            ->orderByDesc('id')
-            ->get();
+        $existingAllocations = $this->allocations->forProjectUser($project->id, $userId);
 
         $allocation = $existingAllocations->first(function (ProjectAllocation $allocation) use ($startDate, $endDate) {
             return $allocation->start_date?->toDateString() === $startDate
@@ -159,9 +142,9 @@ class ProjectAllocationSyncService implements ProjectAllocationSyncInterface
         ];
 
         if ($allocation) {
-            $allocation->update($payload);
+            $this->allocations->update($allocation, $payload);
         } else {
-            $allocation = ProjectAllocation::query()->create([
+            $allocation = $this->allocations->create([
                 'project_id' => $project->id,
                 'user_id' => $userId,
                 'used_hours' => 0,
@@ -170,11 +153,7 @@ class ProjectAllocationSyncService implements ProjectAllocationSyncInterface
             ]);
         }
 
-        ProjectAllocation::query()
-            ->where('project_id', $project->id)
-            ->where('user_id', $userId)
-            ->whereKeyNot($allocation->id)
-            ->delete();
+        $this->allocations->deleteDuplicateAllocations($project->id, $userId, $allocation->id);
 
         $this->syncUsedHoursForProjectUser($project->id, $userId);
     }

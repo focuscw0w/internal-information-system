@@ -6,6 +6,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Modules\Project\Contracts\NotificationServiceInterface;
+use Modules\Project\Contracts\Repositories\ProjectNotificationRepositoryInterface;
 use Modules\Project\Models\Comment;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
@@ -26,6 +27,8 @@ use Modules\User\Models\User;
 
 class NotificationService implements NotificationServiceInterface
 {
+    public function __construct(private readonly ProjectNotificationRepositoryInterface $notifications) {}
+
     /**
      * Notify task stakeholders about a status change.
      */
@@ -58,7 +61,7 @@ class NotificationService implements NotificationServiceInterface
 
         $task->load('project');
 
-        $users = User::whereIn('id', $newUserIds)->get();
+        $users = $this->notifications->usersByIds($newUserIds);
 
         $notification = new TaskAssignedNotification($task, $assignedBy);
 
@@ -75,7 +78,7 @@ class NotificationService implements NotificationServiceInterface
             return;
         }
 
-        $users = User::whereIn('id', $newUserIds)->get();
+        $users = $this->notifications->usersByIds($newUserIds);
         $notification = new ProjectAssignedNotification($project, $assignedBy);
 
         $users->reject(fn (User $u) => $u->id === $assignedBy->id)
@@ -93,16 +96,15 @@ class NotificationService implements NotificationServiceInterface
         $notification = new DeadlineApproachingNotification($task, $daysRemaining);
 
         $recipients->unique('id')->each(function (User $user) use ($task, $daysRemaining, $notification) {
-            $alreadySent = $user->notifications()
-                ->where('type', DeadlineApproachingNotification::class)
-                ->whereNull('read_at')
-                ->where('created_at', '>=', now()->subHours(24))
-                ->get()
-                ->contains(function ($n) use ($task, $daysRemaining) {
+            $alreadySent = $this->notifications->recentUnreadMatching(
+                $user,
+                DeadlineApproachingNotification::class,
+                function ($n) use ($task, $daysRemaining) {
                     $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
                     return ($data['task_id'] ?? null) === $task->id
                         && ($data['days_remaining'] ?? null) === $daysRemaining;
-                });
+                }
+            );
 
             if (! $alreadySent) {
                 $user->notify($notification);
@@ -132,17 +134,16 @@ class NotificationService implements NotificationServiceInterface
         $subjectId = $subject->id;
 
         $recipients->unique('id')->each(function (User $user) use ($subject, $reason, $notification, $notificationClass, $subjectId) {
-            $alreadySent = $user->notifications()
-                ->where('type', $notificationClass)
-                ->whereNull('read_at')
-                ->where('created_at', '>=', now()->subHours(24))
-                ->get()
-                ->contains(function ($n) use ($subject, $reason, $subjectId) {
+            $alreadySent = $this->notifications->recentUnreadMatching(
+                $user,
+                $notificationClass,
+                function ($n) use ($subject, $reason, $subjectId) {
                     $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
                     $idField = $subject instanceof Task ? 'task_id' : 'project_id';
                     return ($data[$idField] ?? null) === $subjectId
                         && ($data['reason'] ?? null) === $reason;
-                });
+                }
+            );
 
             if (! $alreadySent) {
                 $user->notify($notification);
@@ -161,15 +162,14 @@ class NotificationService implements NotificationServiceInterface
             return;
         }
 
-        $alreadySent = $project->owner->notifications()
-            ->where('type', ProjectOverdueNotification::class)
-            ->whereNull('read_at')
-            ->where('created_at', '>=', now()->subHours(24))
-            ->get()
-            ->contains(function ($n) use ($project) {
+        $alreadySent = $this->notifications->recentUnreadMatching(
+            $project->owner,
+            ProjectOverdueNotification::class,
+            function ($n) use ($project) {
                 $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
                 return ($data['project_id'] ?? null) === $project->id;
-            });
+            }
+        );
 
         if (! $alreadySent) {
             $project->owner->notify(new ProjectOverdueNotification($project));
@@ -181,11 +181,7 @@ class NotificationService implements NotificationServiceInterface
      */
     public function notifyUserOverloaded(User $user, float $utilization): void
     {
-        $alreadySent = $user->notifications()
-            ->where('type', UserOverloadedNotification::class)
-            ->whereNull('read_at')
-            ->where('created_at', '>=', now()->subHours(24))
-            ->exists();
+        $alreadySent = $this->notifications->recentUnreadExists($user, UserOverloadedNotification::class);
 
         if (! $alreadySent) {
             $user->notify(new UserOverloadedNotification($user, $utilization));
@@ -209,15 +205,14 @@ class NotificationService implements NotificationServiceInterface
         $projectId = $project->id;
 
         $recipients->unique('id')->each(function (User $user) use ($projectId, $notification) {
-            $alreadySent = $user->notifications()
-                ->where('type', ProjectCapacityAtRiskNotification::class)
-                ->whereNull('read_at')
-                ->where('created_at', '>=', now()->subHours(24))
-                ->get()
-                ->contains(function ($n) use ($projectId) {
+            $alreadySent = $this->notifications->recentUnreadMatching(
+                $user,
+                ProjectCapacityAtRiskNotification::class,
+                function ($n) use ($projectId) {
                     $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
                     return ($data['project_id'] ?? null) === $projectId;
-                });
+                }
+            );
 
             if (! $alreadySent) {
                 $user->notify($notification);
@@ -234,7 +229,7 @@ class NotificationService implements NotificationServiceInterface
             return;
         }
 
-        $users = User::whereIn('id', $newUserIds)->get();
+        $users = $this->notifications->usersByIds($newUserIds);
         $notification = new ProjectHighWorkloadNotification($project, $assignedBy, $project->workload);
 
         $users->reject(fn (User $u) => $u->id === $assignedBy->id)
@@ -252,15 +247,14 @@ class NotificationService implements NotificationServiceInterface
         $taskId = $task->id;
 
         $recipients->unique('id')->each(function (User $user) use ($taskId, $notification) {
-            $alreadySent = $user->notifications()
-                ->where('type', TaskHoursExceededNotification::class)
-                ->whereNull('read_at')
-                ->where('created_at', '>=', now()->subHours(24))
-                ->get()
-                ->contains(function ($n) use ($taskId) {
+            $alreadySent = $this->notifications->recentUnreadMatching(
+                $user,
+                TaskHoursExceededNotification::class,
+                function ($n) use ($taskId) {
                     $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
                     return ($data['task_id'] ?? null) === $taskId;
-                });
+                }
+            );
 
             if (! $alreadySent) {
                 $user->notify($notification);
@@ -316,7 +310,7 @@ class NotificationService implements NotificationServiceInterface
      */
     public function notifyPasswordResetRequested(User $requestingUser): void
     {
-        $admins = User::where('is_admin', true)->get();
+        $admins = $this->notifications->admins();
         $notification = new PasswordResetRequestedNotification($requestingUser);
         $admins->each(fn (User $admin) => $admin->notify($notification));
     }
@@ -326,7 +320,7 @@ class NotificationService implements NotificationServiceInterface
      */
     public function getUserNotifications(User $user, int $perPage = 20): LengthAwarePaginator
     {
-        return $user->notifications()->paginate($perPage);
+        return $this->notifications->paginateForUser($user, $perPage);
     }
 
     /**
@@ -334,7 +328,7 @@ class NotificationService implements NotificationServiceInterface
      */
     public function markAsRead(string $notificationId, User $user): bool
     {
-        $notification = $user->notifications()->where('id', $notificationId)->first();
+        $notification = $this->notifications->findForUser($user, $notificationId);
 
         if (! $notification) {
             return false;
@@ -350,10 +344,7 @@ class NotificationService implements NotificationServiceInterface
      */
     public function markAllAsRead(User $user): int
     {
-        $count = $user->unreadNotifications()->count();
-        $user->unreadNotifications()->update(['read_at' => now()]);
-
-        return $count;
+        return $this->notifications->markAllAsRead($user);
     }
 
     /**
@@ -361,7 +352,7 @@ class NotificationService implements NotificationServiceInterface
      */
     public function delete(string $notificationId, User $user): bool
     {
-        $notification = $user->notifications()->where('id', $notificationId)->first();
+        $notification = $this->notifications->findForUser($user, $notificationId);
 
         if (! $notification) {
             return false;
@@ -377,10 +368,7 @@ class NotificationService implements NotificationServiceInterface
      */
     public function deleteAll(User $user): int
     {
-        $count = $user->notifications()->count();
-        $user->notifications()->delete();
-
-        return $count;
+        return $this->notifications->deleteAll($user);
     }
 
     /**

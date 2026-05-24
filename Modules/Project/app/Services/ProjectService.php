@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Contracts\ProjectAllocationSyncInterface;
+use Modules\Project\Contracts\Repositories\ProjectRepositoryInterface;
 use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Models\Project;
@@ -22,6 +23,7 @@ class ProjectService implements ProjectServiceInterface
         protected TeamServiceInterface $teamService,
         protected NotificationServiceInterface $notificationService,
         protected ProjectAllocationSyncInterface $allocationSyncService,
+        protected ProjectRepositoryInterface $projects,
     ) {}
 
     /**
@@ -30,28 +32,8 @@ class ProjectService implements ProjectServiceInterface
     public function getAllProjects(array $filters = []): Collection
     {
         $user = auth()->user();
-        $query = Project::with(['owner', 'team'])->visibleTo($user);
 
-        if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
-
-        if (isset($filters['workload'])) {
-            $query->where('workload', $filters['workload']);
-        }
-
-        if (isset($filters['owner_id'])) {
-            $query->where('owner_id', $filters['owner_id']);
-        }
-
-        if (isset($filters['search'])) {
-            $query->where(function ($q) use ($filters) {
-                $q->where('name', 'like', '%'.$filters['search'].'%')
-                    ->orWhere('description', 'like', '%'.$filters['search'].'%');
-            });
-        }
-
-        return $query->get();
+        return $this->projects->visibleTo($user, $filters);
     }
 
     /**
@@ -59,7 +41,7 @@ class ProjectService implements ProjectServiceInterface
      */
     public function getProjectById(int $id): ?Project
     {
-        $project = Project::with(['owner', 'team', 'tasks'])->find($id);
+        $project = $this->projects->findWithDetails($id);
 
         if (! $project) {
             Log::warning('Project not found', ['project_id' => $id]);
@@ -78,7 +60,7 @@ class ProjectService implements ProjectServiceInterface
         try {
             DB::beginTransaction();
 
-            $project = Project::create([
+            $project = $this->projects->create([
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
                 'status' => $data['status'] ?? 'planning',
@@ -100,7 +82,7 @@ class ProjectService implements ProjectServiceInterface
 
             DB::commit();
 
-            return $project->fresh(['owner', 'team', 'tasks']);
+            return $this->projects->fresh($project, ['owner', 'team', 'tasks']);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Project creation failed: '.$e->getMessage(), [
@@ -116,7 +98,7 @@ class ProjectService implements ProjectServiceInterface
      */
     public function updateProject(int $id, array $data): ?Project
     {
-        $project = Project::find($id);
+        $project = $this->projects->find($id);
 
         if (! $project) {
             Log::warning('Project not found for update', ['project_id' => $id]);
@@ -132,7 +114,7 @@ class ProjectService implements ProjectServiceInterface
             $oldStatus = $project->status;
 
             // Update basic project fields
-            $project->update([
+            $this->projects->update($project, [
                 'name' => $data['name'] ?? $project->name,
                 'description' => $data['description'] ?? $project->description,
                 'status' => $data['status'] ?? $project->status,
@@ -158,14 +140,14 @@ class ProjectService implements ProjectServiceInterface
 
             if (isset($data['status']) && $data['status'] !== $oldStatus && auth()->check()) {
                 $this->notificationService->notifyProjectStatusChanged(
-                    $project->fresh(['owner', 'team']),
+                    $this->projects->fresh($project, ['owner', 'team']),
                     $oldStatus,
                     $data['status'],
                     auth()->user()
                 );
             }
 
-            return $project->fresh(['owner', 'team', 'tasks']);
+            return $this->projects->fresh($project, ['owner', 'team', 'tasks']);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Project update failed: '.$e->getMessage(), [
@@ -192,7 +174,7 @@ class ProjectService implements ProjectServiceInterface
 
         Log::info('Deleting project', ['project_id' => $id]);
 
-        return $project->delete();
+        return $this->projects->delete($project);
     }
 
     /**
@@ -200,25 +182,7 @@ class ProjectService implements ProjectServiceInterface
      */
     public function getProjectStatistics(): array
     {
-        return [
-            'total' => Project::count(),
-            'active' => Project::where('status', 'active')->count(),
-            'planning' => Project::where('status', 'planning')->count(),
-            'completed' => Project::where('status', 'completed')->count(),
-            'on_hold' => Project::where('status', 'on_hold')->count(),
-            'cancelled' => Project::where('status', 'cancelled')->count(),
-            'overdue' => $this->getOverdueProjects()->count(),
-            'total_team_members' => Project::active()
-                ->with('team')
-                ->get()
-                ->pluck('team')
-                ->flatten()
-                ->unique('id')
-                ->count(),
-            'average_capacity' => round((float) Project::active()->avg('capacity_used'), 2),
-            'completed_tasks' => Project::active()->sum('tasks_completed'),
-            'total_tasks' => Project::active()->sum('tasks_total'),
-        ];
+        return $this->projects->statistics();
     }
 
     /**
@@ -226,7 +190,7 @@ class ProjectService implements ProjectServiceInterface
      */
     public function updateProjectProgress(int $projectId): ?Project
     {
-        $project = Project::find($projectId);
+        $project = $this->projects->find($projectId);
 
         if (! $project) {
             Log::warning('Project not found for progress update', ['project_id' => $projectId]);
@@ -236,7 +200,7 @@ class ProjectService implements ProjectServiceInterface
 
         $project->updateProgress();
 
-        return $project->fresh(['owner', 'team', 'tasks']);
+        return $this->projects->fresh($project, ['owner', 'team', 'tasks']);
     }
 
     /**
@@ -244,9 +208,7 @@ class ProjectService implements ProjectServiceInterface
      */
     public function getProjectsByStatus(string $status): Collection
     {
-        return Project::where('status', $status)
-            ->with(['owner', 'team'])
-            ->get();
+        return $this->projects->byStatus($status);
     }
 
     /**
@@ -254,10 +216,7 @@ class ProjectService implements ProjectServiceInterface
      */
     public function getOverdueProjects(): Collection
     {
-        return Project::where('end_date', '<', now())
-            ->whereNotIn('status', ['completed', 'cancelled'])
-            ->with(['owner', 'team'])
-            ->get();
+        return $this->projects->overdue();
     }
 
     /**
@@ -265,9 +224,7 @@ class ProjectService implements ProjectServiceInterface
      */
     public function getUserProjectsSummary(User $user): array
     {
-        $projects = Project::forUser($user->id)
-            ->with(['team', 'tasks'])
-            ->get();
+        $projects = $this->projects->forUserWithSummaryRelations($user->id);
 
         return ProjectSummaryResource::collectionForUser($projects, $user->id)->toArray();
     }
@@ -277,11 +234,6 @@ class ProjectService implements ProjectServiceInterface
      */
     public function getActiveProjectsWithIncompleteTasks(): Collection
     {
-        return Project::query()
-            ->where('status', 'active')
-            ->with(['tasks' => fn ($q) => $q->whereNotIn('status', ['done'])
-                ->select('id', 'project_id', 'estimated_hours', 'actual_hours'),
-            ])
-            ->get(['id', 'name', 'end_date']);
+        return $this->projects->activeWithIncompleteTasks();
     }
 }

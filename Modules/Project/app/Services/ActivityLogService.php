@@ -5,10 +5,13 @@ namespace Modules\Project\Services;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Project\Contracts\ActivityLogServiceInterface;
+use Modules\Project\Contracts\Repositories\ActivityLogRepositoryInterface;
 use Modules\Project\Models\ActivityLog;
 
 class ActivityLogService implements ActivityLogServiceInterface
 {
+    public function __construct(private readonly ActivityLogRepositoryInterface $activities) {}
+
     /**
      * Log an activity.
      */
@@ -19,7 +22,7 @@ class ActivityLogService implements ActivityLogServiceInterface
         ?Model $subject = null,
         ?array $metadata = null
     ): ActivityLog {
-        return ActivityLog::create([
+        return $this->activities->create([
             'project_id' => $projectId,
             'user_id' => auth()->id(),
             'type' => $type,
@@ -35,10 +38,6 @@ class ActivityLogService implements ActivityLogServiceInterface
      */
     public function getProjectActivities(int $projectId, int $limit = 50): Collection
     {
-        return ActivityLog::where('project_id', $projectId)
-            ->with('user')
-            ->orderBy('created_at', 'asc')
-            ->limit($limit)
-            ->get();
+        return $this->activities->forProject($projectId, $limit);
     }
 }

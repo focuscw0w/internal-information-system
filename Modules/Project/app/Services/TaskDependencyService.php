@@ -2,19 +2,21 @@
 
 namespace Modules\Project\Services;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Project\Contracts\Repositories\TaskDependencyRepositoryInterface;
 use Modules\Project\Contracts\TaskDependencyServiceInterface;
 use Modules\Project\Models\Task;
 
 class TaskDependencyService implements TaskDependencyServiceInterface
 {
+    public function __construct(private readonly TaskDependencyRepositoryInterface $dependencies) {}
+
     public function add(Task $task, int $predecessorId): void
     {
         $this->guardTaskNotStarted($task);
         $this->guardAgainstSelf($task, $predecessorId);
 
-        $predecessor = Task::findOrFail($predecessorId);
+        $predecessor = $this->dependencies->findTaskOrFail($predecessorId);
         $this->guardSameProject($task, $predecessor);
 
         if ($this->wouldCreateCycle($task, $predecessorId)) {
@@ -23,12 +25,12 @@ class TaskDependencyService implements TaskDependencyServiceInterface
             ]);
         }
 
-        $task->predecessors()->syncWithoutDetaching([$predecessorId]);
+        $this->dependencies->attachPredecessor($task, $predecessorId);
     }
 
     public function remove(Task $task, int $predecessorId): void
     {
-        $task->predecessors()->detach($predecessorId);
+        $this->dependencies->detachPredecessor($task, $predecessorId);
     }
 
     public function sync(Task $task, array $predecessorIds): void
@@ -42,9 +44,7 @@ class TaskDependencyService implements TaskDependencyServiceInterface
         }
 
         if (! empty($predecessorIds)) {
-            $sameProjectCount = Task::whereIn('id', $predecessorIds)
-                ->where('project_id', $task->project_id)
-                ->count();
+            $sameProjectCount = $this->dependencies->countSameProjectTasks($predecessorIds, $task->project_id);
 
             if ($sameProjectCount !== count($predecessorIds)) {
                 throw ValidationException::withMessages([
@@ -54,7 +54,7 @@ class TaskDependencyService implements TaskDependencyServiceInterface
         }
 
         DB::transaction(function () use ($task, $predecessorIds) {
-            $current = $task->predecessors()->pluck('tasks.id')->all();
+            $current = $this->dependencies->predecessorIds($task);
             $toAdd = array_diff($predecessorIds, $current);
 
             foreach ($toAdd as $newId) {
@@ -65,7 +65,7 @@ class TaskDependencyService implements TaskDependencyServiceInterface
                 }
             }
 
-            $task->predecessors()->sync($predecessorIds);
+            $this->dependencies->syncPredecessors($task, $predecessorIds);
         });
     }
 
@@ -75,7 +75,7 @@ class TaskDependencyService implements TaskDependencyServiceInterface
             return true;
         }
 
-        $maxIterations = max(1, Task::where('project_id', $task->project_id)->count());
+        $maxIterations = max(1, $this->dependencies->countProjectTasks($task->project_id));
 
         $visited = [];
         $queue = [$newPredecessorId];
@@ -93,10 +93,7 @@ class TaskDependencyService implements TaskDependencyServiceInterface
             $visited[$current] = true;
             $steps++;
 
-            $upstream = DB::table('task_dependencies')
-                ->where('task_id', $current)
-                ->pluck('depends_on_task_id')
-                ->all();
+            $upstream = $this->dependencies->upstreamTaskIds((int) $current);
 
             foreach ($upstream as $up) {
                 if (! isset($visited[$up])) {

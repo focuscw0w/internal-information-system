@@ -4,6 +4,7 @@ namespace Modules\Project\Console\Commands;
 
 use Illuminate\Console\Command;
 use Modules\Project\Contracts\NotificationServiceInterface;
+use Modules\Project\Contracts\Repositories\TaskRepositoryInterface;
 use Modules\Project\Models\Task;
 
 class CheckDeadlinesCommand extends Command
@@ -12,8 +13,10 @@ class CheckDeadlinesCommand extends Command
 
     protected $description = 'Skontroluje blížiace sa deadliny úloh a odošle notifikácie';
 
-    public function __construct(private readonly NotificationServiceInterface $notificationService)
-    {
+    public function __construct(
+        private readonly NotificationServiceInterface $notificationService,
+        private readonly TaskRepositoryInterface $tasks,
+    ) {
         parent::__construct();
     }
 
@@ -25,10 +28,7 @@ class CheckDeadlinesCommand extends Command
         foreach ($targetDays as $days) {
             $targetDate = now()->addDays($days)->toDateString();
 
-            Task::whereDate('due_date', $targetDate)
-                ->where('status', '!=', 'done')
-                ->with(['assignedUsers', 'project.owner'])
-                ->has('assignedUsers')
+            $this->tasks->dueIncompleteAssignedTasks($targetDate)
                 ->each(function (Task $task) use ($days, &$notified) {
                     $this->notificationService->notifyDeadlineApproaching($task, $days);
                     $notified++;

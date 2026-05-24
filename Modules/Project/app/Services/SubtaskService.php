@@ -3,24 +3,24 @@
 namespace Modules\Project\Services;
 
 use Illuminate\Support\Facades\Log;
+use Modules\Project\Contracts\Repositories\SubtaskRepositoryInterface;
 use Modules\Project\Contracts\SubtaskServiceInterface;
 use Modules\Project\Models\Subtask;
-use Modules\Project\Models\Task;
 
 class SubtaskService implements SubtaskServiceInterface
 {
+    public function __construct(private readonly SubtaskRepositoryInterface $subtasks) {}
+
     /**
      * Create a new subtask.
      */
     public function createSubtask(int $taskId, array $data): Subtask
     {
-        $task = Task::findOrFail($taskId);
-
-        $maxOrder = $task->subtasks()->max('sort_order') ?? 0;
+        $maxOrder = $this->subtasks->maxSortOrderForTask($taskId);
 
         Log::info('Creating subtask', ['task_id' => $taskId, 'title' => $data['title']]);
 
-        return Subtask::create([
+        return $this->subtasks->create([
             'task_id' => $taskId,
             'title' => $data['title'],
             'sort_order' => $maxOrder + 1,
@@ -32,13 +32,13 @@ class SubtaskService implements SubtaskServiceInterface
      */
     public function updateSubtask(int $subtaskId, array $data): Subtask
     {
-        $subtask = Subtask::findOrFail($subtaskId);
+        $subtask = $this->subtasks->findOrFail($subtaskId);
 
         Log::info('Updating subtask', ['subtask_id' => $subtaskId, 'data' => $data]);
 
-        $subtask->update($data);
+        $this->subtasks->update($subtask, $data);
 
-        return $subtask->fresh();
+        return $this->subtasks->fresh($subtask);
     }
 
     /**
@@ -46,7 +46,7 @@ class SubtaskService implements SubtaskServiceInterface
      */
     public function toggleSubtask(int $subtaskId): Subtask
     {
-        $subtask = Subtask::findOrFail($subtaskId);
+        $subtask = $this->subtasks->findOrFail($subtaskId);
 
         Log::info('Toggling subtask', [
             'subtask_id' => $subtaskId,
@@ -55,7 +55,7 @@ class SubtaskService implements SubtaskServiceInterface
 
         $subtask->toggleComplete();
 
-        return $subtask->fresh();
+        return $this->subtasks->fresh($subtask);
     }
 
     /**
@@ -63,10 +63,10 @@ class SubtaskService implements SubtaskServiceInterface
      */
     public function deleteSubtask(int $subtaskId): bool
     {
-        $subtask = Subtask::findOrFail($subtaskId);
+        $subtask = $this->subtasks->findOrFail($subtaskId);
 
         Log::info('Deleting subtask', ['subtask_id' => $subtaskId, 'title' => $subtask->title]);
 
-        return $subtask->delete();
+        return $this->subtasks->delete($subtask);
     }
 }

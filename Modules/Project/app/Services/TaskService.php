@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Project\Contracts\ActivityLogServiceInterface;
 use Modules\Project\Contracts\NotificationServiceInterface;
+use Modules\Project\Contracts\Repositories\TaskRepositoryInterface;
 use Modules\Project\Contracts\TaskServiceInterface;
-use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 
 class TaskService implements TaskServiceInterface
@@ -18,7 +18,8 @@ class TaskService implements TaskServiceInterface
      */
     public function __construct(
         protected ActivityLogServiceInterface $activityLog,
-        protected NotificationServiceInterface $notificationService
+        protected NotificationServiceInterface $notificationService,
+        protected TaskRepositoryInterface $tasks,
     ) {}
 
     /**
@@ -45,11 +46,7 @@ class TaskService implements TaskServiceInterface
      */
     public function getAllTasks(int $projectId): Collection
     {
-        return Task::where('project_id', $projectId)
-            ->with(['assignedUsers'])
-            ->orderBy('priority', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return $this->tasks->forProject($projectId);
     }
 
     /**
@@ -57,8 +54,7 @@ class TaskService implements TaskServiceInterface
      */
     public function getTaskById(int $taskId): ?Task
     {
-        return Task::with(['project', 'assignedUsers', 'subtasks'])
-            ->findOrFail($taskId);
+        return $this->tasks->findWithDetails($taskId);
     }
 
     /**
@@ -69,7 +65,7 @@ class TaskService implements TaskServiceInterface
         Log::info('Creating task', ['project_id' => $projectId, 'title' => $data['title']]);
 
         return DB::transaction(function () use ($projectId, $data) {
-            $task = Task::create([
+            $task = $this->tasks->create([
                 'project_id' => $projectId,
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
@@ -80,7 +76,7 @@ class TaskService implements TaskServiceInterface
             ]);
 
             if (! empty($data['assigned_users'])) {
-                $task->assignedUsers()->sync($data['assigned_users']);
+                $this->tasks->syncAssignedUsers($task, $data['assigned_users']);
 
                 if (auth()->check()) {
                     $this->notificationService->notifyTaskAssigned($task, $data['assigned_users'], auth()->user());
@@ -103,7 +99,7 @@ class TaskService implements TaskServiceInterface
      */
     public function updateTask(int $taskId, array $data): Task
     {
-        $task = Task::findOrFail($taskId);
+        $task = $this->tasks->findOrFail($taskId);
 
         Log::info('Updating task', ['task_id' => $taskId, 'data' => $data]);
 
@@ -111,7 +107,7 @@ class TaskService implements TaskServiceInterface
             'title', 'status', 'priority', 'description', 'estimated_hours',
         ]);
 
-        $task->update([
+        $this->tasks->update($task, [
             'title' => $data['title'] ?? $task->title,
             'description' => $data['description'] ?? $task->description,
             'priority' => $data['priority'] ?? $task->priority,
@@ -120,8 +116,8 @@ class TaskService implements TaskServiceInterface
         ]);
 
         if (array_key_exists('assigned_users', $data)) {
-            $oldUsers = $task->assignedUsers()->pluck('users.id')->toArray();
-            $task->assignedUsers()->sync($data['assigned_users']);
+            $oldUsers = $this->tasks->assignedUserIds($task);
+            $this->tasks->syncAssignedUsers($task, $data['assigned_users']);
 
             $newUserIds = array_values(array_diff($data['assigned_users'], $oldUsers));
             if (! empty($newUserIds) && auth()->check()) {
@@ -139,7 +135,7 @@ class TaskService implements TaskServiceInterface
             );
         }
 
-        return $task->fresh(['project', 'assignedUsers']);
+        return $this->tasks->fresh($task, ['project', 'assignedUsers']);
     }
 
     /**
@@ -147,7 +143,7 @@ class TaskService implements TaskServiceInterface
      */
     public function deleteTask(int $taskId): bool
     {
-        $task = Task::findOrFail($taskId);
+        $task = $this->tasks->findOrFail($taskId);
 
         Log::info('Deleting task', ['task_id' => $taskId, 'title' => $task->title]);
 
@@ -159,7 +155,7 @@ class TaskService implements TaskServiceInterface
             ['task_title' => $task->title]
         );
 
-        return $task->delete();
+        return $this->tasks->delete($task);
     }
 
     /**
@@ -169,9 +165,9 @@ class TaskService implements TaskServiceInterface
     {
         Log::info('Assigning users to task', ['task_id' => $taskId, 'user_ids' => $userIds]);
 
-        $task = Task::findOrFail($taskId);
-        $oldUsers = $task->assignedUsers->pluck('id')->toArray();
-        $task->assignedUsers()->sync($userIds);
+        $task = $this->tasks->findOrFail($taskId);
+        $oldUsers = $this->tasks->assignedUserIds($task);
+        $this->tasks->syncAssignedUsers($task, $userIds);
 
         $this->activityLog->log(
             $task->project_id,
@@ -186,7 +182,7 @@ class TaskService implements TaskServiceInterface
             $this->notificationService->notifyTaskAssigned($task, $newUserIds, auth()->user());
         }
 
-        return $task->fresh(['assignedUsers']);
+        return $this->tasks->fresh($task, ['assignedUsers']);
     }
 
     /**
@@ -196,7 +192,7 @@ class TaskService implements TaskServiceInterface
      */
     public function updateTaskStatus(int $taskId, string $status, bool $force = false): array
     {
-        $task = Task::with('predecessors')->findOrFail($taskId);
+        $task = $this->tasks->findWithPredecessors($taskId);
         $oldStatus = $task->status;
 
         Log::info('Updating task status', ['task_id' => $taskId, 'old_status' => $oldStatus, 'new_status' => $status, 'force' => $force]);
@@ -217,7 +213,7 @@ class TaskService implements TaskServiceInterface
             }
         }
 
-        $task->update(['status' => $status]);
+        $this->tasks->update($task, ['status' => $status]);
 
         $this->activityLog->log(
             $task->project_id,
@@ -233,7 +229,7 @@ class TaskService implements TaskServiceInterface
 
         $this->notificationService->notifyTaskStatusChanged($task, $oldStatus, $status);
 
-        return ['task' => $task->fresh()];
+        return ['task' => $this->tasks->fresh($task)];
     }
 
     /**
@@ -241,12 +237,7 @@ class TaskService implements TaskServiceInterface
      */
     public function getTasksByUser(int $userId): Collection
     {
-        return Task::whereHas('assignedUsers', function ($query) use ($userId) {
-            $query->where('users.id', $userId);
-        })
-            ->with(['project'])
-            ->orderBy('priority', 'desc')
-            ->get();
+        return $this->tasks->byUser($userId);
     }
 
     /**
@@ -264,8 +255,8 @@ class TaskService implements TaskServiceInterface
     public function logHours(int $taskId, float $hours): Task
     {
         $task = $this->getTaskById($taskId);
-        $task->increment('actual_hours', $hours);
+        $this->tasks->incrementActualHours($task, $hours);
 
-        return $task->fresh();
+        return $this->tasks->fresh($task);
     }
 }

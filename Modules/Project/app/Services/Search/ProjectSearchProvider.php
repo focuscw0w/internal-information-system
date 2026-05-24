@@ -2,7 +2,9 @@
 
 namespace Modules\Project\Services\Search;
 
-use Illuminate\Database\Eloquent\Builder;
+use Modules\Project\Contracts\Repositories\CommentRepositoryInterface;
+use Modules\Project\Contracts\Repositories\ProjectRepositoryInterface;
+use Modules\Project\Contracts\Repositories\TaskRepositoryInterface;
 use Modules\Project\Contracts\SearchProviderInterface;
 use Modules\Project\Enums\ProjectGlobalPermission;
 use Modules\Project\Enums\ProjectPermission;
@@ -14,11 +16,17 @@ use Throwable;
 
 class ProjectSearchProvider implements SearchProviderInterface
 {
+    public function __construct(
+        private readonly ProjectRepositoryInterface $projects,
+        private readonly TaskRepositoryInterface $tasks,
+        private readonly CommentRepositoryInterface $comments,
+    ) {}
+
     public function search(string $query, User $user, int $perGroup): array
     {
         $term = trim($query);
         $like = '%'.$this->escapeLike($term).'%';
-        $visibleProjectIds = Project::visibleTo($user)->pluck('id')->all();
+        $visibleProjectIds = $this->projects->visibleProjectIds($user);
 
         if (mb_strlen($term) < 2) {
             return ['actions' => $this->buildActions($user, $term, $perGroup)];
@@ -56,17 +64,14 @@ class ProjectSearchProvider implements SearchProviderInterface
 
     private function createTaskActions(User $user, string $term, int $perGroup): array
     {
-        $query = Project::visibleTo($user)
-            ->orderByDesc('updated_at')
-            ->limit($perGroup * 3);
+        $nameLike = null;
 
         if (mb_strlen($term) >= 2 && ! $this->matchesGenericCreateTaskTerm($term)) {
-            $like = '%'.$this->escapeLike($term).'%';
-            $query->where('name', 'like', $like);
+            $nameLike = '%'.$this->escapeLike($term).'%';
         }
 
-        return $query
-            ->get(['id', 'name', 'owner_id', 'updated_at'])
+        return $this->projects
+            ->latestVisibleForTaskActions($user, $nameLike, $perGroup * 3)
             ->filter(fn (Project $project) => $project->userHasPermission($user, ProjectPermission::CREATE_TASKS->value))
             ->take($perGroup)
             ->map(fn (Project $project) => SearchActionBuilder::make(
@@ -90,14 +95,8 @@ class ProjectSearchProvider implements SearchProviderInterface
 
     private function searchProjects(User $user, string $like, int $perGroup): array
     {
-        return Project::visibleTo($user)
-            ->where(function (Builder $q) use ($like) {
-                $q->where('name', 'like', $like)
-                    ->orWhere('description', 'like', $like);
-            })
-            ->orderByDesc('updated_at')
-            ->limit($perGroup)
-            ->get(['id', 'name', 'status'])
+        return $this->projects
+            ->searchVisible($user, $like, $perGroup)
             ->map(fn (Project $project) => [
                 'type' => 'project',
                 'id' => $project->id,
@@ -115,16 +114,8 @@ class ProjectSearchProvider implements SearchProviderInterface
             return [];
         }
 
-        return Task::query()
-            ->whereIn('project_id', $visibleProjectIds)
-            ->where(function (Builder $q) use ($like) {
-                $q->where('title', 'like', $like)
-                    ->orWhere('description', 'like', $like);
-            })
-            ->with('project:id,name')
-            ->orderByDesc('updated_at')
-            ->limit($perGroup)
-            ->get(['id', 'project_id', 'title', 'status'])
+        return $this->tasks
+            ->searchWithinProjects($visibleProjectIds, $like, $perGroup)
             ->map(fn (Task $task) => [
                 'type' => 'task',
                 'id' => $task->id,
@@ -142,13 +133,8 @@ class ProjectSearchProvider implements SearchProviderInterface
             return [];
         }
 
-        return Comment::query()
-            ->whereHas('task', fn (Builder $q) => $q->whereIn('project_id', $visibleProjectIds))
-            ->where('body', 'like', $like)
-            ->with(['task:id,project_id,title', 'task.project:id,name'])
-            ->orderByDesc('created_at')
-            ->limit($perGroup)
-            ->get(['id', 'task_id', 'body'])
+        return $this->comments
+            ->searchWithinProjects($visibleProjectIds, $like, $perGroup)
             ->map(function (Comment $comment) {
                 $snippet = mb_substr(strip_tags($comment->body), 0, 80);
 

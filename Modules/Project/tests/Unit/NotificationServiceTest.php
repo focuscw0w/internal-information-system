@@ -34,7 +34,7 @@ class NotificationServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->service = new NotificationService();
+        $this->service = app(NotificationService::class);
     }
 
     #[Test]

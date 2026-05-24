@@ -5,13 +5,15 @@ namespace Modules\Project\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Modules\Project\Contracts\Repositories\ProjectRepositoryInterface;
 use Modules\Project\Enums\ProjectGlobalPermission;
 use Modules\Project\Enums\ProjectPermission;
-use Modules\Project\Models\Project;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckProjectPermission
 {
+    public function __construct(private readonly ProjectRepositoryInterface $projects) {}
+
     public function handle(Request $request, Closure $next, string ...$permissions): Response
     {
         $user = $request->user();
@@ -21,7 +23,7 @@ class CheckProjectPermission
         }
 
         $projectId = $request->route('id') ?? $request->route('projectId');
-        $project = Project::findOrFail($projectId);
+        $project = $this->projects->findOrFail($projectId);
 
         if ($user->hasPermissionTo(ProjectGlobalPermission::PROJECTS_VIEW_ALL->value)
             && $this->onlyReadPermissions($permissions)

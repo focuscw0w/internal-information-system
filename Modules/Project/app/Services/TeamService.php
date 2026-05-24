@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Contracts\ProjectAllocationSyncInterface;
+use Modules\Project\Contracts\Repositories\ProjectRepositoryInterface;
+use Modules\Project\Contracts\Repositories\ProjectTeamRepositoryInterface;
 use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Enums\ProjectWorkload;
 use Modules\Project\Models\Project;
@@ -18,6 +20,8 @@ class TeamService implements TeamServiceInterface
     public function __construct(
         private readonly NotificationServiceInterface $notificationService,
         private readonly ProjectAllocationSyncInterface $allocationSyncService,
+        private readonly ProjectRepositoryInterface $projects,
+        private readonly ProjectTeamRepositoryInterface $teams,
     ) {}
 
     /**
@@ -25,7 +29,7 @@ class TeamService implements TeamServiceInterface
      */
     public function updateProjectTeam(int $id, array $data): ?Project
     {
-        $project = Project::find($id);
+        $project = $this->projects->find($id);
 
         if (! $project) {
             Log::warning('Project not found for team update', ['project_id' => $id]);
@@ -38,7 +42,7 @@ class TeamService implements TeamServiceInterface
         try {
             DB::beginTransaction();
 
-            $oldUserIds = $project->team()->pluck('users.id')->toArray();
+            $oldUserIds = $this->teams->userIds($project);
 
             if (is_array($data['team_members']) && ! empty($data['team_members'])) {
                 $this->syncTeamMembers($project, $data['team_members'], $data['team_settings'] ?? []);
@@ -59,7 +63,7 @@ class TeamService implements TeamServiceInterface
 
             DB::commit();
 
-            return $project->fresh(['owner', 'team', 'tasks']);
+            return $this->projects->fresh($project, ['owner', 'team', 'tasks']);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Project team update failed: '.$e->getMessage(), [
@@ -76,9 +80,9 @@ class TeamService implements TeamServiceInterface
      */
     public function removeMember(int $projectId, int $userId): bool
     {
-        $project = Project::findOrFail($projectId);
+        $project = $this->projects->findOrFail($projectId);
 
-        $removed = $project->team()->detach($userId) > 0;
+        $removed = $this->teams->detach($project, $userId) > 0;
 
         if ($removed) {
             $this->allocationSyncService->removeAllocationsForUsers($project, [$userId]);
@@ -92,11 +96,8 @@ class TeamService implements TeamServiceInterface
      */
     public function syncTeamMembers(Project $project, array $userIds, array $settings): void
     {
-        $currentUserIds = $project->team()->pluck('users.id')->toArray();
-        $existing = $project->team()
-            ->wherePivotIn('user_id', $userIds)
-            ->get()
-            ->keyBy('id');
+        $currentUserIds = $this->teams->userIds($project);
+        $existing = $this->teams->existingMembers($project, $userIds);
 
         $syncData = [];
 
@@ -127,7 +128,7 @@ class TeamService implements TeamServiceInterface
             'team_members_count' => count($syncData),
         ]);
 
-        $project->team()->sync($syncData);
+        $this->teams->sync($project, $syncData);
 
         $removedUserIds = array_values(array_diff($currentUserIds, $userIds));
         $this->allocationSyncService->removeAllocationsForUsers($project, $removedUserIds);

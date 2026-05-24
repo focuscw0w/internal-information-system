@@ -8,15 +8,18 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\Project\Contracts\CommentServiceInterface;
+use Modules\Project\Contracts\Repositories\ProjectRepositoryInterface;
 use Modules\Project\Http\Requests\Comment\StoreCommentRequest;
 use Modules\Project\Models\CommentAttachment;
-use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
 use Modules\User\Models\User;
 
 class CommentController extends Controller
 {
-    public function __construct(private readonly CommentServiceInterface $commentService) {}
+    public function __construct(
+        private readonly CommentServiceInterface $commentService,
+        private readonly ProjectRepositoryInterface $projects,
+    ) {}
 
     public function store(StoreCommentRequest $request, int $projectId, Task $task): RedirectResponse
     {
@@ -54,7 +57,11 @@ class CommentController extends Controller
             'q' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $project = Project::with(['owner', 'team'])->findOrFail($projectId);
+        $project = $this->projects->findWithDetails($projectId);
+
+        if (! $project) {
+            abort(404);
+        }
 
         $term = trim((string) $request->query('q', ''));
 

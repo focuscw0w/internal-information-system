@@ -28,7 +28,7 @@ class TaskServiceTest extends TestCase
 
         $this->actor = User::factory()->create();
         $this->project = Project::factory()->create(['owner_id' => $this->actor->id]);
-        $this->service = new TaskService(new ActivityLogService(), new NotificationService());
+        $this->service = app(TaskService::class);
 
         $this->actingAs($this->actor);
     }
