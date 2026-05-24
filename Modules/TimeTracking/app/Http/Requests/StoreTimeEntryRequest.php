@@ -3,8 +3,8 @@
 namespace Modules\TimeTracking\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Modules\Project\Models\Project;
-use Modules\Project\Models\Task;
+use Modules\TimeTracking\Contracts\Repositories\TimeTrackingProjectRepositoryInterface;
+use Modules\TimeTracking\Contracts\Repositories\TimeTrackingTaskRepositoryInterface;
 
 class StoreTimeEntryRequest extends FormRequest
 {
@@ -13,9 +13,9 @@ class StoreTimeEntryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $project = Project::find((int) $this->route('projectId'));
+        $projects = app(TimeTrackingProjectRepositoryInterface::class);
 
-        return $project?->userIsParticipant($this->user()) ?? false;
+        return $projects->userIsParticipant((int) $this->route('projectId'), $this->user());
     }
 
     /**
@@ -30,17 +30,15 @@ class StoreTimeEntryRequest extends FormRequest
                 'exists:tasks,id',
                 function ($attribute, $value, $fail) {
                     $routeProjectId = (int) $this->route('projectId');
-                    $task = Task::find($value);
+                    $tasks = app(TimeTrackingTaskRepositoryInterface::class);
+                    $task = $tasks->find((int) $value);
 
                     if (! $task || $task->project_id !== $routeProjectId) {
                         $fail('The selected task does not belong to this project.');
                         return;
                     }
 
-                    $isAssigned = \DB::table('assigned_users')
-                        ->where('task_id', $value)
-                        ->where('user_id', auth()->id())
-                        ->exists();
+                    $isAssigned = $tasks->assignedUserExists((int) $value, (int) auth()->id());
 
                     if (! $isAssigned) {
                         $fail('You are not assigned to this task.');

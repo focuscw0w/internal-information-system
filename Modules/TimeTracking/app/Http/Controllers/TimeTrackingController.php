@@ -8,11 +8,14 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Transformers\ProjectResource;
-use Modules\TimeTracking\Models\TimeEntry;
+use Modules\TimeTracking\Contracts\Repositories\TimeEntryRepositoryInterface;
 
 class TimeTrackingController extends Controller
 {
-    public function __construct(private readonly ProjectServiceInterface $projectService) {}
+    public function __construct(
+        private readonly ProjectServiceInterface $projectService,
+        private readonly TimeEntryRepositoryInterface $timeEntries,
+    ) {}
 
     /**
      * Display a listing of the resource.
@@ -24,11 +27,7 @@ class TimeTrackingController extends Controller
 
         $user = auth()->user();
 
-        $entriesQuery = TimeEntry::with(['task', 'project', 'user'])
-            ->where('user_id', $user->id)
-            ->orderByDesc('entry_date');
-
-        $entries = $entriesQuery->get();
+        $entries = $this->timeEntries->entriesForUser($user);
 
         $weekStart = Carbon::now()->startOfWeek();
         $weekEnd = Carbon::now()->endOfWeek();
@@ -65,11 +64,9 @@ class TimeTrackingController extends Controller
             ->filter(fn ($e) => $e->entry_date->between($monthStart, $monthEnd))
             ->sum('hours');
 
-        $prevWeekQuery = TimeEntry::query()
-            ->where('user_id', $user->id)
-            ->whereBetween('entry_date', [$prevWeekStart, $prevWeekEnd]);
-
-        $prevWeekTotal = (float) $prevWeekQuery->sum('hours');
+        $prevWeekTotal = (float) $this->timeEntries
+            ->totalHoursPerUserInPeriod($prevWeekStart, $prevWeekEnd, [$user->id])
+            ->sum();
 
         $weekTarget = 40;
         $monthTarget = $weekTarget * 4;

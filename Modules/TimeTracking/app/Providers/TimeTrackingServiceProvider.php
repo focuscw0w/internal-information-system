@@ -6,13 +6,21 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\Project\Contracts\SearchProviderInterface;
 use Modules\Project\Support\PermissionRegistry;
+use Modules\TimeTracking\Contracts\Repositories\TimeEntryRepositoryInterface;
+use Modules\TimeTracking\Contracts\Repositories\TimeReportRepositoryInterface;
+use Modules\TimeTracking\Contracts\Repositories\TimeTrackingProjectRepositoryInterface;
+use Modules\TimeTracking\Contracts\Repositories\TimeTrackingTaskRepositoryInterface;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Enums\TimeTrackingPermission;
+use Modules\TimeTracking\Repositories\EloquentTimeEntryRepository;
+use Modules\TimeTracking\Repositories\EloquentTimeReportRepository;
+use Modules\TimeTracking\Repositories\EloquentTimeTrackingProjectRepository;
+use Modules\TimeTracking\Repositories\EloquentTimeTrackingTaskRepository;
 use Modules\TimeTracking\Services\Search\TimeTrackingSearchProvider;
+use Modules\TimeTracking\Services\TimeEntryService;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Modules\TimeTracking\Services\TimeEntryService;
 
 class TimeTrackingServiceProvider extends ServiceProvider
 {
@@ -46,6 +54,10 @@ class TimeTrackingServiceProvider extends ServiceProvider
         $this->app->register(RouteServiceProvider::class);
 
         $this->app->bind(TimeEntryServiceInterface::class, TimeEntryService::class);
+        $this->app->bind(TimeEntryRepositoryInterface::class, EloquentTimeEntryRepository::class);
+        $this->app->bind(TimeTrackingProjectRepositoryInterface::class, EloquentTimeTrackingProjectRepository::class);
+        $this->app->bind(TimeTrackingTaskRepositoryInterface::class, EloquentTimeTrackingTaskRepository::class);
+        $this->app->bind(TimeReportRepositoryInterface::class, EloquentTimeReportRepository::class);
         $this->app->tag(TimeTrackingSearchProvider::class, SearchProviderInterface::class);
     }
 

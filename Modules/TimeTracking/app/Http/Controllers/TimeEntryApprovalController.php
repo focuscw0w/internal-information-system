@@ -7,17 +7,22 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Modules\TimeTracking\Contracts\Repositories\TimeEntryRepositoryInterface;
 use Modules\TimeTracking\Enums\TimeEntryStatusEnum;
 use Modules\TimeTracking\Models\TimeEntry;
 
 class TimeEntryApprovalController extends Controller
 {
+    public function __construct(
+        private readonly TimeEntryRepositoryInterface $timeEntries,
+    ) {}
+
     public function approve(Request $request, int $id): RedirectResponse
     {
-        $entry = TimeEntry::with('project')->findOrFail($id);
+        $entry = $this->timeEntries->findWithProjectOrFail($id);
         $this->authorizeEntry($request, $entry);
 
-        $entry->update([
+        $this->timeEntries->update($entry, [
             'status' => TimeEntryStatusEnum::Approved->value,
             'approved_by' => $request->user()->id,
             'approved_at' => now(),
@@ -33,10 +38,10 @@ class TimeEntryApprovalController extends Controller
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);
 
-        $entry = TimeEntry::with('project')->findOrFail($id);
+        $entry = $this->timeEntries->findWithProjectOrFail($id);
         $this->authorizeEntry($request, $entry);
 
-        $entry->update([
+        $this->timeEntries->update($entry, [
             'status' => TimeEntryStatusEnum::Rejected->value,
             'approved_by' => null,
             'approved_at' => null,
@@ -53,9 +58,7 @@ class TimeEntryApprovalController extends Controller
             'ids.*' => ['integer', 'exists:time_entries,id'],
         ]);
 
-        $entries = TimeEntry::with('project')
-            ->whereIn('id', $validated['ids'])
-            ->get();
+        $entries = $this->timeEntries->findManyWithProject($validated['ids']);
 
         $problematicIds = $entries
             ->filter(fn (TimeEntry $entry) => ! $this->canApproveEntry($request, $entry))
@@ -71,14 +74,12 @@ class TimeEntryApprovalController extends Controller
         }
 
         DB::transaction(function () use ($entries, $request) {
-            TimeEntry::query()
-                ->whereIn('id', $entries->pluck('id'))
-                ->update([
-                    'status' => TimeEntryStatusEnum::Approved->value,
-                    'approved_by' => $request->user()->id,
-                    'approved_at' => now(),
-                    'rejection_reason' => null,
-                ]);
+            $this->timeEntries->updateStatusForIds($entries->pluck('id')->all(), [
+                'status' => TimeEntryStatusEnum::Approved->value,
+                'approved_by' => $request->user()->id,
+                'approved_at' => now(),
+                'rejection_reason' => null,
+            ]);
         });
 
         return back()->with('success', 'Vybrané záznamy boli schválené.');

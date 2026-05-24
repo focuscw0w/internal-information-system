@@ -8,17 +8,19 @@ use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Transformers\ProjectResource;
+use Modules\TimeTracking\Contracts\Repositories\TimeEntryRepositoryInterface;
+use Modules\TimeTracking\Contracts\Repositories\TimeTrackingProjectRepositoryInterface;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Http\Requests\StoreTimeEntryRequest;
 use Modules\TimeTracking\Http\Requests\UpdateTimeEntryRequest;
-use Modules\Project\Models\Project;
-use Modules\TimeTracking\Models\TimeEntry;
 
 class TimeEntryController extends Controller
 {
     public function __construct(
         private readonly TimeEntryServiceInterface $timeEntryService,
-        private readonly ProjectServiceInterface $projectService
+        private readonly ProjectServiceInterface $projectService,
+        private readonly TimeEntryRepositoryInterface $timeEntries,
+        private readonly TimeTrackingProjectRepositoryInterface $timeProjects,
     ) {}
 
     /**
@@ -64,7 +66,7 @@ class TimeEntryController extends Controller
      */
     public function update(UpdateTimeEntryRequest $request, int $projectId, int $entryId): RedirectResponse
     {
-        $entry = TimeEntry::find($entryId);
+        $entry = $this->timeEntries->find($entryId);
         if (! $entry || $entry->project_id !== $projectId) {
             return back()->with('error', 'Time entry not found.');
         }
@@ -83,7 +85,7 @@ class TimeEntryController extends Controller
      */
     public function destroy(int $projectId, int $entryId): RedirectResponse
     {
-        $entry = TimeEntry::find($entryId);
+        $entry = $this->timeEntries->find($entryId);
         if (! $entry || $entry->project_id !== $projectId) {
             return back()->with('error', 'Time entry not found.');
         }
@@ -99,19 +101,7 @@ class TimeEntryController extends Controller
 
     public function timerProjects(): JsonResponse
     {
-        $userId = auth()->id();
-
-        $projects = Project::with([
-            'tasks' => fn ($query) => $query
-                ->select('id', 'project_id', 'title')
-                ->whereHas('assignedUsers', fn ($assignedQuery) => $assignedQuery->where('users.id', $userId)),
-        ])
-            ->where(function ($q) use ($userId) {
-                $q->where('owner_id', $userId)
-                    ->orWhereHas('team', fn ($q) => $q->where('user_id', $userId));
-            })
-            ->whereHas('tasks.assignedUsers', fn ($query) => $query->where('users.id', $userId))
-            ->get(['id', 'name']);
+        $projects = $this->timeProjects->timerProjectsForUser((int) auth()->id());
 
         return response()->json($projects);
     }

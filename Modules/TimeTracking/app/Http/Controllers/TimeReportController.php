@@ -4,21 +4,24 @@ namespace Modules\TimeTracking\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Modules\Project\Models\Project;
+use Modules\TimeTracking\Contracts\Repositories\TimeReportRepositoryInterface;
+use Modules\TimeTracking\Contracts\Repositories\TimeTrackingProjectRepositoryInterface;
+use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\TimeTracking\Enums\TimeEntryStatusEnum;
 use Modules\TimeTracking\Models\TimeEntry;
-use Modules\TimeTracking\Services\TimeEntryService;
-use Modules\User\Models\User;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TimeReportController extends Controller
 {
-    public function __construct(private readonly TimeEntryService $timeEntryService) {}
+    public function __construct(
+        private readonly TimeEntryServiceInterface $timeEntryService,
+        private readonly TimeReportRepositoryInterface $reports,
+        private readonly TimeTrackingProjectRepositoryInterface $timeProjects,
+    ) {}
 
     public function index(Request $request): Response
     {
@@ -143,45 +146,15 @@ class TimeReportController extends Controller
             ->getTotalHoursPerUserInPeriod($prevFrom, $prevTo, $userIds, $projectIds, $status)
             ->sum();
 
-        $base = $this->baseEntriesQuery($from, $to, $userIds, $projectIds, $status);
-
-        $users = User::query()
-            ->whereIn('id', $totalsByUser->keys()->all())
-            ->get(['id', 'name', 'email'])
-            ->keyBy('id');
-        $projects = Project::query()
-            ->whereIn('id', $totalsByProject->keys()->all())
-            ->get(['id', 'name'])
-            ->keyBy('id');
-
-        $byUserStats = (clone $base)
-            ->selectRaw('user_id, COUNT(*) as entries_count, COUNT(DISTINCT project_id) as projects_count')
-            ->groupBy('user_id')
-            ->get()
-            ->keyBy('user_id');
-
-        $byProjectStats = (clone $base)
-            ->selectRaw('project_id, COUNT(*) as entries_count')
-            ->groupBy('project_id')
-            ->get()
-            ->keyBy('project_id');
-
-        $topContributors = (clone $base)
-            ->selectRaw('project_id, user_id, COALESCE(SUM(hours), 0) as total_hours')
-            ->with('user:id,name')
-            ->groupBy('project_id', 'user_id')
-            ->orderByDesc('total_hours')
-            ->get()
-            ->groupBy('project_id')
-            ->map(fn ($rows) => $rows->take(5)->map(fn ($row) => [
-                'user_id' => (int) $row->user_id,
-                'name' => $row->user?->name ?? 'Používateľ #'.$row->user_id,
-                'hours' => (float) $row->total_hours,
-            ])->values());
+        $users = $this->reports->usersByIds($totalsByUser->keys()->all());
+        $projects = $this->timeProjects->reportFilterProjects($totalsByProject->keys()->all())->keyBy('id');
+        $byUserStats = $this->reports->userStats($from, $to, $userIds, $projectIds, $status);
+        $byProjectStats = $this->reports->projectStats($from, $to, $userIds, $projectIds, $status);
+        $topContributors = $this->reports->topContributors($from, $to, $userIds, $projectIds, $status);
 
         $timelineGranularity = $from->diffInDays($to) > 45 ? 'week' : 'day';
-        $timeline = (clone $base)
-            ->get(['entry_date', 'hours'])
+        $timeline = $this->reports
+            ->timelineEntries($from, $to, $userIds, $projectIds, $status)
             ->groupBy(fn (TimeEntry $entry) => $timelineGranularity === 'week'
                 ? $entry->entry_date->format('o-W')
                 : $entry->entry_date->toDateString())
@@ -213,16 +186,6 @@ class TimeReportController extends Controller
         ];
     }
 
-    private function baseEntriesQuery(Carbon $from, Carbon $to, ?array $userIds, ?array $projectIds, string $status): Builder
-    {
-        return TimeEntry::query()
-            ->whereDate('entry_date', '>=', $from)
-            ->whereDate('entry_date', '<=', $to)
-            ->when($userIds !== null, fn ($query) => $query->whereIn('user_id', $userIds))
-            ->when($projectIds !== null, fn ($query) => $query->whereIn('project_id', $projectIds))
-            ->when($status !== 'all', fn ($query) => $query->where('status', $status));
-    }
-
     private function summaryExportRows(Request $request, array $filters): array
     {
         $from = Carbon::parse($filters['date_from'])->startOfDay();
@@ -231,9 +194,8 @@ class TimeReportController extends Controller
         $projectIds = $this->intersectIds($projectScope, $filters['project_ids']);
         $userIds = $filters['user_ids'] ?: null;
 
-        return $this->baseEntriesQuery($from, $to, $userIds, $projectIds, $filters['status'])
-            ->with(['user:id,name,email', 'project:id,name'])
-            ->get(['id', 'project_id', 'user_id', 'hours', 'status'])
+        return $this->reports
+            ->summaryExportEntries($from, $to, $userIds, $projectIds, $filters['status'])
             ->groupBy(fn (TimeEntry $entry) => $entry->user_id.'-'.$entry->project_id)
             ->map(function ($entries) {
                 /** @var TimeEntry $first */
@@ -272,17 +234,8 @@ class TimeReportController extends Controller
         $projectIds = $this->intersectIds($projectScope, $filters['project_ids']);
         $userIds = $filters['user_ids'] ?: null;
 
-        return $this->baseEntriesQuery($from, $to, $userIds, $projectIds, $filters['status'])
-            ->with([
-                'user:id,name,email',
-                'project:id,name',
-                'task:id,title',
-                'approver:id,name',
-            ])
-            ->orderBy('entry_date')
-            ->orderBy('project_id')
-            ->orderBy('user_id')
-            ->get()
+        return $this->reports
+            ->detailExportEntries($from, $to, $userIds, $projectIds, $filters['status'])
             ->map(fn (TimeEntry $entry) => [
                 'entry_date' => $entry->entry_date?->toDateString(),
                 'user_name' => $entry->user?->name ?? 'Používateľ #'.$entry->user_id,
@@ -323,18 +276,8 @@ class TimeReportController extends Controller
     private function filterOptions(Request $request): array
     {
         $projectIds = $this->scopedProjectIds($request);
-        $projects = Project::query()
-            ->when($projectIds !== null, fn ($query) => $query->whereIn('id', $projectIds))
-            ->orderBy('name')
-            ->get(['id', 'name']);
-
-        $users = User::query()
-            ->whereIn('id', TimeEntry::query()
-                ->when($projectIds !== null, fn ($query) => $query->whereIn('project_id', $projectIds))
-                ->select('user_id')
-                ->distinct())
-            ->orderBy('name')
-            ->get(['id', 'name', 'email']);
+        $projects = $this->timeProjects->reportFilterProjects($projectIds);
+        $users = $this->reports->filterUsers($projectIds);
 
         return [
             'projects' => $projects,
@@ -350,18 +293,7 @@ class TimeReportController extends Controller
             return null;
         }
 
-        $projectIds = Project::query()
-            ->where(function (Builder $query) use ($user) {
-                $query
-                    ->where('owner_id', $user->id)
-                    ->orWhereHas('team', function (Builder $teamQuery) use ($user) {
-                        $teamQuery
-                            ->where('user_id', $user->id)
-                            ->whereJsonContains('permissions', 'manage_time_entries');
-                    });
-            })
-            ->pluck('id')
-            ->all();
+        $projectIds = $this->timeProjects->manageableProjectIds($user);
 
         abort_if($projectIds === [], 403);
 

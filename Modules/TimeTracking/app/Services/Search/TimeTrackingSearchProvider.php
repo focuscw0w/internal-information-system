@@ -3,18 +3,22 @@
 namespace Modules\TimeTracking\Services\Search;
 
 use Modules\Project\Contracts\SearchProviderInterface;
-use Modules\Project\Models\Project;
 use Modules\Project\Services\Search\SearchActionBuilder;
+use Modules\TimeTracking\Contracts\Repositories\TimeTrackingProjectRepositoryInterface;
 use Modules\User\Models\User;
 
 class TimeTrackingSearchProvider implements SearchProviderInterface
 {
+    public function __construct(
+        private readonly TimeTrackingProjectRepositoryInterface $timeProjects,
+    ) {}
+
     public function search(string $query, User $user, int $perGroup): array
     {
         $term = trim($query);
         $actions = [];
 
-        if ($user->is_admin || Project::whereUserCanManageTimeEntries($user)->exists()) {
+        if ($user->is_admin || $this->timeProjects->hasManageableProjects($user)) {
             $actions[] = SearchActionBuilder::make(
                 'time-approvals',
                 'Schvaľovania',
