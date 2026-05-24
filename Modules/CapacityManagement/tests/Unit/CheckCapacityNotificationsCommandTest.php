@@ -5,6 +5,7 @@ namespace Modules\CapacityManagement\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\CapacityManagement\Console\Commands\CheckCapacityNotificationsCommand;
 use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
+use Modules\CapacityManagement\Contracts\Repositories\CapacityNotificationRepositoryInterface;
 use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Models\Project;
 use Modules\User\Models\User;
@@ -36,7 +37,14 @@ class CheckCapacityNotificationsCommandTest extends TestCase
                 115.0
             );
 
-        $command = new CheckCapacityNotificationsCommand($capacityService, $notificationService);
+        $notificationRepository = $this->createMock(CapacityNotificationRepositoryInterface::class);
+        $notificationRepository->expects($this->once())
+            ->method('findUser')
+            ->with($user->id)
+            ->willReturn($user);
+        $notificationRepository->expects($this->never())->method('findProject');
+
+        $command = new CheckCapacityNotificationsCommand($capacityService, $notificationService, $notificationRepository);
         $this->app->instance(CheckCapacityNotificationsCommand::class, $command);
 
         $this->artisan('capacity:check-notifications')->assertExitCode(0);
@@ -72,7 +80,14 @@ class CheckCapacityNotificationsCommandTest extends TestCase
                 40.0
             );
 
-        $command = new CheckCapacityNotificationsCommand($capacityService, $notificationService);
+        $notificationRepository = $this->createMock(CapacityNotificationRepositoryInterface::class);
+        $notificationRepository->expects($this->never())->method('findUser');
+        $notificationRepository->expects($this->once())
+            ->method('findProject')
+            ->with($project->id)
+            ->willReturn($project);
+
+        $command = new CheckCapacityNotificationsCommand($capacityService, $notificationService, $notificationRepository);
         $this->app->instance(CheckCapacityNotificationsCommand::class, $command);
 
         $this->artisan('capacity:check-notifications')->assertExitCode(0);
@@ -103,7 +118,11 @@ class CheckCapacityNotificationsCommandTest extends TestCase
         $notificationService->expects($this->never())
             ->method('notifyProjectCapacityAtRisk');
 
-        $command = new CheckCapacityNotificationsCommand($capacityService, $notificationService);
+        $notificationRepository = $this->createMock(CapacityNotificationRepositoryInterface::class);
+        $notificationRepository->expects($this->never())->method('findUser');
+        $notificationRepository->expects($this->never())->method('findProject');
+
+        $command = new CheckCapacityNotificationsCommand($capacityService, $notificationService, $notificationRepository);
         $this->app->instance(CheckCapacityNotificationsCommand::class, $command);
 
         $this->artisan('capacity:check-notifications')->assertExitCode(0);
@@ -134,7 +153,11 @@ class CheckCapacityNotificationsCommandTest extends TestCase
         $notificationService->expects($this->never())
             ->method('notifyProjectCapacityAtRisk');
 
-        $command = new CheckCapacityNotificationsCommand($capacityService, $notificationService);
+        $notificationRepository = $this->createMock(CapacityNotificationRepositoryInterface::class);
+        $notificationRepository->expects($this->never())->method('findUser');
+        $notificationRepository->expects($this->never())->method('findProject');
+
+        $command = new CheckCapacityNotificationsCommand($capacityService, $notificationService, $notificationRepository);
         $this->app->instance(CheckCapacityNotificationsCommand::class, $command);
 
         $this->artisan('capacity:check-notifications')->assertExitCode(0);
@@ -153,7 +176,11 @@ class CheckCapacityNotificationsCommandTest extends TestCase
         $notificationService->expects($this->never())->method('notifyUserOverloaded');
         $notificationService->expects($this->never())->method('notifyProjectCapacityAtRisk');
 
-        $command = new CheckCapacityNotificationsCommand($capacityService, $notificationService);
+        $notificationRepository = $this->createMock(CapacityNotificationRepositoryInterface::class);
+        $notificationRepository->expects($this->never())->method('findUser');
+        $notificationRepository->expects($this->never())->method('findProject');
+
+        $command = new CheckCapacityNotificationsCommand($capacityService, $notificationService, $notificationRepository);
         $this->app->instance(CheckCapacityNotificationsCommand::class, $command);
 
         $this->artisan('capacity:check-notifications')->assertExitCode(0);
