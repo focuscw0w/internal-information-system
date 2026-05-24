@@ -4,9 +4,8 @@ namespace Modules\CapacityManagement\Console\Commands;
 
 use Illuminate\Console\Command;
 use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
+use Modules\CapacityManagement\Contracts\Repositories\CapacityNotificationRepositoryInterface;
 use Modules\Project\Contracts\NotificationServiceInterface;
-use Modules\Project\Models\Project;
-use Modules\User\Models\User;
 
 class CheckCapacityNotificationsCommand extends Command
 {
@@ -17,6 +16,7 @@ class CheckCapacityNotificationsCommand extends Command
     public function __construct(
         private readonly CapacityManagementServiceInterface $capacityService,
         private readonly NotificationServiceInterface $notificationService,
+        private readonly CapacityNotificationRepositoryInterface $capacityNotifications,
     ) {
         parent::__construct();
     }
@@ -28,7 +28,7 @@ class CheckCapacityNotificationsCommand extends Command
 
         // 1. USER_OVERLOADED — používatelia s utilization > 100%
         foreach ($dashboard['alerts'] as $alert) {
-            $user = User::find($alert['id']);
+            $user = $this->capacityNotifications->findUser((int) $alert['id']);
             if ($user) {
                 $this->notificationService->notifyUserOverloaded($user, $alert['weekly_utilization']);
                 $notified++;
@@ -38,7 +38,7 @@ class CheckCapacityNotificationsCommand extends Command
         // 2. PROJECT_CAPACITY_AT_RISK — projekty kde can_finish = false a ešte nie sú overdue
         foreach ($dashboard['prediction']['projects'] as $projectData) {
             if (! $projectData['can_finish'] && $projectData['days_remaining'] > 0) {
-                $project = Project::find($projectData['id']);
+                $project = $this->capacityNotifications->findProject((int) $projectData['id']);
                 if ($project) {
                     $this->notificationService->notifyProjectCapacityAtRisk(
                         $project,

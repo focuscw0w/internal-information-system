@@ -2,15 +2,19 @@
 
 namespace Modules\CapacityManagement\Services\Search;
 
+use Modules\CapacityManagement\Contracts\Repositories\CapacityAccessRepositoryInterface;
 use Modules\CapacityManagement\Enums\CapacityPermission;
 use Modules\Project\Contracts\SearchProviderInterface;
-use Modules\Project\Models\Project;
 use Modules\Project\Services\Search\SearchActionBuilder;
 use Modules\User\Models\User;
 use Throwable;
 
 class CapacitySearchProvider implements SearchProviderInterface
 {
+    public function __construct(
+        private readonly CapacityAccessRepositoryInterface $accessRepository,
+    ) {}
+
     public function search(string $query, User $user, int $perGroup): array
     {
         $term = trim($query);
@@ -49,10 +53,7 @@ class CapacitySearchProvider implements SearchProviderInterface
 
     private function canAccessManagerArea(User $user): bool
     {
-        return $user->is_admin
-            || $this->canGlobally($user, CapacityPermission::CAPACITY_MANAGE->value)
-            || Project::managedBy($user)->exists()
-            || Project::whereUserCanManageTimeEntries($user)->exists();
+        return $this->accessRepository->canAccessManagerArea($user);
     }
 
     private function canGlobally(User $user, string $permission): bool

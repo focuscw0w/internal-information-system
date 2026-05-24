@@ -5,26 +5,22 @@ namespace Modules\CapacityManagement\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\CapacityManagement\Contracts\Repositories\CapacityDashboardRepositoryInterface;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
-use Modules\TimeTracking\Models\TimeEntry;
 
 class DashboardController extends Controller
 {
+    public function __construct(private readonly CapacityDashboardRepositoryInterface $dashboardRepository) {}
+
     public function index(): Response
     {
         $user = auth()->user();
         $today = now()->toDateString();
         $weekStart = now()->startOfWeek()->toDateString();
 
-        $myTasksToday = Task::query()
-            ->whereHas('assignedUsers', fn ($query) => $query->where('users.id', $user->id))
-            ->where('status', '!=', 'done')
-            ->whereDate('due_date', '<=', $today)
-            ->with('project:id,name')
-            ->orderBy('due_date')
-            ->limit(6)
-            ->get()
+        $myTasksToday = $this->dashboardRepository
+            ->tasksDueForUser($user, $today)
             ->map(fn (Task $task) => [
                 'id' => $task->id,
                 'project_id' => $task->project_id,
@@ -39,18 +35,8 @@ class DashboardController extends Controller
                 ],
             ]);
 
-        $atRiskProjects = Project::query()
-            ->forUser($user->id)
-            ->whereNotIn('status', ['completed', 'cancelled'])
-            ->with(['tasks', 'owner:id,name'])
-            ->get()
-            ->filter(fn (Project $project) => $project->is_at_risk || $project->is_overdue)
-            ->sortBy([
-                ['is_overdue', 'desc'],
-                ['days_remaining', 'asc'],
-            ])
-            ->take(5)
-            ->values()
+        $atRiskProjects = $this->dashboardRepository
+            ->atRiskProjectsForUser($user)
             ->map(fn (Project $project) => [
                 'id' => $project->id,
                 'name' => $project->name,
@@ -68,18 +54,15 @@ class DashboardController extends Controller
                 ],
             ]);
 
-        $weekEntries = TimeEntry::query()
-            ->forUser($user->id)
-            ->whereDate('entry_date', '>=', $weekStart)
-            ->whereDate('entry_date', '<=', $today);
+        $weekStats = $this->dashboardRepository->weekTimeEntryStatsForUser($user->id, $weekStart, $today);
 
         $timeWeekToDate = [
             'week_start' => $weekStart,
             'week_end' => $today,
-            'logged_hours' => (float) (clone $weekEntries)->sum('hours'),
-            'today_hours' => (float) (clone $weekEntries)->whereDate('entry_date', $today)->sum('hours'),
-            'entries_count' => (clone $weekEntries)->count(),
-            'unsubmitted_hours' => (float) (clone $weekEntries)->sum('hours'),
+            'logged_hours' => $weekStats['logged_hours'],
+            'today_hours' => $weekStats['today_hours'],
+            'entries_count' => $weekStats['entries_count'],
+            'unsubmitted_hours' => $weekStats['logged_hours'],
             'approved_hours' => 0.0,
             'approval_enabled' => false,
         ];

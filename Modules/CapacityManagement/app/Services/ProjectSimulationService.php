@@ -5,14 +5,19 @@ namespace Modules\CapacityManagement\Services;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Modules\CapacityManagement\Contracts\ProjectSimulationInterface;
+use Modules\CapacityManagement\Contracts\Repositories\CapacityForecastRepositoryInterface;
+use Modules\CapacityManagement\Contracts\Repositories\EmployeeCapacityRepositoryInterface;
 use Modules\CapacityManagement\DTO\ProjectSimulationInput;
 use Modules\CapacityManagement\DTO\ProjectSimulationResult;
-use Modules\CapacityManagement\Models\EmployeeCapacity;
 use Modules\Project\Models\Project;
-use Modules\Project\Models\ProjectAllocation;
 
 class ProjectSimulationService implements ProjectSimulationInterface
 {
+    public function __construct(
+        private readonly CapacityForecastRepositoryInterface $forecastRepository,
+        private readonly EmployeeCapacityRepositoryInterface $employeeCapacities,
+    ) {}
+
     /**
      * Run an in-memory burn-down simulation for a single project.
      * Nothing is persisted to the database.
@@ -25,10 +30,10 @@ class ProjectSimulationService implements ProjectSimulationInterface
         $project->loadMissing('tasks');
 
         // Load all allocations for this project (not just currently active)
-        $allocations = ProjectAllocation::forProject($project->id)->get();
+        $allocations = $this->forecastRepository->allocationsForProject($project->id);
 
         // Load employee capacities
-        $capacitiesMap = EmployeeCapacity::query()->pluck('weekly_capacity_hours', 'user_id');
+        $capacitiesMap = $this->employeeCapacities->weeklyCapacityMap();
 
         // --- Baseline values ---
         $baselineRemainingHours  = $this->calculateRemainingHours($project);

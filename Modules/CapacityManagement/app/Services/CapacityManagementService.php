@@ -4,11 +4,11 @@ namespace Modules\CapacityManagement\Services;
 
 use Carbon\Carbon;
 use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
+use Modules\CapacityManagement\Contracts\Repositories\CapacityForecastRepositoryInterface;
+use Modules\CapacityManagement\Contracts\Repositories\EmployeeCapacityRepositoryInterface;
 use Modules\CapacityManagement\DTO\CapacityInputs;
-use Modules\CapacityManagement\Models\EmployeeCapacity;
 use Modules\Project\Contracts\ProjectAllocationSyncInterface;
 use Modules\Project\Contracts\ProjectServiceInterface;
-use Modules\Project\Models\ProjectAllocation;
 use Modules\TimeTracking\Contracts\TimeEntryServiceInterface;
 use Modules\User\Contracts\UserServiceInterface;
 
@@ -20,6 +20,8 @@ class CapacityManagementService implements CapacityManagementServiceInterface
         private readonly ProjectServiceInterface $projectService,
         private readonly CapacityCalculator $calculator,
         private readonly ProjectAllocationSyncInterface $allocationSyncService,
+        private readonly EmployeeCapacityRepositoryInterface $employeeCapacities,
+        private readonly CapacityForecastRepositoryInterface $forecastRepository,
     ) {}
 
     /**
@@ -56,21 +58,14 @@ class CapacityManagementService implements CapacityManagementServiceInterface
      */
     public function setWeeklyCapacityForUser(int $userId, int $hours): void
     {
-        EmployeeCapacity::query()->updateOrCreate(
-            ['user_id' => $userId],
-            ['weekly_capacity_hours' => $hours],
-        );
+        $this->employeeCapacities->updateOrCreateWeeklyCapacity($userId, $hours);
 
         $this->allocationSyncService->syncAllocationsForUserProjects($userId);
     }
 
     public function getWeeklyCapacityForUser(int $userId): ?int
     {
-        $value = EmployeeCapacity::query()
-            ->where('user_id', $userId)
-            ->value('weekly_capacity_hours');
-
-        return $value !== null ? (int) $value : null;
+        return $this->employeeCapacities->weeklyCapacityForUser($userId);
     }
 
     public function getWeeklyCapacitiesForUsers(array $userIds): array
@@ -81,11 +76,7 @@ class CapacityManagementService implements CapacityManagementServiceInterface
             return [];
         }
 
-        return EmployeeCapacity::query()
-            ->whereIn('user_id', $userIds)
-            ->pluck('weekly_capacity_hours', 'user_id')
-            ->map(fn ($hours) => (int) $hours)
-            ->all();
+        return $this->employeeCapacities->weeklyCapacitiesForUsers($userIds);
     }
 
     /**
@@ -99,7 +90,7 @@ class CapacityManagementService implements CapacityManagementServiceInterface
         $users = $this->userService->getAllUsers();
         $periods = $this->getDashboardPeriods($now);
 
-        $capacities = EmployeeCapacity::query()->pluck('weekly_capacity_hours', 'user_id');
+        $capacities = $this->employeeCapacities->weeklyCapacityMap();
         $weeksInMonth = max(1, (int) ceil(
             $periods['start_of_month']->diffInDays($periods['end_of_month']->copy()->addDay()) / 7
         ));
@@ -121,9 +112,7 @@ class CapacityManagementService implements CapacityManagementServiceInterface
             ->getHoursGroupedByWeekAndUser($twelveWeeksAgo, $now);
 
         $activeProjects = $this->projectService->getActiveProjectsWithIncompleteTasks();
-        $forecastAllocations = ProjectAllocation::query()
-            ->whereIn('project_id', $activeProjects->pluck('id'))
-            ->get();
+        $forecastAllocations = $this->forecastRepository->allocationsForProjects($activeProjects->pluck('id'));
 
         return new CapacityInputs(
             users: $users,

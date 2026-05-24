@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\CapacityManagement\Contracts\CapacityManagementServiceInterface;
+use Modules\CapacityManagement\Contracts\Repositories\ManagerDashboardRepositoryInterface;
 use Modules\CapacityManagement\Enums\CapacityPermission;
 use Modules\Project\Models\Project;
 use Modules\Project\Models\Task;
@@ -21,6 +22,7 @@ class ManagerController extends Controller
     public function __construct(
         private readonly CapacityManagementServiceInterface $capacityService,
         private readonly TimeEntryServiceInterface $timeEntryService,
+        private readonly ManagerDashboardRepositoryInterface $managerRepository,
     ) {}
 
     public function dashboard(): Response
@@ -62,18 +64,14 @@ class ManagerController extends Controller
         $managedTimeProjectIds = $this->managedTimeProjectIds($user, $isAdmin);
 
         if ($isAdmin || $managedTimeProjectIds->isNotEmpty()) {
-            $pendingApprovalsQuery = TimeEntry::pending()
-                ->when(! $isAdmin, fn ($query) => $query->whereIn('project_id', $managedTimeProjectIds));
+            $approvalProjectIds = $isAdmin ? null : $managedTimeProjectIds->all();
 
             $widgets['pendingApprovals'] = [
-                'count' => (clone $pendingApprovalsQuery)->count(),
+                'count' => $this->managerRepository->pendingApprovalCount($approvalProjectIds),
             ];
 
-            $widgets['pendingApprovalEntries'] = (clone $pendingApprovalsQuery)
-                ->with(['user:id,name,email', 'project:id,name', 'task:id,title'])
-                ->orderBy('entry_date')
-                ->limit(8)
-                ->get()
+            $widgets['pendingApprovalEntries'] = $this->managerRepository
+                ->pendingApprovalEntries($approvalProjectIds)
                 ->map(fn (TimeEntry $entry) => [
                     'id' => $entry->id,
                     'entry_date' => $entry->entry_date?->toDateString(),
@@ -99,12 +97,10 @@ class ManagerController extends Controller
         $managedProjectIds = $this->managedProjectIds($user, $isAdmin);
 
         if ($isAdmin || $managedProjectIds->isNotEmpty()) {
-            $widgets['overdueTasks'] = Task::overdue()
-                ->when(! $isAdmin, fn ($query) => $query->whereIn('project_id', $managedProjectIds))
-                ->with('project:id,name')
-                ->orderBy('due_date')
-                ->limit(6)
-                ->get()
+            $managedProjectFilter = $isAdmin ? null : $managedProjectIds->all();
+
+            $widgets['overdueTasks'] = $this->managerRepository
+                ->overdueTasks($managedProjectFilter)
                 ->map(fn (Task $task) => [
                     'id' => $task->id,
                     'project_id' => $task->project_id,
@@ -117,14 +113,8 @@ class ManagerController extends Controller
                     ],
                 ]);
 
-            $widgets['atRiskProjects'] = Project::query()
-                ->when(! $isAdmin, fn ($query) => $query->whereIn('id', $managedProjectIds))
-                ->whereNotIn('status', ['completed', 'cancelled'])
-                ->with(['tasks', 'owner:id,name'])
-                ->get()
-                ->filter(fn (Project $project) => $project->is_at_risk)
-                ->take(6)
-                ->values()
+            $widgets['atRiskProjects'] = $this->managerRepository
+                ->atRiskProjects($managedProjectFilter)
                 ->map(fn (Project $project) => [
                     'id' => $project->id,
                     'name' => $project->name,
@@ -139,14 +129,8 @@ class ManagerController extends Controller
                     ],
                 ]);
 
-            $widgets['managedProjects'] = Project::query()
-                ->when(! $isAdmin, fn ($query) => $query->whereIn('id', $managedProjectIds))
-                ->whereNotIn('status', ['completed', 'cancelled'])
-                ->withCount('team')
-                ->orderByRaw('CASE WHEN end_date IS NULL THEN 1 ELSE 0 END')
-                ->orderBy('end_date')
-                ->limit(8)
-                ->get()
+            $widgets['managedProjects'] = $this->managerRepository
+                ->managedProjects($managedProjectFilter)
                 ->map(fn (Project $project) => [
                     'id' => $project->id,
                     'name' => $project->name,
@@ -166,10 +150,7 @@ class ManagerController extends Controller
         if ($isAdmin || $viewTimeProjectIds->isNotEmpty()) {
             $projectIds = $isAdmin ? null : $viewTimeProjectIds->all();
             $totals = $this->timeEntryService->getTotalHoursPerUserInPeriod($from, $to, null, $projectIds);
-            $users = User::query()
-                ->whereIn('id', $totals->keys()->all())
-                ->get(['id', 'name'])
-                ->keyBy('id');
+            $users = $this->managerRepository->usersByIds($totals->keys()->all());
 
             $widgets['teamHoursThisWeek'] = [
                 'from' => $from->toDateString(),
@@ -213,24 +194,12 @@ class ManagerController extends Controller
             ->values();
 
         $aggregateUserIds = $includeUnassigned
-            ? User::query()->pluck('id')->map(fn ($id) => (int) $id)->values()
+            ? $this->managerRepository->allUserIds()
             : $participantIds;
 
         $capacityByUser = $this->capacityService->getPeopleSnapshotForUsers($aggregateUserIds->all());
-        $usersById = User::query()
-            ->whereIn('id', $aggregateUserIds->all())
-            ->get(['id', 'name', 'email'])
-            ->keyBy('id');
-
-        $projectHours = TimeEntry::query()
-            ->when($projectIds !== [], fn ($query) => $query->whereIn('project_id', $projectIds))
-            ->whereDate('entry_date', '>=', $from)
-            ->whereDate('entry_date', '<=', $to)
-            ->selectRaw('project_id, user_id, COALESCE(SUM(hours), 0) as total')
-            ->groupBy('project_id', 'user_id')
-            ->get()
-            ->groupBy('project_id')
-            ->map(fn ($entries) => $entries->pluck('total', 'user_id')->map(fn ($hours) => (float) $hours));
+        $usersById = $this->managerRepository->usersByIds($aggregateUserIds->all());
+        $projectHours = $this->managerRepository->projectHoursByProjectAndUser($projectIds, $from, $to);
 
         $totalHoursByUser = $this->timeEntryService
             ->getTotalHoursPerUserInPeriod(
@@ -379,27 +348,7 @@ class ManagerController extends Controller
 
     private function teamProjects($user, bool $isAdmin, bool $canManageCapacity): Collection
     {
-        return Project::query()
-            ->when(! ($isAdmin || $canManageCapacity), function ($query) use ($user) {
-                $query->where(function ($projectQuery) use ($user) {
-                    $projectQuery
-                        ->where('owner_id', $user->id)
-                        ->orWhereHas('team', function ($teamQuery) use ($user) {
-                            $teamQuery
-                                ->where('user_id', $user->id)
-                                ->where(function ($permissionQuery) {
-                                    $permissionQuery
-                                        ->whereJsonContains('permissions', 'manage_team')
-                                        ->orWhereJsonContains('permissions', 'manage_time_entries');
-                                });
-                        });
-                });
-            })
-            ->whereNotIn('status', ['completed', 'cancelled'])
-            ->with(['owner:id,name,email', 'team:id,name,email', 'allocations'])
-            ->orderByRaw('CASE WHEN end_date IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('end_date')
-            ->get();
+        return $this->managerRepository->teamProjects($user, $isAdmin || $canManageCapacity);
     }
 
     private function capacityStatsForUser(int $userId, array $capacityByUser): array
@@ -457,37 +406,17 @@ class ManagerController extends Controller
 
     private function managedProjectIds($user, bool $isAdmin): Collection
     {
-        if ($isAdmin) {
-            return Project::query()->pluck('id');
-        }
-
-        return Project::managedBy($user)->pluck('id');
+        return $this->managerRepository->managedProjectIds($user, $isAdmin);
     }
 
     private function managedTimeProjectIds($user, bool $isAdmin): Collection
     {
-        if ($isAdmin) {
-            return Project::query()->pluck('id');
-        }
-
-        return Project::whereUserCanManageTimeEntries($user)->pluck('id');
+        return $this->managerRepository->managedTimeProjectIds($user, $isAdmin);
     }
 
     private function viewTimeProjectIds($user, bool $isAdmin): Collection
     {
-        if ($isAdmin) {
-            return Project::query()->pluck('id');
-        }
-
-        return Project::query()
-            ->where(function ($query) use ($user) {
-                $query
-                    ->where('owner_id', $user->id)
-                    ->orWhereHas('team', fn ($teamQuery) => $teamQuery
-                        ->where('user_id', $user->id)
-                        ->whereJsonContains('permissions', 'manage_time_entries'));
-            })
-            ->pluck('id');
+        return $this->managerRepository->viewTimeProjectIds($user, $isAdmin);
     }
 
     private function hasGlobalPermission($user, string $permission): bool

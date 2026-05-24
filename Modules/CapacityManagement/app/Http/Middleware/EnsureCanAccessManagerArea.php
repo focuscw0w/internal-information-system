@@ -4,13 +4,15 @@ namespace Modules\CapacityManagement\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Modules\CapacityManagement\Enums\CapacityPermission;
-use Modules\Project\Models\Project;
+use Modules\CapacityManagement\Contracts\Repositories\CapacityAccessRepositoryInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 class EnsureCanAccessManagerArea
 {
+    public function __construct(
+        private readonly CapacityAccessRepositoryInterface $accessRepository,
+    ) {}
+
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
@@ -19,24 +21,10 @@ class EnsureCanAccessManagerArea
             abort(403);
         }
 
-        if (
-            $user->is_admin
-            || $this->hasGlobalPermission($user, CapacityPermission::CAPACITY_MANAGE->value)
-            || Project::managedBy($user)->exists()
-            || Project::whereUserCanManageTimeEntries($user)->exists()
-        ) {
+        if ($this->accessRepository->canAccessManagerArea($user)) {
             return $next($request);
         }
 
         abort(403);
-    }
-
-    private function hasGlobalPermission($user, string $permission): bool
-    {
-        try {
-            return $user->can($permission);
-        } catch (Throwable) {
-            return false;
-        }
     }
 }

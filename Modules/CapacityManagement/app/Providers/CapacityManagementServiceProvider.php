@@ -6,7 +6,19 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\CapacityManagement\Console\Commands\CheckCapacityNotificationsCommand;
+use Modules\CapacityManagement\Contracts\Repositories\CapacityAccessRepositoryInterface;
+use Modules\CapacityManagement\Contracts\Repositories\CapacityDashboardRepositoryInterface;
+use Modules\CapacityManagement\Contracts\Repositories\CapacityForecastRepositoryInterface;
+use Modules\CapacityManagement\Contracts\Repositories\CapacityNotificationRepositoryInterface;
+use Modules\CapacityManagement\Contracts\Repositories\EmployeeCapacityRepositoryInterface;
+use Modules\CapacityManagement\Contracts\Repositories\ManagerDashboardRepositoryInterface;
 use Modules\CapacityManagement\Enums\CapacityPermission;
+use Modules\CapacityManagement\Repositories\EloquentCapacityAccessRepository;
+use Modules\CapacityManagement\Repositories\EloquentCapacityDashboardRepository;
+use Modules\CapacityManagement\Repositories\EloquentCapacityForecastRepository;
+use Modules\CapacityManagement\Repositories\EloquentCapacityNotificationRepository;
+use Modules\CapacityManagement\Repositories\EloquentEmployeeCapacityRepository;
+use Modules\CapacityManagement\Repositories\EloquentManagerDashboardRepository;
 use Modules\CapacityManagement\Services\Search\CapacitySearchProvider;
 use Modules\Project\Contracts\SearchProviderInterface;
 use Modules\User\Contracts\PermissionRegistryInterface;
@@ -64,6 +76,13 @@ class CapacityManagementServiceProvider extends ServiceProvider
             \Modules\CapacityManagement\Contracts\ProjectSimulationInterface::class,
             \Modules\CapacityManagement\Services\ProjectSimulationService::class,
         );
+
+        $this->app->bind(EmployeeCapacityRepositoryInterface::class, EloquentEmployeeCapacityRepository::class);
+        $this->app->bind(CapacityForecastRepositoryInterface::class, EloquentCapacityForecastRepository::class);
+        $this->app->bind(CapacityDashboardRepositoryInterface::class, EloquentCapacityDashboardRepository::class);
+        $this->app->bind(ManagerDashboardRepositoryInterface::class, EloquentManagerDashboardRepository::class);
+        $this->app->bind(CapacityAccessRepositoryInterface::class, EloquentCapacityAccessRepository::class);
+        $this->app->bind(CapacityNotificationRepositoryInterface::class, EloquentCapacityNotificationRepository::class);
 
         $this->app->tag(CapacitySearchProvider::class, SearchProviderInterface::class);
     }
