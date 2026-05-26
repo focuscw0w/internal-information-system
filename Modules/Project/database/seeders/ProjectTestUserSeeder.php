@@ -6,8 +6,8 @@ use Modules\User\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Modules\Project\Enums\ProjectPermission;
+use Modules\Project\Enums\ProjectPriority;
 use Modules\Project\Enums\ProjectStatus;
-use Modules\Project\Enums\ProjectWorkload;
 use Modules\Project\Models\Project;
 
 class ProjectTestUserSeeder extends Seeder
@@ -60,7 +60,7 @@ class ProjectTestUserSeeder extends Seeder
             [
                 'description' => 'Testovací projekt pre vývoj a demo účely.',
                 'status' => ProjectStatus::ACTIVE->value,
-                'workload' => ProjectWorkload::MEDIUM->value,
+                'priority' => ProjectPriority::MEDIUM->value,
                 'start_date' => now(),
                 'end_date' => now()->addMonths(3),
                 'progress' => 0,

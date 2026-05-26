@@ -16,7 +16,7 @@ class ProjectFactory extends Factory
             'name' => $this->faker->words(3, true),
             'description' => $this->faker->sentence(),
             'status' => 'active',
-            'workload' => 'medium',
+            'priority' => 'medium',
             'start_date' => now(),
             'end_date' => now()->addMonths(2),
             'actual_start_date' => null,

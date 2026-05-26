@@ -7,7 +7,7 @@ export type ProjectStatus =
     | 'on_hold'
     | 'cancelled';
 export type AtRiskReason = 'overdue' | 'stale' | 'no_progress';
-export type WorkloadLevel = 'low' | 'medium' | 'high' | 'overloaded';
+export type ProjectPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TaskStatus = 'todo' | 'in_progress' | 'testing' | 'done';
 export type ViewMode = 'grid' | 'list';
@@ -36,7 +36,7 @@ export interface Project {
     description: string | null;
     current_user_permissions: string[];
     status: ProjectStatus;
-    workload: WorkloadLevel;
+    priority: ProjectPriority;
     start_date: string;
     end_date: string;
     actual_start_date: string | null;

@@ -17,8 +17,8 @@ class EloquentProjectRepository implements ProjectRepositoryInterface
             $query->where('status', $filters['status']);
         }
 
-        if (isset($filters['workload'])) {
-            $query->where('workload', $filters['workload']);
+        if (isset($filters['priority'])) {
+            $query->where('priority', $filters['priority']);
         }
 
         if (isset($filters['owner_id'])) {

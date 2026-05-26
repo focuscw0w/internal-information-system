@@ -16,7 +16,7 @@ class ProjectResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'status' => $this->status,
-            'workload' => $this->workload,
+            'priority' => $this->priority,
             'progress' => (int) $this->progress,
 
             'start_date' => $this->start_date?->format('Y-m-d'),

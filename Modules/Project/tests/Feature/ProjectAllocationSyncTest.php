@@ -103,7 +103,7 @@ class ProjectAllocationSyncTest extends TestCase
             'owner_id' => $owner->id,
             'name' => 'Sync test',
             'status' => 'active',
-            'workload' => 'medium',
+            'priority' => 'medium',
             'start_date' => '2026-04-01',
             'end_date' => '2026-04-30',
         ]);
@@ -117,7 +117,7 @@ class ProjectAllocationSyncTest extends TestCase
             ->put("/projects/{$project->id}", [
                 'name' => 'Sync test',
                 'status' => 'active',
-                'workload' => 'medium',
+                'priority' => 'medium',
                 'start_date' => '2026-05-01',
                 'end_date' => '2026-05-31',
             ])
@@ -146,7 +146,7 @@ class ProjectAllocationSyncTest extends TestCase
                 'name' => 'Allocation on create',
                 'description' => 'Test project',
                 'status' => 'active',
-                'workload' => 'medium',
+                'priority' => 'medium',
                 'start_date' => '2026-04-01',
                 'end_date' => '2026-04-14',
                 'team_members' => [$member->id],

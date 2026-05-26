@@ -37,7 +37,7 @@ export const Card = ({ project, onClick }: CardProps) => {
                     eyebrow={project.owner?.name ?? 'Internal'}
                     name={project.name}
                     status={project.status}
-                    workload={project.workload}
+                    priority={project.priority}
                     isAtRisk={project.is_at_risk}
                 />
 

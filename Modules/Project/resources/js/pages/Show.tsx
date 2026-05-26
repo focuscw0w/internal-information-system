@@ -93,8 +93,8 @@ export default function Show({
                             </span>
                             <BadgeLabel type="status" value={project.status} />
                             <BadgeLabel
-                                type="workload"
-                                value={project.workload}
+                                type="priority"
+                                value={project.priority}
                             />
                         </div>
                         <h1 className="page-head__title">{project.name}</h1>

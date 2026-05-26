@@ -1,12 +1,12 @@
 import {
+    ProjectPriority,
     ProjectStatus,
     TaskPriority,
     TaskStatus,
-    WorkloadLevel,
 } from '../types/types';
 
-type BadgeType = 'status' | 'workload' | 'priority' | 'task-status';
-type BadgeValue = ProjectStatus | WorkloadLevel | TaskPriority | TaskStatus;
+type BadgeType = 'status' | 'priority' | 'task-status';
+type BadgeValue = ProjectStatus | ProjectPriority | TaskPriority | TaskStatus;
 
 interface BadgeConfig {
     bg: string;
@@ -40,28 +40,6 @@ const CONFIG: Record<BadgeType, Record<string, BadgeConfig>> = {
             bg: 'bg-red-100 text-red-700 border-red-200',
             text: 'text-red-700',
             label: 'Zrušený',
-        },
-    },
-    workload: {
-        low: {
-            bg: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-            text: 'text-emerald-700',
-            label: 'Nízke',
-        },
-        medium: {
-            bg: 'bg-amber-100 text-amber-700 border-amber-200',
-            text: 'text-amber-700',
-            label: 'Stredné',
-        },
-        high: {
-            bg: 'bg-orange-100 text-orange-700 border-orange-200',
-            text: 'text-orange-700',
-            label: 'Vysoké',
-        },
-        overloaded: {
-            bg: 'bg-red-100 text-red-700 border-red-200',
-            text: 'text-red-700',
-            label: 'Preťažené',
         },
     },
     priority: {

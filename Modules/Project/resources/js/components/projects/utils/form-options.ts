@@ -1,4 +1,4 @@
-import { ProjectStatus, WorkloadLevel } from '../../../types/types';
+import { ProjectPriority, ProjectStatus } from '../../../types/types';
 
 export const statusOptions: { value: ProjectStatus; label: string }[] = [
     { value: 'planning', label: 'Plánovanie' },
@@ -8,9 +8,9 @@ export const statusOptions: { value: ProjectStatus; label: string }[] = [
     { value: 'cancelled', label: 'Zrušený' },
 ];
 
-export const workloadOptions: { value: WorkloadLevel; label: string }[] = [
-    { value: 'low', label: 'Nízke' },
-    { value: 'medium', label: 'Stredné' },
-    { value: 'high', label: 'Vysoké' },
-    { value: 'overloaded', label: 'Preťažené' },
+export const priorityOptions: { value: ProjectPriority; label: string }[] = [
+    { value: 'low', label: 'Nízka' },
+    { value: 'medium', label: 'Stredná' },
+    { value: 'high', label: 'Vysoká' },
+    { value: 'urgent', label: 'Urgentná' },
 ];

@@ -30,24 +30,24 @@ class ProjectRepositoriesTest extends TestCase
         $visible = Project::factory()->create([
             'owner_id' => $owner->id,
             'status' => 'active',
-            'workload' => 'high',
+            'priority' => 'high',
             'name' => 'ERP rollout',
         ]);
         Project::factory()->create([
             'owner_id' => $owner->id,
             'status' => 'planning',
-            'workload' => 'medium',
+            'priority' => 'medium',
         ]);
         Project::factory()->create([
             'owner_id' => $otherOwner->id,
             'status' => 'active',
-            'workload' => 'high',
+            'priority' => 'high',
             'name' => 'Hidden project',
         ]);
 
         $projects = app(ProjectRepositoryInterface::class)->visibleTo($owner, [
             'status' => 'active',
-            'workload' => 'high',
+            'priority' => 'high',
             'search' => 'ERP',
         ]);
 

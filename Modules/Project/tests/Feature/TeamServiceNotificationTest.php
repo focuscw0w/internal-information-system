@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Notification;
 use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Models\Project;
 use Modules\Project\Notifications\ProjectAssignedNotification;
-use Modules\Project\Notifications\ProjectHighWorkloadNotification;
+use Modules\Project\Notifications\ProjectHighPriorityNotification;
 use Modules\User\Models\User;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -17,7 +17,7 @@ class TeamServiceNotificationTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function adding_member_to_high_workload_project_sends_both_assigned_and_high_workload_notifications(): void
+    public function adding_member_to_high_priority_project_sends_both_assigned_and_high_priority_notifications(): void
     {
         Notification::fake();
 
@@ -25,7 +25,7 @@ class TeamServiceNotificationTest extends TestCase
         $newMember = User::factory()->create();
         $project = Project::factory()->create([
             'owner_id' => $actor->id,
-            'workload' => 'high',
+            'priority' => 'high',
         ]);
 
         $this->actingAs($actor);
@@ -36,11 +36,11 @@ class TeamServiceNotificationTest extends TestCase
         ]);
 
         Notification::assertSentTo($newMember, ProjectAssignedNotification::class);
-        Notification::assertSentTo($newMember, ProjectHighWorkloadNotification::class);
+        Notification::assertSentTo($newMember, ProjectHighPriorityNotification::class);
     }
 
     #[Test]
-    public function adding_member_to_overloaded_project_sends_high_workload_notification(): void
+    public function adding_member_to_urgent_project_sends_high_priority_notification(): void
     {
         Notification::fake();
 
@@ -48,7 +48,7 @@ class TeamServiceNotificationTest extends TestCase
         $newMember = User::factory()->create();
         $project = Project::factory()->create([
             'owner_id' => $actor->id,
-            'workload' => 'overloaded',
+            'priority' => 'urgent',
         ]);
 
         $this->actingAs($actor);
@@ -58,11 +58,11 @@ class TeamServiceNotificationTest extends TestCase
             'team_settings' => [],
         ]);
 
-        Notification::assertSentTo($newMember, ProjectHighWorkloadNotification::class);
+        Notification::assertSentTo($newMember, ProjectHighPriorityNotification::class);
     }
 
     #[Test]
-    public function adding_member_to_low_workload_project_does_not_send_high_workload_notification(): void
+    public function adding_member_to_low_priority_project_does_not_send_high_priority_notification(): void
     {
         Notification::fake();
 
@@ -70,7 +70,7 @@ class TeamServiceNotificationTest extends TestCase
         $newMember = User::factory()->create();
         $project = Project::factory()->create([
             'owner_id' => $actor->id,
-            'workload' => 'low',
+            'priority' => 'low',
         ]);
 
         $this->actingAs($actor);
@@ -81,11 +81,11 @@ class TeamServiceNotificationTest extends TestCase
         ]);
 
         Notification::assertSentTo($newMember, ProjectAssignedNotification::class);
-        Notification::assertNotSentTo($newMember, ProjectHighWorkloadNotification::class);
+        Notification::assertNotSentTo($newMember, ProjectHighPriorityNotification::class);
     }
 
     #[Test]
-    public function adding_member_to_medium_workload_project_does_not_send_high_workload_notification(): void
+    public function adding_member_to_medium_priority_project_does_not_send_high_priority_notification(): void
     {
         Notification::fake();
 
@@ -93,7 +93,7 @@ class TeamServiceNotificationTest extends TestCase
         $newMember = User::factory()->create();
         $project = Project::factory()->create([
             'owner_id' => $actor->id,
-            'workload' => 'medium',
+            'priority' => 'medium',
         ]);
 
         $this->actingAs($actor);
@@ -103,18 +103,18 @@ class TeamServiceNotificationTest extends TestCase
             'team_settings' => [],
         ]);
 
-        Notification::assertNotSentTo($newMember, ProjectHighWorkloadNotification::class);
+        Notification::assertNotSentTo($newMember, ProjectHighPriorityNotification::class);
     }
 
     #[Test]
-    public function assigner_does_not_receive_high_workload_notification_for_their_own_addition(): void
+    public function assigner_does_not_receive_high_priority_notification_for_their_own_addition(): void
     {
         Notification::fake();
 
         $actor = User::factory()->create();
         $project = Project::factory()->create([
             'owner_id' => $actor->id,
-            'workload' => 'overloaded',
+            'priority' => 'urgent',
         ]);
 
         $this->actingAs($actor);
@@ -124,6 +124,6 @@ class TeamServiceNotificationTest extends TestCase
             'team_settings' => [],
         ]);
 
-        Notification::assertNotSentTo($actor, ProjectHighWorkloadNotification::class);
+        Notification::assertNotSentTo($actor, ProjectHighPriorityNotification::class);
     }
 }

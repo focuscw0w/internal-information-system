@@ -3,8 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Modules\Project\Enums\ProjectPriority;
 use Modules\Project\Enums\ProjectStatus;
-use Modules\Project\Enums\ProjectWorkload;
 
 return new class extends Migration {
     /**
@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string('name');
             $table->text('description')->nullable();
             $table->enum('status', ProjectStatus::values())->default(ProjectStatus::PLANNING->value);
-            $table->enum('workload', ProjectWorkload::values())->default(ProjectWorkload::MEDIUM->value);
+            $table->enum('priority', ProjectPriority::values())->default(ProjectPriority::MEDIUM->value);
 
             // Dates
             $table->date('start_date');

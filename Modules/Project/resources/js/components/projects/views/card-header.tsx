@@ -1,12 +1,12 @@
 import { AlertTriangle } from 'lucide-react';
-import { ProjectStatus, WorkloadLevel } from '../../../types/types';
+import { ProjectPriority, ProjectStatus } from '../../../types/types';
 import { BadgeLabel } from '../../ui/badge';
 
 interface CardHeaderProps {
     name: string;
     eyebrow?: string;
     status: ProjectStatus;
-    workload: WorkloadLevel;
+    priority: ProjectPriority;
     isAtRisk?: boolean;
 }
 
@@ -14,7 +14,7 @@ export const CardHeader = ({
     name,
     eyebrow = 'Internal',
     status,
-    workload,
+    priority,
     isAtRisk,
 }: CardHeaderProps) => {
     return (
@@ -33,7 +33,7 @@ export const CardHeader = ({
             </div>
             <div className="flex flex-wrap gap-2">
                 <BadgeLabel type="status" value={status} />
-                <BadgeLabel type="workload" value={workload} />
+                <BadgeLabel type="priority" value={priority} />
             </div>
         </div>
     );

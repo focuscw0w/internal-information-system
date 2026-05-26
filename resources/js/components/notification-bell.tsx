@@ -50,7 +50,7 @@ function getNotificationIcon(type: AppNotificationType) {
             return <AlertTriangle className="h-4 w-4 text-red-600" />;
         case 'project_capacity_at_risk':
             return <TrendingDown className="h-4 w-4 text-red-500" />;
-        case 'project_high_workload':
+        case 'project_high_priority':
             return <Flame className="h-4 w-4 text-orange-500" />;
         case 'task_hours_exceeded':
             return <Clock className="h-4 w-4 text-red-500" />;

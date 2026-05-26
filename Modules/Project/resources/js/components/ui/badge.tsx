@@ -1,17 +1,17 @@
 import { Badge } from '@/components/ui/badge';
 import { getColor, getText, getTextColor } from '../../utils/badge';
 import {
+    ProjectPriority,
     ProjectStatus,
     TaskPriority,
     TaskStatus,
-    WorkloadLevel,
 } from '../../types/types';
 
-type BadgeType = 'status' | 'workload' | 'priority' | 'task-status';
+type BadgeType = 'status' | 'priority' | 'task-status';
 
 interface BadgeProps {
     type: BadgeType;
-    value: ProjectStatus | WorkloadLevel | TaskPriority | TaskStatus;
+    value: ProjectStatus | ProjectPriority | TaskPriority | TaskStatus;
     showLabel?: boolean;
     textOnly?: boolean;
     className?: string;
@@ -20,7 +20,6 @@ interface BadgeProps {
 
 const TYPE_LABELS: Record<BadgeType, string> = {
     status: 'Stav',
-    workload: 'Zaťaženie',
     priority: 'Priorita',
     'task-status': 'Stav',
 };

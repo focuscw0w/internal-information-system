@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Hash;
 use Modules\CapacityManagement\Models\EmployeeCapacity;
 use Modules\Project\Contracts\NotificationServiceInterface;
 use Modules\Project\Enums\ProjectPermission;
+use Modules\Project\Enums\ProjectPriority;
 use Modules\Project\Enums\ProjectStatus;
-use Modules\Project\Enums\ProjectWorkload;
 use Modules\Project\Enums\TaskPriority;
 use Modules\Project\Enums\TaskStatus;
 use Modules\Project\Models\ActivityLog;
@@ -178,7 +178,7 @@ class RealisticOperationsSeeder extends Seeder
             'name' => 'ERP migrácia 2026',
             'description' => 'Migrácia historických dát, skladových API a reportingových tokov do nového ERP.',
             'status' => ProjectStatus::ACTIVE->value,
-            'workload' => ProjectWorkload::HIGH->value,
+            'priority' => ProjectPriority::HIGH->value,
             'start_date' => $this->seedWindowStart->subWeek(),
             'end_date' => $this->seedWindowEnd,
             'progress' => 0,
@@ -214,7 +214,7 @@ class RealisticOperationsSeeder extends Seeder
             'name' => 'Mobilný sklad',
             'description' => 'Stabilizácia release candidate buildu, offline režimu a skenovania čiarových kódov.',
             'status' => ProjectStatus::ACTIVE->value,
-            'workload' => ProjectWorkload::OVERLOADED->value,
+            'priority' => ProjectPriority::URGENT->value,
             'start_date' => $this->seedWindowStart->subWeeks(3),
             'end_date' => $this->today->subDays(2),
             'progress' => 0,
@@ -248,7 +248,7 @@ class RealisticOperationsSeeder extends Seeder
             'name' => 'Interný reporting',
             'description' => 'Menší interný stream pre manažérske KPI exporty a prístupové filtre.',
             'status' => ProjectStatus::PLANNING->value,
-            'workload' => ProjectWorkload::MEDIUM->value,
+            'priority' => ProjectPriority::MEDIUM->value,
             'start_date' => $this->seedWindowStart,
             'end_date' => $this->seedWindowEnd,
             'progress' => 0,
@@ -1132,7 +1132,7 @@ class RealisticOperationsSeeder extends Seeder
         $this->command->info('');
     }
 
-    private function attachTeam(Project $project, array $members, string $assignedBy, bool $notifyHighWorkload): void
+    private function attachTeam(Project $project, array $members, string $assignedBy, bool $notifyHighPriority): void
     {
         foreach ($members as $member) {
             $project->team()->attach($this->users[$member['user']]->id, [
@@ -1154,8 +1154,8 @@ class RealisticOperationsSeeder extends Seeder
             $this->users[$assignedBy]
         );
 
-        if ($notifyHighWorkload) {
-            $this->notificationService->notifyProjectHighWorkload(
+        if ($notifyHighPriority) {
+            $this->notificationService->notifyProjectHighPriority(
                 $project,
                 $memberIds,
                 $this->users[$assignedBy]

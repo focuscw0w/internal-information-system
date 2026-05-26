@@ -9,7 +9,7 @@ use Modules\Project\Contracts\ProjectAllocationSyncInterface;
 use Modules\Project\Contracts\Repositories\ProjectRepositoryInterface;
 use Modules\Project\Contracts\Repositories\ProjectTeamRepositoryInterface;
 use Modules\Project\Contracts\TeamServiceInterface;
-use Modules\Project\Enums\ProjectWorkload;
+use Modules\Project\Enums\ProjectPriority;
 use Modules\Project\Models\Project;
 
 class TeamService implements TeamServiceInterface
@@ -51,9 +51,9 @@ class TeamService implements TeamServiceInterface
                 if (! empty($newUserIds) && auth()->check()) {
                     $this->notificationService->notifyProjectAssigned($project, $newUserIds, auth()->user());
 
-                    $workload = ProjectWorkload::tryFrom($project->workload);
-                    if ($workload && $workload->isCritical()) {
-                        $this->notificationService->notifyProjectHighWorkload($project, $newUserIds, auth()->user());
+                    $priority = ProjectPriority::tryFrom($project->priority);
+                    if ($priority && $priority->isCritical()) {
+                        $this->notificationService->notifyProjectHighPriority($project, $newUserIds, auth()->user());
                     }
                 }
             } else {

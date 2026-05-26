@@ -1,8 +1,8 @@
-import { WorkloadLevel } from '../../../types/types';
+import { ProjectPriority } from '../../../types/types';
 
-export const getWorkloadColor = (workload: WorkloadLevel): string => {
-    switch (workload) {
-        case 'overloaded':
+export const getPriorityColor = (priority: ProjectPriority): string => {
+    switch (priority) {
+        case 'urgent':
             return 'text-red-600';
         case 'high':
             return 'text-orange-600';

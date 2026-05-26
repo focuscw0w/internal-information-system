@@ -83,7 +83,7 @@ class AdminProjectAccessTest extends TestCase
             ->put("/projects/{$project->id}", [
                 'name' => 'Admin upravil',
                 'status' => 'active',
-                'workload' => 'medium',
+                'priority' => 'medium',
                 'start_date' => now()->format('Y-m-d'),
                 'end_date' => now()->addMonth()->format('Y-m-d'),
             ])
@@ -299,7 +299,7 @@ class AdminProjectAccessTest extends TestCase
             ->put("/projects/{$project->id}", [
                 'name' => 'Read only user tried this',
                 'status' => 'active',
-                'workload' => 'medium',
+                'priority' => 'medium',
                 'start_date' => now()->format('Y-m-d'),
                 'end_date' => now()->addMonth()->format('Y-m-d'),
             ])

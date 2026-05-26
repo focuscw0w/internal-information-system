@@ -85,11 +85,11 @@ export const Row = ({ project, onClick }: RowProps) => {
                     </div>
 
                     <div className="w-24 text-center">
-                        <p className="mb-1 text-xs text-muted-foreground">Zaťaženie</p>
+                        <p className="mb-1 text-xs text-muted-foreground">Priorita</p>
                         <div className="flex items-center justify-center gap-1">
                             <BadgeLabel
-                                type="workload"
-                                value={project.workload}
+                                type="priority"
+                                value={project.priority}
                             />
                         </div>
                     </div>

@@ -7,15 +7,15 @@ import { useForm, usePage } from '@inertiajs/react';
 import { AlertCircle, Loader2, Plus } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { ProjectStatus, WorkloadLevel } from '../../../types/types';
+import { ProjectPriority, ProjectStatus } from '../../../types/types';
 import { TeamMemberSelect } from '../../ui/team-member-select';
-import { statusOptions, workloadOptions } from '../utils';
+import { priorityOptions, statusOptions } from '../utils';
 
 interface CreateProjectFormData {
     name: string;
     description: string;
     status: ProjectStatus;
-    workload: WorkloadLevel;
+    priority: ProjectPriority;
     start_date: string;
     end_date: string;
     team_members: number[];
@@ -46,7 +46,7 @@ export const CreateProjectDialog = ({
             name: '',
             description: '',
             status: 'planning',
-            workload: 'medium',
+            priority: 'medium',
             start_date: '',
             end_date: '',
             team_members: [],
@@ -140,15 +140,15 @@ export const CreateProjectDialog = ({
                 />
 
                 <FormField
-                    label="Vyťaženie"
-                    id="workload"
+                    label="Priorita"
+                    id="priority"
                     type="select"
-                    value={data.workload}
+                    value={data.priority}
                     onChange={(value) =>
-                        setData('workload', value as WorkloadLevel)
+                        setData('priority', value as ProjectPriority)
                     }
-                    error={errors.workload}
-                    options={workloadOptions}
+                    error={errors.priority}
+                    options={priorityOptions}
                 />
             </div>
 

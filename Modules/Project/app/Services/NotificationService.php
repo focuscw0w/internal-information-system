@@ -14,7 +14,7 @@ use Modules\Project\Notifications\AtRiskNotification;
 use Modules\Project\Notifications\CommentMentionedNotification;
 use Modules\Project\Notifications\DeadlineApproachingNotification;
 use Modules\Project\Notifications\ProjectCapacityAtRiskNotification;
-use Modules\Project\Notifications\ProjectHighWorkloadNotification;
+use Modules\Project\Notifications\ProjectHighPriorityNotification;
 use Modules\Project\Notifications\ProjectOverdueNotification;
 use Modules\Project\Notifications\ProjectAssignedNotification;
 use Modules\Project\Notifications\ProjectStatusChangedNotification;
@@ -221,16 +221,16 @@ class NotificationService implements NotificationServiceInterface
     }
 
     /**
-     * Notify newly assigned users that the project has high or overloaded workload.
+     * Notify newly assigned users that the project has high or urgent priority.
      */
-    public function notifyProjectHighWorkload(Project $project, array $newUserIds, User $assignedBy): void
+    public function notifyProjectHighPriority(Project $project, array $newUserIds, User $assignedBy): void
     {
         if (empty($newUserIds)) {
             return;
         }
 
         $users = $this->notifications->usersByIds($newUserIds);
-        $notification = new ProjectHighWorkloadNotification($project, $assignedBy, $project->workload);
+        $notification = new ProjectHighPriorityNotification($project, $assignedBy, $project->priority);
 
         $users->reject(fn (User $u) => $u->id === $assignedBy->id)
             ->each(fn (User $u) => $u->notify($notification));

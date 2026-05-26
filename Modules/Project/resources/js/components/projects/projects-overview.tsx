@@ -3,9 +3,9 @@ import { Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
     Project,
+    ProjectPriority,
     ProjectStatus,
     ViewMode,
-    WorkloadLevel,
 } from '../../types/types';
 import { ProjectsHeader } from './projects-header';
 import { ViewModeToggle } from './viewmode-toggle';
@@ -22,11 +22,11 @@ const STATUS_OPTIONS: { value: ProjectStatus; label: string }[] = [
     { value: 'cancelled', label: 'Zrušený' },
 ];
 
-const WORKLOAD_OPTIONS: { value: WorkloadLevel; label: string }[] = [
-    { value: 'low', label: 'Nízke' },
-    { value: 'medium', label: 'Stredné' },
-    { value: 'high', label: 'Vysoké' },
-    { value: 'overloaded', label: 'Preťažené' },
+const PRIORITY_OPTIONS: { value: ProjectPriority; label: string }[] = [
+    { value: 'low', label: 'Nízka' },
+    { value: 'medium', label: 'Stredná' },
+    { value: 'high', label: 'Vysoká' },
+    { value: 'urgent', label: 'Urgentná' },
 ];
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
@@ -66,7 +66,7 @@ const projectToCsvRow = (project: Project): Array<string | number> => [
     project.name,
     project.owner?.name ?? '',
     project.status,
-    project.workload,
+    project.priority,
     project.start_date,
     project.end_date,
     project.progress,
@@ -110,7 +110,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
     const [statusFilter, setStatusFilter] = useState<ProjectStatus | null>(
         null,
     );
-    const [workloadFilter, setWorkloadFilter] = useState<WorkloadLevel | null>(
+    const [priorityFilter, setPriorityFilter] = useState<ProjectPriority | null>(
         null,
     );
     const [sortBy, setSortBy] = useState<SortOption>('end_date');
@@ -119,12 +119,12 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
         router.visit(`/projects/${projectId}`);
     };
 
-    const hasFilters = Boolean(search || statusFilter || workloadFilter);
+    const hasFilters = Boolean(search || statusFilter || priorityFilter);
 
     const clearFilters = () => {
         setSearch('');
         setStatusFilter(null);
-        setWorkloadFilter(null);
+        setPriorityFilter(null);
     };
 
     const filtered = useMemo(() => {
@@ -133,7 +133,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
             .filter((p) => {
                 if (q && !p.name.toLowerCase().includes(q)) return false;
                 if (statusFilter && p.status !== statusFilter) return false;
-                if (workloadFilter && p.workload !== workloadFilter)
+                if (priorityFilter && p.priority !== priorityFilter)
                     return false;
                 return true;
             })
@@ -152,7 +152,7 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                         return a.name.localeCompare(b.name, 'sk');
                 }
             });
-    }, [projects, search, statusFilter, workloadFilter, sortBy]);
+    }, [projects, search, statusFilter, priorityFilter, sortBy]);
 
     const activeProjects = projects.filter((p) => p.status === 'active').length;
     const totalTeam = projects.reduce((sum, p) => sum + p.team_size, 0);
@@ -252,16 +252,16 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
                     </select>
 
                     <select
-                        value={workloadFilter ?? ''}
+                        value={priorityFilter ?? ''}
                         onChange={(e) =>
-                            setWorkloadFilter(
-                                (e.target.value as WorkloadLevel) || null,
+                            setPriorityFilter(
+                                (e.target.value as ProjectPriority) || null,
                             )
                         }
                         className="select text-xs"
                     >
-                        <option value="">Všetky zaťaženia</option>
-                        {WORKLOAD_OPTIONS.map((o) => (
+                        <option value="">Všetky priority</option>
+                        {PRIORITY_OPTIONS.map((o) => (
                             <option key={o.value} value={o.value}>
                                 {o.label}
                             </option>

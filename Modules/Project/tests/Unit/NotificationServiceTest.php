@@ -11,7 +11,7 @@ use Modules\Project\Contracts\TeamServiceInterface;
 use Modules\Project\Notifications\DeadlineApproachingNotification;
 use Modules\Project\Notifications\ProjectAssignedNotification;
 use Modules\Project\Notifications\ProjectCapacityAtRiskNotification;
-use Modules\Project\Notifications\ProjectHighWorkloadNotification;
+use Modules\Project\Notifications\ProjectHighPriorityNotification;
 use Modules\Project\Notifications\ProjectStatusChangedNotification;
 use Modules\Project\Notifications\PasswordResetRequestedNotification;
 use Modules\Project\Notifications\TaskAssignedNotification;
@@ -320,32 +320,32 @@ class NotificationServiceTest extends TestCase
         $this->assertSame(1, $owner->notifications()->where('type', ProjectCapacityAtRiskNotification::class)->count());
     }
 
-    // ── notifyProjectHighWorkload ─────────────────────────────────────────────
+    // ── notifyProjectHighPriority ─────────────────────────────────────────────
 
     #[Test]
-    public function it_sends_project_high_workload_to_new_members_except_assigner(): void
+    public function it_sends_project_high_priority_to_new_members_except_assigner(): void
     {
         Notification::fake();
 
         $assignedBy = User::factory()->create();
         $newMember = User::factory()->create();
-        $project = Project::factory()->create(['workload' => 'high']);
+        $project = Project::factory()->create(['priority' => 'high']);
 
-        $this->service->notifyProjectHighWorkload($project, [$newMember->id, $assignedBy->id], $assignedBy);
+        $this->service->notifyProjectHighPriority($project, [$newMember->id, $assignedBy->id], $assignedBy);
 
-        Notification::assertSentTo($newMember, ProjectHighWorkloadNotification::class);
-        Notification::assertNotSentTo($assignedBy, ProjectHighWorkloadNotification::class);
+        Notification::assertSentTo($newMember, ProjectHighPriorityNotification::class);
+        Notification::assertNotSentTo($assignedBy, ProjectHighPriorityNotification::class);
     }
 
     #[Test]
-    public function it_does_not_send_project_high_workload_when_user_ids_empty(): void
+    public function it_does_not_send_project_high_priority_when_user_ids_empty(): void
     {
         Notification::fake();
 
         $assignedBy = User::factory()->create();
-        $project = Project::factory()->create(['workload' => 'high']);
+        $project = Project::factory()->create(['priority' => 'high']);
 
-        $this->service->notifyProjectHighWorkload($project, [], $assignedBy);
+        $this->service->notifyProjectHighPriority($project, [], $assignedBy);
 
         Notification::assertNothingSent();
     }

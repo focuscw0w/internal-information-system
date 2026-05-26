@@ -160,7 +160,7 @@ test('project creation endpoint requires create permission', function () {
         'name' => 'Permission Project',
         'description' => 'Test',
         'status' => 'planning',
-        'workload' => 'medium',
+        'priority' => 'medium',
         'start_date' => now()->toDateString(),
         'end_date' => now()->addWeek()->toDateString(),
         'team_members' => [],

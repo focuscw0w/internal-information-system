@@ -4,11 +4,11 @@ import { useUsers } from '@/hooks/use-users';
 import { useForm, usePage } from '@inertiajs/react';
 import { AlertCircle, Edit, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { statusOptions, workloadOptions } from '../utils';
+import { priorityOptions, statusOptions } from '../utils';
 import {
     Project,
+    ProjectPriority,
     ProjectStatus,
-    WorkloadLevel,
 } from '../../../types/types';
 import { TeamMemberSelect } from '../../ui/team-member-select';
 import { SharedData } from '@/types';
@@ -22,7 +22,7 @@ interface EditProjectFormData {
     name: string;
     description: string;
     status: ProjectStatus;
-    workload: WorkloadLevel;
+    priority: ProjectPriority;
     start_date: string;
     end_date: string;
     team_members: number[];
@@ -45,7 +45,7 @@ export const EditProjectDialog = ({
             name: project.name || '',
             description: project.description || '',
             status: project.status || 'planning',
-            workload: project.workload || 'medium',
+            priority: project.priority || 'medium',
             start_date: project.start_date || '',
             end_date: project.end_date || '',
             team_members: initialTeamMembers,
@@ -57,7 +57,7 @@ export const EditProjectDialog = ({
                 name: project.name || '',
                 description: project.description || '',
                 status: project.status || 'planning',
-                workload: project.workload || 'medium',
+                priority: project.priority || 'medium',
                 start_date: project.start_date || '',
                 end_date: project.end_date || '',
                 team_members: initialTeamMembers,
@@ -157,15 +157,15 @@ export const EditProjectDialog = ({
                 />
 
                 <FormField
-                    label="Vyťaženie"
-                    id="workload"
+                    label="Priorita"
+                    id="priority"
                     type="select"
-                    value={data.workload}
+                    value={data.priority}
                     onChange={(value) =>
-                        setData('workload', value as WorkloadLevel)
+                        setData('priority', value as ProjectPriority)
                     }
-                    error={errors.workload}
-                    options={workloadOptions}
+                    error={errors.priority}
+                    options={priorityOptions}
                 />
             </div>
 

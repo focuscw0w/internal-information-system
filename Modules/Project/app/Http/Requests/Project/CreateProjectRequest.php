@@ -6,8 +6,8 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Project\Enums\ProjectGlobalPermission;
 use Modules\Project\Enums\ProjectPermission;
+use Modules\Project\Enums\ProjectPriority;
 use Modules\Project\Enums\ProjectStatus;
-use Modules\Project\Enums\ProjectWorkload;
 use Throwable;
 
 class CreateProjectRequest extends FormRequest
@@ -43,7 +43,7 @@ class CreateProjectRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'status' => ['required', Rule::in(ProjectStatus::values())],
-            'workload' => ['required', Rule::in(ProjectWorkload::values())],
+            'priority' => ['required', Rule::in(ProjectPriority::values())],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
 
@@ -90,12 +90,12 @@ class CreateProjectRequest extends FormRequest
     }
 
     /**
-     * Get workload as enum (with default)
+     * Get priority as enum (with default)
      */
-    public function getWorkloadEnum(): ProjectWorkload
+    public function getPriorityEnum(): ProjectPriority
     {
-        $workload = $this->validated()['workload'] ?? null;
+        $priority = $this->validated()['priority'] ?? null;
 
-        return $workload ? ProjectWorkload::from($workload) : ProjectWorkload::LOW;
+        return $priority ? ProjectPriority::from($priority) : ProjectPriority::LOW;
     }
 }

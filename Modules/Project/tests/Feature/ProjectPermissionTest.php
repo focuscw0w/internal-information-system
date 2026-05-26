@@ -69,7 +69,7 @@ class ProjectPermissionTest extends TestCase
             ->put("/projects/{$project->id}", [
                 'name' => 'Upravený názov',
                 'status' => 'active',
-                'workload' => 'medium',
+                'priority' => 'medium',
                 'start_date' => now()->format('Y-m-d'),
                 'end_date' => now()->addMonth()->format('Y-m-d'),
             ])
@@ -157,7 +157,7 @@ class ProjectPermissionTest extends TestCase
             ->put("/projects/{$project->id}", [
                 'name' => 'Nový názov',
                 'status' => 'active',
-                'workload' => 'medium',
+                'priority' => 'medium',
                 'start_date' => now()->format('Y-m-d'),
                 'end_date' => now()->addMonth()->format('Y-m-d'),
             ])

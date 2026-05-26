@@ -27,7 +27,7 @@ interface NotificationServiceInterface
 
     public function notifyProjectCapacityAtRisk(Project $project, float $remainingHours, float $confidence): void;
 
-    public function notifyProjectHighWorkload(Project $project, array $newUserIds, User $assignedBy): void;
+    public function notifyProjectHighPriority(Project $project, array $newUserIds, User $assignedBy): void;
 
     public function notifyTaskHoursExceeded(Task $task): void;
 

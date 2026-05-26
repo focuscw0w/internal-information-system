@@ -24,7 +24,7 @@ class Project extends Model
         'name',
         'description',
         'status',
-        'workload',
+        'priority',
         'start_date',
         'end_date',
         'actual_start_date',

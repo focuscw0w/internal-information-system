@@ -32,7 +32,7 @@ export type AppNotificationType =
     | 'project_overdue'
     | 'user_overloaded'
     | 'project_capacity_at_risk'
-    | 'project_high_workload'
+    | 'project_high_priority'
     | 'task_hours_exceeded'
     | 'project_status_changed'
     | 'password_reset_requested';
@@ -54,7 +54,7 @@ export interface AppNotificationData {
     utilization?: number;
     remaining_hours?: number;
     confidence?: number;
-    workload?: string;
+    project_priority?: string;
     estimated_hours?: number;
     actual_hours?: number;
 }
