@@ -43,7 +43,7 @@ export function NavMain({
                                         className={cn(
                                             'h-8 rounded-md text-[13px] text-sidebar-foreground/90',
                                             isActive &&
-                                                'border border-border bg-card text-sidebar-foreground shadow-xs',
+                                                "relative before:absolute before:top-2 before:bottom-2 before:left-0 before:w-0.5 before:rounded-r-sm before:bg-[var(--accent-blue)] before:content-['']",
                                         )}
                                     >
                                         <Link href={item.href} prefetch>

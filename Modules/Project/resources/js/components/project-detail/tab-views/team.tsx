@@ -328,7 +328,7 @@ export const Team = ({ project }: TeamProps) => {
                 }}
             >
                 {selectedMember && selectedStats && (
-                    <DialogContent className="max-w-3xl">
+                    <DialogContent className="sm:max-w-4xl">
                         <DialogHeader>
                             <div className="flex items-start gap-4 pr-8">
                                 <Avatar className="h-12 w-12">

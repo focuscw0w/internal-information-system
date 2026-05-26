@@ -23,6 +23,7 @@ interface TimeTrackingSummary {
     week_start: string;
     week_end: string;
     week_range_label: string;
+    month_range_label: string;
     week_total: number;
     prev_week_total: number;
     month_total: number;
@@ -30,6 +31,8 @@ interface TimeTrackingSummary {
     month_target: number;
     week_daily_hours: WeekDay[];
     week_project_hours: Record<number, number>;
+    month_daily_hours: WeekDay[];
+    month_project_hours: Record<number, number>;
 }
 
 interface IndexProps {
@@ -140,13 +143,24 @@ export default function Index({ projects, entries, summary }: IndexProps) {
     const daysWithHours = weekDays.filter((day) => day.hours > 0).length;
     const dailyAverage = daysWithHours ? weekTotal / daysWithHours : 0;
 
+    const chartDays =
+        view === 'week' ? summary.week_daily_hours : summary.month_daily_hours;
+    const chartMaxHours = Math.max(10, ...chartDays.map((day) => day.hours));
+
+    const breakdownProjectHours =
+        view === 'week'
+            ? summary.week_project_hours
+            : summary.month_project_hours;
+
     const breakdown = projects
         .map((project, index) => ({
             project,
-            hours: Number(summary.week_project_hours[project.id] ?? 0),
+            hours: Number(breakdownProjectHours[project.id] ?? 0),
             color: projectColors[index % projectColors.length],
         }))
         .filter((item) => item.hours > 0);
+
+    const breakdownTotal = view === 'week' ? weekTotal : monthTotal;
 
     const selectedProject =
         selectedProjectId === ''
@@ -365,10 +379,14 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                             <div className="card__head">
                                 <div>
                                     <h3 className="card__title">
-                                        Prehľad týždňa
+                                        {view === 'week'
+                                            ? 'Prehľad týždňa'
+                                            : 'Prehľad mesiaca'}
                                     </h3>
                                     <div className="card__sub">
-                                        Hodiny po dňoch a projektoch
+                                        {view === 'week'
+                                            ? summary.week_range_label
+                                            : summary.month_range_label}
                                     </div>
                                 </div>
                                 <div className="seg">
@@ -389,43 +407,51 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                                 </div>
                             </div>
                             <div className="card__body">
-                                <div className="flex h-52 items-end gap-4 px-1">
-                                    {weekDays.map((day) => {
+                                <div
+                                    className={`flex h-52 items-end px-1 ${view === 'week' ? 'gap-4' : 'gap-1'}`}
+                                >
+                                    {chartDays.map((day) => {
                                         const height =
-                                            (day.hours / maxDayHours) * 100;
+                                            (day.hours / chartMaxHours) * 100;
                                         return (
                                             <div
                                                 key={day.date}
                                                 className="flex h-full flex-1 flex-col items-center gap-2"
                                             >
                                                 <div className="flex w-full flex-1 flex-col items-center justify-end">
-                                                    <span className="mono mb-1 text-xs text-muted-foreground">
-                                                        {day.hours
-                                                            ? formatHours(
-                                                                  day.hours,
-                                                              )
-                                                            : '-'}
-                                                    </span>
+                                                    {view === 'week' && (
+                                                        <span className="mono mb-1 text-xs text-muted-foreground">
+                                                            {day.hours
+                                                                ? formatHours(
+                                                                      day.hours,
+                                                                  )
+                                                                : '-'}
+                                                        </span>
+                                                    )}
                                                     <div
                                                         className="w-full max-w-14 rounded-t bg-[var(--accent-blue)]"
                                                         style={{
                                                             height: day.hours
                                                                 ? `${height}%`
                                                                 : 2,
-                                                            opacity:
-                                                                day.hours >= 8
-                                                                    ? 1
-                                                                    : 0.18,
                                                         }}
                                                     />
                                                 </div>
                                                 <div className="text-center">
-                                                    <div className="text-xs font-medium">
+                                                    <div
+                                                        className={
+                                                            view === 'week'
+                                                                ? 'text-xs font-medium'
+                                                                : 'text-[10px] font-medium text-muted-foreground'
+                                                        }
+                                                    >
                                                         {day.label}
                                                     </div>
-                                                    <div className="text-[11px] text-muted-foreground">
-                                                        {day.short_date}
-                                                    </div>
+                                                    {view === 'week' && (
+                                                        <div className="text-[11px] text-muted-foreground">
+                                                            {day.short_date}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         );
@@ -503,7 +529,7 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                         <QuickAddCard projects={projects} />
                         <ProjectBreakdownCard
                             breakdown={breakdown}
-                            totalHours={weekTotal}
+                            totalHours={breakdownTotal}
                         />
                         <RecentCard
                             entries={entries.slice(0, 3)}

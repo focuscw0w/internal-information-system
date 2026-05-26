@@ -8,7 +8,6 @@ import {
     Clock,
     Layers,
     Mail,
-    MessageSquare,
     Settings,
 } from 'lucide-react';
 import type { ElementType } from 'react';
@@ -151,7 +150,7 @@ export default function Profile({
         { id: 'overview', label: 'Prehľad', icon: Layers },
         {
             id: 'projects',
-            label: 'Moje projekty',
+            label: isOwnProfile ? 'Moje projekty' : 'Projekty',
             icon: Briefcase,
             count: projects.length,
         },
@@ -193,10 +192,6 @@ export default function Profile({
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2">
-                            <button type="button" className="btn" disabled>
-                                <MessageSquare className="h-4 w-4" />
-                                Správa
-                            </button>
                             {isOwnProfile && canEditOwnProfile ? (
                                 <Link
                                     href="/settings/profile"
@@ -391,26 +386,21 @@ export default function Profile({
                             </div>
                         </section>
 
-                        <section className="card">
-                            <div className="card__head">
-                                <h2 className="card__title">Bezpečnosť</h2>
-                            </div>
-                            <div className="card__body space-y-2">
-                                <Link
-                                    href="/settings/password"
-                                    className="btn w-full justify-start"
-                                >
-                                    Zmeniť heslo
-                                </Link>
-                                <button
-                                    type="button"
-                                    className="btn w-full justify-start"
-                                    disabled
-                                >
-                                    Aktívne relácie
-                                </button>
-                            </div>
-                        </section>
+                        {isOwnProfile && (
+                            <section className="card">
+                                <div className="card__head">
+                                    <h2 className="card__title">Bezpečnosť</h2>
+                                </div>
+                                <div className="card__body space-y-2">
+                                    <Link
+                                        href="/settings/password"
+                                        className="btn w-full justify-start"
+                                    >
+                                        Zmeniť heslo
+                                    </Link>
+                                </div>
+                            </section>
+                        )}
                     </div>
                 )}
             </div>
@@ -429,12 +419,12 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
     return (
-        <label className="grid gap-2">
+        <div className="grid gap-1">
             <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                 {label}
             </span>
-            <input className="input" value={value} readOnly />
-        </label>
+            <span className="text-sm text-foreground">{value}</span>
+        </div>
     );
 }
 

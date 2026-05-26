@@ -59,10 +59,32 @@ class TimeTrackingController extends Controller
             ->map(fn ($group) => (float) $group->sum('hours'))
             ->all();
 
+        $monthEntries = $entries->filter(
+            fn ($e) => $e->entry_date->between($monthStart, $monthEnd),
+        );
+
+        $daysInMonth = $monthEnd->day;
+        $monthDailyHours = collect(range(0, $daysInMonth - 1))->map(function ($i) use ($monthStart, $monthEntries) {
+            $day = (clone $monthStart)->addDays($i);
+            $hours = (float) $monthEntries
+                ->filter(fn ($e) => $e->entry_date->isSameDay($day))
+                ->sum('hours');
+
+            return [
+                'date' => $day->toDateString(),
+                'label' => (string) $day->day,
+                'short_date' => $day->format('j.n.'),
+                'hours' => $hours,
+            ];
+        })->all();
+
+        $monthProjectHours = $monthEntries
+            ->groupBy('project_id')
+            ->map(fn ($group) => (float) $group->sum('hours'))
+            ->all();
+
         $weekTotal = (float) $weekEntries->sum('hours');
-        $monthTotal = (float) $entries
-            ->filter(fn ($e) => $e->entry_date->between($monthStart, $monthEnd))
-            ->sum('hours');
+        $monthTotal = (float) $monthEntries->sum('hours');
 
         $prevWeekTotal = (float) $this->timeEntries
             ->totalHoursPerUserInPeriod($prevWeekStart, $prevWeekEnd, [$user->id])
@@ -78,6 +100,12 @@ class TimeTrackingController extends Controller
             $weekEnd->day,
             $this->slovakMonthShort($weekEnd->month),
             $weekEnd->year,
+        );
+
+        $monthRangeLabel = sprintf(
+            '%s %d',
+            ucfirst($this->slovakMonthLong($monthStart->month)),
+            $monthStart->year,
         );
 
         return Inertia::render('TimeTracking/Index', [
@@ -97,6 +125,7 @@ class TimeTrackingController extends Controller
                 'week_start' => $weekStart->toDateString(),
                 'week_end' => $weekEnd->toDateString(),
                 'week_range_label' => $weekRangeLabel,
+                'month_range_label' => $monthRangeLabel,
                 'week_total' => $weekTotal,
                 'prev_week_total' => $prevWeekTotal,
                 'month_total' => $monthTotal,
@@ -104,6 +133,8 @@ class TimeTrackingController extends Controller
                 'month_target' => $monthTarget,
                 'week_daily_hours' => $weekDailyHours,
                 'week_project_hours' => $weekProjectHours,
+                'month_daily_hours' => $monthDailyHours,
+                'month_project_hours' => $monthProjectHours,
             ],
         ]);
     }
@@ -123,6 +154,24 @@ class TimeTrackingController extends Controller
             10 => 'okt',
             11 => 'nov',
             12 => 'dec',
+        ][$month];
+    }
+
+    private function slovakMonthLong(int $month): string
+    {
+        return [
+            1 => 'január',
+            2 => 'február',
+            3 => 'marec',
+            4 => 'apríl',
+            5 => 'máj',
+            6 => 'jún',
+            7 => 'júl',
+            8 => 'august',
+            9 => 'september',
+            10 => 'október',
+            11 => 'november',
+            12 => 'december',
         ][$month];
     }
 

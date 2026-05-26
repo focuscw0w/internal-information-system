@@ -1,4 +1,5 @@
 import { Checkbox } from '@/components/ui/checkbox';
+import { router } from '@inertiajs/react';
 import { MoreHorizontal, Search, UserRound, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { AvailablePermissions, ManagedUser } from '../types/types';
@@ -206,8 +207,14 @@ export const UserTable = ({
                             )}
 
                             {filteredUsers.map((user) => (
-                                <tr key={user.id}>
-                                    <td>
+                                <tr
+                                    key={user.id}
+                                    onClick={() =>
+                                        router.visit(`/users/${user.id}`)
+                                    }
+                                    className="cursor-pointer"
+                                >
+                                    <td onClick={(e) => e.stopPropagation()}>
                                         <Checkbox
                                             aria-label={`Vybrať používateľa ${user.name}`}
                                             checked={selectedIds.has(user.id)}
@@ -256,7 +263,7 @@ export const UserTable = ({
                                             ).toLocaleDateString('sk-SK')}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td onClick={(e) => e.stopPropagation()}>
                                         <div className="flex items-center justify-center gap-1">
                                             <EditUserDialog
                                                 user={user}
