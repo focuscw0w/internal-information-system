@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { MultiSelect } from '@/components/ui/multi-select';
-import ManagerLayout from '@/layouts/ManagerLayout';
+import ManagerLayout from '@/layouts/manager-layout';
 import { Head } from '@inertiajs/react';
 import {
     Briefcase,

@@ -7,7 +7,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import ManagerLayout from '@/layouts/ManagerLayout';
+import ManagerLayout from '@/layouts/manager-layout';
 import { SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
