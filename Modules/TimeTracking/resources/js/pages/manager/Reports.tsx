@@ -75,6 +75,14 @@ const formatHours = (hours: number) =>
 
 const formatDate = (date: Date) => date.toISOString().slice(0, 10);
 
+// Shorten ISO date bucket labels ("2026-05-01" -> "1.5.") so the chart
+// x-axis stays readable on narrow screens. Other label formats pass through.
+const formatBucketLabel = (label: string) => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(label);
+    if (!match) return label;
+    return `${Number(match[3])}.${Number(match[2])}.`;
+};
+
 const initials = (name: string) =>
     name
         .split(/\s+/)
@@ -312,42 +320,46 @@ export default function Reports({ filters, data, filterOptions }: Props) {
                 </div>
 
                 <section className="card mb-5">
-                    <div className="card__body flex flex-col gap-3">
-                        <div className="flex flex-wrap items-center gap-2.5">
-                            <span className="min-w-20 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+                    <div className="card__body flex flex-col gap-5 sm:gap-4">
+                        <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+                            <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase sm:min-w-20">
                                 Obdobie
                             </span>
-                            <div className="field-wrap">
-                                <Calendar />
-                                <input
-                                    type="date"
-                                    className="input input--with-icon w-40"
-                                    value={filterState.date_from}
-                                    onChange={(event) =>
-                                        setFilterState((state) => ({
-                                            ...state,
-                                            date_from: event.target.value,
-                                        }))
-                                    }
-                                />
+                            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-2.5">
+                                <div className="field-wrap">
+                                    <Calendar />
+                                    <input
+                                        type="date"
+                                        className="input input--with-icon w-full sm:w-40"
+                                        value={filterState.date_from}
+                                        onChange={(event) =>
+                                            setFilterState((state) => ({
+                                                ...state,
+                                                date_from: event.target.value,
+                                            }))
+                                        }
+                                    />
+                                </div>
+                                <span className="hidden text-muted-foreground sm:inline">
+                                    –
+                                </span>
+                                <div className="field-wrap">
+                                    <Calendar />
+                                    <input
+                                        type="date"
+                                        className="input input--with-icon w-full sm:w-40"
+                                        value={filterState.date_to}
+                                        onChange={(event) =>
+                                            setFilterState((state) => ({
+                                                ...state,
+                                                date_to: event.target.value,
+                                            }))
+                                        }
+                                    />
+                                </div>
                             </div>
-                            <span className="text-muted-foreground">–</span>
-                            <div className="field-wrap">
-                                <Calendar />
-                                <input
-                                    type="date"
-                                    className="input input--with-icon w-40"
-                                    value={filterState.date_to}
-                                    onChange={(event) =>
-                                        setFilterState((state) => ({
-                                            ...state,
-                                            date_to: event.target.value,
-                                        }))
-                                    }
-                                />
-                            </div>
-                            <div className="mx-1 h-6 w-px bg-border" />
-                            <div className="flex flex-wrap gap-1">
+                            <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
+                            <div className="flex flex-wrap gap-1.5">
                                 {presets.map((preset) => {
                                     const active =
                                         filterState.date_from === preset.from &&
@@ -372,11 +384,14 @@ export default function Reports({ filters, data, filterOptions }: Props) {
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-2.5">
-                            <span className="min-w-20 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+                        <div className="-my-0.5 h-px bg-border sm:hidden" />
+
+                        <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+                            <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase sm:min-w-20">
                                 Filtre
                             </span>
                             <MultiSelect
+                                className="w-full sm:w-auto"
                                 placeholder="Všetky projekty"
                                 options={projectOptions}
                                 value={filterState.project_ids}
@@ -391,6 +406,7 @@ export default function Reports({ filters, data, filterOptions }: Props) {
                                 }
                             />
                             <MultiSelect
+                                className="w-full sm:w-auto"
                                 placeholder="Všetci ľudia"
                                 options={userOptions}
                                 value={filterState.user_ids}
@@ -405,7 +421,7 @@ export default function Reports({ filters, data, filterOptions }: Props) {
                                 }
                             />
                             <select
-                                className="select"
+                                className="select w-full sm:w-auto"
                                 value={filterState.status}
                                 onChange={(event) =>
                                     setFilterState((state) => ({
@@ -424,7 +440,7 @@ export default function Reports({ filters, data, filterOptions }: Props) {
                                     </option>
                                 ))}
                             </select>
-                            <div className="field-wrap min-w-[200px] max-w-[280px] flex-1">
+                            <div className="field-wrap w-full sm:min-w-[200px] sm:max-w-[280px] sm:flex-1">
                                 <Search />
                                 <input
                                     type="search"
@@ -439,7 +455,7 @@ export default function Reports({ filters, data, filterOptions }: Props) {
                             {hasFilters && (
                                 <button
                                     type="button"
-                                    className="btn btn--sm btn--ghost"
+                                    className="btn btn--sm btn--ghost w-full sm:w-auto"
                                     onClick={clearFilters}
                                 >
                                     <X className="h-3.5 w-3.5" />
@@ -457,37 +473,37 @@ export default function Reports({ filters, data, filterOptions }: Props) {
 
                 <section className="card">
                     <div className="card__head !border-0 !p-0">
-                        <div className="tabbar w-full border-b border-border">
+                        <div className="tabbar grid w-full grid-cols-3 border-b border-border sm:flex">
                             <button
                                 type="button"
-                                className={`tab ${activeTab === 'users' ? 'is-active' : ''}`}
+                                className={`tab w-full justify-center whitespace-nowrap px-2 sm:w-auto sm:justify-start sm:px-3 ${activeTab === 'users' ? 'is-active' : ''}`}
                                 onClick={() => setActiveTab('users')}
                             >
-                                <Users className="h-4 w-4" />
+                                <Users className="hidden h-4 w-4 sm:block" />
                                 Po osobe
-                                <span className="tab__count">
+                                <span className="tab__count hidden sm:inline-flex">
                                     {reportData.byUser.length}
                                 </span>
                             </button>
                             <button
                                 type="button"
-                                className={`tab ${activeTab === 'projects' ? 'is-active' : ''}`}
+                                className={`tab w-full justify-center whitespace-nowrap px-2 sm:w-auto sm:justify-start sm:px-3 ${activeTab === 'projects' ? 'is-active' : ''}`}
                                 onClick={() => setActiveTab('projects')}
                             >
-                                <Briefcase className="h-4 w-4" />
+                                <Briefcase className="hidden h-4 w-4 sm:block" />
                                 Po projekte
-                                <span className="tab__count">
+                                <span className="tab__count hidden sm:inline-flex">
                                     {reportData.byProject.length}
                                 </span>
                             </button>
                             <button
                                 type="button"
-                                className={`tab ${activeTab === 'timeline' ? 'is-active' : ''}`}
+                                className={`tab w-full justify-center whitespace-nowrap px-2 sm:w-auto sm:justify-start sm:px-3 ${activeTab === 'timeline' ? 'is-active' : ''}`}
                                 onClick={() => setActiveTab('timeline')}
                             >
-                                <TrendingUp className="h-4 w-4" />
+                                <TrendingUp className="hidden h-4 w-4 sm:block" />
                                 Po období
-                                <span className="tab__count">
+                                <span className="tab__count hidden sm:inline-flex">
                                     {reportData.timeline.length}
                                 </span>
                             </button>
@@ -570,16 +586,16 @@ function UsersReportTable({
                                         </span>
                                     </div>
                                 </td>
-                                <td className="mono text-right font-medium">
+                                <td className="mono whitespace-nowrap text-right font-medium">
                                     {formatHours(row.total_hours)} h
                                 </td>
-                                <td className="mono text-right text-muted-foreground">
+                                <td className="mono whitespace-nowrap text-right text-muted-foreground">
                                     {row.entries_count}
                                 </td>
-                                <td className="mono text-right text-muted-foreground">
+                                <td className="mono whitespace-nowrap text-right text-muted-foreground">
                                     {row.projects_count}
                                 </td>
-                                <td className="mono text-right text-muted-foreground">
+                                <td className="mono whitespace-nowrap text-right text-muted-foreground">
                                     {formatHours(row.total_hours / periodDays)} h
                                 </td>
                             </tr>
@@ -635,10 +651,10 @@ function ProjectsReportTable({
                                         </span>
                                     </div>
                                 </td>
-                                <td className="mono text-right font-medium">
+                                <td className="mono whitespace-nowrap text-right font-medium">
                                     {formatHours(row.total_hours)} h
                                 </td>
-                                <td className="mono text-right text-muted-foreground">
+                                <td className="mono whitespace-nowrap text-right text-muted-foreground">
                                     {row.entries_count}
                                 </td>
                                 <td>
@@ -695,8 +711,8 @@ function TimelineSection({ rows }: { rows: ReportData['timeline'] }) {
                 </div>
             </div>
 
-            <div className="relative h-80 pt-3 pb-8 pl-14 pr-2">
-                <div className="absolute top-3 bottom-8 left-0 flex w-12 flex-col justify-between pr-2 text-right font-mono text-[10.5px] text-muted-foreground">
+            <div className="relative h-80 pt-3 pr-2 pb-8 pl-10 sm:pl-14">
+                <div className="absolute top-3 bottom-8 left-0 flex w-8 flex-col justify-between pr-1.5 text-right font-mono text-[10px] text-muted-foreground sm:w-12 sm:pr-2 sm:text-[10.5px]">
                     <span>{Math.round(max)} h</span>
                     <span>{Math.round(max * 0.75)} h</span>
                     <span>{Math.round(max * 0.5)} h</span>
@@ -726,7 +742,7 @@ function TimelineSection({ rows }: { rows: ReportData['timeline'] }) {
                                         style={{ height: `${heightPct}%` }}
                                     >
                                         <div className="absolute inset-0 rounded-t bg-[var(--accent-blue)] transition-all" />
-                                        <div className="mono absolute bottom-full left-1/2 mb-1 -translate-x-1/2 text-[10.5px] font-medium whitespace-nowrap text-muted-foreground">
+                                        <div className="mono absolute bottom-full left-1/2 mb-1 hidden -translate-x-1/2 text-[10.5px] font-medium whitespace-nowrap text-muted-foreground sm:block">
                                             {formatHours(row.total_hours)} h
                                         </div>
                                     </div>
@@ -735,13 +751,13 @@ function TimelineSection({ rows }: { rows: ReportData['timeline'] }) {
                         })}
                     </div>
 
-                    <div className="absolute top-full right-0 left-0 flex gap-0 px-1 pt-2">
+                    <div className="absolute top-full right-0 left-0 flex gap-0.5 px-1 pt-2">
                         {rows.map((row) => (
                             <div
                                 key={row.label}
-                                className="flex-1 text-center text-[11px] font-medium text-foreground"
+                                className="flex-1 text-center text-[10px] font-medium text-foreground sm:text-[11px]"
                             >
-                                {row.label}
+                                {formatBucketLabel(row.label)}
                             </div>
                         ))}
                     </div>
@@ -761,13 +777,13 @@ function TimelineSection({ rows }: { rows: ReportData['timeline'] }) {
                     {rows.map((row) => (
                         <tr key={row.label}>
                             <td className="font-medium">{row.label}</td>
-                            <td className="mono text-right">
+                            <td className="mono whitespace-nowrap text-right">
                                 {formatHours(row.total_hours)} h
                             </td>
-                            <td className="mono text-right text-muted-foreground">
+                            <td className="mono whitespace-nowrap text-right text-muted-foreground">
                                 {row.entries_count}
                             </td>
-                            <td className="mono text-right text-muted-foreground">
+                            <td className="mono whitespace-nowrap text-right text-muted-foreground">
                                 {row.entries_count > 0
                                     ? `${formatHours(row.total_hours / row.entries_count)} h`
                                     : '—'}

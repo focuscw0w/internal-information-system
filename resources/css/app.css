@@ -491,9 +491,16 @@
         align-items: start;
     }
 
+    /* Let grid items shrink instead of blowing out the track on wide
+       content (tables, etc.) — without this they keep min-width: auto. */
+    .grid-main-side > * {
+        min-width: 0;
+    }
+
     .col {
         display: flex;
         flex-direction: column;
+        min-width: 0;
     }
 
     .page-head__back {
@@ -575,7 +582,7 @@
 
 @media (max-width: 1024px) {
     .grid-main-side {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 

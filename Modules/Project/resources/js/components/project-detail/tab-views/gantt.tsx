@@ -151,9 +151,18 @@ export function GanttChart({ project }: GanttChartProps) {
     function getBar(task: Task): { leftPx: number; widthPx: number } {
         const start = dayjs(task.start_date ?? project.start_date);
         const end = task.due_date ? dayjs(task.due_date) : projectEnd;
-        const startDay = Math.max(0, start.diff(projectStart, 'day'));
-        const endDay = Math.min(totalDays - 1, end.diff(projectStart, 'day'));
-        const durationDays = Math.max(1, endDay - startDay + 1);
+        // Clamp both ends to the visible timeline so tasks whose dates fall
+        // outside the project range don't render bars beyond the grid (which
+        // would create phantom horizontal scroll space).
+        const startDay = Math.min(
+            totalDays - 1,
+            Math.max(0, start.diff(projectStart, 'day')),
+        );
+        const endDay = Math.max(
+            startDay,
+            Math.min(totalDays - 1, end.diff(projectStart, 'day')),
+        );
+        const durationDays = endDay - startDay + 1;
         return {
             leftPx: startDay * DAY_WIDTH,
             widthPx: durationDays * DAY_WIDTH,
@@ -246,7 +255,7 @@ export function GanttChart({ project }: GanttChartProps) {
             </div>
 
             {/* Gantt grid */}
-            <div className="overflow-hidden rounded-lg border border-gray-100 shadow-sm">
+            <div className="max-w-full overflow-hidden rounded-lg border border-gray-100 shadow-sm">
                 {filteredTasks.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-3 py-16">
                         <CircleDashed className="h-12 w-12 text-gray-300" />

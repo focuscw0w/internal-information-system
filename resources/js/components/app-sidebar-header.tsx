@@ -36,7 +36,7 @@ export function AppSidebarHeader({
         <>
             <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-sidebar-border bg-card px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-5">
                 <div className="flex min-w-0 items-center gap-2">
-                    <SidebarTrigger className="-ml-1 md:hidden" />
+                    <SidebarTrigger className="-ml-1" />
                     <Breadcrumbs breadcrumbs={breadcrumbs} />
                 </div>
 

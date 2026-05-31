@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 
@@ -14,6 +15,7 @@ type Props = {
     icon?: ReactNode;
     searchPlaceholder?: string;
     emptyText?: string;
+    className?: string;
 };
 
 export function MultiSelect({
@@ -24,6 +26,7 @@ export function MultiSelect({
     icon,
     searchPlaceholder = 'Hľadať…',
     emptyText = 'Žiadne výsledky',
+    className,
 }: Props) {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -53,10 +56,10 @@ export function MultiSelect({
         .map((option) => option.name);
 
     return (
-        <div ref={ref} className="multi-select__wrap">
+        <div ref={ref} className={cn('multi-select__wrap', className)}>
             <button
                 type="button"
-                className="multi-select"
+                className="multi-select w-full"
                 onClick={() => setOpen((o) => !o)}
             >
                 {icon}

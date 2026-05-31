@@ -41,7 +41,7 @@ export function NavMain({
                                         isActive={isActive}
                                         tooltip={{ children: item.title }}
                                         className={cn(
-                                            'h-8 rounded-md text-[13px] text-sidebar-foreground/90',
+                                            'h-11 rounded-md text-[15px] text-sidebar-foreground/90 md:h-8 md:text-[13px]',
                                             isActive &&
                                                 "relative before:absolute before:top-2 before:bottom-2 before:left-0 before:w-0.5 before:rounded-r-sm before:bg-[var(--accent-blue)] before:content-['']",
                                         )}

@@ -4,6 +4,7 @@ import { Head, usePage } from '@inertiajs/react';
 import { Check, Pause, Play, Plus } from 'lucide-react';
 import { Project } from 'Modules/Project/resources/js/types/types';
 import { useMemo, useState } from 'react';
+import { EntryDetailDialog } from '../components/index/entry-detail-dialog';
 import { EntryRowActions } from '../components/index/entry-row-actions';
 import { ManualEntryDialog } from '../components/index/manual-entry-dialog';
 import { QuickAddCard } from '../components/index/quick-add-card';
@@ -89,6 +90,7 @@ export default function Index({ projects, entries, summary }: IndexProps) {
     >('all');
     const [stopOpen, setStopOpen] = useState(false);
     const [manualOpen, setManualOpen] = useState(false);
+    const [detailEntry, setDetailEntry] = useState<TimeEntry | null>(null);
 
     const projectById = useMemo(
         () =>
@@ -328,6 +330,24 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                 </section>
 
                 <StopTimerDialog open={stopOpen} onOpenChange={setStopOpen} />
+                <EntryDetailDialog
+                    entry={detailEntry}
+                    projectName={
+                        detailEntry
+                            ? projectById.get(detailEntry.project_id)?.project
+                                  .name
+                            : undefined
+                    }
+                    projectColor={
+                        detailEntry
+                            ? projectById.get(detailEntry.project_id)?.color
+                            : undefined
+                    }
+                    showUser={isTeamScope}
+                    onOpenChange={(open) => {
+                        if (!open) setDetailEntry(null);
+                    }}
+                />
                 <ManualEntryDialog
                     open={manualOpen}
                     onOpenChange={setManualOpen}
@@ -518,6 +538,7 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                                             entries={entriesByDate[date]}
                                             projectById={projectById}
                                             showUser={isTeamScope}
+                                            onEntryClick={setDetailEntry}
                                         />
                                     ))
                                 )}
@@ -575,11 +596,13 @@ function DayGroup({
     entries,
     projectById,
     showUser = false,
+    onEntryClick,
 }: {
     date: string;
     entries: TimeEntry[];
     projectById: Map<number, { project: Project; color: string }>;
     showUser?: boolean;
+    onEntryClick: (entry: TimeEntry) => void;
 }) {
     const total = entries.reduce((sum, entry) => sum + Number(entry.hours), 0);
     const dateObject = new Date(date);
@@ -607,7 +630,16 @@ function DayGroup({
                 return (
                     <div
                         key={entry.id}
-                        className="grid grid-cols-[4px_minmax(0,1fr)_auto_auto] items-center gap-4 border-b border-border px-5 py-3"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => onEntryClick(entry)}
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                onEntryClick(entry);
+                            }
+                        }}
+                        className="grid cursor-pointer grid-cols-[4px_minmax(0,1fr)_auto_auto] items-center gap-4 border-b border-border px-5 py-3 transition-colors hover:bg-muted/50 focus:bg-muted/50 focus:outline-none"
                     >
                         <span
                             className="h-8 rounded-sm"
@@ -643,10 +675,17 @@ function DayGroup({
                             {projectMeta?.project.current_user_permissions?.includes(
                                 'manage_time_entries',
                             ) ? (
-                                <EntryRowActions
-                                    entry={entry}
-                                    project={projectMeta?.project}
-                                />
+                                <span
+                                    onClick={(event) => event.stopPropagation()}
+                                    onKeyDown={(event) =>
+                                        event.stopPropagation()
+                                    }
+                                >
+                                    <EntryRowActions
+                                        entry={entry}
+                                        project={projectMeta?.project}
+                                    />
+                                </span>
                             ) : null}
                         </div>
                     </div>

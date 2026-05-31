@@ -47,7 +47,8 @@ export function DataTable<T>({
     }
 
     return (
-        <table className="table">
+        <div className="w-full overflow-x-auto">
+            <table className="table">
             <thead>
                 <tr>
                     {columns.map((col) => (
@@ -96,6 +97,7 @@ export function DataTable<T>({
                     </Fragment>
                 ))}
             </tbody>
-        </table>
+            </table>
+        </div>
     );
 }

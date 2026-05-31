@@ -252,20 +252,22 @@ export default function Index({ dashboard }: CapacityManagementPageProps) {
                 </div>
 
                 {overloadedPeople.length > 0 && (
-                    <div className="flex items-center gap-3 rounded-lg border border-[var(--danger-border)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-text)]">
-                        <AlertTriangle className="h-5 w-5 shrink-0" />
-                        <div className="flex-1">
-                            <strong>
-                                {overloadedPeople.length} ľudí je preťažených
-                            </strong>{' '}
-                            tento týždeň. Najviac{' '}
-                            <strong>{overloadedPeople[0].name}</strong> (
-                            {overloadedPeople[0].weekly_utilization}%). Zvážte
-                            prerozdelenie úloh alebo posun deadlineov.
+                    <div className="flex flex-col gap-3 rounded-lg border border-[var(--danger-border)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-text)] sm:flex-row sm:items-center">
+                        <div className="flex flex-1 items-start gap-3 sm:items-center">
+                            <AlertTriangle className="h-5 w-5 shrink-0" />
+                            <div className="flex-1">
+                                <strong>
+                                    {overloadedPeople.length} ľudí je preťažených
+                                </strong>{' '}
+                                tento týždeň. Najviac{' '}
+                                <strong>{overloadedPeople[0].name}</strong> (
+                                {overloadedPeople[0].weekly_utilization}%).
+                                Zvážte prerozdelenie úloh alebo posun deadlineov.
+                            </div>
                         </div>
                         <button
                             type="button"
-                            className="btn btn--sm bg-card"
+                            className="btn w-full shrink-0 justify-center bg-card sm:h-7 sm:w-auto sm:px-2 sm:text-xs"
                             onClick={showRecommendations}
                         >
                             Pozrieť odporúčania
@@ -343,7 +345,7 @@ export default function Index({ dashboard }: CapacityManagementPageProps) {
                         </div>
 
                         <section className="card">
-                            <div className="card__head">
+                            <div className="card__head flex-col items-stretch gap-3 sm:flex-row sm:items-center">
                                 <div>
                                     <h3 className="card__title">
                                         Ľudia a ich vyťaženie
@@ -353,7 +355,7 @@ export default function Index({ dashboard }: CapacityManagementPageProps) {
                                         {dashboard.people.length} členov tímu
                                     </div>
                                 </div>
-                                <div className="command-bar__filters">
+                                <div className="command-bar__filters grid w-full grid-cols-2 sm:flex sm:w-auto">
                                     <FilterButton
                                         label="Všetci"
                                         count={dashboard.people.length}
@@ -417,11 +419,11 @@ export default function Index({ dashboard }: CapacityManagementPageProps) {
                         </section>
 
                         <section className="card">
-                            <div className="card__head">
+                            <div className="card__head flex-col items-stretch gap-3 sm:flex-row sm:items-center">
                                 <h3 className="card__title">
                                     História vyťaženia tímu (12 týždňov)
                                 </h3>
-                                <select className="select text-xs">
+                                <select className="select w-full text-xs sm:w-auto">
                                     <option>Posledných 12 týždňov</option>
                                 </select>
                             </div>
@@ -488,7 +490,7 @@ function FilterButton({
     return (
         <button
             type="button"
-            className={`btn btn--sm ${active ? 'btn--primary' : ''}`}
+            className={`btn h-10 w-full justify-between px-3 sm:h-7 sm:w-auto sm:justify-center sm:px-2 sm:text-xs ${active ? 'btn--primary' : ''}`}
             onClick={onClick}
         >
             {label}

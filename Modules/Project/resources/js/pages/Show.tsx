@@ -14,6 +14,7 @@ import { Kanban } from '../components/project-detail/kanban/kanban';
 import { GanttChart } from '../components/project-detail/tab-views/gantt';
 import { ProjectOverview } from '../components/project-detail/tab-views/project-overview';
 import { Team } from '../components/project-detail/tab-views/team';
+import { ManageTeamDialog } from '../components/project-detail/dialogs/team/manage-team';
 import { Timeline } from '../components/project-detail/tab-views/timeline';
 import { CreateTaskDialog } from '../components/project-detail/task-table/dialogs/create-task';
 import { TaskTable } from '../components/project-detail/task-table/task-table';
@@ -79,7 +80,7 @@ export default function Show({
         <ProjectLayout project={projectWithCapacity}>
             <Head title={`Detail projektu - ${project.name}`} />
 
-            <div className="page min-h-screen">
+            <div className="page min-h-screen min-w-0">
                 <Link href="/projects" className="page-head__back">
                     <ArrowLeft />
                     Späť na projekty
@@ -115,11 +116,16 @@ export default function Show({
                     </div>
 
                     <div className="page-head__actions">
-                        {can('view_team') && (
-                            <button type="button" className="btn">
-                                <Users className="h-4 w-4" />
-                                Spravovať tím
-                            </button>
+                        {can('manage_team') && (
+                            <ManageTeamDialog
+                                project={project}
+                                trigger={
+                                    <button type="button" className="btn">
+                                        <Users className="h-4 w-4" />
+                                        Spravovať tím
+                                    </button>
+                                }
+                            />
                         )}
                         {can('edit_project') && (
                             <EditProjectDialog

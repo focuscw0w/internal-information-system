@@ -168,10 +168,10 @@ export const UserTable = ({
 
             <div className="card overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="table">
+                    <table className="table [&_td]:px-2 [&_th]:px-2 sm:[&_td]:px-4 sm:[&_th]:px-4">
                         <thead>
                             <tr>
-                                <th className="w-10">
+                                <th className="hidden w-10 sm:table-cell">
                                     <Checkbox
                                         aria-label="Vybrať všetkých používateľov"
                                         checked={allVisibleSelected}
@@ -180,9 +180,11 @@ export const UserTable = ({
                                     />
                                 </th>
                                 <th>Používateľ</th>
-                                <th>Stav</th>
+                                <th className="hidden sm:table-cell">Stav</th>
                                 <th>Oprávnenia</th>
-                                <th>Vytvorený</th>
+                                <th className="hidden sm:table-cell">
+                                    Vytvorený
+                                </th>
                                 <th className="text-center">Akcie</th>
                             </tr>
                         </thead>
@@ -214,7 +216,10 @@ export const UserTable = ({
                                     }
                                     className="cursor-pointer"
                                 >
-                                    <td onClick={(e) => e.stopPropagation()}>
+                                    <td
+                                        className="hidden sm:table-cell"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
                                         <Checkbox
                                             aria-label={`Vybrať používateľa ${user.name}`}
                                             checked={selectedIds.has(user.id)}
@@ -236,7 +241,7 @@ export const UserTable = ({
                                             >
                                                 {initials(user.name)}
                                             </span>
-                                            <div className="min-w-0">
+                                            <div className="min-w-0 max-w-[104px] sm:max-w-none">
                                                 <div className="truncate font-medium">
                                                     {user.name}
                                                 </div>
@@ -246,7 +251,7 @@ export const UserTable = ({
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td className="hidden sm:table-cell">
                                         <span className="badge badge--success">
                                             Aktívny
                                         </span>
@@ -256,7 +261,7 @@ export const UserTable = ({
                                             {permissionSummary(user)}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td className="hidden sm:table-cell">
                                         <span className="text-muted-foreground">
                                             {new Date(
                                                 user.created_at,
@@ -280,7 +285,7 @@ export const UserTable = ({
                                             )}
                                             <button
                                                 type="button"
-                                                className="icon-btn"
+                                                className="icon-btn hidden sm:inline-flex"
                                                 disabled
                                             >
                                                 <MoreHorizontal className="h-4 w-4" />

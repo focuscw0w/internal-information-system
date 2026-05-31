@@ -48,7 +48,7 @@ export function FormDialog({
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
             <DialogContent
-                className={`max-h-[90vh] overflow-y-auto ${sizeClass}`}
+                className={`max-h-[90vh] overflow-x-hidden overflow-y-auto ${sizeClass}`}
             >
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
@@ -57,8 +57,10 @@ export function FormDialog({
                     )}
                 </DialogHeader>
 
-                <form onSubmit={onSubmit}>
-                    <div className="grid gap-4 py-4">{children}</div>
+                <form onSubmit={onSubmit} className="min-w-0">
+                    <div className="grid min-w-0 gap-4 py-4 [&>*]:min-w-0">
+                        {children}
+                    </div>
 
                     <DialogFooter>
                         <DialogClose asChild>

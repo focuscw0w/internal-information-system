@@ -22,20 +22,22 @@ export const TeamMemberCard = ({
     return (
         <div className="rounded-lg border bg-card p-4 shadow-sm">
             {/* Header */}
-            <div className="mb-3 flex items-start justify-between">
-                <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white">
+            <div className="mb-3 flex items-start justify-between gap-2">
+                <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white">
                         {user.name
                             .split(' ')
                             .map((n) => n[0])
                             .join('')
                             .toUpperCase()}
                     </div>
-                    <div>
-                        <p className="font-semibold text-gray-900">
+                    <div className="min-w-0">
+                        <p className="truncate font-semibold text-gray-900">
                             {user.name}
                         </p>
-                        <p className="text-sm text-gray-500">{user.email}</p>
+                        <p className="truncate text-sm text-gray-500">
+                            {user.email}
+                        </p>
                     </div>
                 </div>
                 <Button
@@ -43,7 +45,7 @@ export const TeamMemberCard = ({
                     variant="ghost"
                     size="sm"
                     onClick={onRemove}
-                    className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                    className="shrink-0 text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
                     <Trash2 size={16} className="mr-1" />
                     Odstrániť

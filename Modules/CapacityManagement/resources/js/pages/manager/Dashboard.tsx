@@ -1539,8 +1539,8 @@ function ReportsPanel({
     const maxHours = Math.max(...rows.map((row) => row.weekly_load_hours), 1);
 
     return (
-        <div className="col gap-5">
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="col gap-5 [&>*]:min-w-0">
+            <div className="grid gap-5 [&>*]:min-w-0 xl:grid-cols-[minmax(0,1fr)_320px]">
                 <section className="card">
                     <div className="card__head">
                         <div>
@@ -1561,7 +1561,7 @@ function ReportsPanel({
                             {rows.slice(0, 8).map((row) => (
                                 <div
                                     key={row.id}
-                                    className="flex h-full flex-1 flex-col items-center justify-end gap-2"
+                                    className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
                                 >
                                     <span className="mono text-[11px] text-muted-foreground">
                                         {formatHours(row.weekly_load_hours)}h
@@ -1577,7 +1577,7 @@ function ReportsPanel({
                                             )}%`,
                                         }}
                                     />
-                                    <span className="max-w-20 truncate text-xs">
+                                    <span className="w-full truncate text-center text-xs">
                                         {row.name}
                                     </span>
                                 </div>
