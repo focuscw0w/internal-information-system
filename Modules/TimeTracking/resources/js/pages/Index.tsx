@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import { Check, Pause, Play, Plus } from 'lucide-react';
+import { Check, Download, Pause, Play, Plus } from 'lucide-react';
 import { Project } from 'Modules/Project/resources/js/types/types';
 import { useMemo, useState } from 'react';
 import { EntryDetailDialog } from '../components/index/entry-detail-dialog';
@@ -213,6 +213,12 @@ export default function Index({ projects, entries, summary }: IndexProps) {
                                 {summary.week_range_label}
                             </strong>
                         </p>
+                    </div>
+                    <div className="page-head__actions">
+                        <a className="btn" href="/time-tracking/export">
+                            <Download className="h-4 w-4" />
+                            Export CSV
+                        </a>
                     </div>
                 </div>
 

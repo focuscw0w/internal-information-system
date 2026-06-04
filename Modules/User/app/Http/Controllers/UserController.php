@@ -3,8 +3,10 @@
 namespace Modules\User\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\User\Contracts\PermissionRegistryInterface;
@@ -38,6 +40,12 @@ class UserController extends Controller
      */
     public function manage(): Response
     {
+        $lastActivity = DB::table('sessions')
+            ->whereNotNull('user_id')
+            ->groupBy('user_id')
+            ->select('user_id', DB::raw('MAX(last_activity) as last_activity'))
+            ->pluck('last_activity', 'user_id');
+
         return Inertia::render('User/Manage', [
             'users' => User::query()
                 ->with('permissions')
@@ -51,6 +59,9 @@ class UserController extends Controller
                     'is_admin' => $user->is_admin,
                     'permissions' => $user->getPermissionNames()->toArray(),
                     'created_at' => $user->created_at,
+                    'last_active_at' => isset($lastActivity[$user->id])
+                        ? Carbon::createFromTimestamp($lastActivity[$user->id])->toIso8601String()
+                        : null,
                 ]),
             'availablePermissions' => $this->permissions->groupedForFrontend(),
             'status' => session('status'),

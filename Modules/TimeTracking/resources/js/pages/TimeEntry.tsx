@@ -29,9 +29,6 @@ export default function TimeEntryPage({ project, entries }: TimeEntryProps) {
                     </div>
                     <div className="page-head__actions">
                         <button type="button" className="btn" disabled>
-                            Export CSV
-                        </button>
-                        <button type="button" className="btn" disabled>
                             Odoslať na schválenie
                         </button>
                     </div>

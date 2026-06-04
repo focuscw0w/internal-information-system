@@ -26,6 +26,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         ->name('time-tracking.')
         ->group(function () {
             Route::get('/', [TimeTrackingController::class, 'index'])->name('index');
+            Route::get('/export', [TimeTrackingController::class, 'export'])->name('export');
         });
 
     // Timer API

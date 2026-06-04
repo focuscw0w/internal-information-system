@@ -1,20 +1,9 @@
 import { type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CreateProjectDialog } from './dialogs/create-project';
 
-interface ProjectsHeaderProps {
-    exportCount: number;
-    canExportProjects: boolean;
-    onExportProjects: () => void;
-}
-
-export const ProjectsHeader = ({
-    exportCount,
-    canExportProjects,
-    onExportProjects,
-}: ProjectsHeaderProps) => {
+export const ProjectsHeader = () => {
     const { props } = usePage<SharedData>();
     const permissions =
         (props.current_user_permissions as string[] | undefined) ?? [];
@@ -50,22 +39,6 @@ export const ProjectsHeader = ({
                 </p>
             </div>
             <div className="page-head__actions">
-                <button
-                    type="button"
-                    className="btn"
-                    onClick={onExportProjects}
-                    disabled={!canExportProjects || exportCount === 0}
-                    title={
-                        !canExportProjects
-                            ? 'Nemáš oprávnenie exportovať projekty'
-                            : exportCount > 0
-                              ? `Exportovať ${exportCount} projektov do CSV`
-                              : 'Nie je čo exportovať'
-                    }
-                >
-                    <Download className="h-4 w-4" />
-                    Export
-                </button>
                 {canCreateProject && (
                     <CreateProjectDialog
                         open={createProjectOpen}

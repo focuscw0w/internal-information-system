@@ -2,11 +2,13 @@
 
 namespace Modules\User\Tests\Feature;
 
+use Carbon\Carbon;
 use Modules\CapacityManagement\Enums\CapacityPermission;
 use Modules\Project\Enums\ProjectGlobalPermission;
 use Modules\User\Contracts\PermissionRegistryInterface;
 use Modules\User\Enums\UserPermission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Modules\User\Models\User;
 use Spatie\Permission\Models\Permission;
@@ -67,6 +69,47 @@ class UserManagementTest extends TestCase
         $managedUser = collect($props['users'])->firstWhere('id', $user->id);
 
         $this->assertContains(ProjectGlobalPermission::PROJECTS_CREATE->value, $managedUser['permissions']);
+    }
+
+    public function test_manage_page_returns_users_with_last_activity_from_sessions(): void
+    {
+        $admin = $this->createAdmin();
+        $activeUser = $this->createRegularUser();
+        $inactiveUser = $this->createRegularUser();
+        $lastActivity = now()->subMinutes(12)->timestamp;
+
+        DB::table('sessions')->insert([
+            [
+                'id' => 'older-session',
+                'user_id' => $activeUser->id,
+                'ip_address' => '127.0.0.1',
+                'user_agent' => 'PHPUnit',
+                'payload' => 'test',
+                'last_activity' => now()->subHour()->timestamp,
+            ],
+            [
+                'id' => 'latest-session',
+                'user_id' => $activeUser->id,
+                'ip_address' => '127.0.0.1',
+                'user_agent' => 'PHPUnit',
+                'payload' => 'test',
+                'last_activity' => $lastActivity,
+            ],
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('user.index'));
+
+        $response->assertOk();
+        $props = $response->original->getData()['page']['props'];
+
+        $activeManagedUser = collect($props['users'])->firstWhere('id', $activeUser->id);
+        $inactiveManagedUser = collect($props['users'])->firstWhere('id', $inactiveUser->id);
+
+        $this->assertSame(
+            Carbon::createFromTimestamp($lastActivity)->toIso8601String(),
+            $activeManagedUser['last_active_at'],
+        );
+        $this->assertNull($inactiveManagedUser['last_active_at']);
     }
 
     // =========================================================================

@@ -29,6 +29,24 @@ const initials = (name: string) =>
         .slice(0, 2)
         .toUpperCase();
 
+const formatLastActive = (dateString: string | null) => {
+    if (!dateString) {
+        return 'Nikdy';
+    }
+
+    const diffMs = Date.now() - new Date(dateString).getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMin / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMin < 1) return 'práve teraz';
+    if (diffMin < 60) return `pred ${diffMin} min`;
+    if (diffHours < 24) return `pred ${diffHours} h`;
+    if (diffDays < 30) return `pred ${diffDays} dňami`;
+
+    return new Date(dateString).toLocaleDateString('sk-SK');
+};
+
 const permissionSummary = (user: ManagedUser) => {
     if (user.is_admin) {
         return 'Plný prístup';
@@ -55,7 +73,6 @@ export const UserTable = ({
     initialEditUserId,
 }: UserTableProps) => {
     const [search, setSearch] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
     const filteredUsers = useMemo(() => {
@@ -71,7 +88,7 @@ export const UserTable = ({
 
             return true;
         });
-    }, [search, statusFilter, users]);
+    }, [search, users]);
 
     const selectedVisibleCount = filteredUsers.filter((user) =>
         selectedIds.has(user.id),
@@ -79,7 +96,7 @@ export const UserTable = ({
     const allVisibleSelected =
         filteredUsers.length > 0 &&
         selectedVisibleCount === filteredUsers.length;
-    const hasFilters = Boolean(search || statusFilter);
+    const hasFilters = Boolean(search);
 
     const toggleUser = (userId: number) => {
         setSelectedIds((current) => {
@@ -111,7 +128,6 @@ export const UserTable = ({
 
     const resetFilters = () => {
         setSearch('');
-        setStatusFilter('');
     };
 
     return (
@@ -126,15 +142,6 @@ export const UserTable = ({
                         placeholder="Hľadať podľa mena alebo e-mailu..."
                     />
                 </div>
-
-                <select
-                    className="select text-xs"
-                    value={statusFilter}
-                    onChange={(event) => setStatusFilter(event.target.value)}
-                >
-                    <option value="">Všetky stavy</option>
-                    <option value="active">Aktívni</option>
-                </select>
 
                 {hasFilters && (
                     <button
@@ -180,7 +187,9 @@ export const UserTable = ({
                                     />
                                 </th>
                                 <th>Používateľ</th>
-                                <th className="hidden sm:table-cell">Stav</th>
+                                <th className="hidden sm:table-cell">
+                                    Posledná aktivita
+                                </th>
                                 <th>Oprávnenia</th>
                                 <th className="hidden sm:table-cell">
                                     Vytvorený
@@ -252,8 +261,10 @@ export const UserTable = ({
                                         </div>
                                     </td>
                                     <td className="hidden sm:table-cell">
-                                        <span className="badge badge--success">
-                                            Aktívny
+                                        <span className="text-muted-foreground">
+                                            {formatLastActive(
+                                                user.last_active_at,
+                                            )}
                                         </span>
                                     </td>
                                     <td>

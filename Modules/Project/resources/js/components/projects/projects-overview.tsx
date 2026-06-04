@@ -40,70 +40,6 @@ interface ProjectsOverviewProps {
     projects: Project[];
 }
 
-const csvHeaders = [
-    'Názov',
-    'Vedúci projektu',
-    'Stav',
-    'Vyťaženie',
-    'Začiatok',
-    'Koniec',
-    'Pokrok (%)',
-    'Kapacita (%)',
-    'Dokončené úlohy',
-    'Úlohy celkom',
-    'Členovia tímu',
-    'Dní do deadline',
-    'Detail',
-];
-
-const csvValue = (value: string | number | null | undefined): string => {
-    const text = value === null || value === undefined ? '' : String(value);
-
-    return `"${text.replace(/"/g, '""')}"`;
-};
-
-const projectToCsvRow = (project: Project): Array<string | number> => [
-    project.name,
-    project.owner?.name ?? '',
-    project.status,
-    project.priority,
-    project.start_date,
-    project.end_date,
-    project.progress,
-    project.capacity_used,
-    project.tasks_completed,
-    project.tasks_total,
-    project.team_size,
-    project.days_remaining,
-    `${window.location.origin}/projects/${project.id}`,
-];
-
-const canExportProject = (project: Project): boolean =>
-    project.current_user_permissions.includes('export_data');
-
-const downloadCsv = (projects: Project[]): void => {
-    const rows = [
-        csvHeaders,
-        ...projects.map((project) => projectToCsvRow(project)),
-    ];
-    const csv = rows
-        .map((row) => row.map((value) => csvValue(value)).join(','))
-        .join('\r\n');
-    const blob = new Blob([`\uFEFF${csv}`], {
-        type: 'text/csv;charset=utf-8;',
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    const date = new Date().toISOString().slice(0, 10);
-
-    link.href = url;
-    link.download = `projekty-${date}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-};
-
 export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [search, setSearch] = useState('');
@@ -168,15 +104,10 @@ export const ProjectsOverview = ({ projects }: ProjectsOverviewProps) => {
         0,
     );
     const tasksTotal = projects.reduce((sum, p) => sum + p.tasks_total, 0);
-    const exportableProjects = filtered.filter(canExportProject);
 
     return (
         <div>
-            <ProjectsHeader
-                exportCount={exportableProjects.length}
-                canExportProjects={exportableProjects.length > 0}
-                onExportProjects={() => downloadCsv(exportableProjects)}
-            />
+            <ProjectsHeader />
 
             <div className="kpi-grid mb-6">
                 <div className="kpi">

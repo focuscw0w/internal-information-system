@@ -9,6 +9,9 @@ use Inertia\Inertia;
 use Modules\Project\Contracts\ProjectServiceInterface;
 use Modules\Project\Transformers\ProjectResource;
 use Modules\TimeTracking\Contracts\Repositories\TimeEntryRepositoryInterface;
+use Modules\TimeTracking\Enums\TimeEntryStatusEnum;
+use Modules\TimeTracking\Models\TimeEntry;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TimeTrackingController extends Controller
 {
@@ -137,6 +140,41 @@ class TimeTrackingController extends Controller
                 'month_project_hours' => $monthProjectHours,
             ],
         ]);
+    }
+
+    public function export(): StreamedResponse
+    {
+        $user = auth()->user();
+        $entries = $this->timeEntries->entriesForUser($user);
+        $filename = 'moj-cas-'.now()->format('Ymd-His').'.csv';
+
+        return response()->streamDownload(function () use ($entries) {
+            echo "\xEF\xBB\xBF";
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'Dátum',
+                'Projekt',
+                'Úloha',
+                'Hodiny',
+                'Stav',
+                'Popis',
+            ], ';');
+
+            foreach ($entries as $entry) {
+                /** @var TimeEntry $entry */
+                fputcsv($handle, [
+                    $entry->entry_date?->toDateString(),
+                    $entry->project?->name ?? 'Projekt #'.$entry->project_id,
+                    $entry->task?->title ?? 'Úloha #'.$entry->task_id,
+                    number_format((float) $entry->hours, 2, '.', ''),
+                    TimeEntryStatusEnum::tryFrom($entry->status)?->label() ?? $entry->status,
+                    $entry->description ?? '',
+                ], ';');
+            }
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     private function slovakMonthShort(int $month): string

@@ -16,7 +16,6 @@ import {
     Check,
     CheckCheck,
     Clock,
-    Download,
     TrendingUp,
     Users,
     X,
@@ -154,30 +153,6 @@ const formatDate = (date: string | null) => {
         day: 'numeric',
         month: 'short',
     }).format(new Date(date));
-};
-
-const csvValue = (value: string | number | null | undefined): string => {
-    const text = value === null || value === undefined ? '' : String(value);
-
-    return `"${text.replace(/"/g, '""')}"`;
-};
-
-const downloadCsv = (filename: string, rows: Array<Array<string | number>>) => {
-    const csv = rows
-        .map((row) => row.map((value) => csvValue(value)).join(';'))
-        .join('\r\n');
-    const blob = new Blob([`\uFEFF${csv}`], {
-        type: 'text/csv;charset=utf-8;',
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
 };
 
 const initials = (name: string) =>
@@ -358,99 +333,6 @@ export default function Dashboard({ widgets }: DashboardProps) {
             },
         );
     };
-    const exportDashboard = () => {
-        const date = new Date().toISOString().slice(0, 10);
-        const projectGroups = widgets.teamProjectGroups ?? [];
-        const pendingByProject = new Map<number, number>();
-        const overdueByProject = new Map<number, number>();
-
-        pendingEntries.forEach((entry) => {
-            if (!entry.project.id) return;
-
-            pendingByProject.set(
-                entry.project.id,
-                (pendingByProject.get(entry.project.id) ?? 0) + 1,
-            );
-        });
-
-        (widgets.overdueTasks ?? []).forEach((task) => {
-            overdueByProject.set(
-                task.project.id,
-                (overdueByProject.get(task.project.id) ?? 0) + 1,
-            );
-        });
-
-        const rows =
-            projectGroups.length > 0
-                ? projectGroups.map((project) => {
-                      const members = project.members.filter(
-                          (member) => member.role !== 'unassigned',
-                      );
-                      const weeklyHours = members.reduce(
-                          (sum, member) => sum + member.project_weekly_hours,
-                          0,
-                      );
-                      const weeklyCapacity = members.reduce(
-                          (sum, member) =>
-                              sum +
-                              (member.weekly_capacity_hours *
-                                  member.project_allocation) /
-                                  100,
-                          0,
-                      );
-                      const utilization =
-                          weeklyCapacity > 0
-                              ? Math.round((weeklyHours / weeklyCapacity) * 100)
-                              : 0;
-
-                      return [
-                          project.name,
-                          project.status,
-                          project.progress,
-                          project.end_date ?? '',
-                          members.length,
-                          Number(weeklyHours.toFixed(2)),
-                          Number(weeklyCapacity.toFixed(2)),
-                          utilization,
-                          pendingByProject.get(project.id ?? 0) ?? 0,
-                          overdueByProject.get(project.id ?? 0) ?? 0,
-                          project.is_at_risk || project.is_overdue
-                              ? 'Áno'
-                              : 'Nie',
-                      ];
-                  })
-                : managedProjects.map((project) => [
-                      project.name,
-                      project.status,
-                      project.progress,
-                      project.end_date ?? '',
-                      project.team_size,
-                      '',
-                      '',
-                      '',
-                      pendingByProject.get(project.id) ?? 0,
-                      overdueByProject.get(project.id) ?? 0,
-                      project.is_at_risk || project.is_overdue ? 'Áno' : 'Nie',
-                  ]);
-
-        downloadCsv(`manazersky-pohlad-${date}.csv`, [
-            [
-                'Projekt',
-                'Stav',
-                'Pokrok (%)',
-                'Deadline',
-                'Členovia',
-                'Hodiny',
-                'Kapacita',
-                'Vyťaženie (%)',
-                'Čaká na schválenie',
-                'Overdue úlohy',
-                'Riziko',
-            ],
-            ...rows,
-        ]);
-    };
-
     return (
         <ManagerLayout>
             <Head title="Manažérsky pohľad" />
@@ -465,14 +347,6 @@ export default function Dashboard({ widgets }: DashboardProps) {
                         </p>
                     </div>
                     <div className="page-head__actions">
-                        <button
-                            type="button"
-                            className="btn"
-                            onClick={exportDashboard}
-                        >
-                            <Download className="size-4" />
-                            Export
-                        </button>
                         <span
                             className="btn cursor-default"
                             aria-label={`Obdobie: ${weekRange}`}
@@ -987,77 +861,6 @@ function TeamPanel({
         (sum, group) => sum + group.members.length,
         0,
     );
-    const exportDisabled =
-        viewMode === 'projects'
-            ? projectMembershipCount === 0
-            : rows.length === 0;
-
-    const exportTeam = () => {
-        if (exportDisabled) return;
-
-        const date = new Date().toISOString().slice(0, 10);
-
-        if (viewMode === 'projects') {
-            downloadCsv(`moj-tim-podla-projektov-${date}.csv`, [
-                [
-                    'Projekt',
-                    'Člen tímu',
-                    'Rola',
-                    'Alokácia (%)',
-                    'Hodiny v projekte',
-                    'Kapacita v projekte',
-                    'Projektové vyťaženie (%)',
-                    'Celkové vyťaženie (%)',
-                ],
-                ...groups.flatMap((group) =>
-                    group.members.map((member) => [
-                        group.name,
-                        member.name,
-                        member.role === 'owner'
-                            ? 'Vlastník'
-                            : member.role === 'unassigned'
-                              ? 'Bez projektu'
-                              : 'Člen',
-                        member.project_allocation,
-                        member.project_weekly_hours,
-                        member.weekly_capacity_hours,
-                        Math.round(member.weekly_utilization),
-                        Math.round(member.total_weekly_utilization),
-                    ]),
-                ),
-            ]);
-
-            return;
-        }
-
-        downloadCsv(`moj-tim-podla-ludi-${date}.csv`, [
-            [
-                'Člen tímu',
-                'Počet projektov',
-                'Projekty',
-                'Odpracované hodiny',
-                'Týždenná kapacita',
-                'Vyťaženie (%)',
-                'Voľná kapacita',
-            ],
-            ...rows.map((member) => [
-                member.name,
-                member.project_count ?? 0,
-                (member.projects ?? [])
-                    .map(
-                        (project) => `${project.name} (${project.allocation}%)`,
-                    )
-                    .join('; '),
-                member.weekly_load_hours,
-                member.weekly_capacity_hours,
-                Math.round(member.weekly_utilization),
-                member.is_over_capacity
-                    ? 'Nad kapacitou'
-                    : member.free_capacity_hours,
-            ]),
-        ]);
-    };
-
     return (
         <>
             <div className="grid-main-side">
@@ -1088,20 +891,6 @@ function TeamPanel({
                                     Podľa ľudí
                                 </button>
                             </div>
-                            <button
-                                type="button"
-                                className="btn btn--sm"
-                                onClick={exportTeam}
-                                disabled={exportDisabled}
-                                title={
-                                    exportDisabled
-                                        ? 'Nie sú žiadne tímové dáta na export'
-                                        : 'Exportovať aktuálny tímový pohľad do CSV'
-                                }
-                            >
-                                <Download className="size-4" />
-                                CSV
-                            </button>
                         </div>
                     </div>
 

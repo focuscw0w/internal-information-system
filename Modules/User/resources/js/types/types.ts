@@ -5,6 +5,7 @@ export interface ManagedUser {
     is_admin: boolean;
     permissions: string[];
     created_at: string;
+    last_active_at: string | null;
 }
 
 export interface PermissionOption {
