@@ -1,3 +1,4 @@
+import { getAvatarColor } from '@/lib/avatar-color';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -425,7 +426,7 @@ function RecommendationsCard({
                                 background: utilizationColor(row.utilization),
                             }}
                         />
-                        <span className="avatar avatar--sm">
+                        <span className={`avatar avatar--sm ${getAvatarColor(row.name)}`}>
                             {initials(row.name)}
                         </span>
                         <div className="min-w-0 flex-1 text-sm">
@@ -460,7 +461,7 @@ function PersonRow({ person }: { person: Person }) {
         <tr>
             <td>
                 <div className="flex items-center gap-3">
-                    <span className="avatar avatar--sm">
+                    <span className={`avatar avatar--sm ${getAvatarColor(person.name)}`}>
                         {initials(person.name)}
                     </span>
                     <div>

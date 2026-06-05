@@ -1,3 +1,4 @@
+import { getAvatarColor } from '@/lib/avatar-color';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -165,7 +166,7 @@ export default function Profile({
             <div className="page page-enter">
                 <div className="profile-hero">
                     <div className="profile-hero__body">
-                        <span className="avatar avatar--lg bg-pink-600">
+                        <span className={`avatar avatar--lg ${getAvatarColor(user.name)}`}>
                             {initials(user.name)}
                         </span>
 

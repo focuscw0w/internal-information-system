@@ -1,6 +1,7 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { GlobalSearchDialog } from '@/components/global-search/global-search-dialog';
 import { Icon } from '@/components/icon';
+import { getAvatarColor } from '@/lib/avatar-color';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -268,7 +269,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             src={auth.user.avatar}
                                             alt={auth.user.name}
                                         />
-                                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                        <AvatarFallback className={`rounded-lg ${getAvatarColor(auth.user.name)}`}>
                                             {getInitials(auth.user.name)}
                                         </AvatarFallback>
                                     </Avatar>

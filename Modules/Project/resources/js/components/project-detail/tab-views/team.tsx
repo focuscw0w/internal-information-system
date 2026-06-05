@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { getAvatarColor } from '@/lib/avatar-color';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -218,7 +219,7 @@ export const Team = ({ project }: TeamProps) => {
                                         <td>
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-8 w-8">
-                                                    <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">
+                                                    <AvatarFallback className={`text-xs font-semibold ${getAvatarColor(member.name)}`}>
                                                         {initials(member.name)}
                                                     </AvatarFallback>
                                                 </Avatar>
@@ -332,7 +333,7 @@ export const Team = ({ project }: TeamProps) => {
                         <DialogHeader>
                             <div className="flex items-start gap-4 pr-8">
                                 <Avatar className="h-12 w-12">
-                                    <AvatarFallback className="bg-primary text-sm font-semibold text-primary-foreground">
+                                    <AvatarFallback className={`text-sm font-semibold ${getAvatarColor(selectedMember.name)}`}>
                                         {initials(selectedMember.name)}
                                     </AvatarFallback>
                                 </Avatar>

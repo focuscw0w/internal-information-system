@@ -1,3 +1,4 @@
+import { getAvatarColor } from '@/lib/avatar-color';
 import { router } from '@inertiajs/react';
 import dayjs from 'dayjs';
 import { CircleDashed, Filter, X } from 'lucide-react';
@@ -384,7 +385,7 @@ export function GanttChart({ project }: GanttChartProps) {
                                                 .map((u) => (
                                                     <div
                                                         key={u.id}
-                                                        className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 ring-1 ring-white"
+                                                        className={`flex h-5 w-5 items-center justify-center rounded-full ring-1 ring-white ${getAvatarColor(u.name)}`}
                                                         title={u.name}
                                                     >
                                                         <span className="text-[9px] font-bold text-white">

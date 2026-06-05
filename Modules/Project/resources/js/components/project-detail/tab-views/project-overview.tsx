@@ -1,3 +1,4 @@
+import { getAvatarColor } from '@/lib/avatar-color';
 import { Project } from '../../../types/types';
 import { BadgeLabel } from '../../ui/badge';
 import { TaskTable } from '../task-table/task-table';
@@ -63,7 +64,7 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
                                 key={member.id}
                                 className="flex items-center gap-3"
                             >
-                                <span className="avatar avatar--sm">
+                                <span className={`avatar avatar--sm ${getAvatarColor(member.name)}`}>
                                     {member.name
                                         .split(' ')
                                         .map((part) => part[0])

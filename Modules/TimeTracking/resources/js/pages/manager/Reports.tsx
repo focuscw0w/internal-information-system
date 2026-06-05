@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { getAvatarColor } from '@/lib/avatar-color';
 import { Progress } from '@/components/ui/progress';
 import { MultiSelect } from '@/components/ui/multi-select';
 import ManagerLayout from '@/layouts/manager-layout';
@@ -566,7 +567,7 @@ function UsersReportTable({
                                 <td>
                                     <div className="flex items-center gap-2.5">
                                         <Avatar className="size-6">
-                                            <AvatarFallback className="bg-muted text-[10px] font-semibold text-foreground">
+                                            <AvatarFallback className={`text-[10px] font-semibold ${getAvatarColor(row.user_name)}`}>
                                                 {initials(row.user_name)}
                                             </AvatarFallback>
                                         </Avatar>
@@ -665,7 +666,7 @@ function ProjectsReportTable({
                                                 className="badge badge--neutral text-[11px]"
                                             >
                                                 <Avatar className="size-3.5">
-                                                    <AvatarFallback className="bg-muted text-[8px] font-semibold text-foreground">
+                                                    <AvatarFallback className={`text-[8px] font-semibold ${getAvatarColor(contributor.name)}`}>
                                                         {initials(contributor.name)}
                                                     </AvatarFallback>
                                                 </Avatar>

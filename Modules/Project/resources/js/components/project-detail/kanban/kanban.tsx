@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
+import { getAvatarColor } from '@/lib/avatar-color';
 import {
     closestCorners,
     DndContext,
@@ -323,10 +324,10 @@ function AssigneeAvatars({ task }: { task: Task }) {
 
     return (
         <div className="avatars">
-            {assignees.slice(0, 3).map((user, index) => (
+            {assignees.slice(0, 3).map((user) => (
                 <span
                     key={user.id}
-                    className={`avatar avatar--sm ${avatarTone(index)}`}
+                    className={`avatar avatar--sm ${getAvatarColor(user.name)}`}
                     title={user.name}
                 >
                     {initials(user.name)}
@@ -348,14 +349,6 @@ function initials(name: string): string {
         .join('')
         .slice(0, 2)
         .toUpperCase();
-}
-
-function avatarTone(index: number): string {
-    return [
-        'bg-[var(--accent-blue)]',
-        'bg-[var(--danger)]',
-        'bg-[var(--success)]',
-    ][index % 3];
 }
 
 function formatHours(hours: number): string {

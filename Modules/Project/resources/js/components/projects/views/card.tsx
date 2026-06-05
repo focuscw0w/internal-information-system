@@ -1,3 +1,4 @@
+import { getAvatarColor } from '@/lib/avatar-color';
 import { Calendar } from 'lucide-react';
 import { Project } from '../../../types/types';
 import { ProgressBar } from '../progressbar';
@@ -12,18 +13,11 @@ interface CardProps {
 export const Card = ({ project, onClick }: CardProps) => {
     const visibleTeam = project.team?.slice(0, 4) ?? [];
     const extraTeam = Math.max(0, (project.team?.length ?? 0) - visibleTeam.length);
-    const avatarColors = [
-        'bg-[var(--accent-blue)]',
-        'bg-[#c0447c]',
-        'bg-[#5b65d8]',
-        'bg-[#009b72]',
-        'bg-[#b36b00]',
-    ];
 
     return (
         <div
             onClick={onClick}
-            className="group relative cursor-pointer overflow-hidden rounded-lg border border-border bg-card shadow-xs transition-shadow hover:shadow-sm"
+            className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-lg border border-border bg-card shadow-xs transition-shadow hover:shadow-sm"
         >
             <div
                 onClick={(e) => e.stopPropagation()}
@@ -32,7 +26,7 @@ export const Card = ({ project, onClick }: CardProps) => {
                 <ProjectActions project={project} />
             </div>
 
-            <div className="px-5 pt-4 pb-3">
+            <div className="flex-1 px-5 pt-4 pb-3">
                 <CardHeader
                     eyebrow={project.owner?.name ?? 'Internal'}
                     name={project.name}
@@ -52,10 +46,10 @@ export const Card = ({ project, onClick }: CardProps) => {
 
             <div className="flex items-center justify-between gap-3 border-t border-border bg-muted/50 px-5 py-3 text-xs text-muted-foreground">
                 <div className="avatars min-w-0">
-                    {visibleTeam.map((member, index) => (
+                    {visibleTeam.map((member) => (
                         <span
                             key={member.id}
-                            className={`avatar avatar--sm ${avatarColors[index % avatarColors.length]}`}
+                            className={`avatar avatar--sm ${getAvatarColor(member.name)}`}
                             title={member.name}
                         >
                             {member.name

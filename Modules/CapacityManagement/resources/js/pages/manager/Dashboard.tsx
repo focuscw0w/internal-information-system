@@ -1,4 +1,5 @@
 import { Checkbox } from '@/components/ui/checkbox';
+import { getAvatarColor } from '@/lib/avatar-color';
 import {
     Dialog,
     DialogContent,
@@ -172,7 +173,7 @@ function Avatar({
     size?: 'default' | 'sm';
 }) {
     return (
-        <span className={`avatar ${size === 'sm' ? 'avatar--sm' : ''}`}>
+        <span className={`avatar ${size === 'sm' ? 'avatar--sm' : ''} ${getAvatarColor(name)}`}>
             {initials(name)}
         </span>
     );

@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getAvatarColor } from '@/lib/avatar-color';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -392,7 +393,7 @@ function TimeEntriesTable({ task }: { task: Task }) {
                                     <td>
                                         <div className="flex items-center gap-2">
                                             {entry.user && (
-                                                <span className="avatar avatar--sm">
+                                                <span className={`avatar avatar--sm ${getAvatarColor(entry.user.name)}`}>
                                                     {initials(entry.user.name)}
                                                 </span>
                                             )}
@@ -520,7 +521,7 @@ function TaskAside({
                                     key={user.id}
                                     className="flex h-7 items-center gap-2 rounded-md bg-muted px-2"
                                 >
-                                    <span className="avatar avatar--sm">
+                                    <span className={`avatar avatar--sm ${getAvatarColor(user.name)}`}>
                                         {initials(user.name)}
                                     </span>
                                     <span className="truncate text-sm font-medium text-foreground">

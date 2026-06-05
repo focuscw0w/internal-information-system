@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { getAvatarColor } from '@/lib/avatar-color';
 import { FileText } from 'lucide-react';
 import { Fragment, useState } from 'react';
 import { Comment, CommentAttachment } from '../../../types/types';
@@ -43,7 +44,9 @@ export function CommentItem({ comment, isOwn }: CommentItemProps) {
 
     return (
         <div className="flex gap-3">
-            <div className={`avatar ${isOwn ? 'bg-[var(--success)]' : ''}`}>
+            <div
+                className={`avatar ${isOwn ? 'bg-[var(--success)] text-white' : getAvatarColor(comment.user?.name)}`}
+            >
                 {initials}
             </div>
 

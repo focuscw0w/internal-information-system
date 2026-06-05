@@ -1,4 +1,5 @@
 import { Checkbox } from '@/components/ui/checkbox';
+import { getAvatarColor } from '@/lib/avatar-color';
 import { router } from '@inertiajs/react';
 import { MoreHorizontal, Search, UserRound, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -11,15 +12,6 @@ interface UserTableProps {
     availablePermissions: AvailablePermissions;
     initialEditUserId?: string;
 }
-
-const avatarColors = [
-    'bg-pink-600',
-    'bg-violet-600',
-    'bg-sky-600',
-    'bg-emerald-600',
-    'bg-amber-700',
-    'bg-cyan-700',
-];
 
 const initials = (name: string) =>
     name
@@ -241,12 +233,7 @@ export const UserTable = ({
                                     <td>
                                         <div className="flex items-center gap-3">
                                             <span
-                                                className={`avatar avatar--sm ${
-                                                    avatarColors[
-                                                        user.id %
-                                                            avatarColors.length
-                                                    ]
-                                                }`}
+                                                className={`avatar avatar--sm ${getAvatarColor(user.name)}`}
                                             >
                                                 {initials(user.name)}
                                             </span>

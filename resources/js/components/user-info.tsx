@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useInitials } from '@/hooks/use-initials';
+import { getAvatarColor } from '@/lib/avatar-color';
 import { type User } from '@/types';
 
 export function UserInfo({
@@ -15,7 +16,7 @@ export function UserInfo({
         <>
             <Avatar className="h-8 w-8 overflow-hidden rounded-full">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-full bg-pink-600 text-xs font-semibold text-white dark:bg-pink-600 dark:text-white">
+                <AvatarFallback className={`rounded-full text-xs font-semibold ${getAvatarColor(user.name)}`}>
                     {getInitials(user.name)}
                 </AvatarFallback>
             </Avatar>
